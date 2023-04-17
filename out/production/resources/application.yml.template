@@ -1,0 +1,14 @@
+server.port=****
+
+kokonut_aws_kms_id=${****}
+kokonut_aws_kms_access=${****}
+kokonut_aws_kms_secret=${****}
+
+# DB
+spring.datasource.url=jdbc:mariadb://${****}:${****}/${****}
+spring.datasource.username=${****}
+spring.datasource.password=${****}
+spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
+
+# Spring boot 2.6버전 이후에 spring.mvc.pathmatch.matching-strategy 값이 ant_apth_matcher에서 path_pattern_parser로 변경되면서 몇몇 라이브러리에서 오류가 발생하고 있다!
+spring.mvc.pathmatch.matching-strategy=ant_path_matcher

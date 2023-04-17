@@ -1,0 +1,106 @@
+buildscript {
+	ext {
+		queryDslVersion = "5.0.0"
+	}
+}
+
+plugins {
+	id 'org.springframework.boot' version '2.7.5'
+	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+	id 'java'
+	id "com.ewerk.gradle.plugins.querydsl" version "1.0.10"
+}
+
+group = 'com.app'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+
+dependencies {
+	// init setting
+	// boot plugin version 2.7.5
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.24'
+	runtimeOnly group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '3.0.8'
+	testImplementation group: 'com.h2database', name: 'h2', version: '2.1.214'
+	annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.24'
+	testImplementation group: 'org.springframework.security', name: 'spring-security-test', version: '5.7.4'
+	//
+
+	// dependency 추가 할 때에는 group, name, version 풀 기재하는 용도로 쓰고 주석으로 어디에 사용되는건지 기재
+	// Woody 추가 ~
+	implementation group: 'junit', name: 'junit', version: '4.13.2' // Junit 쓰기위함
+	implementation group: 'org.modelmapper', name: 'modelmapper', version: '3.0.0' // Modelmapper 쓰기위함
+	implementation group: 'com.amazonaws', name: 'aws-java-sdk-kms', version: '1.11.202' // AWS KMS 쓰기위함
+	implementation "com.querydsl:querydsl-jpa:${queryDslVersion}" // querydsl 쓰기위함
+	implementation "com.querydsl:querydsl-apt:${queryDslVersion}" // querydsl 쓰기위함
+
+	implementation group: 'org.qlrm', name: 'qlrm', version: '3.0.4' // querydsl 내에 네이티브 쿼리를 사용하기위함
+	implementation group: 'io.springfox', name: 'springfox-boot-starter', version: '3.0.0' // Swagger 쓰기위함
+	implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: '3.0.0' // Swagger 쓰기위함
+
+	implementation group: 'org.apache.poi', name: 'poi', version: '5.2.2' // Excel Read 쓰기위함
+	implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '5.2.2' // Swagger Read 쓰기위함
+
+	implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.2' // JWT 쓰기위함
+	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.2' // JWT 쓰기위함
+	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.2' // JWT 쓰기위함
+
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis' // Redis 쓰기위함
+
+	implementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1' // json 데이터 가공
+	implementation group: 'org.json', name: 'json', version: '20220924' // json Object 쓰기위함
+	implementation group: 'com.google.code.gson', name: 'gson', version: '2.10' // google gson 쓰기위함
+
+	implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.12.369' // AWS S3 SDK 쓰기위함
+	implementation group: 'org.imgscalr', name: 'imgscalr-lib', version: '4.2' // 이미지 썸네일 쓰기위함
+
+	implementation group: 'org.apache.commons', name: 'commons-csv', version: '1.9.0' // CSV 형태 다운로드파일 라이브러리
+
+	// ~
+
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+/**
+ * @author Woody
+ * Date : 2022-10-24
+ * Time :
+ * Remark : queryDSL 설정 추가
+ */
+def querydslDir = "$buildDir/generated/querydsl"
+
+querydsl {
+	jpa = true
+	querydslSourcesDir = querydslDir
+}
+sourceSets {
+	main.java.srcDir querydslDir
+}
+compileQuerydsl{
+	options.annotationProcessorPath = configurations.querydsl
+}
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+	querydsl.extendsFrom compileClasspath
+}
