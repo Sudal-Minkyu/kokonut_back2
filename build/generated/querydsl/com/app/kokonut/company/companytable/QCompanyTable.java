@@ -21,6 +21,8 @@ public class QCompanyTable extends EntityPathBase<CompanyTable> {
 
     public final StringPath cpCode = createString("cpCode");
 
+    public final NumberPath<Integer> ctAddColumnCount = createNumber("ctAddColumnCount", Integer.class);
+
     public final StringPath ctDesignation = createString("ctDesignation");
 
     public final NumberPath<Long> ctId = createNumber("ctId", Long.class);
