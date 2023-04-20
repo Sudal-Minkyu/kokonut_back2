@@ -3,13 +3,19 @@ package com.app.kokonut.company.companycategory;
 import com.app.kokonut.admin.AdminRepository;
 import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
+import com.app.kokonut.category.categorydefault.CategoryDefault;
+import com.app.kokonut.category.categorydefault.CategoryDefaultRepository;
+import com.app.kokonut.category.categorydefault.dtos.CategoryDefaultListDto;
+import com.app.kokonut.category.categorydefault.dtos.CategoryDefaultListSubDto;
+import com.app.kokonut.category.categoryitem.CategoryItem;
+import com.app.kokonut.category.categoryitem.CategoryItemRepository;
+import com.app.kokonut.category.categoryitem.dtos.CategoryItemListDto;
 import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.company.companycategory.dtos.CompanyCategoryListDto;
 import com.app.kokonut.company.companytable.CompanyTableRepository;
 import com.app.kokonut.company.companytable.dtos.CompanyTableListDto;
 import com.app.kokonut.company.companytable.dtos.CompanyTableSubListDto;
 import com.app.kokonutuser.DynamicUserService;
-import com.app.kokonutuser.dtos.KokonutUserFieldListDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -33,16 +39,48 @@ public class CompanyCategoryService {
     private final AdminRepository adminRepository;
     private final CompanyCategoryRepository companyCategoryRepository;
     private final CompanyTableRepository companyTableRepository;
+    private final CategoryDefaultRepository categoryDefaultRepository;
+    private final CategoryItemRepository categoryItemRepository;
+
     private final DynamicUserService dynamicUserService;
 
     @Autowired
-    public CompanyCategoryService(AdminRepository adminRepository, CompanyCategoryRepository companyCategoryRepository, CompanyTableRepository companyTableRepository, DynamicUserService dynamicUserService){
+    public CompanyCategoryService(AdminRepository adminRepository, CompanyCategoryRepository companyCategoryRepository, CompanyTableRepository companyTableRepository, CategoryDefaultRepository categoryDefaultRepository, CategoryItemRepository categoryItemRepository, DynamicUserService dynamicUserService){
         this.adminRepository = adminRepository;
         this.companyCategoryRepository = companyCategoryRepository;
         this.companyTableRepository = companyTableRepository;
+        this.categoryDefaultRepository = categoryDefaultRepository;
+        this.categoryItemRepository = categoryItemRepository;
         this.dynamicUserService = dynamicUserService;
     }
 
+    // 기본 카테고리 항목 호출
+    public ResponseEntity<Map<String, Object>> categoryList() {
+        log.info("categoryList 호출");
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+        List<CategoryDefaultListDto> companyCategoryListDtos = new ArrayList<>();
+        CategoryDefaultListDto categoryDefaultListDto;
+
+        List<CategoryDefaultListSubDto> categoryDefaultListSubDtos = categoryDefaultRepository.findByCategoryDefaultList();
+
+        for(CategoryDefaultListSubDto categoryDefaultListSubDto : categoryDefaultListSubDtos) {
+
+            categoryDefaultListDto = new CategoryDefaultListDto();
+            List<CategoryItemListDto> categoryItemListDtoList = categoryItemRepository.findByCategoryItemList(categoryDefaultListSubDto.getCdId());
+
+            categoryDefaultListDto.setCdName(categoryDefaultListSubDto.getCdName());
+            categoryDefaultListDto.setCategoryItemListDtoList(categoryItemListDtoList);
+            companyCategoryListDtos.add(categoryDefaultListDto);
+
+        }
+
+        data.put("defaultCategoryList", companyCategoryListDtos);
+
+        return ResponseEntity.ok(res.success(data));
+    }
 
     // 추가 카테고리 항목 호출
     public ResponseEntity<Map<String, Object>> addCategoryList(JwtFilterDto jwtFilterDto) {
@@ -131,4 +169,5 @@ public class CompanyCategoryService {
 
         return ResponseEntity.ok(res.success(data));
     }
+
 }

@@ -27,6 +27,7 @@ public class CompanyService {
 
     private final CompanyRepository companyRepository;
     private final AwsKmsHistoryRepository awsKmsHistoryRepository;
+
     @Autowired
     public CompanyService(AwsKmsUtil awsKmsUtil, CompanyRepository companyRepository, AwsKmsHistoryRepository awsKmsHistoryRepository){
         this.awsKmsUtil = awsKmsUtil;
