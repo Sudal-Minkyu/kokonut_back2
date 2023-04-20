@@ -13,11 +13,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Setter
-@Getter
+@Data
 @Entity
 @EqualsAndHashCode(of = "adminId")
 @Table(name="kn_admin")
