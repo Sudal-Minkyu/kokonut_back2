@@ -7,9 +7,13 @@ phases:
   #  commands:
   #    - npm run lint
   #   - command
+  install:
+    runtime-versions:
+      java: corretto11
   build:
     commands:
       - echo Build Starting on `date`
+      - cp ./src/main/resources/application.yml
       - chmod +x ./gradlew
       - ./gradlew build
   post_build:
