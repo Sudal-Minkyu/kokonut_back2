@@ -13,7 +13,6 @@ import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.common.realcomponent.CommonUtil;
 import com.app.kokonut.company.company.Company;
 import com.app.kokonut.company.company.CompanyRepository;
-import com.app.kokonut.company.company.dtos.CompanyTableCountDto;
 import com.app.kokonut.company.companyitem.dtos.CompanyItemListDto;
 import com.app.kokonut.company.companytable.CompanyTable;
 import com.app.kokonut.company.companytable.CompanyTableRepository;
@@ -164,6 +163,7 @@ public class CompanyItemService {
     }
 
     // 테이블 추가
+    @Transactional
     public ResponseEntity<Map<String, Object>> userTableSave(JwtFilterDto jwtFilterDto, String ctDesignation) {
         log.info("userTableSave 호출");
 
@@ -197,12 +197,13 @@ public class CompanyItemService {
             int cpTableCount;
             if(optionalCompany.isPresent()) {
                 cpTableCount = optionalCompany.get().getCpTableCount()+1;
+                optionalCompany.get().setCpTableCount(cpTableCount);
             } else {
                 log.error("userTableSave -> 존재하지않은 회사입니다.");
                 cpTableCount = 0;
             }
 
-            String ctName = cpCode+cpTableCount;
+            String ctName = cpCode+"_"+cpTableCount;
 
             CompanyTable companyTable = new CompanyTable();
             companyTable.setCpCode(cpCode);
@@ -216,6 +217,13 @@ public class CompanyItemService {
 
             boolean result = kokonutUserService.createTableKokonutUser(ctName, 1);
             if(result) {
+
+                if(optionalCompany.isPresent()) {
+                    companyRepository.save(optionalCompany.get());
+                } else {
+                    log.error("userTableSave -> 존재하지않은 회사입니다.");
+                }
+
                 historyService.updateHistory(activityHistoryId,
                         cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
             }

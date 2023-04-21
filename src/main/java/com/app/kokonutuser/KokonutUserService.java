@@ -356,9 +356,11 @@ public class KokonutUserService {
 				String Field = commonFieldDto.getTableField();
 				if(state == 1) {
 					if(Objects.equals(Field, "ID") || Objects.equals(Field, "PASSWORD")){
-						break;
+						num++;
+						continue;
 					}
 				}
+
 				String Type = commonFieldDto.getTableType();
 				String Null = commonFieldDto.getTableNull();
 				String Extra = commonFieldDto.getTableExtra();
