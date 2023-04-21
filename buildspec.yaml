@@ -1,20 +1,113 @@
 version: 0.2
+
 phases:
+  install:
+    runtime-versions:
+      java: corretto11
+
   build:
     commands:
       - echo Build Starting on `date`
+      - cp ./src/main/resources/application.yml
       - chmod +x ./gradlew
       - ./gradlew build
+
   post_build:
     commands:
       - echo $(basename ./build/libs/*.jar)
-      - pwd
+
+      - DOCKER_DB_HOST=${DOCKER_DB_HOST}
+      - sed -i 's@DOCKER_DB_HOST_TAG@'"$DOCKER_DB_HOST"'@' k8s-deploy.yaml
+      - DOCKER_DB_PORT=${DOCKER_DB_PORT}
+      - sed -i 's@DOCKER_DB_PORT_TAG@'"$DOCKER_DB_PORT"'@' k8s-deploy.yaml
+      - DOCKER_DB_USERNAME=${DOCKER_DB_USERNAME}
+      - sed -i 's@DOCKER_DB_USERNAME_TAG@'"$DOCKER_DB_USERNAME"'@' k8s-deploy.yaml
+      - DOCKER_DB_PASSWORD=${DOCKER_DB_PASSWORD}
+      - sed -i 's@DOCKER_DB_PASSWORD_TAG@'"$DOCKER_DB_PASSWORD"'@' k8s-deploy.yaml
+
+      - KOKONUT_DB_DBNAME=${KOKONUT_DB_DBNAME}
+      - sed -i 's@KOKONUT_DB_DBNAME_TAG@'"$KOKONUT_DB_DBNAME"'@' k8s-deploy.yaml
+      - KOKONUT_DB_USER=${KOKONUT_DB_USER}
+      - sed -i 's@KOKONUT_DB_USER_TAG@'"$KOKONUT_DB_USER"'@' k8s-deploy.yaml
+      - KOKONUT_DB_DORMANT=${KOKONUT_DB_DORMANT}
+      - sed -i 's@KOKONUT_DB_DORMANT_TAG@'"$KOKONUT_DB_DORMANT"'@' k8s-deploy.yaml
+      - KOKONUT_DB_REMOVE=${KOKONUT_DB_REMOVE}
+      - sed -i 's@KOKONUT_DB_REMOVE_TAG@'"$KOKONUT_DB_REMOVE"'@' k8s-deploy.yaml
+
+      - KOKONUT_AWS_S3_URL=${KOKONUT_AWS_S3_URL}
+      - sed -i 's@KOKONUT_AWS_S3_URL_TAG@'"$KOKONUT_AWS_S3_URL"'@' k8s-deploy.yaml
+      - KOKONUT_AWS_S3_BUCKET=${KOKONUT_AWS_S3_BUCKET}
+      - sed -i 's@KOKONUT_AWS_S3_BUCKET_TAG@'"$KOKONUT_AWS_S3_BUCKET"'@' k8s-deploy.yaml
+      - KOKONUT_AWS_S3_ACCESS=${KOKONUT_AWS_S3_ACCESS}
+      - sed -i 's@KOKONUT_AWS_S3_ACCESS_TAG@'"$KOKONUT_AWS_S3_ACCESS"'@' k8s-deploy.yaml
+      - KOKONUT_AWS_S3_SECRET=${KOKONUT_AWS_S3_SECRET}
+      - sed -i 's@KOKONUT_AWS_S3_SECRET_TAG@'"$KOKONUT_AWS_S3_SECRET"'@' k8s-deploy.yaml
+
+      - KOKONUT_AWS_S3_BUSINESSS3FOLDER=${KOKONUT_AWS_S3_BUSINESSS3FOLDER}
+      - sed -i 's@KOKONUT_AWS_S3_BUSINESSS3FOLDER_TAG@'"$KOKONUT_AWS_S3_BUSINESSS3FOLDER"'@' k8s-deploy.yaml
+      - KOKONUT_AWS_S3_QNAS3FOLDER=${KOKONUT_AWS_S3_QNAS3FOLDER}
+      - sed -i 's@KOKONUT_AWS_S3_QNAS3FOLDER_TAG@'"$KOKONUT_AWS_S3_QNAS3FOLDER"'@' k8s-deploy.yaml
+
+      - KOKONUT_AWS_KMS_SECRET=${KOKONUT_AWS_KMS_SECRET}
+      - sed -i 's@KOKONUT_AWS_KMS_SECRET_TAG@'"$KOKONUT_AWS_KMS_SECRET"'@' k8s-deploy.yaml
+      - KOKONUT_AWS_KMS_ACCESS=${KOKONUT_AWS_KMS_ACCESS}
+      - sed -i 's@KOKONUT_AWS_KMS_ACCESS_TAG@'"$KOKONUT_AWS_KMS_ACCESS"'@' k8s-deploy.yaml
+      - KOKONUT_AWS_KMS_ID=${KOKONUT_AWS_KMS_ID}
+      - sed -i 's@KOKONUT_AWS_KMS_ID_TAG@'"$KOKONUT_AWS_KMS_ID"'@' k8s-deploy.yaml
+
+      - KOKONUT_JWT_SECRET=${KOKONUT_JWT_SECRET}
+      - sed -i 's@KOKONUT_JWT_SECRET_TAG@'"$KOKONUT_JWT_SECRET"'@' k8s-deploy.yaml
+
+      - KOKONUT_FRONT_SERVER_DOMAIN=${KOKONUT_FRONT_SERVER_DOMAIN}
+      - sed -i 's@KOKONUT_FRONT_SERVER_DOMAIN_TAG@'"$KOKONUT_FRONT_SERVER_DOMAIN"'@' k8s-deploy.yaml
+
+      - KOKONUT_OTP_URL=${KOKONUT_OTP_URL}
+      - sed -i 's@KOKONUT_OTP_URL_TAG@'"$KOKONUT_OTP_URL"'@' k8s-deploy.yaml
+      - KOKONUT_MAIL_HOST=${KOKONUT_MAIL_HOST}
+      - sed -i 's@KOKONUT_MAIL_HOST_TAG@'"$KOKONUT_MAIL_HOST"'@' k8s-deploy.yaml
+
+      - KOKONUT_IAMPORT_KEY=${KOKONUT_IAMPORT_KEY}
+      - sed -i 's@KOKONUT_IAMPORT_KEY_TAG@'"$KOKONUT_IAMPORT_KEY"'@' k8s-deploy.yaml
+      - KOKONUT_IAMPORT_SECRET=${KOKONUT_IAMPORT_SECRET}
+      - sed -i 's@KOKONUT_IAMPORT_SECRET_TAG@'"$KOKONUT_IAMPORT_SECRET"'@' k8s-deploy.yaml
+
+      - KOKONUT_NICE_ID=${KOKONUT_NICE_ID}
+      - sed -i 's@KOKONUT_NICE_ID_TAG@'"$KOKONUT_NICE_ID"'@' k8s-deploy.yaml
+      - KOKONUT_NICE_SECRET=${KOKONUT_NICE_SECRET}
+      - sed -i 's@KOKONUT_NICE_SECRET_TAG@'"$KOKONUT_NICE_SECRET"'@' k8s-deploy.yaml
+      - KOKONUT_NICE_PRODUCT=${KOKONUT_NICE_PRODUCT}
+      - sed -i 's@KOKONUT_NICE_PRODUCT_TAG@'"$KOKONUT_NICE_PRODUCT"'@' k8s-deploy.yaml
+      - KOKONUT_NICE_ACCESS=${KOKONUT_NICE_ACCESS}
+      - sed -i 's@KOKONUT_NICE_ACCESS_TAG@'"$KOKONUT_NICE_ACCESS"'@' k8s-deploy.yaml
+      - S3_ACCESS_ID=${TOPPOS_S3_ACCESS_ID}
+
+      - KOKONUT_NCLOUD_SERVICEID=${KOKONUT_NCLOUD_SERVICEID}
+      - sed -i 's@KOKONUT_NCLOUD_SERVICEID_TAG@'"$KOKONUT_NCLOUD_SERVICEID"'@' k8s-deploy.yaml
+      - KOKONUT_NCLOUD_ACCESSKEY=${KOKONUT_NCLOUD_ACCESSKEY}
+      - sed -i 's@KOKONUT_NCLOUD_ACCESSKEY_TAG@'"$KOKONUT_NCLOUD_ACCESSKEY"'@' k8s-deploy.yaml
+      - KOKONUT_NCLOUD_SECRETKEY=${KOKONUT_NCLOUD_SECRETKEY}
+      - sed -i 's@KOKONUT_NCLOUD_SECRETKEY_TAG@'"$KOKONUT_NCLOUD_SECRETKEY"'@' k8s-deploy.yaml
+      - KOKONUT_NCLOUD_PRIMARYKEY=${KOKONUT_NCLOUD_PRIMARYKEY}
+      - sed -i 's@KOKONUT_NCLOUD_PRIMARYKEY_TAG@'"$KOKONUT_NCLOUD_PRIMARYKEY"'@' k8s-deploy.yaml
+      - KOKONUT_NCLOUD_CATEGORYCODE=${KOKONUT_NCLOUD_CATEGORYCODE}
+      - sed -i 's@KOKONUT_NCLOUD_CATEGORYCODE_TAG@'"$KOKONUT_NCLOUD_CATEGORYCODE"'@' k8s-deploy.yaml
+
+      - KOKONUT_STIBEE_APIKEY=${KOKONUT_STIBEE_APIKEY}
+      - sed -i 's@KOKONUT_STIBEE_APIKEY_TAG@'"$KOKONUT_STIBEE_APIKEY"'@' k8s-deploy.yaml
+
+      - kubectl apply -f k8s-deploy.yaml
+
 artifacts:
   files:
     - build/libs/*.jar
     - appspec.yaml   # CodeDeploy 적용 시 추가
+    - k8s-deploy.yaml   # CodeDeploy 적용 시 추가
     - scripts/start.sh    # CodeDeploy 적용 시 추가
   discard-paths: yes
 cache:
   paths:
     - '/root/.gradle/caches/**/*'
+
+
+
+

@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kokonut-deployment
+  labels:
+    app: kokonut
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kokonut
+  template:
+    metadata:
+      labels:
+        app: kokonut
+    spec:
+      containers:
+        - name: kokonut
+          ports:
+            - containerPort: 8050
+              name: kokonut-port
+              protocol: TCP
+          resources:
+            requests:
+              memory: "2048Mi"
+              cpu: "500m"
+          env:
+            - name: DOCKER_DB_HOST
+              value: DOCKER_DB_HOST_TAG
+            - name: DOCKER_DB_PORT
+              value: "DOCKER_DB_PORT_TAG"
+            - name: DOCKER_DB_USERNAME
+              value: DOCKER_DB_USERNAME_TAG
+            - name: DOCKER_DB_PASSWORD
+              value: DOCKER_DB_PASSWORD_TAG
+            - name: KOKONUT_DB_DBNAME
+              value: KOKONUT_DB_DBNAME_TAG
+            - name: KOKONUT_DB_USER
+              value: KOKONUT_DB_USER_TAG
+            - name: KOKONUT_DB_DORMANT
+              value: KOKONUT_DB_DORMANT_TAG
+            - name: KOKONUT_DB_REMOVE
+              value: KOKONUT_DB_REMOVE_TAG
+
+            - name: KOKONUT_AWS_S3_URL
+              value: KOKONUT_AWS_S3_URL_TAG
+            - name: KOKONUT_AWS_S3_BUCKET
+              value: KOKONUT_AWS_S3_BUCKET_TAG
+            - name: KOKONUT_AWS_S3_ACCESS
+              value: KOKONUT_AWS_S3_ACCESS_TAG
+            - name: KOKONUT_AWS_S3_SECRET
+              value: KOKONUT_AWS_S3_SECRET_TAG
+
+            - name: KOKONUT_AWS_S3_BUSINESSS3FOLDER
+              value: KOKONUT_AWS_S3_BUSINESSS3FOLDER_TAG
+            - name: KOKONUT_AWS_S3_QNAS3FOLDER
+              value: KOKONUT_AWS_S3_QNAS3FOLDER_TAG
+
+            - name: KOKONUT_AWS_KMS_SECRET
+              value: KOKONUT_AWS_KMS_SECRET_TAG
+            - name: KOKONUT_AWS_KMS_ACCESS
+              value: KOKONUT_AWS_KMS_ACCESS_TAG
+            - name: KOKONUT_AWS_KMS_ID
+              value: KOKONUT_AWS_KMS_ID_TAG
+
+            - name: KOKONUT_JWT_SECRET
+              value: KOKONUT_JWT_SECRET_TAG
+
+            - name: KOKONUT_FRONT_SERVER_DOMAIN
+              value: KOKONUT_FRONT_SERVER_DOMAIN_TAG
+
+            - name: KOKONUT_OTP_URL
+              value: KOKONUT_OTP_URL_TAG
+            - name: KOKONUT_MAIL_HOST
+              value: KOKONUT_MAIL_HOST_TAG
+
+            - name: KOKONUT_IAMPORT_KEY
+              value: KOKONUT_IAMPORT_KEY_TAG
+            - name: KOKONUT_IAMPORT_SECRET
+              value: KOKONUT_IAMPORT_SECRET_TAG
+
+            - name: KOKONUT_NICE_ID
+              value: KOKONUT_NICE_ID_TAG
+            - name: KOKONUT_NICE_SECRET
+              value: KOKONUT_NICE_SECRET_TAG
+            - name: KOKONUT_NICE_PRODUCT
+              value: KOKONUT_NICE_PRODUCT_TAG
+            - name: KOKONUT_NICE_ACCESS
+              value: KOKONUT_NICE_ACCESS_TAG
+
+            - name: KOKONUT_NCLOUD_SERVICEID
+              value: KOKONUT_NCLOUD_SERVICEID_TAG
+            - name: KOKONUT_NCLOUD_ACCESSKEY
+              value: KOKONUT_NCLOUD_ACCESSKEY_TAG
+            - name: KOKONUT_NCLOUD_SECRETKEY
+              value: KOKONUT_NCLOUD_SECRETKEY_TAG
+            - name: KOKONUT_NCLOUD_PRIMARYKEY
+              value: KOKONUT_NCLOUD_PRIMARYKEY_TAG
+            - name: KOKONUT_NCLOUD_CATEGORYCODE
+              value: KOKONUT_NCLOUD_CATEGORYCODE_TAG
+
+            - name: KOKONUT_STIBEE_APIKEY
+              value: KOKONUT_STIBEE_APIKEY_TAG
