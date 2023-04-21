@@ -293,7 +293,7 @@ public class TotalDbDownloadService {
                 String browser;
                 String userAgent = request.getHeader("User-Agent");
 
-                if (userAgent.contains("MSIE") || userAgent.contains("Trident"))   {
+                if (userAgent.contains("MSIE") || userAgent.contains("Trident"))  {
                     browser = "MSIE";
                 } else if (userAgent.contains("Opera") || userAgent.contains("OPR")) {
                     browser = "Opera";
@@ -314,7 +314,7 @@ public class TotalDbDownloadService {
                 } else {
                     StringBuilder sb = new StringBuilder();
                     for (int i = 0; i < exportFileName.length(); i++)
-                    {
+                   {
                         char c = exportFileName.charAt(i);
                         if (c > '~') {
                             sb.append(URLEncoder.encode("" + c, StandardCharsets.UTF_8));

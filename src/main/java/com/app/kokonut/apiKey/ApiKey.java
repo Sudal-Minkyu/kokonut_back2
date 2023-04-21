@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.io.Serializable;
+
 import java.time.LocalDateTime;
 
 /**
@@ -20,15 +20,10 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @Table(name="kn_api_key")
-public class ApiKey implements Serializable {
+public class ApiKey {
 
-    private static final long serialVersionUID = 1L;
-
-    /**
-     * 키
-     */
     @Id
-    @ApiModelProperty("키")
+    @ApiModelProperty("주키")
     @Column(name = "ak_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long akId;

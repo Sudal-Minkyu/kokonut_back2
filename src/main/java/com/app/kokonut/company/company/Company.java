@@ -4,7 +4,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 import javax.persistence.*;
-import java.io.Serializable;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -12,9 +12,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @Table(name="kn_company")
-public class Company implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class Company {
 
     @Id
     @ApiModelProperty("주키")

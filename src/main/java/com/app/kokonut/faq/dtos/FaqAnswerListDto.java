@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
+
 /**
  * @author Joy
  * Date : 2023-01-03
@@ -15,7 +15,7 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class FaqAnswerListDto implements Serializable {
+public class FaqAnswerListDto {
 
     @ApiModelProperty("질문")
     private String faqQuestion;

@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.io.Serializable;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -14,9 +14,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @Table(name="kn_company_table")
-public class CompanyTable implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class CompanyTable {
 
     @Id
     @ApiModelProperty("주키")

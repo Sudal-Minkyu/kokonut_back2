@@ -1,4 +1,4 @@
-package com.app.kokonut.company.companycategory;
+package com.app.kokonut.privacy.policy.policythirdoverseas;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -6,11 +6,11 @@ import org.springframework.stereotype.Repository;
 
 /**
  * @author Woody
- * Date : 2023-04-11
+ * Date : 2023-04-21
  * Time :
  * Remark :
  */
 @Repository
-public interface CompanyCategoryRepository extends JpaRepository<CompanyCategory, Long>, JpaSpecificationExecutor<CompanyCategory>, CompanyCategoryRepositoryCustom {
+public interface PolicyThirdOverseasRepository extends JpaRepository<PolicyThirdOverseas, Long>, JpaSpecificationExecutor<PolicyThirdOverseas> {
 
 }

@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.io.Serializable;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -14,12 +14,8 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @Table(name="kn_category_default")
-public class CategoryDefault implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
+public class CategoryDefault {
     @Id
-    @ApiModelProperty("주키")
     @Column(name = "cd_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long cdId;

@@ -4,13 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
+
 import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class FaqSearchDto implements Serializable {
+public class FaqSearchDto {
 
     private Integer faqState;  // 상태(0:게시중지,1:게시중,2:게시대기)
 

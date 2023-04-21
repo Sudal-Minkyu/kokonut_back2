@@ -306,7 +306,7 @@ public class DynamicUserService {
 //			}
 
 		// kokonut_user DB 생성 (유저 테이블) - 테스트완료 woody
-		boolean result = kokonutUserService.createTableKokonutUser(companyCode);
+		boolean result = kokonutUserService.createTableKokonutUser(companyCode, 0);
 		log.info("result : "+result);
 
 //			if(!dynamicUserService.CreateDynamicTable(companyCode)) {
@@ -1635,10 +1635,10 @@ public class DynamicUserService {
 			for(KokonutAddColumnListDto kokonutAddColumnListDto : kokonutAddColumnListDtos) {
 
 				Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-						companyCode+" - "+activityCode.getDesc()+" 시도 이력"+ "추가된 컬럼명 : "+kokonutAddColumnListDto.getCcName(), "", ip, 0, jwtFilterDto.getEmail());
+						companyCode+" - "+activityCode.getDesc()+" 시도 이력"+ "추가된 컬럼명 : "+kokonutAddColumnListDto.getCiName(), "", ip, 0, jwtFilterDto.getEmail());
 
-				StringBuilder comment = new StringBuilder(kokonutAddColumnListDto.getCcName());
-				if(kokonutAddColumnListDto.getCcSecurity() == 0) {
+				StringBuilder comment = new StringBuilder(kokonutAddColumnListDto.getCiName());
+				if(kokonutAddColumnListDto.getCiSecurity() == 0) {
 					comment.append(",비암호화");
 				} else {
 					comment.append(",암호화");
@@ -1653,7 +1653,7 @@ public class DynamicUserService {
 				);
 
 				historyService.updateHistory(activityHistoryId,
-						companyCode+" - "+activityCode.getDesc()+" 시도 이력"+ "추가된 컬럼명 : "+kokonutAddColumnListDto.getCcName(), "", 1);
+						companyCode+" - "+activityCode.getDesc()+" 시도 이력"+ "추가된 컬럼명 : "+kokonutAddColumnListDto.getCiName(), "", 1);
 
 				tableAddColumnCount++;
 			}

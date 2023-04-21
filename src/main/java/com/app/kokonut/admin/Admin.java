@@ -24,8 +24,9 @@ public class Admin implements UserDetails {
     /**
      * 키
      */
+
     @Id
-    @ApiModelProperty("키")
+    @ApiModelProperty("주키")
     @Column(name = "admin_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long adminId;

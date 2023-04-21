@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
+
 import java.time.LocalDateTime;
 
 /**
@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CollectInfoListDto implements Serializable {
+public class CollectInfoListDto {
 
     @ApiModelProperty("주키")
     private Long ciId;

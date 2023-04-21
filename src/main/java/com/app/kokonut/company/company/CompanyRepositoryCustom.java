@@ -1,6 +1,7 @@
 package com.app.kokonut.company.company;
 
 import com.app.kokonut.auth.dtos.CompanyEncryptDto;
+import com.app.kokonut.company.company.dtos.CompanyTableCountDto;
 
 /**
  * @author Woody

@@ -266,7 +266,7 @@ public class KokonutDormantService {
 
 	// 컬럼(필드)정보 수정
 	@Transactional
-	public void alterChangeColumnTableQuery(String companyCode, String beforField, String afterField, String type, int length, Boolean isNull, String defaultValue, String comment)  {
+	public void alterChangeColumnTableQuery(String companyCode, String beforField, String afterField, String type, int length, Boolean isNull, String defaultValue, String comment) {
 		log.info("alterChangeColumnTableQuery 휴면 호출");
 
 		try {

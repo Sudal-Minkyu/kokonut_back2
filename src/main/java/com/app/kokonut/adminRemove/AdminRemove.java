@@ -9,7 +9,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.io.Serializable;
+
 import java.util.Date;
 
 @Entity
@@ -17,9 +17,9 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @Table(name="kn_admin_remove")
-public class AdminRemove implements Serializable {
+public class AdminRemove {
 
-    private static final long serialVersionUID = 1L;
+    
 
     /**
      * ADMIN IDX

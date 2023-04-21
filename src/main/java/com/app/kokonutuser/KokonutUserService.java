@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author Woody
@@ -332,12 +333,12 @@ public class KokonutUserService {
 
 	/**
 	 * 동적 기본테이블 생성
-	 * @param ctName : 테이블명(사업자코드+테이블카운트 수)
+	 * @param ctName : 테이블명(사업자코드+테이블카운트 수) -> 새로추가한 테이블일 경우 아이디와 비밀번호는 제외한다. state = 1 일 경우
 	 * @return boolean
 	 * 기존 코코넛 : CreateDynamicTable
 	 */
 	@Transactional
-	public boolean createTableKokonutUser(String ctName) {
+	public boolean createTableKokonutUser(String ctName, Integer state) {
 		log.info("createTableKokonutUser 호출");
 
 		boolean isSuccess = false;
@@ -353,6 +354,11 @@ public class KokonutUserService {
 			for (CommonFieldDto commonFieldDto : commonTable) {
 				String query = "";
 				String Field = commonFieldDto.getTableField();
+				if(state == 1) {
+					if(Objects.equals(Field, "ID") || Objects.equals(Field, "PASSWORD")){
+						break;
+					}
+				}
 				String Type = commonFieldDto.getTableType();
 				String Null = commonFieldDto.getTableNull();
 				String Extra = commonFieldDto.getTableExtra();
@@ -513,7 +519,7 @@ public class KokonutUserService {
 	 * 기존 코코넛 : AlterChangeColumnTableQuery
 	 */
 	@Transactional
-	public boolean alterChangeColumnTableQuery(String companyCode, String beforField, String afterField, String type, int length, Boolean isNull, String defaultValue, String comment)  {
+	public boolean alterChangeColumnTableQuery(String companyCode, String beforField, String afterField, String type, int length, Boolean isNull, String defaultValue, String comment) {
 		log.info("alterChangeColumnTableQuery 유저 호출");
 
 		boolean isSuccess = false;

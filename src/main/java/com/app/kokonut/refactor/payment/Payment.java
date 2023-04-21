@@ -4,21 +4,16 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.io.Serializable;
+
 import java.util.Date;
 
 @Data
 @Entity
 @Table(name = "payment")
-public class Payment implements Serializable {
+public class Payment {
 
-    private static final long serialVersionUID = 1L;
-
-    /**
-     * 키
-     */
     @Id
-    @ApiModelProperty("키")
+    @ApiModelProperty("주키")
     @Column(name = "IDX", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idx;

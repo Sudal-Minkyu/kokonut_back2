@@ -450,13 +450,13 @@ public class AuthService {
         companyDataKey.setCpCode(company.getCpCode());
         companyDataKey.setDataKey(dataKey);
 
-        String ctName = cpCode+"_0001";
+        String ctName = cpCode+"_1";
 
         // 회사 유저 기본테이블 저장
         CompanyTable companyTable = new CompanyTable();
         companyTable.setCpCode(cpCode);
         companyTable.setCtName(ctName);
-        companyTable.setCtTableCount("0001");
+        companyTable.setCtTableCount("1");
         companyTable.setCtDesignation("기본");
         companyTable.setCtAddColumnCount(1);
         companyTable.setInsert_email(kokonutSignUp.getKnEmail());
@@ -481,7 +481,7 @@ public class AuthService {
         companyDataKeyRepository.save(companyDataKey);
         companyTableRepository.save(companyTable);
 
-        boolean result = kokonutUserService.createTableKokonutUser(ctName);
+        boolean result = kokonutUserService.createTableKokonutUser(ctName, 0);
         log.warn("result : "+result);
 
         log.info("사업자 정보 저장 saveAdmin : "+saveAdmin.getAdminId());

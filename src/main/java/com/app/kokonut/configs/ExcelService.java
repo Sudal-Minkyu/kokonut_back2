@@ -162,7 +162,7 @@ public class ExcelService {
  		String browser = "";
 		String userAgent = request.getHeader("User-Agent");
 		
-		if (userAgent.contains("MSIE") || userAgent.contains("Trident"))   {
+		if (userAgent.contains("MSIE") || userAgent.contains("Trident"))  {
 			browser = "MSIE";
 		} else if (userAgent.contains("Opera") || userAgent.contains("OPR")) {
 			browser = "Opera";
@@ -183,7 +183,7 @@ public class ExcelService {
         } else {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < fileName.length(); i++)
-            {
+           {
                 char c = fileName.charAt(i);
                 if (c > '~') {
                     sb.append(URLEncoder.encode("" + c, StandardCharsets.UTF_8));

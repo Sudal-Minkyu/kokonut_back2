@@ -87,7 +87,7 @@ public class CommonUtil {
 //    	String browser = "";
 //		String header = request.getHeader("User-Agent");
 //
-//		if ( header.indexOf("MSIE") > -1 || header.indexOf("Trident") > -1 )   {
+//		if ( header.indexOf("MSIE") > -1 || header.indexOf("Trident") > -1 )  {
 //			browser = "MSIE";
 //		} else if (header.indexOf("Opera") > -1 || header.indexOf("OPR") > -1 ) {
 //			browser = "Opera";
@@ -113,7 +113,7 @@ public class CommonUtil {
 //    	String browser = "";
 //		String header = request.getHeader("User-Agent");
 //
-//		if ( header.indexOf("MSIE") > -1 || header.indexOf("Trident") > -1 )   {
+//		if ( header.indexOf("MSIE") > -1 || header.indexOf("Trident") > -1 )  {
 //			browser = "MSIE";
 //		} else if (header.indexOf("Opera") > -1 || header.indexOf("OPR") > -1 ) {
 //			browser = "Opera";

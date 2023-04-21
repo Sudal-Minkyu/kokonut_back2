@@ -11,9 +11,9 @@ import lombok.Data;
 @Data
 public class KokonutAddColumnListDto {
 
-    private String ccName; // 컬럼명
+    private String ciName; // 컬럼명
 
-    private Integer ccSecurity; // 암호화여부
+    private Integer ciSecurity; // 암호화여부
 
     private String categoryName; // 카테고리명
 

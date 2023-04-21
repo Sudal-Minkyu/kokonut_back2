@@ -1,4 +1,4 @@
-package com.app.kokonut.company.companycategory.dtos;
+package com.app.kokonut.company.companyitem.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,10 +13,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CompanyCategoryListDto {
+public class CompanyItemListDto {
 
-    private String ccName;
+    private String ciName;
 
-    private String ccSecurity;
+    private String ciSecurity;
 
 }

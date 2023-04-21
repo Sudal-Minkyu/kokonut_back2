@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
+
 import java.util.Date;
 
 /**
@@ -18,7 +18,7 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AddressBookDto implements Serializable {
+public class AddressBookDto {
 
     /**
      * 회사 키(주소록 보는 권한이 개인이면 삭제해도 되는 컬럼)

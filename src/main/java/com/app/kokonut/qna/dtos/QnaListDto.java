@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -18,7 +18,7 @@ import java.time.format.DateTimeFormatter;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class QnaListDto implements Serializable {
+public class QnaListDto {
 
     private Long qnaId;
 

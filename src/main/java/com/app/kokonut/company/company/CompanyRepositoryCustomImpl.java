@@ -1,6 +1,7 @@
 package com.app.kokonut.company.company;
 
 import com.app.kokonut.auth.dtos.CompanyEncryptDto;
+import com.app.kokonut.company.company.dtos.CompanyTableCountDto;
 import com.app.kokonut.company.companydatakey.QCompanyDataKey;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPQLQuery;
@@ -40,6 +41,5 @@ public class CompanyRepositoryCustomImpl extends QuerydslRepositorySupport imple
 
         return query.fetchOne();
     }
-
 
 }

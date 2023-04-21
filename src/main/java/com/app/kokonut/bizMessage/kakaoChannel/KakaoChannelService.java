@@ -66,12 +66,12 @@ public class KakaoChannelService {
 
                 // 테스트 후 작성하기 - 22/12/15 to. Woody
 //                if("DELETING_PERMANENTLY".equals(channelStatus) )
-//                {
+//               {
 //                    String channelName = "DELETING_PERMANENTLY";
 //                    alimTalkMessageService.UpdateKakaoTalkChannel(channelId, channelName, channelStatus);
 //
 //                } else
-//                {
+//               {
 //                    String channelName = channel.get("channelName").toString();
 //                    alimTalkMessageService.UpdateKakaoTalkChannel(channelId, channelName, channelStatus);
 //                }

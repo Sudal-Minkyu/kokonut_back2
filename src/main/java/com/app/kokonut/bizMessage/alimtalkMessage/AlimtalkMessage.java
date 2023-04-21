@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.io.Serializable;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -14,15 +14,10 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @Table(name="kn_alimtalk_message")
-public class AlimtalkMessage implements Serializable {
+public class AlimtalkMessage {
 
-    private static final long serialVersionUID = 1L;
-
-    /**
-     * 키
-     */
     @Id
-    @ApiModelProperty("키")
+    @ApiModelProperty("주키")
     @Column(name = "am_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long amId;

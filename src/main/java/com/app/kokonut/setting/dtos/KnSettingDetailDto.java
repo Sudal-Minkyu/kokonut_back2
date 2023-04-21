@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
+
 
 /**
  * @author Joy
@@ -17,8 +17,8 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class KnSettingDetailDto implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class KnSettingDetailDto {
+    
 
     @ApiModelProperty("키")
     private Long stId;

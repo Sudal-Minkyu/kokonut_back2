@@ -15,4 +15,7 @@ import java.util.Optional;
 @Repository
 public interface CompanyTableRepository extends JpaRepository<CompanyTable, Long>, JpaSpecificationExecutor<CompanyTable>, CompanyTableRepositoryCustom {
     Optional<CompanyTable> findCompanyTableByCtName(String ctName);
+
+    boolean existsByCtDesignation(String ctDesignation);
+
 }

@@ -1,30 +1,36 @@
-package com.app.kokonut.company.companycategory;
+package com.app.kokonut.company.companyitem;
 
 import com.app.kokonut.admin.AdminRepository;
 import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
-import com.app.kokonut.category.categorydefault.CategoryDefault;
 import com.app.kokonut.category.categorydefault.CategoryDefaultRepository;
 import com.app.kokonut.category.categorydefault.dtos.CategoryDefaultListDto;
 import com.app.kokonut.category.categorydefault.dtos.CategoryDefaultListSubDto;
-import com.app.kokonut.category.categoryitem.CategoryItem;
 import com.app.kokonut.category.categoryitem.CategoryItemRepository;
 import com.app.kokonut.category.categoryitem.dtos.CategoryItemListDto;
 import com.app.kokonut.common.AjaxResponse;
-import com.app.kokonut.company.companycategory.dtos.CompanyCategoryListDto;
+import com.app.kokonut.common.ResponseErrorCode;
+import com.app.kokonut.common.realcomponent.CommonUtil;
+import com.app.kokonut.company.company.Company;
+import com.app.kokonut.company.company.CompanyRepository;
+import com.app.kokonut.company.company.dtos.CompanyTableCountDto;
+import com.app.kokonut.company.companyitem.dtos.CompanyItemListDto;
+import com.app.kokonut.company.companytable.CompanyTable;
 import com.app.kokonut.company.companytable.CompanyTableRepository;
 import com.app.kokonut.company.companytable.dtos.CompanyTableListDto;
 import com.app.kokonut.company.companytable.dtos.CompanyTableSubListDto;
+import com.app.kokonut.history.HistoryService;
+import com.app.kokonut.history.dto.ActivityCode;
 import com.app.kokonutuser.DynamicUserService;
+import com.app.kokonutuser.KokonutUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.*;
 
 /**
  * @author Woody
@@ -34,10 +40,14 @@ import java.util.Map;
  */
 @Slf4j
 @Service
-public class CompanyCategoryService {
+public class CompanyItemService {
+
+    private final KokonutUserService kokonutUserService;
+    private final HistoryService historyService;
 
     private final AdminRepository adminRepository;
-    private final CompanyCategoryRepository companyCategoryRepository;
+    private final CompanyRepository companyRepository;
+    private final CompanyItemRepository companyItemRepository;
     private final CompanyTableRepository companyTableRepository;
     private final CategoryDefaultRepository categoryDefaultRepository;
     private final CategoryItemRepository categoryItemRepository;
@@ -45,9 +55,15 @@ public class CompanyCategoryService {
     private final DynamicUserService dynamicUserService;
 
     @Autowired
-    public CompanyCategoryService(AdminRepository adminRepository, CompanyCategoryRepository companyCategoryRepository, CompanyTableRepository companyTableRepository, CategoryDefaultRepository categoryDefaultRepository, CategoryItemRepository categoryItemRepository, DynamicUserService dynamicUserService){
+    public CompanyItemService(KokonutUserService kokonutUserService, HistoryService historyService,
+                              AdminRepository adminRepository, CompanyRepository companyRepository, CompanyItemRepository companyItemRepository,
+                              CompanyTableRepository companyTableRepository, CategoryDefaultRepository categoryDefaultRepository,
+                              CategoryItemRepository categoryItemRepository, DynamicUserService dynamicUserService){
+        this.kokonutUserService = kokonutUserService;
+        this.historyService = historyService;
         this.adminRepository = adminRepository;
-        this.companyCategoryRepository = companyCategoryRepository;
+        this.companyRepository = companyRepository;
+        this.companyItemRepository = companyItemRepository;
         this.companyTableRepository = companyTableRepository;
         this.categoryDefaultRepository = categoryDefaultRepository;
         this.categoryItemRepository = categoryItemRepository;
@@ -82,9 +98,9 @@ public class CompanyCategoryService {
         return ResponseEntity.ok(res.success(data));
     }
 
-    // 추가 카테고리 항목 호출
-    public ResponseEntity<Map<String, Object>> addCategoryList(JwtFilterDto jwtFilterDto) {
-        log.info("addCategoryList 호출");
+    // 추가 항목리스트 호출
+    public ResponseEntity<Map<String, Object>> addItemList(JwtFilterDto jwtFilterDto) {
+        log.info("addItemList 호출");
 
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
@@ -95,8 +111,115 @@ public class CompanyCategoryService {
         String companyCode = adminCompanyInfoDto.getCompanyCode();
 //        log.info("companyCode : "+companyCode);
 
-        List<CompanyCategoryListDto> companyCategoryListDtoList = companyCategoryRepository.findByCategoryList(companyCode);
-        data.put("categoryList", companyCategoryListDtoList);
+        List<CompanyItemListDto> companyCategoryListDtoList = companyItemRepository.findByItemList(companyCode);
+        data.put("itemList", companyCategoryListDtoList);
+
+        return ResponseEntity.ok(res.success(data));
+    }
+
+    // 항목을 추가한다.
+    @Transactional
+    public ResponseEntity<Map<String, Object>> saveItem(JwtFilterDto jwtFilterDto, String ciName, Integer ciSecurity) {
+        log.info("saveItem 호출");
+
+        log.info("ciName : "+ciName);
+        log.info("ciSecurity : "+ciSecurity);
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+        String email = jwtFilterDto.getEmail();
+
+        AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+        Long adminId = adminCompanyInfoDto.getAdminId();
+        String companyCode = adminCompanyInfoDto.getCompanyCode();
+
+        ActivityCode activityCode;
+        String ip = CommonUtil.clientIp();
+        Long activityHistoryId;
+        if(companyItemRepository.existsByCiName(ciName)) {
+            log.error("이미 등록되어 있는 항목입니다.");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO087.getCode(), ResponseErrorCode.KO087.getDesc()));
+        } else {
+            // 추가카테고리의 항목 추가 코드
+            activityCode = ActivityCode.AC_42;
+
+            // 활동이력 저장 -> 비정상 모드
+            activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
+                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
+
+            CompanyItem companyItem = new CompanyItem();
+            companyItem.setCpCode(companyCode);
+            companyItem.setCiName(ciName);
+            companyItem.setCiSecurity(ciSecurity);
+            companyItem.setInsert_email(jwtFilterDto.getEmail());
+            companyItem.setInsert_date(LocalDateTime.now());
+            companyItemRepository.save(companyItem);
+
+            historyService.updateHistory(activityHistoryId,
+                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+        }
+
+        return ResponseEntity.ok(res.success(data));
+    }
+
+    // 테이블 추가
+    public ResponseEntity<Map<String, Object>> userTableSave(JwtFilterDto jwtFilterDto, String ctDesignation) {
+        log.info("userTableSave 호출");
+
+        log.info("ctDesignation : "+ctDesignation);
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+        String email = jwtFilterDto.getEmail();
+
+        AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+        Long adminId = adminCompanyInfoDto.getAdminId();
+        String cpCode = adminCompanyInfoDto.getCompanyCode();
+
+        ActivityCode activityCode;
+        String ip = CommonUtil.clientIp();
+        Long activityHistoryId;
+        if(companyTableRepository.existsByCtDesignation(ctDesignation)) {
+            log.error("이미 등록되어 있는 테이블명 입니다.");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO088.getCode(), ResponseErrorCode.KO088.getDesc()));
+        } else {
+            // 테이블추가의 활동 코드
+            activityCode = ActivityCode.AC_16;
+
+            // 활동이력 저장 -> 비정상 모드
+            activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
+                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
+
+            Optional<Company> optionalCompany = companyRepository.findByCpCode(cpCode);
+
+            int cpTableCount;
+            if(optionalCompany.isPresent()) {
+                cpTableCount = optionalCompany.get().getCpTableCount()+1;
+            } else {
+                log.error("userTableSave -> 존재하지않은 회사입니다.");
+                cpTableCount = 0;
+            }
+
+            String ctName = cpCode+cpTableCount;
+
+            CompanyTable companyTable = new CompanyTable();
+            companyTable.setCpCode(cpCode);
+            companyTable.setCtName(ctName);
+            companyTable.setCtTableCount(String.valueOf(cpTableCount));
+            companyTable.setCtDesignation(ctDesignation);
+            companyTable.setCtAddColumnCount(1);
+            companyTable.setInsert_email(jwtFilterDto.getEmail());
+            companyTable.setInsert_date(LocalDateTime.now());
+            companyTableRepository.save(companyTable);
+
+            boolean result = kokonutUserService.createTableKokonutUser(ctName, 1);
+            if(result) {
+                historyService.updateHistory(activityHistoryId,
+                        cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+            }
+        }
 
         return ResponseEntity.ok(res.success(data));
     }

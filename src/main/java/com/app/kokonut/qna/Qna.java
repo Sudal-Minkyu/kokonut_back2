@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.io.Serializable;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -14,12 +14,10 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @Table(name="kn_qna")
-public class Qna implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class Qna {
 
     @Id
-    @ApiModelProperty("키")
+    @ApiModelProperty("주키")
     @Column(name = "qna_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long qnaId;

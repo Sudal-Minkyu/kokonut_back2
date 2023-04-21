@@ -6,20 +6,21 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.io.Serializable;
+
 
 @Entity
 @EqualsAndHashCode(of = "cdId")
 @Data
 @NoArgsConstructor
 @Table(name="kn_company_datakey")
-public class CompanyDataKey implements Serializable {
+public class CompanyDataKey {
 
-    private static final long serialVersionUID = 1L;
+    
 
     /**
      * 주키
      */
+
     @Id
     @ApiModelProperty("주키")
     @Column(name = "cd_id", nullable = false)

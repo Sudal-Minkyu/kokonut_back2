@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
+
 import java.time.LocalDateTime;
 
 /**
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RevDocSearchDto implements Serializable {
+public class RevDocSearchDto {
 
     private LocalDateTime stimeStart;
 

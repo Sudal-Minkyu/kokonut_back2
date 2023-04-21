@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
+
 import java.time.LocalDateTime;
 /**
  * @author Joy
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class NoticeSearchDto implements Serializable {
+public class NoticeSearchDto {
 
     @ApiModelProperty("상단공지여부(0:일반,1:상단공지)")
     private Integer isNotice;

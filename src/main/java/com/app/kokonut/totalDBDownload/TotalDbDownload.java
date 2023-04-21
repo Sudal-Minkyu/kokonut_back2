@@ -24,8 +24,9 @@ public class TotalDbDownload {
     /**
      * 키
      */
+
     @Id
-    @ApiModelProperty("키")
+    @ApiModelProperty("주키")
     @Column(name = "td_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long tdId;

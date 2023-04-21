@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.io.Serializable;
+
 import java.util.Date;
 
 @Entity
@@ -14,15 +14,10 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @Table(name="kn_privacy_email_history")
-public class PrivacyEmailHistory implements Serializable {
+public class PrivacyEmailHistory {
 
-    private static final long serialVersionUID = 1L;
-
-    /**
-     * 키
-     */
     @Id
-    @ApiModelProperty("키")
+    @ApiModelProperty("주키")
     @Column(name = "ph_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long phId;

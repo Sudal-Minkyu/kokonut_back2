@@ -5,13 +5,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
+
 import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class QnaSchedulerDto implements Serializable {
+public class QnaSchedulerDto {
 
     @ApiModelProperty("키")
     private Long qnaId;

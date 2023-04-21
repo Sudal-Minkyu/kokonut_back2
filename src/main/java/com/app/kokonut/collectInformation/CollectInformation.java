@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.io.Serializable;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -14,13 +14,14 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @Table(name="kn_collect_information")
-public class CollectInformation implements Serializable {
+public class CollectInformation {
 
-    private static final long serialVersionUID = 1L;
+    
 
     /**
      * 주키
      */
+
     @Id
     @ApiModelProperty("주키")
     @Column(name = "ci_id", nullable = false)

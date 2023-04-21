@@ -5,13 +5,13 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import java.io.Serializable;
+
 import java.sql.Date;
 
 @Data
 @ApiModel("")
-public class StatisticsDayDto implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class StatisticsDayDto {
+    
     private Integer idx;
 
 

@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.io.Serializable;
+
 import java.sql.Date;
 import java.time.LocalDateTime;
 
@@ -15,10 +15,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @Table(name="kn_statistics_day")
-public class StatisticsDay implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
+public class StatisticsDay {
     @Id
     @Column(name = "sd_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
