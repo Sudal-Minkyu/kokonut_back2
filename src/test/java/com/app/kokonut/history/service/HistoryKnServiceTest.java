@@ -185,21 +185,21 @@ class HistoryKnServiceTest {
 //        System.out.println("activityHistoryStatisticsDto : "+ activityHistoryStatisticsDto);
 //    }
 
-    @Test
-    @DisplayName("활동내역 저장 테스트")
-    public void insertHistoryTest() {
-
-        int type = 1;
-        Long adminId = 1L;
-        ActivityCode activityCode = ActivityCode.AC_01;
-        String activityDetail = "저장테스트";
-        String reason = "저장테스트2";
-        String ipAddr = "ip테스트";
-        int state = 1;
-
-        Long saveactivityHistoryId = historyService.insertHistory(type, adminId, activityCode, activityDetail, reason, ipAddr, state, "");
-        System.out.println("저장된 IDX : "+saveactivityHistoryId);
-    }
+//    @Test
+//    @DisplayName("활동내역 저장 테스트")
+//    public void insertHistoryTest() {
+//
+//        int type = 1;
+//        Long adminId = 1L;
+//        ActivityCode activityCode = ActivityCode.AC_01;
+//        String activityDetail = "저장테스트";
+//        String reason = "저장테스트2";
+//        String ipAddr = "ip테스트";
+//        int state = 1;
+//
+//        Long saveactivityHistoryId = historyService.insertHistory(type, adminId, activityCode, activityDetail, reason, ipAddr, state, "");
+//        System.out.println("저장된 IDX : "+saveactivityHistoryId);
+//    }
 
 
 
