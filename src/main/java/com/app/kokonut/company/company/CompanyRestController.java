@@ -41,7 +41,7 @@ public class CompanyRestController {
         return companyItemService.addItemList(jwtFilterDto);
     }
 
-    @ApiOperation(value="추가카테고리의 항목을 추가한다.", notes="" +
+    @ApiOperation(value="추가 카테고리의 항목을 추가한다.", notes="" +
             "1. 항목의 이름, 암호화여부의 데이터를 받는다." +
             "2. 해당 항목을 저정한다.")
     @PostMapping(value = "/saveItem") // -> 추가 카테고리의 항목을 추가한다.
@@ -62,7 +62,7 @@ public class CompanyRestController {
         return companyItemService.userTableSave(jwtFilterDto, ctDesignation);
     }
 
-    @ApiOperation(value="유저테이블 항목을 가져온다.", notes="" +
+    @ApiOperation(value="모든 테이블을 가져온다.", notes="" +
             "1. cpCode를 통해 추가된 카테고리를 조회한다." +
             "2. 결과값을 보낸다.")
     @GetMapping(value = "/userTableList")
@@ -71,6 +71,5 @@ public class CompanyRestController {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return companyItemService.userTableList(jwtFilterDto);
     }
-
 
 }

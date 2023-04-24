@@ -622,23 +622,23 @@ public class KokonutUserService {
 
 	/**
 	 * 컬럼(필드) 삭제
-	 * @param companyCode	- 변경할 테이블 명
+	 * @param tableName	- 변경할 테이블 명
 	 * @param field		- 삭제할 컬럼명
 	 * @return boolean
 	 * 기존 코코넛 : AlterDropColumnTableQuery
 	 */
 	@Transactional
-	public void alterDropColumnUserTableQuery(String companyCode, String field) {
+	public void alterDropColumnUserTableQuery(String tableName, String field) {
 		log.info("alterDropColumnUserTableQuery 호출");
 
 		try {
-			String dropQuery = "ALTER TABLE `" + companyCode + "` DROP COLUMN " + "`" + field + "`";
+			String dropQuery = "ALTER TABLE `" + tableName + "` DROP COLUMN " + "`" + field + "`";
 
 			dynamicUserRepositoryCustom.userCommonTable(dropQuery);
 
-			log.info("유저테이블 필드삭제 성공 : "+companyCode);
+			log.info("유저테이블 필드삭제 성공 : "+tableName);
 		} catch (Exception e) {
-			log.error("유저테이블 필드삭제 에러 : "+companyCode);
+			log.error("유저테이블 필드삭제 에러 : "+tableName);
 		}
 	}
 

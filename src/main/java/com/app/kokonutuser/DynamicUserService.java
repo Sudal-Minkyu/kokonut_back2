@@ -1,9 +1,11 @@
 package com.app.kokonutuser;
 
+import com.app.kokonut.admin.dtos.AdminOtpKeyDto;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import com.app.kokonut.common.realcomponent.AESGCMcrypto;
 import com.app.kokonut.company.companytable.CompanyTable;
 import com.app.kokonut.company.companytable.CompanyTableRepository;
+import com.app.kokonut.configs.GoogleOTP;
 import com.app.kokonut.history.HistoryService;
 import com.app.kokonut.history.dto.ActivityCode;
 import com.app.kokonut.admin.AdminRepository;
@@ -52,6 +54,7 @@ public class DynamicUserService {
 	private final AdminRepository adminRepository;
 	private final CompanyRepository companyRepository;
 
+	private final GoogleOTP googleOTP;
 	private final ExcelService excelService;
 	private final KokonutUserService kokonutUserService;
 	private final CompanyService companyService;
@@ -63,12 +66,13 @@ public class DynamicUserService {
 
 	@Autowired
 	public DynamicUserService(PasswordEncoder passwordEncoder, AdminRepository adminRepository,
-							  CompanyRepository companyRepository, ExcelService excelService,
+							  CompanyRepository companyRepository, GoogleOTP googleOTP, ExcelService excelService,
 							  KokonutUserService kokonutUserService, KokonutDormantService kokonutDormantService, CompanyService companyService,
 							  HistoryService historyService, KokonutRemoveService kokonutRemoveService, CompanyTableRepository companyTableRepository) {
 		this.passwordEncoder = passwordEncoder;
 		this.adminRepository = adminRepository;
 		this.companyRepository = companyRepository;
+		this.googleOTP = googleOTP;
 		this.excelService = excelService;
 		this.kokonutUserService = kokonutUserService;
 		this.kokonutDormantService = kokonutDormantService;
@@ -1521,8 +1525,13 @@ public class DynamicUserService {
 		return ResponseEntity.ok(res.success(data));
 	}
 
+
+
+
+
+
 	// 테이블의 컬럼조회
-	public ResponseEntity<Map<String, Object>> tableColumnCall(String tableName, JwtFilterDto jwtFilterDto) {
+	public ResponseEntity<Map<String, Object>> tableColumnCall(String tableName) {
 		log.info("tableColumnCall 호출");
 
 		AjaxResponse res = new AjaxResponse();
@@ -1563,46 +1572,8 @@ public class DynamicUserService {
 		return ResponseEntity.ok(res.success(data));
 	}
 
-	// 테이블의 컬럼 목록보내주는 함수
-	public List<KokonutUserFieldListDto> tableColumnList(String tableName) {
-		log.info("tableColumnList 호출");
-
-		List<KokonutUserFieldDto> kokonutUserFieldDtos = kokonutUserService.getUserColumns(tableName);
-		log.info("kokonutUserFieldDtos : "+kokonutUserFieldDtos);
-
-		List<KokonutUserFieldListDto> kokonutUserFieldListDtos = new ArrayList<>();
-		KokonutUserFieldListDto kokonutUserFieldListDto;
-		for (KokonutUserFieldDto kokonutUserFieldDto : kokonutUserFieldDtos) {
-			kokonutUserFieldListDto = new KokonutUserFieldListDto();
-			String field = kokonutUserFieldDto.getField();
-			if(!field.contains("kokonut_")) {
-				String comment = kokonutUserFieldDto.getComment();
-				if (comment != null) {
-					String[] commentText = comment.split(",");
-
-					if(commentText.length == 5) {
-						kokonutUserFieldListDto.setFieldName(field);
-
-						if (commentText[1].equals("암호화")) {
-							kokonutUserFieldListDto.setFieldSecrity(1);
-						} else {
-							kokonutUserFieldListDto.setFieldSecrity(0);
-						}
-
-						kokonutUserFieldListDto.setFieldComment(commentText[0]);
-						kokonutUserFieldListDto.setFieldCategory(commentText[3]);
-						kokonutUserFieldListDto.setFieldColor(commentText[4]);
-					}
-				}
-				kokonutUserFieldListDtos.add(kokonutUserFieldListDto);
-			}
-		}
-
-		return kokonutUserFieldListDtos;
-	}
-
-
 	// 컬럼추가 버튼(오른쪽에 추가)
+	@Transactional
 	public ResponseEntity<Map<String, Object>> tableColumnAdd(KokonutColumnAddDto kokonutColumnAddDto, JwtFilterDto jwtFilterDto) {
 		log.info("tableColumnCall 호출");
 
@@ -1664,11 +1635,33 @@ public class DynamicUserService {
 		}
 
 
-
-
-
-
 		return ResponseEntity.ok(res.success(data));
 	}
 
+
+	// 테이블에 추가된 컬럼을 삭제한다.
+	@Transactional
+	public ResponseEntity<Map<String, Object>> tableColumnDelete(KokonutColumnDeleteDto kokonutColumnDeleteDto, JwtFilterDto jwtFilterDto) {
+		log.info("tableColumnDelete 호출");
+
+		AjaxResponse res = new AjaxResponse();
+		HashMap<String, Object> data = new HashMap<>();
+
+		AdminOtpKeyDto adminOtpKeyDto = adminRepository.findByOtpKey(jwtFilterDto.getEmail());
+		String otpValue = kokonutColumnDeleteDto.getOtpValue();
+
+		boolean auth = googleOTP.checkCode(otpValue, adminOtpKeyDto.getKnOtpKey());
+		if (!auth) {
+			log.error("입력된 구글 OTP 값이 일치하지 않습니다. 확인해주세요.");
+			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO012.getCode(), ResponseErrorCode.KO012.getDesc()));
+		}
+
+		String tableName = kokonutColumnDeleteDto.getTableName();
+		for(int i=0; i<kokonutColumnDeleteDto.getFieldNames().size(); i++) {
+			log.info("삭제할 필드명 : "+kokonutColumnDeleteDto.getFieldNames().get(i));
+			kokonutUserService.alterDropColumnUserTableQuery(tableName, kokonutColumnDeleteDto.getFieldNames().get(i));
+		}
+
+		return ResponseEntity.ok(res.success(data));
+	}
 }

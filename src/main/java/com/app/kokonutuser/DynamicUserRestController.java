@@ -2,12 +2,10 @@ package com.app.kokonutuser;
 
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import com.app.kokonut.auth.jwt.SecurityUtil;
-import com.app.kokonutuser.dtos.KokonutColumnAddDto;
-import com.app.kokonutuser.dtos.KokonutColumSaveDto;
-import com.app.kokonutuser.dtos.KokonutColumUpdateDto;
-import com.app.kokonutuser.dtos.KokonutUserSearchDto;
+import com.app.kokonutuser.dtos.*;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -70,9 +68,8 @@ public class DynamicUserRestController {
 	@ApiImplicitParams({
 			@ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
 	})
-	public ResponseEntity<Map<String,Object>> tableColumnCall(@RequestParam(name="tableName", defaultValue = "") String tableName, HttpServletRequest request) {
-		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwtOrApiKey(request);
-		return dynamicUserService.tableColumnCall(tableName, jwtFilterDto);
+	public ResponseEntity<Map<String,Object>> tableColumnCall(@RequestParam(name="tableName", defaultValue = "") String tableName) {
+		return dynamicUserService.tableColumnCall(tableName);
 	}
 
 	// 컬럼추가 버튼(오른쪽에 추가)
@@ -80,11 +77,21 @@ public class DynamicUserRestController {
 	@ApiImplicitParams({
 			@ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
 	})
-	public ResponseEntity<Map<String, Object>> tableColumnAdd(@RequestBody KokonutColumnAddDto kokonutColumnAddDto, HttpServletRequest request) {
-		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwtOrApiKey(request);
+	public ResponseEntity<Map<String, Object>> tableColumnAdd(@RequestBody KokonutColumnAddDto kokonutColumnAddDto) {
+		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
 		return dynamicUserService.tableColumnAdd(kokonutColumnAddDto, jwtFilterDto);
 	}
 
+	@ApiOperation(value="테이블에 추가된 컬럼을 삭제한다.", notes="" +
+			"1. 삭제할 항목을 받은 리스트값과 삭제할 테이블과 otp값을 받는다." +
+			"2. OTP값을 검증한다." +
+			"3. 받은 테이블과 데이터를 삭제(drop)한다.")
+	@PostMapping(value = "/tableColumnDelete")
+	@ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+	public ResponseEntity<Map<String,Object>> tableColumnDelete(@RequestBody KokonutColumnDeleteDto kokonutColumnDeleteDto) {
+		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+		return dynamicUserService.tableColumnDelete(kokonutColumnDeleteDto, jwtFilterDto);
+	}
 
 
 
