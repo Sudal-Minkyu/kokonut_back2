@@ -114,17 +114,14 @@ public class PolicyService {
 
         log.info("policy : "+policy);
 
-//        policyRepository.save(policy);
-
-
+        Policy policySave = policyRepository.save(policy);
 
         historyService.updateHistory(activityHistoryId,
                 companyCode+" - "+activityCode.getDesc()+" 첫번째 뎁스 시도 이력", "", 1);
 
-
+        data.put("saveId",policySave.getPiId());
 
         return ResponseEntity.ok(res.success(data));
-
     }
 
 
