@@ -17,7 +17,7 @@ public class CategoryItemListDto {
 
     private String cddName;
 
-    private String cddSecurity;
+    private Integer cddSecurity;
 
     private String cddSubName;
 

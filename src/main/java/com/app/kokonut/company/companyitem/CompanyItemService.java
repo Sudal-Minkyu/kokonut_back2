@@ -172,6 +172,11 @@ public class CompanyItemService {
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
 
+        if(ctDesignation.equals("")) {
+            log.error("추가할 테이블명을 입력해주세요.");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO088.getCode(), ResponseErrorCode.KO088.getDesc()));
+        }
+
         String email = jwtFilterDto.getEmail();
 
         AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);

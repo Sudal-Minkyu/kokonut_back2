@@ -17,6 +17,6 @@ public class CompanyItemListDto {
 
     private String ciName;
 
-    private String ciSecurity;
+    private Integer ciSecurity;
 
 }

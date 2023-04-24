@@ -32,7 +32,7 @@ public class CategoryItem {
 
     @ApiModelProperty("암호화여부 -> 0: 비암호화, 1 : 암호화")
     @Column(name = "cdd_security")
-    private String cddSecurity;
+    private Integer cddSecurity;
 
     @ApiModelProperty("뒤에 표시될 이름")
     @Column(name = "cdd_sub_name")
