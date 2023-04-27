@@ -3,3 +3,9 @@ os: linux
 files:
   - source:  /
     destination: /home/ssm-user/build/
+
+permissions:
+  - object: /home/ssm-user/build/
+    pattern: "**"
+    owner: ssm-user
+    group: ssm-user
