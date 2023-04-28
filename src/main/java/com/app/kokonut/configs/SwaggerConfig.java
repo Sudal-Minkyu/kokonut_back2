@@ -57,12 +57,12 @@ public class SwaggerConfig {
     @Bean
     public Docket api3() {
         final ApiInfo apiInfo = new ApiInfoBuilder().title("코코넛 API")
-                .description("<h3>코코넛 - ApiKey 또는 JWT Token 둘중 하나는 보유시 호출 가능한 RestAPI</h3>")
+                .description("<h3>코코넛 - ApiKey 보유시 호출 가능한 RestAPI</h3>")
                 .contact(new Contact("Kokonut", "https://kokonut.me", "contact@kokonut.me"))
                 .version("1.0").build();
 
         return new Docket(DocumentationType.SWAGGER_2)
-                .groupName("3. ApiKey 또는 JWT Token 둘중 하나는 필요")
+                .groupName("3. ApiKey 필요")
                 .apiInfo(apiInfo)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.app"))

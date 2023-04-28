@@ -28,6 +28,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
+    @Value("${kokonut.front.server.domain}")
+    public String frontServerDomainIp;
+
     @Value("${kokonut.aws.s3.access}")
     private String AWSS3ACCESSKEY;
 
@@ -61,13 +64,13 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry
-            .addMapping("/*/api/**")
-            .allowedOriginPatterns("http://localhost:5173")
-            .allowedHeaders("Authorization", "Content-type", "ApiKey")
-            .exposedHeaders("Authorization")
-            .allowedMethods(HttpMethod.GET.name(), HttpMethod.POST.name())
-            .allowCredentials(true)
-            .maxAge(900); // 타임아웃 15분으로 설정
+                .addMapping("/*/api/**")
+                .allowedOriginPatterns("http://"+frontServerDomainIp+":5173")
+                .allowedHeaders("Authorization", "Content-type", "ApiKey")
+                .exposedHeaders("Authorization")
+                .allowedMethods(HttpMethod.GET.name(), HttpMethod.POST.name())
+                .allowCredentials(true)
+                .maxAge(900); // 타임아웃 15분으로 설정
     }
 
     @Bean

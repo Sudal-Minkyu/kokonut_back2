@@ -64,6 +64,8 @@ public enum ActivityCode {
     AC_41("AC_41", "1:1 문의등록하기"), // 사용
 
     AC_42("AC_42", "추가카테고리의 항목 추가"), // 사용
+
+    AC_43("AC_43", "개인정보 처리방침 작성중인 글삭제"),
     ;
     
     private final String code;

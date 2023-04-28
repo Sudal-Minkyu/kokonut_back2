@@ -43,6 +43,28 @@ public class AjaxResponse {
         return this.res;
     }
 
+
+    // API용 호출이 성공할시 해당함수 사용
+    public Map<String, Object> apisuccess(HashMap<String,Object> response) {
+        res.clear();
+        res.put("response",response);
+        res.put("status",200);
+        res.put("timestamp", new Timestamp(System.currentTimeMillis()));
+        res.put("message", "SUCCESS");
+        return this.res;
+    }
+
+    // API용 호출이 실패할시 해당함수 사용
+    public Map<String, Object> apifail(String err_code,String err_msg) {
+        res.clear();
+        res.put("status",500);
+        res.put("timestamp", new Timestamp(System.currentTimeMillis()));
+        res.put("message", "FAIL");
+        res.put("err_code", err_code);
+        res.put("err_msg", err_msg);
+        return this.res;
+    }
+
     // Pages 형태의 조회 API 반환 함수
     // 리스트를 출력해야한다는 상황에 해당 함수사용
     public Map<String, Object> ResponseSuccessPage(HashMap<String,Object> sendData){
