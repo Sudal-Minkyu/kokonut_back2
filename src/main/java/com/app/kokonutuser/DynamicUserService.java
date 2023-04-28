@@ -1550,7 +1550,7 @@ public class DynamicUserService {
 				if (comment != null) {
 					String[] commentText = comment.split(",");
 
-					if(commentText.length == 5) {
+					if(commentText.length == 6) {
 						kokonutUserFieldListDto.setFieldName(field);
 
 						if (commentText[1].equals("암호화")) {
@@ -1562,6 +1562,7 @@ public class DynamicUserService {
 						kokonutUserFieldListDto.setFieldComment(commentText[0]);
 						kokonutUserFieldListDto.setFieldCategory(commentText[3]);
 						kokonutUserFieldListDto.setFieldColor(commentText[4]);
+						kokonutUserFieldListDto.setFieldCode(commentText[5]);
 					}
 				}
 				kokonutUserFieldListDtos.add(kokonutUserFieldListDto);
@@ -1618,7 +1619,8 @@ public class DynamicUserService {
 				comment.append(kokonutAddColumnListDto.getCategoryName());
 				comment.append(",");
 				comment.append(kokonutAddColumnListDto.getTextColor());
-
+				comment.append(",");
+				comment.append(optionalCompanyTable.get().getCtTableCount()).append("_").append(tableAddColumnCount);
 				kokonutUserService.alterAddColumnTableQuery(
 						tableName, tableName+"_"+tableAddColumnCount, "VARCHAR", 256, true, "", String.valueOf(comment)
 				);

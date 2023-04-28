@@ -6,11 +6,11 @@ import org.springframework.stereotype.Repository;
 
 /**
  * @author Woody
- * Date : 2023-04-21
+ * Date : 2023-04-26
  * Time :
  * Remark :
  */
 @Repository
-public interface PolicyThirdOverseasRepository extends JpaRepository<PolicyThirdOverseas, Long>, JpaSpecificationExecutor<PolicyThirdOverseas> {
+public interface PolicyThirdOverseasRepository extends JpaRepository<PolicyThirdOverseas, Long>, JpaSpecificationExecutor<PolicyThirdOverseas>, PolicyThirdOverseasRepositoryCustom {
 
 }

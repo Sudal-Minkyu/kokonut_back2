@@ -1,4 +1,4 @@
-package com.app.kokonut.privacy.policy.policycollection;
+package com.app.kokonut.privacy.policy.policyserviceauto;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -9,33 +9,37 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@EqualsAndHashCode(of="piscId")
+@EqualsAndHashCode(of="pisaId")
 @Data
 @NoArgsConstructor
-@Table(name="kn_privacy_policy_info_service_collection")
-public class PolicyCollection {
+@Table(name="kn_privacy_policy_info_service_auto")
+public class PolicyServiceAuto {
 
     @Id
     @ApiModelProperty("주키")
-    @Column(name = "pisc_id", nullable = false)
+    @Column(name = "pisa_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long piscId;
+    private Long pisaId;
 
     @ApiModelProperty("개인정보처리방침 ID")
     @Column(name = "pi_id")
     private Long piId;
 
-    @ApiModelProperty("서비스 가입시 처리목적")
-    @Column(name = "pisc_purpose")
-    private String piscPurpose;
+    @ApiModelProperty("처리목적")
+    @Column(name = "pisa_purpose")
+    private String pisaPurpose;
 
     @ApiModelProperty("수집항목")
-    @Column(name = "pics_info")
-    private String picsInfo;
+    @Column(name = "pisa_info")
+    private String pisaInfo;
+
+    @ApiModelProperty("수집방법")
+    @Column(name = "pisa_methodology")
+    private String pisaMethodology;
 
     @ApiModelProperty("처리및보유기간")
-    @Column(name = "pics_period")
-    private String picsPeriod;
+    @Column(name = "pisa_period")
+    private String pisaPeriod;
 
     @ApiModelProperty("등록한 이메일")
     @Column(name = "insert_email", nullable = false)

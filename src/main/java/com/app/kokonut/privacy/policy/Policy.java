@@ -39,20 +39,36 @@ public class Policy {
     private String piHeader;
 
     @ApiModelProperty("인터넷접속로그 여부 0: 미선택, 1: 선택")
-    @Column(name = "pi_internet_log")
-    private Integer piInternetLog;
+    @Column(name = "pi_internet_chose")
+    private Integer piInternetChose;
 
     @ApiModelProperty("계약또는청약철회 여부 0: 미선택, 1: 선택")
-    @Column(name = "pi_contract_log")
-    private Integer piContractLog;
+    @Column(name = "pi_contract_chose")
+    private Integer piContractChose;
 
     @ApiModelProperty("계약또는청약철회 여부 0: 미선택, 1: 선택")
-    @Column(name = "pi_pay_log")
-    private Integer piPayLog;
+    @Column(name = "pi_pay_chose")
+    private Integer piPayChose;
 
     @ApiModelProperty("소피자의 불만 또는 분쟁처리 여부: 0: 미선택, 1: 선택")
-    @Column(name = "pi_consumer_log")
-    private Integer piConsumerLog;
+    @Column(name = "pi_consumer_chose")
+    private Integer piConsumerChose;
+
+    @ApiModelProperty("표시광고 0: 미선택, 1: 선택")
+    @Column(name = "pi_advertisement_chose")
+    private Integer piAdvertisementChose;
+
+    @ApiModelProperty("개인정보 처리업무의 국외 위탁에 관한 사항: 0: 미선택, 1: 선택")
+    @Column(name = "pi_out_chose")
+    private Integer piOutChose;
+
+    @ApiModelProperty("제3자 제공에 관한 사항: 0: 미선택, 1: 선택")
+    @Column(name = "pi_third_chose")
+    private Integer piThirdChose;
+
+    @ApiModelProperty("국외 제3자 제공에 관한 사항: 0: 미선택, 1: 선택")
+    @Column(name = "pi_third_overseas_chose")
+    private Integer piThirdOverseasChose;
 
     @ApiModelProperty("시행일자 년")
     @Column(name = "pi_year")
@@ -66,6 +82,10 @@ public class Policy {
     @Column(name = "pi_day")
     private String piDay;
 
+    @ApiModelProperty("작성단계(1,2,3,4,5,6(완료)")
+    @Column(name = "pi_stage")
+    private Integer piStage;
+
     @ApiModelProperty("작정완료 여부 0:미완료, 1:완료")
     @Column(name = "pi_autosave")
     private Integer piAutosave;
@@ -78,4 +98,11 @@ public class Policy {
     @Column(name = "insert_date", nullable = false)
     private LocalDateTime insert_date;
 
+    @ApiModelProperty("수정한 이메일")
+    @Column(name = "modify_email", nullable = false)
+    private String modify_email;
+
+    @ApiModelProperty("수정한 날짜")
+    @Column(name = "modify_date", nullable = false)
+    private LocalDateTime modify_date;
 }

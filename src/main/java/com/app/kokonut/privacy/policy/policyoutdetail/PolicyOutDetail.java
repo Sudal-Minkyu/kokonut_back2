@@ -36,11 +36,11 @@ public class PolicyOutDetail {
 
     @ApiModelProperty("위탁일시 및 방법")
     @Column(name = "piod_method")
-    private String piod_method;
+    private String piodMethod;
 
     @ApiModelProperty("책임자연락처")
     @Column(name = "piod_contact")
-    private String piod_contact;
+    private String piodContact;
 
     @ApiModelProperty("위탁하는 개인정보 항목")
     @Column(name = "piod_info")

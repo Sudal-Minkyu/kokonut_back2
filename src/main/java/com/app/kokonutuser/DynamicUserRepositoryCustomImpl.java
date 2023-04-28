@@ -122,7 +122,7 @@ public class DynamicUserRepositoryCustomImpl implements DynamicUserRepositoryCus
             searchQuery,
             (rs, rowNum) ->
                 new KokonutUserFieldInfoDto(
-                    rs.getLong("IDX"),
+                    rs.getLong("kokonut_IDX"),
                     rs.getObject(VALUE)
                 )
         );
@@ -135,7 +135,7 @@ public class DynamicUserRepositoryCustomImpl implements DynamicUserRepositoryCus
                 searchQuery,
                 (rs, rowNum) ->
                         new KokonutUserPwInfoDto(
-                                rs.getLong("IDX"),
+                                rs.getLong("kokonut_IDX"),
                                 rs.getString("PASSWORD")
                         )
         );
@@ -155,7 +155,7 @@ public class DynamicUserRepositoryCustomImpl implements DynamicUserRepositoryCus
             searchQuery,
             (rs, rowNum) ->
                 new KokonutUserListDto(
-                    rs.getLong("IDX"),
+                    rs.getLong("kokonut_IDX"),
                     rs.getString("ID"),
                     rs.getTimestamp("REGDATE"),
                     rs.getTimestamp("LAST_LOGIN_DATE")

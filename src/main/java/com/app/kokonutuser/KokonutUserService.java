@@ -751,7 +751,7 @@ public class KokonutUserService {
 	public Long passwordConfirm(String companyCode, String id, String pw) {
 		log.info("passwordConfirm 호출");
 
-		String searchQuery = "SELECT IDX, PASSWORD FROM `"+companyCode+"` WHERE `ID`='"+id+"'";
+		String searchQuery = "SELECT kokonut_IDX, PASSWORD FROM `"+companyCode+"` WHERE `ID`='"+id+"'";
 //		log.info("searchQuery : "+searchQuery);
 
 		List<KokonutUserPwInfoDto> nowpw = dynamicUserRepositoryCustom.findByNowPw(searchQuery);

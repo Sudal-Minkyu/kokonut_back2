@@ -22,4 +22,6 @@ public class KokonutUserFieldListDto {
     private String fieldCategory; // 카테고리명
 
     private String fieldColor; // 설명텍스트색상
+
+    private String fieldCode; // 코드네임
 }
