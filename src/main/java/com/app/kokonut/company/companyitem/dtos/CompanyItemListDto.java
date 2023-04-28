@@ -15,6 +15,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CompanyItemListDto {
 
+    private Long ciId;
+
     private String ciName;
 
     private Integer ciSecurity;

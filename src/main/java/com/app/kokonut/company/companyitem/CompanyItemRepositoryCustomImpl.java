@@ -33,6 +33,7 @@ public class CompanyItemRepositoryCustomImpl extends QuerydslRepositorySupport i
         JPQLQuery<CompanyItemListDto> query = from(companyItem)
                 .where(companyItem.cpCode.eq(cpCode))
                 .select(Projections.constructor(CompanyItemListDto.class,
+                        companyItem.ciId,
                         companyItem.ciName,
                         companyItem.ciSecurity
                 ));

@@ -12,5 +12,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface CompanyItemRepository extends JpaRepository<CompanyItem, Long>, JpaSpecificationExecutor<CompanyItem>, CompanyItemRepositoryCustom {
-    boolean existsByCiName(String ciName);
+    boolean existsByCiNameAndCpCode(String ciName, String companyCode);
 }

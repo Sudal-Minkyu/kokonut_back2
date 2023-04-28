@@ -22,6 +22,8 @@ public class CompanyRestController {
         this.companyItemService = companyItemService;
     }
 
+//  @@@@@@@@@@@@@@@@@@@@@@@@@ 카테고리 관련 API @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
     @ApiOperation(value="기본 카테고리 항목을 가져온다.", notes="" +
             "1. 기본으로 제공하는 카테고리를 조회한다." +
             "2. DB내에 추가된 카테고리와 해당 카테고리의 항목을 보내준다.")
@@ -46,11 +48,35 @@ public class CompanyRestController {
             "2. 해당 항목을 저정한다.")
     @PostMapping(value = "/saveItem") // -> 추가 카테고리의 항목을 추가한다.
     @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-    public ResponseEntity<Map<String,Object>> addCategoryList(@RequestParam(name="ciName", defaultValue = "") String ciName,
+    public ResponseEntity<Map<String,Object>> saveItem(@RequestParam(name="ciName", defaultValue = "") String ciName,
                                                               @RequestParam(name="ciSecurity", defaultValue = "") Integer ciSecurity) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return companyItemService.saveItem(jwtFilterDto, ciName, ciSecurity);
     }
+
+    @ApiOperation(value="추가 카테고리의 항목을 수정한다.", notes="" +
+            "1. 해당 항목의 고유ID, 항목의 이름 데이터를 받는다." +
+            "2. 해당 항목을 조회하고 존해하면 받은 이름으로 수정한다.")
+    @PostMapping(value = "/updateItem") // -> 추가 카테고리의 수정을 추가한다.
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    public ResponseEntity<Map<String,Object>> updateItem(@RequestParam(name="ciId", defaultValue = "") Long ciId,
+                                                         @RequestParam(name="ciName", defaultValue = "") String ciName) {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return companyItemService.updateItem(ciId, ciName, jwtFilterDto);
+    }
+
+    @ApiOperation(value="추가 카테고리의 항목을 삭제한다.", notes="" +
+            "1. 삭제할 항목의 고유ID 데이터를 받는다." +
+            "2. 해당 항목을 조회하여 삭제한다.")
+    @PostMapping(value = "/deleteItem") // -> 추가 카테고리의 항목을 삭제한다.
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    public ResponseEntity<Map<String,Object>> deleteItem(@RequestParam(name="ciId", defaultValue = "") Long ciId) {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return companyItemService.deleteItem(ciId, jwtFilterDto);
+    }
+
+//  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
 
     @ApiOperation(value="테이블을 추가한다.", notes="" +
             "1. 추가할 테이블명을 받는다." +

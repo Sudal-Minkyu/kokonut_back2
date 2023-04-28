@@ -116,7 +116,7 @@ public class CompanyItemService {
         return ResponseEntity.ok(res.success(data));
     }
 
-    // 항목을 추가한다.
+    // 추가 카테고리의 항목을 추가한다.
     @Transactional
     public ResponseEntity<Map<String, Object>> saveItem(JwtFilterDto jwtFilterDto, String ciName, Integer ciSecurity) {
         log.info("saveItem 호출");
@@ -136,7 +136,7 @@ public class CompanyItemService {
         ActivityCode activityCode;
         String ip = CommonUtil.clientIp();
         Long activityHistoryId;
-        if(companyItemRepository.existsByCiName(ciName)) {
+        if(companyItemRepository.existsByCiNameAndCpCode(ciName, companyCode)) {
             log.error("이미 등록되어 있는 항목입니다.");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO087.getCode(), ResponseErrorCode.KO087.getDesc()));
         } else {
@@ -157,6 +157,97 @@ public class CompanyItemService {
 
             historyService.updateHistory(activityHistoryId,
                     companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+        }
+
+        return ResponseEntity.ok(res.success(data));
+    }
+
+    // 추가 카테고리의 항목을 수정한다.
+    @Transactional
+    public ResponseEntity<Map<String, Object>> updateItem(Long ciId, String ciName, JwtFilterDto jwtFilterDto) {
+        log.info("updateItem 호출");
+
+//        log.info("ciId : "+ciId);
+//        log.info("ciName : "+ciName);
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+        String email = jwtFilterDto.getEmail();
+
+        AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+        Long adminId = adminCompanyInfoDto.getAdminId();
+        String companyCode = adminCompanyInfoDto.getCompanyCode();
+
+        ActivityCode activityCode;
+        String ip = CommonUtil.clientIp();
+        Long activityHistoryId;
+        if(companyItemRepository.existsByCiNameAndCpCode(ciName, companyCode)) {
+            log.error("이미 등록되어 있는 항목입니다.");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO087.getCode(), ResponseErrorCode.KO087.getDesc()));
+        } else {
+            Optional<CompanyItem> optionalCompanyItem = companyItemRepository.findById(ciId);
+            if(optionalCompanyItem.isPresent()) {
+                // 추가카테고리의 항목 수정 코드
+                activityCode = ActivityCode.AC_44;
+
+                // 활동이력 저장 -> 비정상 모드
+                activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
+                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
+
+                optionalCompanyItem.get().setCiName(ciName);
+                optionalCompanyItem.get().setModify_email(jwtFilterDto.getEmail());
+                optionalCompanyItem.get().setModify_date(LocalDateTime.now());
+                companyItemRepository.save(optionalCompanyItem.get());
+
+                historyService.updateHistory(activityHistoryId,
+                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+            } else {
+                log.error("존재하지 않은 항목입니다. 새로고침이후 진행해주세요.");
+                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO091.getCode(), ResponseErrorCode.KO091.getDesc()));
+            }
+
+        }
+
+        return ResponseEntity.ok(res.success(data));
+    }
+
+    // 추가 카테고리의 항목을 삭제한다.
+    @Transactional
+    public ResponseEntity<Map<String, Object>> deleteItem(Long ciId, JwtFilterDto jwtFilterDto) {
+        log.info("deleteItem 호출");
+
+        log.info("ciId : "+ciId);
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+        String email = jwtFilterDto.getEmail();
+
+        AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+        Long adminId = adminCompanyInfoDto.getAdminId();
+        String companyCode = adminCompanyInfoDto.getCompanyCode();
+
+        ActivityCode activityCode;
+        String ip = CommonUtil.clientIp();
+        Long activityHistoryId;
+
+        Optional<CompanyItem> optionalCompanyItem = companyItemRepository.findById(ciId);
+        if(optionalCompanyItem.isPresent()) {
+            // 추가카테고리의 항목 삭제 코드
+            activityCode = ActivityCode.AC_45;
+
+            // 활동이력 저장 -> 비정상 모드
+            activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
+                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
+
+            companyItemRepository.delete(optionalCompanyItem.get());
+
+            historyService.updateHistory(activityHistoryId,
+                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+        } else {
+            log.error("존재하지 않은 항목입니다. 새로고침이후 진행해주세요.");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO091.getCode(), ResponseErrorCode.KO091.getDesc()));
         }
 
         return ResponseEntity.ok(res.success(data));
