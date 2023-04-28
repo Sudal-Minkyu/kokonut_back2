@@ -63,9 +63,10 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
+        log.info("허용 프론트IP : "+frontServerDomainIp);
         registry
                 .addMapping("/*/api/**")
-                .allowedOriginPatterns("http://"+frontServerDomainIp+":5173")
+                .allowedOriginPatterns(frontServerDomainIp)
                 .allowedHeaders("Authorization", "Content-type", "ApiKey")
                 .exposedHeaders("Authorization")
                 .allowedMethods(HttpMethod.GET.name(), HttpMethod.POST.name())
