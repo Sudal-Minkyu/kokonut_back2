@@ -32,7 +32,7 @@ public class Policy {
 
     @ApiModelProperty("개정일")
     @Column(name = "pi_date")
-    private LocalDateTime piDate;
+    private String piDate;
 
     @ApiModelProperty("머리말 기업명")
     @Column(name = "pi_header")

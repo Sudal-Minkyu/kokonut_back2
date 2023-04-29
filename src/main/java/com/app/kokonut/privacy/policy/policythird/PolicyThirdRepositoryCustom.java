@@ -14,4 +14,6 @@ public interface PolicyThirdRepositoryCustom {
 
     List<PolicyThirdSaveInfoListDto> findByPolicyThirdList(Long piId);
 
+    void findByPolicyThirdDelete(Long piId);
+
 }

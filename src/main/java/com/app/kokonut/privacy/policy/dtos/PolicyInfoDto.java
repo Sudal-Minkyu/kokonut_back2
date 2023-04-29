@@ -20,15 +20,15 @@ public class PolicyInfoDto {
 
     private Double piVersion; // 개정본 버전
 
-    private LocalDateTime piDate; // 개정일
+    private String piDate; // 개정일
 
     private String piHeader; // 머리말 기업명
 
-    public String getPiDate() {
-        if(piDate != null) {
-            return DateTimeFormatter.ofPattern("yyyy. MM. dd").format(piDate);
-        } else {
-            return "";
-        }
-    }
+//    public String getPiDate() {
+//        if(piDate != null) {
+//            return DateTimeFormatter.ofPattern("yyyy. MM. dd").format(piDate);
+//        } else {
+//            return "";
+//        }
+//    }
 }

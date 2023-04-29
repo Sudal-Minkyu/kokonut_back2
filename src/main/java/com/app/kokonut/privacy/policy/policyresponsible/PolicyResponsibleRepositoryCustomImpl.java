@@ -7,6 +7,8 @@ import org.qlrm.mapper.JpaResultMapper;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import java.util.List;
 
 /**
@@ -42,5 +44,18 @@ public class PolicyResponsibleRepositoryCustomImpl extends QuerydslRepositorySup
         return query.fetch();
     }
 
+    public void findByPolicyResponsibleDelete(Long piId) {
+        EntityManager em = getEntityManager();
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("DELETE FROM kn_privacy_policy_info_responsible \n");
+        sb.append("WHERE pi_id = ?1 \n");
+
+        Query query = em.createNativeQuery(sb.toString());
+        query.setParameter(1, piId);
+
+        query.executeUpdate();
+
+    }
 
 }

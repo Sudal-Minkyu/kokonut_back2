@@ -14,4 +14,6 @@ public interface PolicyResponsibleRepositoryCustom {
 
     List<PolicyResponsibleSaveInfoListDto> findByPolicyResponsibleList(Long piId);
 
+    void findByPolicyResponsibleDelete(Long piId);
+
 }

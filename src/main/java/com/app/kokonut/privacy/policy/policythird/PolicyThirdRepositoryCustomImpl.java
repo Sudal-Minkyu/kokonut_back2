@@ -11,6 +11,8 @@ import org.qlrm.mapper.JpaResultMapper;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import java.util.List;
 
 /**
@@ -44,6 +46,20 @@ public class PolicyThirdRepositoryCustomImpl extends QuerydslRepositorySupport i
             ));
 
         return query.fetch();
+    }
+
+    public void findByPolicyThirdDelete(Long piId) {
+        EntityManager em = getEntityManager();
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("DELETE FROM kn_privacy_policy_info_third \n");
+        sb.append("WHERE pi_id = ?1 \n");
+
+        Query query = em.createNativeQuery(sb.toString());
+        query.setParameter(1, piId);
+
+        query.executeUpdate();
+
     }
 
 

@@ -18,6 +18,8 @@ public class PolicySaveSixthDto {
 
     private Long piId; // 개인정보처리방침 ID
 
+    private Integer policyResponsibleYn; // 0: 미포함, 1: 포함
+
     private List<PolicyResponsibleSaveDto> policyResponsibleSaveDtoList; // 책임자 저장 리스트값
 
     private List<Long> policyResponsibleDeleteIdList; // 책임자 삭제 Id 리스트값

@@ -33,9 +33,10 @@ import com.app.kokonut.privacy.policy.policyserviceauto.PolicyServiceAutoReposit
 import com.app.kokonut.privacy.policy.policyserviceauto.dtos.PolicyServiceAutoSaveDto;
 import com.app.kokonut.privacy.policy.policythird.PolicyThird;
 import com.app.kokonut.privacy.policy.policythird.PolicyThirdRepository;
+import com.app.kokonut.privacy.policy.policythird.dtos.PolicyThirdSaveDto;
 import com.app.kokonut.privacy.policy.policythirdoverseas.PolicyThirdOverseas;
 import com.app.kokonut.privacy.policy.policythirdoverseas.PolicyThirdOverseasRepository;
-import io.swagger.annotations.ApiModelProperty;
+import com.app.kokonut.privacy.policy.policythirdoverseas.dtos.PolicyThirdOverseasSaveDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -43,7 +44,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.Column;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -185,7 +185,7 @@ public class PolicyService {
 
                 // 활동이력 저장 -> 비정상 모드
                 activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
+                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
 
                 if(piStage < 6) {
 
@@ -326,12 +326,12 @@ public class PolicyService {
 
         // 활동이력 저장 -> 비정상 모드
         activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                companyCode+" - "+activityCode.getDesc()+" 첫번째 뎁스 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
+                companyCode+" - "+activityCode.getDesc()+" 첫번째 뎁스 시도 이력", "", ip, 0, email);
 
-        String getPiDate = policySaveFirstDto.getPiDate()+" 00:00:00.000";
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy. MM. dd HH:mm:ss.SSS");
-        LocalDateTime piDate = LocalDateTime.parse(getPiDate, formatter);
-        log.info("piDate : "+piDate);
+//        String getPiDate = policySaveFirstDto.getPiDate()+" 00:00:00.000";
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy. MM. dd HH:mm:ss.SSS");
+//        LocalDateTime piDate = LocalDateTime.parse(getPiDate, formatter);
+//        log.info("piDate : "+piDate);
 
         Policy policySave = new Policy();
         if(policySaveFirstDto.getPiId() != 0) {
@@ -339,7 +339,7 @@ public class PolicyService {
             if(optionalPolicy.isPresent()) {
                 optionalPolicy.get().setPiVersion(policySaveFirstDto.getPiVersion());
                 optionalPolicy.get().setPiHeader(policySaveFirstDto.getPiHeader());
-                optionalPolicy.get().setPiDate(piDate);
+                optionalPolicy.get().setPiDate(policySaveFirstDto.getPiDate());
                 optionalPolicy.get().setModify_email(email);
                 optionalPolicy.get().setModify_date(LocalDateTime.now());
 
@@ -349,7 +349,7 @@ public class PolicyService {
             Policy policy = new Policy();
             policy.setCpCode(companyCode);
             policy.setPiVersion(policySaveFirstDto.getPiVersion());
-            policy.setPiDate(piDate);
+            policy.setPiDate(policySaveFirstDto.getPiDate());
             policy.setPiHeader(policySaveFirstDto.getPiHeader());
             policy.setPiStage(1);
             policy.setPiAutosave(0);
@@ -398,7 +398,7 @@ public class PolicyService {
         if(optionalPolicy.isPresent()) {
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 두번째 뎁스 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
+                    companyCode+" - "+activityCode.getDesc()+" 두번째 뎁스 시도 이력", "", ip, 0, email);
 
             List<PolicyPurpose> policyPurposeSaveList = new ArrayList<>();
             PolicyPurpose policyPurpose;
@@ -487,7 +487,7 @@ public class PolicyService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 세번째 뎁스 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
+                    companyCode+" - "+activityCode.getDesc()+" 세번째 뎁스 시도 이력", "", ip, 0, email);
 
             List<PolicyBefore> policyBeforeSaveList = new ArrayList<>();
             List<PolicyAfter> policyAfterSaveList = new ArrayList<>();
@@ -691,7 +691,7 @@ public class PolicyService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 네번째 뎁스 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
+                    companyCode+" - "+activityCode.getDesc()+" 네번째 뎁스 시도 이력", "", ip, 0, email);
 
             List<PolicyOut> policyOutSaveList = new ArrayList<>();
             List<PolicyOutDetail> policyOutDetailSaveList = new ArrayList<>();
@@ -837,116 +837,126 @@ public class PolicyService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 네번째 뎁스 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
+                    companyCode+" - "+activityCode.getDesc()+" 네번째 뎁스 시도 이력", "", ip, 0, email);
+
+            int thirdState = 0;
+            int thirdOverseasState = 0;
 
             List<PolicyThird> policyThirdSaveList = new ArrayList<>();
-            List<PolicyThirdOverseas> PolicyThirdOverseasSaveList = new ArrayList<>();
-
             PolicyThird policyThird;
+
+            List<PolicyThird> policyThirdDeleteList = new ArrayList<>();
+            List<Long> thirdDeleteIdList = policySaveFifthDto.getPolicyThirdDeleteIdList();
+
+            List<PolicyThirdOverseas> policyThirdOverseasSaveList = new ArrayList<>();
             PolicyThirdOverseas policyThirdOverseas;
 
-//            policyThirdRepository
-//            policyThirdOverseasRepository
+            List<PolicyThirdOverseas> policyThirdOverseasDeleteList = new ArrayList<>();
+            List<Long> thirdOverseasDeleteIdList = policySaveFifthDto.getPolicyThirdOverseasDeleteIdList();
 
-            if(policySaveFifthDto.getPolicyThirdDeleteIdList().size() != 0) {
+
+            if(policySaveFifthDto.getPolicyThirdYn() == 0 && optionalPolicy.get().getPiThirdChose() == 1) {
+                // 미포함인데 이전에 포함한 여부가 존재하면 삭제하기
+                policyThirdRepository.findByPolicyThirdDelete(policySaveFifthDto.getPiId());
+            } else if(policySaveFifthDto.getPolicyThirdYn() == 1) {
+                // 저장 및 수정 및 삭제 로직 수행
+                for(PolicyThirdSaveDto policyThirdSaveDto : policySaveFifthDto.getPolicyThirdSaveDtoList()) {
+                    if(policyThirdSaveDto.getPitId() != 0) {
+                        Optional<PolicyThird> optionalPolicyThird = policyThirdRepository.findById(policyThirdSaveDto.getPitId());
+
+                        if(optionalPolicyThird.isPresent()) {
+                            optionalPolicyThird.get().setPitRecipient(policyThirdSaveDto.getPitRecipient());
+                            optionalPolicyThird.get().setPitPurpose(policyThirdSaveDto.getPitPurpose());
+                            optionalPolicyThird.get().setPitInfo(policyThirdSaveDto.getPitInfo());
+                            optionalPolicyThird.get().setPitPeriod(policyThirdSaveDto.getPitPeriod());
+                            policyThirdSaveList.add(optionalPolicyThird.get());
+                        } else {
+                            log.error("수정 privacyPolicyFifthSave 존재하지 않은 항목");
+                        }
+                    } else {
+                        policyThird = new PolicyThird();
+                        policyThird.setPiId(policySaveFifthDto.getPiId());
+                        policyThird.setPitRecipient(policyThirdSaveDto.getPitRecipient());
+                        policyThird.setPitPurpose(policyThirdSaveDto.getPitPurpose());
+                        policyThird.setPitInfo(policyThirdSaveDto.getPitInfo());
+                        policyThird.setPitPeriod(policyThirdSaveDto.getPitPeriod());
+                        policyThird.setInsert_email(email);
+                        policyThird.setInsert_date(LocalDateTime.now());
+                        policyThirdSaveList.add(policyThird);
+                    }
+                }
+
+                for(Long pitId : thirdDeleteIdList) {
+                    Optional<PolicyThird> optionalPolicyThird = policyThirdRepository.findById(pitId);
+                    if(optionalPolicyThird.isPresent()) {
+                        policyThirdDeleteList.add(optionalPolicyThird.get());
+                    } else {
+                        log.error("삭제 privacyPolicyFifthSave 존재하지 않은 항목");
+                    }
+                }
+
+                thirdState = 1;
 
             }
 
-//            for(PolicyOutSaveDto policyOutSaveDto : policySaveFourthDto.getPolicyOutSaveDtoList()) {
-//                if(policyOutSaveDto.getPioId() != 0) {
-//                    Optional<PolicyOut> optionalPolicyOut = policyOutRepository.findById(policyOutSaveDto.getPioId());
-//                    if(optionalPolicyOut.isPresent()) {
-//                        optionalPolicyOut.get().setPioOutsourcingCompany(policyOutSaveDto.getPioOutsourcingCompany());
-//                        optionalPolicyOut.get().setPioChose(policyOutSaveDto.getPioChose());
-//                        optionalPolicyOut.get().setPioConsignmentCompany(policyOutSaveDto.getPioConsignmentCompany());
-//                        optionalPolicyOut.get().setPioPeriod(policyOutSaveDto.getPioPeriod());
-//                        policyOutSaveList.add(optionalPolicyOut.get());
-//                    } else {
-//                        log.error("수정 privacyPolicyFourthSave 존재하지 않은 항목");
-//                    }
-//                } else {
-//                    policyOut = new PolicyOut();
-//                    policyOut.setPiId(policySaveFourthDto.getPiId());
-//                    policyOut.setPioOutsourcingCompany(policyOutSaveDto.getPioOutsourcingCompany());
-//                    policyOut.setPioChose(policyOutSaveDto.getPioChose());
-//                    policyOut.setPioConsignmentCompany(policyOutSaveDto.getPioConsignmentCompany());
-//                    policyOut.setPioPeriod(policyOutSaveDto.getPioPeriod());
-//                    policyOut.setInsert_email(email);
-//                    policyOut.setInsert_date(LocalDateTime.now());
-//                    policyOutSaveList.add(policyOut);
-//                }
-//            }
-//
-//            List<PolicyOut> policyOutDeleteList = new ArrayList<>();
-//            List<Long> outDeleteIdList = policySaveFourthDto.getPolicyOutDeleteIdList();
-//            for(Long pioId : outDeleteIdList) {
-//                Optional<PolicyOut> optionalPolicyOut = policyOutRepository.findById(pioId);
-//                if(optionalPolicyOut.isPresent()) {
-//                    policyOutDeleteList.add(optionalPolicyOut.get());
-//                } else {
-//                    log.error("삭제 privacyPolicyFourthSave 존재하지 않은 항목");
-//                }
-//            }
+            if(policySaveFifthDto.getPolicyThirdOverseasYn() == 0 && optionalPolicy.get().getPiThirdOverseasChose() == 1) {
+                // 미포함인데 이전에 포함한 여부가 존재하면 삭제하기
+                policyThirdOverseasRepository.findByPolicyThirdOverseasDelete(policySaveFifthDto.getPiId());
+            } else if(policySaveFifthDto.getPolicyThirdOverseasYn() == 1) {
+                // 저장 및 수정 및 삭제 로직 수행
+                for(PolicyThirdOverseasSaveDto policyThirdOverseasSaveDto : policySaveFifthDto.getPolicyThirdOverseasSaveDtoList()) {
+                    if(policyThirdOverseasSaveDto.getPitoId() != 0) {
+                        Optional<PolicyThirdOverseas> optionalPolicyThirdOverseas = policyThirdOverseasRepository.findById(policyThirdOverseasSaveDto.getPitoId());
 
-//            optionalPolicy.get().setPiStage(4);
-//            optionalPolicy.get().setModify_email(email);
-//            optionalPolicy.get().setModify_date(LocalDateTime.now());
-//
-//            // 작성중인 개인정보처리방침 업데이트
-//            policyRepository.save(optionalPolicy.get());
-//
-//            // 처리업무의 위탁에 관한사항 CUD
-//            policyOutRepository.saveAll(policyOutSaveList);
-//            policyOutRepository.deleteAll(policyOutDeleteList);
-//
-//            // 처리업무의 국외 위탁에 관한사항 CUD -> 포함 할 경우만 저장
-//            if(policySaveFourthDto.getPolicyOutDetailYn() == 1) {
-//                for(PolicyOutDetailSaveDto policyOutDetailSaveDto : policySaveFourthDto.getPolicyOutDetailSaveDtoList()) {
-//                    if(policyOutDetailSaveDto.getPiodId() != 0) {
-//                        Optional<PolicyOutDetail> optionalPolicyOutDetail = policyOutDetailRepository.findById(policyOutDetailSaveDto.getPiodId());
-//                        if(optionalPolicyOutDetail.isPresent()) {
-//                            optionalPolicyOutDetail.get().setPiodCompany(policyOutDetailSaveDto.getPiodCompany());
-//                            optionalPolicyOutDetail.get().setPiodLocation(policyOutDetailSaveDto.getPiodLocation());
-//                            optionalPolicyOutDetail.get().setPiodMethod(policyOutDetailSaveDto.getPiodMethod());
-//                            optionalPolicyOutDetail.get().setPiodContact(policyOutDetailSaveDto.getPiodContact());
-//                            optionalPolicyOutDetail.get().setPiodInfo(policyOutDetailSaveDto.getPiodInfo());
-//                            optionalPolicyOutDetail.get().setPiodDetail(policyOutDetailSaveDto.getPiodDetail());
-//                            optionalPolicyOutDetail.get().setPiodPeriod(policyOutDetailSaveDto.getPiodPeriod());
-//                            policyOutDetailSaveList.add(optionalPolicyOutDetail.get());
-//                        } else {
-//                            log.error("수정 privacyPolicyFourthSave 존재하지 않은 항목");
-//                        }
-//                    } else {
-//                        policyOutDetail = new PolicyOutDetail();
-//                        policyOutDetail.setPiId(policySaveFourthDto.getPiId());
-//                        policyOutDetail.setPiodCompany(policyOutDetailSaveDto.getPiodCompany());
-//                        policyOutDetail.setPiodLocation(policyOutDetailSaveDto.getPiodLocation());
-//                        policyOutDetail.setPiodMethod(policyOutDetailSaveDto.getPiodMethod());
-//                        policyOutDetail.setPiodContact(policyOutDetailSaveDto.getPiodContact());
-//                        policyOutDetail.setPiodInfo(policyOutDetailSaveDto.getPiodInfo());
-//                        policyOutDetail.setPiodDetail(policyOutDetailSaveDto.getPiodDetail());
-//                        policyOutDetail.setPiodPeriod(policyOutDetailSaveDto.getPiodPeriod());
-//                        policyOutDetail.setInsert_email(email);
-//                        policyOutDetail.setInsert_date(LocalDateTime.now());
-//                        policyOutDetailSaveList.add(policyOutDetail);
-//                    }
-//                }
-//
-//                List<PolicyOutDetail> policyOutDetailDeleteList = new ArrayList<>();
-//                List<Long> outDetailDeleteIdList = policySaveFourthDto.getPolicyOutDetailDeleteIdList();
-//                for(Long piodId : outDetailDeleteIdList) {
-//                    Optional<PolicyOutDetail> optionalPolicyOutDetail = policyOutDetailRepository.findById(piodId);
-//                    if(optionalPolicyOutDetail.isPresent()) {
-//                        policyOutDetailDeleteList.add(optionalPolicyOutDetail.get());
-//                    } else {
-//                        log.error("삭제 privacyPolicyFourthSave 존재하지 않은 항목");
-//                    }
-//                }
-//
-//                // 처리업무의 국외 위탁에 관한사항 CUD
-//                policyOutDetailRepository.saveAll(policyOutDetailSaveList);
-//                policyOutDetailRepository.deleteAll(policyOutDetailDeleteList);
-//            }
+                        if(optionalPolicyThirdOverseas.isPresent()) {
+                            optionalPolicyThirdOverseas.get().setPitoRecipient(policyThirdOverseasSaveDto.getPitoRecipient());
+                            optionalPolicyThirdOverseas.get().setPitoLocation(policyThirdOverseasSaveDto.getPitoLocation());
+                            optionalPolicyThirdOverseas.get().setPitoPurpose(policyThirdOverseasSaveDto.getPitoPurpose());
+                            optionalPolicyThirdOverseas.get().setPitoInfo(policyThirdOverseasSaveDto.getPitoInfo());
+                            optionalPolicyThirdOverseas.get().setPitoPeriod(policyThirdOverseasSaveDto.getPitoPeriod());
+                            policyThirdOverseasSaveList.add(optionalPolicyThirdOverseas.get());
+                        } else {
+                            log.error("수정 privacyPolicyFifthSave 존재하지 않은 항목");
+                        }
+                    } else {
+                        policyThirdOverseas = new PolicyThirdOverseas();
+                        policyThirdOverseas.setPiId(policySaveFifthDto.getPiId());
+                        policyThirdOverseas.setPitoRecipient(policyThirdOverseasSaveDto.getPitoRecipient());
+                        policyThirdOverseas.setPitoLocation(policyThirdOverseasSaveDto.getPitoLocation());
+                        policyThirdOverseas.setPitoPurpose(policyThirdOverseasSaveDto.getPitoPurpose());
+                        policyThirdOverseas.setPitoInfo(policyThirdOverseasSaveDto.getPitoInfo());
+                        policyThirdOverseas.setPitoPeriod(policyThirdOverseasSaveDto.getPitoPeriod());
+                        policyThirdOverseas.setInsert_email(email);
+                        policyThirdOverseas.setInsert_date(LocalDateTime.now());
+                        policyThirdOverseasSaveList.add(policyThirdOverseas);
+                    }
+                }
+
+                for(Long pitoId : thirdOverseasDeleteIdList) {
+                    Optional<PolicyThirdOverseas> optionalPolicyThirdOverseas = policyThirdOverseasRepository.findById(pitoId);
+                    if(optionalPolicyThirdOverseas.isPresent()) {
+                        policyThirdOverseasDeleteList.add(optionalPolicyThirdOverseas.get());
+                    } else {
+                        log.error("삭제 privacyPolicyFifthSave 존재하지 않은 항목");
+                    }
+                }
+
+                thirdOverseasState = 1;
+            }
+
+            if(thirdState == 1) {
+                policyThirdRepository.saveAll(policyThirdSaveList);
+                policyThirdRepository.deleteAll(policyThirdDeleteList);
+            }
+
+            if(thirdOverseasState == 1) {
+                policyThirdOverseasRepository.saveAll(policyThirdOverseasSaveList);
+                policyThirdOverseasRepository.deleteAll(policyThirdOverseasDeleteList);
+            }
+
+            optionalPolicy.get().setPiStage(5);
+            optionalPolicy.get().setModify_email(email);
+            optionalPolicy.get().setModify_date(LocalDateTime.now());
 
             historyService.updateHistory(activityHistoryId,
                     companyCode+" - "+activityCode.getDesc()+" 네번째 뎁스 시도 이력", "", 1);
@@ -990,50 +1000,65 @@ public class PolicyService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode + " - " + activityCode.getDesc() + " 여섯번째 뎁스 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
+                    companyCode + " - " + activityCode.getDesc() + " 여섯번째 뎁스 시도 이력", "", ip, 0, email);
 
+            int responsibleOverseasState = 0;
+            
             List<PolicyResponsible> policyResponsibleSaveList = new ArrayList<>();
             PolicyResponsible policyResponsible;
 
-            // 책임자 항목에 관한사항 CUD
-            for (PolicyResponsibleSaveDto policyResponsibleSaveDto : policySaveSixthDto.getPolicyResponsibleSaveDtoList()) {
-                if (policyResponsibleSaveDto.getPirId() != 0) {
-                    Optional<PolicyResponsible> optionalPolicyResponsible = policyResponsibleRepository.findById(policyResponsibleSaveDto.getPirId());
-                    if (optionalPolicyResponsible.isPresent()) {
-                        optionalPolicyResponsible.get().setPirName(policyResponsibleSaveDto.getPirName());
-                        optionalPolicyResponsible.get().setPirPosition(policyResponsibleSaveDto.getPirPosition());
-                        optionalPolicyResponsible.get().setPirEmail(policyResponsibleSaveDto.getPirEmail());
-                        optionalPolicyResponsible.get().setPirContact(policyResponsibleSaveDto.getPirContact());
-                        optionalPolicyResponsible.get().setPirDepartment(policyResponsibleSaveDto.getPirDepartment());
-                        policyResponsibleSaveList.add(optionalPolicyResponsible.get());
-                    } else {
-                        log.error("수정 privacyPolicySixthSave 존재하지 않은 항목");
-                    }
-                } else {
-                    policyResponsible = new PolicyResponsible();
-                    policyResponsible.setPiId(policySaveSixthDto.getPiId());
-                    policyResponsible.setPirName(policyResponsibleSaveDto.getPirName());
-                    policyResponsible.setPirPosition(policyResponsibleSaveDto.getPirPosition());
-                    policyResponsible.setPirEmail(policyResponsibleSaveDto.getPirEmail());
-                    policyResponsible.setPirContact(policyResponsibleSaveDto.getPirContact());
-                    policyResponsible.setPirDepartment(policyResponsibleSaveDto.getPirDepartment());
-                    policyResponsible.setInsert_email(email);
-                    policyResponsible.setInsert_date(LocalDateTime.now());
-                    policyResponsibleSaveList.add(policyResponsible);
-                }
-            }
-
             List<PolicyResponsible> policyResponsibleDeleteList = new ArrayList<>();
             List<Long> responsibleDeleteIdList = policySaveSixthDto.getPolicyResponsibleDeleteIdList();
-            for(Long pirId : responsibleDeleteIdList) {
-                Optional<PolicyResponsible> optionalPolicyResponsible = policyResponsibleRepository.findById(pirId);
-                if(optionalPolicyResponsible.isPresent()) {
-                    policyResponsibleDeleteList.add(optionalPolicyResponsible.get());
-                } else {
-                    log.error("삭제 privacyPolicySixthSave 존재하지 않은 항목");
+            
+            if(policySaveSixthDto.getPolicyResponsibleYn() == 0 && optionalPolicy.get().getPiThirdOverseasChose() == 1) {
+                // 미포함인데 이전에 포함한 여부가 존재하면 삭제하기
+                policyResponsibleRepository.findByPolicyResponsibleDelete(policySaveSixthDto.getPiId());
+            } else if(policySaveSixthDto.getPolicyResponsibleYn() == 1) {
+                // 책임자 항목에 관한사항 CUD
+                for (PolicyResponsibleSaveDto policyResponsibleSaveDto : policySaveSixthDto.getPolicyResponsibleSaveDtoList()) {
+                    if (policyResponsibleSaveDto.getPirId() != 0) {
+                        Optional<PolicyResponsible> optionalPolicyResponsible = policyResponsibleRepository.findById(policyResponsibleSaveDto.getPirId());
+                        if (optionalPolicyResponsible.isPresent()) {
+                            optionalPolicyResponsible.get().setPirName(policyResponsibleSaveDto.getPirName());
+                            optionalPolicyResponsible.get().setPirPosition(policyResponsibleSaveDto.getPirPosition());
+                            optionalPolicyResponsible.get().setPirEmail(policyResponsibleSaveDto.getPirEmail());
+                            optionalPolicyResponsible.get().setPirContact(policyResponsibleSaveDto.getPirContact());
+                            optionalPolicyResponsible.get().setPirDepartment(policyResponsibleSaveDto.getPirDepartment());
+                            policyResponsibleSaveList.add(optionalPolicyResponsible.get());
+                        } else {
+                            log.error("수정 privacyPolicySixthSave 존재하지 않은 항목");
+                        }
+                    } else {
+                        policyResponsible = new PolicyResponsible();
+                        policyResponsible.setPiId(policySaveSixthDto.getPiId());
+                        policyResponsible.setPirName(policyResponsibleSaveDto.getPirName());
+                        policyResponsible.setPirPosition(policyResponsibleSaveDto.getPirPosition());
+                        policyResponsible.setPirEmail(policyResponsibleSaveDto.getPirEmail());
+                        policyResponsible.setPirContact(policyResponsibleSaveDto.getPirContact());
+                        policyResponsible.setPirDepartment(policyResponsibleSaveDto.getPirDepartment());
+                        policyResponsible.setInsert_email(email);
+                        policyResponsible.setInsert_date(LocalDateTime.now());
+                        policyResponsibleSaveList.add(policyResponsible);
+                    }
                 }
+                
+                for(Long pirId : responsibleDeleteIdList) {
+                    Optional<PolicyResponsible> optionalPolicyResponsible = policyResponsibleRepository.findById(pirId);
+                    if(optionalPolicyResponsible.isPresent()) {
+                        policyResponsibleDeleteList.add(optionalPolicyResponsible.get());
+                    } else {
+                        log.error("삭제 privacyPolicySixthSave 존재하지 않은 항목");
+                    }
+                }
+
+                responsibleOverseasState = 1;
             }
 
+            if(responsibleOverseasState == 1) {
+                policyResponsibleRepository.saveAll(policyResponsibleSaveList);
+                policyResponsibleRepository.deleteAll(policyResponsibleDeleteList);
+            }
+            
             optionalPolicy.get().setPiYear(policySaveSixthDto.getPiYear());
             optionalPolicy.get().setPiMonth(policySaveSixthDto.getPiMonth());
             optionalPolicy.get().setPiDay(policySaveSixthDto.getPiDay());
@@ -1042,8 +1067,6 @@ public class PolicyService {
             optionalPolicy.get().setModify_date(LocalDateTime.now());
 
             policyRepository.save(optionalPolicy.get());
-            policyResponsibleRepository.saveAll(policyResponsibleSaveList);
-            policyResponsibleRepository.deleteAll(policyResponsibleDeleteList);
 
             historyService.updateHistory(activityHistoryId,
                     companyCode+" - "+activityCode.getDesc()+" 여섯번째 뎁스 시도 이력", "", 1);
@@ -1055,4 +1078,56 @@ public class PolicyService {
 
         return ResponseEntity.ok(res.success(data));
     }
+
+    // 개인정보보호 마지막 뎁스 등록
+    public ResponseEntity<Map<String, Object>> privacyPolicyFinalSave(Long piId, JwtFilterDto jwtFilterDto) {
+        log.info("privacyPolicyFinalSave 호출");
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+        String email = jwtFilterDto.getEmail();
+        AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+
+        Long adminId = adminCompanyInfoDto.getAdminId();
+        Long companyId = adminCompanyInfoDto.getCompanyId();
+        String companyCode = adminCompanyInfoDto.getCompanyCode();
+        log.info("adminId : "+adminId);
+        log.info("companyId : "+companyId);
+        log.info("companyCode : "+companyCode);
+
+        log.info("piId : "+piId);
+
+        ActivityCode activityCode;
+        String ip = CommonUtil.clientIp();
+        Long activityHistoryId;
+
+        // 개인정보 처리방침 작성중 코드
+        activityCode = ActivityCode.AC_29;
+
+        Optional<Policy> optionalPolicy = policyRepository.findById(piId);
+        if(optionalPolicy.isPresent()) {
+
+            // 활동이력 저장 -> 비정상 모드
+            activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
+                    companyCode + " - " + activityCode.getDesc() + " 마지막 뎁스 시도 이력", "", ip, 0, email);
+
+            optionalPolicy.get().setPiStage(7);
+            optionalPolicy.get().setPiAutosave(1);
+            optionalPolicy.get().setModify_email(email);
+            optionalPolicy.get().setModify_date(LocalDateTime.now());
+
+            policyRepository.save(optionalPolicy.get());
+
+            historyService.updateHistory(activityHistoryId,
+                    companyCode+" - "+activityCode.getDesc()+" 마지막 뎁스 시도 이력", "", 1);
+            
+        } else {
+            log.error("존재하지 않은 개인정보처리방침 입니다. 새로고침이후 진행해주세요.");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO090.getCode(), ResponseErrorCode.KO090.getDesc()));
+        }
+
+        return ResponseEntity.ok(res.success(data));
+    }
+    
 }

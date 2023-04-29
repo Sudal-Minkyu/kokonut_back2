@@ -153,6 +153,15 @@ public class PolicyRestController {
         return policyService.privacyPolicySixthSave(policySaveSixthDto, jwtFilterDto);
     }
 
+    @ApiOperation(value="개인정보보호 마지막 뎁스 등록", notes= "" +
+            "1. 개인정보처리방침 최종저장 한다.")
+    @PostMapping(value = "/privacyPolicyFinalSave")
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    public ResponseEntity<Map<String,Object>> privacyPolicyFinalSave(@RequestParam(name="piId", defaultValue = "") Long piId) {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return policyService.privacyPolicyFinalSave(piId, jwtFilterDto);
+    }
+
 //    @ApiOperation(value="개인정보보호 두번쨰 뎁스 등록", notes= "" +
 //            "1. 개인정보처리방침 두번쨰값을 저장 한다." +
 //            "2. 두번째 뎁스의 대한 데이터를 받는다." +
