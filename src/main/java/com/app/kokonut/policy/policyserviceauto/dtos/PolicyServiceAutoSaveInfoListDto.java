@@ -15,6 +15,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PolicyServiceAutoSaveInfoListDto {
 
+    private Long pisaId;
+
     private String pisaPurpose; // 처리목적
 
     private String pisaInfo; // 수집항목

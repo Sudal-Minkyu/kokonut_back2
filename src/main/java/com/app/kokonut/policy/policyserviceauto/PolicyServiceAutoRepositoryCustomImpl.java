@@ -32,6 +32,7 @@ public class PolicyServiceAutoRepositoryCustomImpl extends QuerydslRepositorySup
         JPQLQuery<PolicyServiceAutoSaveInfoListDto> query = from(policyServiceAuto)
             .where(policyServiceAuto.piId.eq(piId))
             .select(Projections.constructor(PolicyServiceAutoSaveInfoListDto.class,
+                    policyServiceAuto.pisaId,
                     policyServiceAuto.pisaPurpose,
                     policyServiceAuto.pisaInfo,
                     policyServiceAuto.pisaMethodology,
