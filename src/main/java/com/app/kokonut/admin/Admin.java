@@ -85,7 +85,7 @@ public class Admin implements UserDetails {
     private Integer knPwdErrorCount = 0;
 
     /**
-     * 이름(대표자명)
+     * 이름
      */
     @Column(name = "kn_name")
     @ApiModelProperty("이름(대표자명)")

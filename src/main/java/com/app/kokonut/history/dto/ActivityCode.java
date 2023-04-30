@@ -70,6 +70,8 @@ public enum ActivityCode {
     AC_44("AC_44", "추가카테고리의 항목 수정"), // 사용
     AC_45("AC_45", "추가카테고리의 항목 삭제"), // 사용
 
+    AC_46("AC_46", "개인정보 처리방침 리스트 조회"), // 사용
+
     ;
     
     private final String code;

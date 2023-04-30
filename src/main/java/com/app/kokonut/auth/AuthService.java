@@ -397,17 +397,17 @@ public class AuthService {
         }
 
         log.info("회원가입 시작");
-        log.info("받아온 값 kokonutSignUp : " + kokonutSignUp);
+        log.info("받아온 값 kokonutSignUp : " + kokonutSignUp.getKnPhoneNumber());
 
         if (!kokonutSignUp.getKnEmail().equals("kokonut@kokonut.me")) { // 테스트일 경우 패스
             String joinPhone = "";
             Cookie[] cookies = request.getCookies();
             if (cookies != null) {
-//                log.info("현재 쿠키값들 : " + Arrays.toString(cookies));
+                log.info("현재 쿠키값들 : " + Arrays.toString(cookies));
                 for (Cookie c : cookies) {
                     if (c.getName().equals("joinPhone")) {
                         joinPhone = c.getValue();
-//                        log.info("본인인증 된 핸드폰번호 : " + joinPhone);
+                        log.info("본인인증 된 핸드폰번호 : " + joinPhone);
 
                     }
                 }
