@@ -21,7 +21,7 @@ public class PolicySaveFourthDto {
 
     private List<Long> policyOutDeleteIdList; // 처리업무의 위탁에 관한사항 삭제 Id 리스트값
 
-    private Integer policyOutDetailYn; // 0: 미포함, 1: 포함
+    private Integer policyOutDetailYn; // 처리업무의 국외 위탁 체크박스여부 0: 미포함, 1: 포함
 
     private List<PolicyOutDetailSaveDto> policyOutDetailSaveDtoList; // 처리업무의 국외 위탁에 관한사항 저장 리스트값
 

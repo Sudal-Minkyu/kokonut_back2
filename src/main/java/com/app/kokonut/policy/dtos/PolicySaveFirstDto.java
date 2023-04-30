@@ -11,7 +11,7 @@ import lombok.Data;
 @Data
 public class PolicySaveFirstDto {
 
-    private Long piId;
+    private Long piId; // -> 신규일 경우 "0"을 보내주면됨
 
     private Double piVersion; // 개정본 버전
 
