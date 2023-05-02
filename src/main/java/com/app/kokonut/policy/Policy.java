@@ -40,35 +40,35 @@ public class Policy {
 
     @ApiModelProperty("인터넷접속로그 여부 0: 미선택, 1: 선택")
     @Column(name = "pi_internet_chose")
-    private Integer piInternetChose;
+    private Boolean piInternetChose;
 
     @ApiModelProperty("계약또는청약철회 여부 0: 미선택, 1: 선택")
     @Column(name = "pi_contract_chose")
-    private Integer piContractChose;
+    private Boolean piContractChose;
 
-    @ApiModelProperty("계약또는청약철회 여부 0: 미선택, 1: 선택")
+    @ApiModelProperty("대금결제 및 재화 여부 0: 미선택, 1: 선택")
     @Column(name = "pi_pay_chose")
-    private Integer piPayChose;
+    private Boolean piPayChose;
 
     @ApiModelProperty("소피자의 불만 또는 분쟁처리 여부: 0: 미선택, 1: 선택")
     @Column(name = "pi_consumer_chose")
-    private Integer piConsumerChose;
+    private Boolean piConsumerChose;
 
     @ApiModelProperty("표시광고 0: 미선택, 1: 선택")
     @Column(name = "pi_advertisement_chose")
-    private Integer piAdvertisementChose;
+    private Boolean piAdvertisementChose;
 
     @ApiModelProperty("개인정보 처리업무의 국외 위탁에 관한 사항: 0: 미선택, 1: 선택")
     @Column(name = "pi_out_chose")
-    private Integer piOutChose;
+    private Boolean piOutChose;
 
     @ApiModelProperty("제3자 제공에 관한 사항: 0: 미선택, 1: 선택")
     @Column(name = "pi_third_chose")
-    private Integer piThirdChose;
+    private Boolean piThirdChose;
 
     @ApiModelProperty("국외 제3자 제공에 관한 사항: 0: 미선택, 1: 선택")
     @Column(name = "pi_third_overseas_chose")
-    private Integer piThirdOverseasChose;
+    private Boolean piThirdOverseasChose;
 
     @ApiModelProperty("시행일자 년")
     @Column(name = "pi_year")

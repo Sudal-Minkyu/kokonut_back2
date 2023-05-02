@@ -75,7 +75,7 @@ public class PolicyRepositoryCustomImpl extends QuerydslRepositorySupport implem
         QPolicy policy = QPolicy.policy;
 
         JPQLQuery<PolicyWritingCheckDto> query = from(policy)
-                .where(policy.cpCode.eq(cpCode).and(policy.insert_email.eq(email)).and(policy.piAutosave.eq(0)))
+                .where(policy.cpCode.eq(cpCode).and(policy.insert_email.eq(email).and(policy.piAutosave.eq(0))))
                 .orderBy(policy.piId.desc()).limit(1)
                 .select(Projections.constructor(PolicyWritingCheckDto.class,
                         policy.piId,
@@ -137,5 +137,38 @@ public class PolicyRepositoryCustomImpl extends QuerydslRepositorySupport implem
         return new PageImpl<>(policyListDtos, pageable, query.fetchCount());
     }
 
+    public PolicyDetailDto findByPolicyDetail(Long piId, String cpCode) {
+
+        QPolicy policy = QPolicy.policy;
+        QAdmin admin = QAdmin.admin;
+
+        JPQLQuery<PolicyDetailDto> query = from(policy)
+                .innerJoin(admin).on(policy.insert_email.eq(admin.knEmail))
+                .where(policy.piId.eq(piId).and(policy.cpCode.eq(cpCode).and(policy.piAutosave.eq(1).and(policy.piStage.eq(7)))))
+                .orderBy().limit(1)
+                .select(Projections.constructor(PolicyDetailDto.class,
+
+                        policy.piVersion,
+                        policy.piDate,
+                        policy.piHeader,
+                        admin.knName,
+
+                        policy.piInternetChose,
+                        policy.piContractChose,
+                        policy.piPayChose,
+                        policy.piConsumerChose,
+                        policy.piAdvertisementChose,
+
+                        policy.piOutChose,
+                        policy.piThirdChose,
+                        policy.piThirdOverseasChose,
+
+                        policy.piYear,
+                        policy.piMonth,
+                        policy.piDay
+                ));
+
+        return query.fetchOne();
+    }
 
 }

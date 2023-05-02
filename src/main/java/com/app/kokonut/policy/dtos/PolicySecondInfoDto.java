@@ -19,7 +19,7 @@ public class PolicySecondInfoDto {
 
     private Integer piContractChose; // 계약또는청약철회 여부 0: 미선택, 1: 선택
 
-    private Integer piPayChose; // 계약또는청약철회 여부 0: 미선택, 1: 선택
+    private Integer piPayChose; // 대금결제 및 재화 여부 0: 미선택, 1: 선택
 
     private Integer piConsumerChose; // 소피자의 불만 또는 분쟁처리 여부: 0: 미선택, 1: 선택
 

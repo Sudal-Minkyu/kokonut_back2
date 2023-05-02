@@ -170,11 +170,27 @@ public class PolicyService {
     }
 
     // 개인정보처리방침 상세내용 조회
-    public ResponseEntity<Map<String, Object>> policyDetail(Long qnaId, JwtFilterDto jwtFilterDto) {
+    public ResponseEntity<Map<String, Object>> policyDetail(Long piId, JwtFilterDto jwtFilterDto) {
         log.info("policyDetail 호출");
 
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
+
+        String email = jwtFilterDto.getEmail();
+        AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+        String cpCode = adminCompanyInfoDto.getCompanyCode();
+
+        PolicyDetailDto policyDetailDto = policyRepository.findByPolicyDetail(piId, cpCode);
+        if(policyDetailDto != null){
+
+            log.info("policyDetailDto : "+policyDetailDto);
+
+            data.put("policyData", policyDetailDto);
+        } else {
+            log.info("조회된 데이터가 없습니다.");
+
+        }
+
 
         return ResponseEntity.ok(res.success(data));
     }
@@ -635,30 +651,30 @@ public class PolicyService {
                 }
             }
 
-            if(policySaveThirdDto.getPiInternetChose() == null || policySaveThirdDto.getPiInternetChose() == 0) {
-                optionalPolicy.get().setPiInternetChose(0);
+            if(policySaveThirdDto.getPiInternetChose() == null || !policySaveThirdDto.getPiInternetChose()) {
+                optionalPolicy.get().setPiInternetChose(false);
             } else {
-                optionalPolicy.get().setPiInternetChose(1);
+                optionalPolicy.get().setPiInternetChose(true);
             }
-            if(policySaveThirdDto.getPiContractChose() == null || policySaveThirdDto.getPiContractChose() == 0) {
-                optionalPolicy.get().setPiContractChose(0);
+            if(policySaveThirdDto.getPiContractChose() == null || !policySaveThirdDto.getPiContractChose()) {
+                optionalPolicy.get().setPiContractChose(false);
             } else {
-                optionalPolicy.get().setPiContractChose(1);
+                optionalPolicy.get().setPiContractChose(true);
             }
-            if(policySaveThirdDto.getPiPayChose() == null || policySaveThirdDto.getPiPayChose() == 0) {
-                optionalPolicy.get().setPiPayChose(0);
+            if(policySaveThirdDto.getPiPayChose() == null || !policySaveThirdDto.getPiPayChose()) {
+                optionalPolicy.get().setPiPayChose(false);
             } else {
-                optionalPolicy.get().setPiPayChose(1);
+                optionalPolicy.get().setPiPayChose(true);
             }
-            if(policySaveThirdDto.getPiConsumerChose() == null || policySaveThirdDto.getPiConsumerChose() == 0) {
-                optionalPolicy.get().setPiConsumerChose(0);
+            if(policySaveThirdDto.getPiConsumerChose() == null || !policySaveThirdDto.getPiConsumerChose()) {
+                optionalPolicy.get().setPiConsumerChose(false);
             } else {
-                optionalPolicy.get().setPiConsumerChose(1);
+                optionalPolicy.get().setPiConsumerChose(true);
             }
-            if(policySaveThirdDto.getPiAdvertisementChose() == null || policySaveThirdDto.getPiAdvertisementChose() == 0) {
-                optionalPolicy.get().setPiAdvertisementChose(0);
+            if(policySaveThirdDto.getPiAdvertisementChose() == null || !policySaveThirdDto.getPiAdvertisementChose()) {
+                optionalPolicy.get().setPiAdvertisementChose(false);
             } else {
-                optionalPolicy.get().setPiAdvertisementChose(1);
+                optionalPolicy.get().setPiAdvertisementChose(true);
             }
 
             optionalPolicy.get().setPiStage(3);
@@ -778,7 +794,7 @@ public class PolicyService {
             policyOutRepository.deleteAll(policyOutDeleteList);
 
             // 처리업무의 국외 위탁에 관한사항 CUD -> 포함 할 경우만 저장
-            if(policySaveFourthDto.getPolicyOutDetailYn() == 1) {
+            if(policySaveFourthDto.getPolicyOutDetailYn()) {
                 for(PolicyOutDetailSaveDto policyOutDetailSaveDto : policySaveFourthDto.getPolicyOutDetailSaveDtoList()) {
                     if(policyOutDetailSaveDto.getPiodId() != 0) {
                         Optional<PolicyOutDetail> optionalPolicyOutDetail = policyOutDetailRepository.findById(policyOutDetailSaveDto.getPiodId());
@@ -886,10 +902,10 @@ public class PolicyService {
             List<Long> thirdOverseasDeleteIdList = policySaveFifthDto.getPolicyThirdOverseasDeleteIdList();
 
 
-            if(policySaveFifthDto.getPolicyThirdYn() == 0 && optionalPolicy.get().getPiThirdChose() == 1) {
+            if(!policySaveFifthDto.getPolicyThirdYn() && optionalPolicy.get().getPiThirdChose()) {
                 // 미포함인데 이전에 포함한 여부가 존재하면 삭제하기
                 policyThirdRepository.findByPolicyThirdDelete(policySaveFifthDto.getPiId());
-            } else if(policySaveFifthDto.getPolicyThirdYn() == 1) {
+            } else if(policySaveFifthDto.getPolicyThirdYn()) {
                 // 저장 및 수정 및 삭제 로직 수행
                 for(PolicyThirdSaveDto policyThirdSaveDto : policySaveFifthDto.getPolicyThirdSaveDtoList()) {
                     if(policyThirdSaveDto.getPitId() != 0) {
@@ -930,10 +946,10 @@ public class PolicyService {
 
             }
 
-            if(policySaveFifthDto.getPolicyThirdOverseasYn() == 0 && optionalPolicy.get().getPiThirdOverseasChose() == 1) {
+            if(!policySaveFifthDto.getPolicyThirdOverseasYn() && optionalPolicy.get().getPiThirdOverseasChose()) {
                 // 미포함인데 이전에 포함한 여부가 존재하면 삭제하기
                 policyThirdOverseasRepository.findByPolicyThirdOverseasDelete(policySaveFifthDto.getPiId());
-            } else if(policySaveFifthDto.getPolicyThirdOverseasYn() == 1) {
+            } else if(policySaveFifthDto.getPolicyThirdOverseasYn()) {
                 // 저장 및 수정 및 삭제 로직 수행
                 for(PolicyThirdOverseasSaveDto policyThirdOverseasSaveDto : policySaveFifthDto.getPolicyThirdOverseasSaveDtoList()) {
                     if(policyThirdOverseasSaveDto.getPitoId() != 0) {

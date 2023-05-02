@@ -21,4 +21,6 @@ public interface PolicyRepositoryCustom {
     PolicyWritingCheckDto findByWriting(String cpCode, String email);
 
     Page<PolicyListDto> findByPolicyList(PolicySearchDto policySearchDto, Pageable pageable);
+
+    PolicyDetailDto findByPolicyDetail(Long piId, String cpCode);
 }
