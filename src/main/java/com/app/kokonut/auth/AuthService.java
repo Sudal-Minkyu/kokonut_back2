@@ -397,27 +397,27 @@ public class AuthService {
         }
 
         log.info("회원가입 시작");
-        log.info("받아온 값 kokonutSignUp : " + kokonutSignUp.getKnPhoneNumber());
+        log.info("받아온 핸드폰번호 : " + kokonutSignUp.getKnPhoneNumber());
 
-        if (!kokonutSignUp.getKnEmail().equals("kokonut@kokonut.me")) { // 테스트일 경우 패스
-            String joinPhone = "";
-            Cookie[] cookies = request.getCookies();
-            if (cookies != null) {
-                log.info("현재 쿠키값들 : " + Arrays.toString(cookies));
-                for (Cookie c : cookies) {
-                    if (c.getName().equals("joinPhone")) {
-                        joinPhone = c.getValue();
-                        log.info("본인인증 된 핸드폰번호 : " + joinPhone);
-
-                    }
-                }
-            }
-            // 본인인증 체크
-            if (!kokonutSignUp.getKnPhoneNumber().equals(joinPhone)) {
-                log.info("본인인증으로 입력된 핸드폰 번호가 아닙니다. 본인인증을 완료해주세요.");
-                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO033.getCode(), ResponseErrorCode.KO033.getDesc()));
-            }
-        }
+//        if (!kokonutSignUp.getKnEmail().equals("kokonut@kokonut.me")) { // 테스트일 경우 패스
+//            String joinPhone = "";
+//            Cookie[] cookies = request.getCookies();
+//            if (cookies != null) {
+//                log.info("현재 쿠키값들 : " + Arrays.toString(cookies));
+//                for (Cookie c : cookies) {
+//                    if (c.getName().equals("joinPhone")) {
+//                        joinPhone = c.getValue();
+//                        log.info("본인인증 된 핸드폰번호 : " + joinPhone);
+//
+//                    }
+//                }
+//            }
+//            // 본인인증 체크
+//            if (!kokonutSignUp.getKnPhoneNumber().equals(joinPhone)) {
+//                log.info("본인인증으로 입력된 핸드폰 번호가 아닙니다. 본인인증을 완료해주세요.");
+//                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO033.getCode(), ResponseErrorCode.KO033.getDesc()));
+//            }
+//        }
 
         // 저장할 KMS 암호화키 생성
         String dataKey;
