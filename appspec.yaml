@@ -2,10 +2,10 @@ version: 0.0
 os: linux
 files:
   - source:  /
-    destination: /home/ssm-user/build/
+    destination: /root/kokonut_backend_project/
 
 permissions:
-  - object: /home/ssm-user/build/
+  - object: /root/kokonut_backend_project/
     pattern: "**"
-    owner: ssm-user
-    group: ssm-user
+    owner: root
+    group: root
