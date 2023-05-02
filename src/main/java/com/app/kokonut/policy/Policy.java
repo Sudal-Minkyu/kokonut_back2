@@ -70,15 +70,19 @@ public class Policy {
     @Column(name = "pi_third_overseas_chose")
     private Boolean piThirdOverseasChose;
 
-    @ApiModelProperty("시행일자 년")
+    @ApiModelProperty("개인정보 처리방침의 변경에 관한 사항: 0: 미선택, 1: 선택")
+    @Column(name = "pi_change_chose")
+    private Boolean piChangeChose;
+
+    @ApiModelProperty("이전 시행일자 년")
     @Column(name = "pi_year")
     private String piYear;
 
-    @ApiModelProperty("시행일자 월")
+    @ApiModelProperty("이전 시행일자 월")
     @Column(name = "pi_month")
     private String piMonth;
 
-    @ApiModelProperty("시행일자 일")
+    @ApiModelProperty("이전 시행일자 일")
     @Column(name = "pi_day")
     private String piDay;
 

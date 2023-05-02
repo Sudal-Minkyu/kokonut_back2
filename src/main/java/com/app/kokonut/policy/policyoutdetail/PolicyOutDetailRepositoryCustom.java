@@ -14,4 +14,5 @@ public interface PolicyOutDetailRepositoryCustom {
 
     List<PolicyOutDetailSaveInfoListDto> findByPolicyOutDetailList(Long piId);
 
+    void findByPolicyOutDetailDelete(Long piId);
 }

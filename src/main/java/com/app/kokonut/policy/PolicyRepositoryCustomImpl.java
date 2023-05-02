@@ -163,6 +163,7 @@ public class PolicyRepositoryCustomImpl extends QuerydslRepositorySupport implem
                         policy.piThirdChose,
                         policy.piThirdOverseasChose,
 
+                        policy.piChangeChose,
                         policy.piYear,
                         policy.piMonth,
                         policy.piDay

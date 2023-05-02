@@ -183,12 +183,44 @@ public class PolicyService {
         PolicyDetailDto policyDetailDto = policyRepository.findByPolicyDetail(piId, cpCode);
         if(policyDetailDto != null){
 
-            log.info("policyDetailDto : "+policyDetailDto);
-
             data.put("policyData", policyDetailDto);
+
+            // Step2
+            List<PolicyPurposeSaveInfoListDto> policyPurposeSaveInfoListDtoList = policyPurposeRepository.findByPolicyPurposeList(piId);
+            data.put("purposeDataList", policyPurposeSaveInfoListDtoList);
+
+            // Step3
+            List<PolicyBeforeSaveInfoListDto> policyBeforeSaveInfoListDtos = policyBeforeRepository.findByPolicyBeforeList(piId);
+            data.put("beforeDataList", policyBeforeSaveInfoListDtos);
+            List<PolicyAfterSaveInfoListDto> policyAfterSaveInfoListDtos = policyAfterRepository.findByPolicyAfterList(piId);
+            data.put("afterDataList", policyAfterSaveInfoListDtos);
+            List<PolicyServiceAutoSaveInfoListDto> policyServiceAutoSaveInfoListDtoList = policyServiceAutoRepository.findByPolicyServiceAutoList(piId);
+            data.put("serviceAutoDataList", policyServiceAutoSaveInfoListDtoList);
+
+            // Step4
+            List<PolicyOutSaveInfoListDto> policyOutSaveInfoListDtos = policyOutRepository.findByPolicyOutList(piId);
+            data.put("outDataList", policyOutSaveInfoListDtos);
+            if(policyDetailDto.getPiOutChose()) {
+                List<PolicyOutDetailSaveInfoListDto> policyOutDetailSaveInfoListDtos = policyOutDetailRepository.findByPolicyOutDetailList(piId);
+                data.put("outDetailDataList", policyOutDetailSaveInfoListDtos);
+            }
+
+            // Step5
+            if(policyDetailDto.getPiThirdChose()) {
+                List<PolicyThirdSaveInfoListDto> policyThirdSaveInfoListDtoList = policyThirdRepository.findByPolicyThirdList(piId);
+                data.put("thirdDataList", policyThirdSaveInfoListDtoList);
+            }
+            if(policyDetailDto.getPiThirdOverseasChose()) {
+                List<PolicyThirdOverseasSaveInfoListDto> policyThirdOverseasSaveInfoListDtoList = policyThirdOverseasRepository.findByPolicyThirdOverseasList(piId);
+                data.put("thirdOverseasDataList", policyThirdOverseasSaveInfoListDtoList);
+            }
+
+            // Step6
+            List<PolicyResponsibleSaveInfoListDto> policyResponsibleSaveInfoListDtoList = policyResponsibleRepository.findByPolicyResponsibleList(piId);
+            data.put("reponsibleDataList", policyResponsibleSaveInfoListDtoList);
+
         } else {
             log.info("조회된 데이터가 없습니다.");
-
         }
 
 
@@ -313,7 +345,7 @@ public class PolicyService {
         PolicyFirstInfoDto policyFirstInfoDto = policyRepository.findByPolicyFirst(piId);
         data.put("policyInfo1", policyFirstInfoDto);
 
-        // Step1
+        // Step2
         List<PolicyPurposeSaveInfoListDto> policyPurposeSaveInfoListDtoList = policyPurposeRepository.findByPolicyPurposeList(piId);
         data.put("purposeInfo", policyPurposeSaveInfoListDtoList);
 
@@ -782,19 +814,15 @@ public class PolicyService {
                 }
             }
 
-            optionalPolicy.get().setPiStage(4);
-            optionalPolicy.get().setModify_email(email);
-            optionalPolicy.get().setModify_date(LocalDateTime.now());
+            List<PolicyOutDetail> policyOutDetailDeleteList = new ArrayList<>();
+            List<Long> outDetailDeleteIdList = policySaveFourthDto.getPolicyOutDetailDeleteIdList();
 
-            // 작성중인 개인정보처리방침 업데이트
-            policyRepository.save(optionalPolicy.get());
-
-            // 처리업무의 위탁에 관한사항 CUD
-            policyOutRepository.saveAll(policyOutSaveList);
-            policyOutRepository.deleteAll(policyOutDeleteList);
-
-            // 처리업무의 국외 위탁에 관한사항 CUD -> 포함 할 경우만 저장
-            if(policySaveFourthDto.getPolicyOutDetailYn()) {
+            int outDetailState = 0;
+            if(!policySaveFourthDto.getPolicyOutDetailYn() && optionalPolicy.get().getPiOutChose()) {
+                // 미포함인데 이전에 포함한 여부가 존재하면 삭제하기
+                policyOutDetailRepository.findByPolicyOutDetailDelete(policySaveFourthDto.getPiId());
+            } else if(policySaveFourthDto.getPolicyOutDetailYn()) {
+                // 처리업무의 국외 위탁에 관한사항 CUD -> 포함 할 경우만 저장
                 for(PolicyOutDetailSaveDto policyOutDetailSaveDto : policySaveFourthDto.getPolicyOutDetailSaveDtoList()) {
                     if(policyOutDetailSaveDto.getPiodId() != 0) {
                         Optional<PolicyOutDetail> optionalPolicyOutDetail = policyOutDetailRepository.findById(policyOutDetailSaveDto.getPiodId());
@@ -826,8 +854,6 @@ public class PolicyService {
                     }
                 }
 
-                List<PolicyOutDetail> policyOutDetailDeleteList = new ArrayList<>();
-                List<Long> outDetailDeleteIdList = policySaveFourthDto.getPolicyOutDetailDeleteIdList();
                 for(Long piodId : outDetailDeleteIdList) {
                     Optional<PolicyOutDetail> optionalPolicyOutDetail = policyOutDetailRepository.findById(piodId);
                     if(optionalPolicyOutDetail.isPresent()) {
@@ -837,10 +863,28 @@ public class PolicyService {
                     }
                 }
 
+                outDetailState = 1;
+            }
+
+            if(outDetailState == 1) {
+                optionalPolicy.get().setPiOutChose(true);
                 // 처리업무의 국외 위탁에 관한사항 CUD
                 policyOutDetailRepository.saveAll(policyOutDetailSaveList);
                 policyOutDetailRepository.deleteAll(policyOutDetailDeleteList);
+            } else {
+                optionalPolicy.get().setPiOutChose(false);
             }
+
+            optionalPolicy.get().setPiStage(4);
+            optionalPolicy.get().setModify_email(email);
+            optionalPolicy.get().setModify_date(LocalDateTime.now());
+
+            // 작성중인 개인정보처리방침 업데이트
+            policyRepository.save(optionalPolicy.get());
+
+            // 처리업무의 위탁에 관한사항 CUD
+            policyOutRepository.saveAll(policyOutSaveList);
+            policyOutRepository.deleteAll(policyOutDeleteList);
 
             historyService.updateHistory(activityHistoryId,
                     companyCode+" - "+activityCode.getDesc()+" 네번째 뎁스 시도 이력", "", 1);
@@ -992,13 +1036,19 @@ public class PolicyService {
             }
 
             if(thirdState == 1) {
+                optionalPolicy.get().setPiThirdChose(true);
                 policyThirdRepository.saveAll(policyThirdSaveList);
                 policyThirdRepository.deleteAll(policyThirdDeleteList);
+            } else {
+                optionalPolicy.get().setPiThirdChose(false);
             }
 
             if(thirdOverseasState == 1) {
+                optionalPolicy.get().setPiThirdOverseasChose(true);
                 policyThirdOverseasRepository.saveAll(policyThirdOverseasSaveList);
                 policyThirdOverseasRepository.deleteAll(policyThirdOverseasDeleteList);
+            } else {
+                optionalPolicy.get().setPiThirdOverseasChose(false);
             }
 
             optionalPolicy.get().setPiStage(5);
@@ -1095,9 +1145,15 @@ public class PolicyService {
             policyResponsibleRepository.saveAll(policyResponsibleSaveList);
             policyResponsibleRepository.deleteAll(policyResponsibleDeleteList);
 
-            optionalPolicy.get().setPiYear(policySaveSixthDto.getPiYear());
-            optionalPolicy.get().setPiMonth(policySaveSixthDto.getPiMonth());
-            optionalPolicy.get().setPiDay(policySaveSixthDto.getPiDay());
+            if(policySaveSixthDto.getPiChangeChose()) {
+                optionalPolicy.get().setPiChangeChose(true);
+                optionalPolicy.get().setPiYear(policySaveSixthDto.getPiYear());
+                optionalPolicy.get().setPiMonth(policySaveSixthDto.getPiMonth());
+                optionalPolicy.get().setPiDay(policySaveSixthDto.getPiDay());
+            } else {
+                optionalPolicy.get().setPiChangeChose(false);
+            }
+
             optionalPolicy.get().setPiStage(6);
             optionalPolicy.get().setModify_email(email);
             optionalPolicy.get().setModify_date(LocalDateTime.now());
