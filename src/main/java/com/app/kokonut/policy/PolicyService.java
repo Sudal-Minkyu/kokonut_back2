@@ -67,9 +67,6 @@ import java.util.*;
 @Service
 public class PolicyService {
 
-//      AC_28("AC_28", "개인정보 처리방침 작성중"),
-//      AC_29("AC_29", "개인정보 처리방침 추가"),
-
     private final HistoryService historyService;
 
     private final AdminRepository adminRepository;
@@ -818,7 +815,7 @@ public class PolicyService {
             List<Long> outDetailDeleteIdList = policySaveFourthDto.getPolicyOutDetailDeleteIdList();
 
             int outDetailState = 0;
-            if(!policySaveFourthDto.getPolicyOutDetailYn() && optionalPolicy.get().getPiOutChose()) {
+            if(!policySaveFourthDto.getPolicyOutDetailYn() && (optionalPolicy.get().getPiOutChose() != null && optionalPolicy.get().getPiOutChose())) {
                 // 미포함인데 이전에 포함한 여부가 존재하면 삭제하기
                 policyOutDetailRepository.findByPolicyOutDetailDelete(policySaveFourthDto.getPiId());
             } else if(policySaveFourthDto.getPolicyOutDetailYn()) {
@@ -946,7 +943,7 @@ public class PolicyService {
             List<Long> thirdOverseasDeleteIdList = policySaveFifthDto.getPolicyThirdOverseasDeleteIdList();
 
 
-            if(!policySaveFifthDto.getPolicyThirdYn() && optionalPolicy.get().getPiThirdChose()) {
+            if(!policySaveFifthDto.getPolicyThirdYn() && (optionalPolicy.get().getPiThirdChose() != null && optionalPolicy.get().getPiThirdChose())) {
                 // 미포함인데 이전에 포함한 여부가 존재하면 삭제하기
                 policyThirdRepository.findByPolicyThirdDelete(policySaveFifthDto.getPiId());
             } else if(policySaveFifthDto.getPolicyThirdYn()) {
@@ -990,7 +987,7 @@ public class PolicyService {
 
             }
 
-            if(!policySaveFifthDto.getPolicyThirdOverseasYn() && optionalPolicy.get().getPiThirdOverseasChose()) {
+            if(!policySaveFifthDto.getPolicyThirdOverseasYn() && (optionalPolicy.get().getPiThirdOverseasChose() != null && optionalPolicy.get().getPiThirdOverseasChose())) {
                 // 미포함인데 이전에 포함한 여부가 존재하면 삭제하기
                 policyThirdOverseasRepository.findByPolicyThirdOverseasDelete(policySaveFifthDto.getPiId());
             } else if(policySaveFifthDto.getPolicyThirdOverseasYn()) {

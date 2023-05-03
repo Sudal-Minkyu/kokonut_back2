@@ -28,7 +28,7 @@ public class Policy {
 
     @ApiModelProperty("개정본 버전")
     @Column(name = "pi_version")
-    private Double piVersion;
+    private String piVersion;
 
     @ApiModelProperty("개정일")
     @Column(name = "pi_date")

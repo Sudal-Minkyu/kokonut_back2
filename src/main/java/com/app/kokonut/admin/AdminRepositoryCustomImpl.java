@@ -164,5 +164,31 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
         return new PageImpl<>(adminListSubDtos, pageable, query.fetchCount());
     }
 
+    // 개인정보제공할 리스트 호출
+    @Override
+    public List<AdminOfferListDto> findByAdminOfferList(Long companyId, String type) {
+
+        QAdmin admin = QAdmin.admin;
+
+        JPQLQuery<AdminOfferListDto> query = from(admin)
+                .where(admin.companyId.eq(companyId))
+                .select(Projections.constructor(AdminOfferListDto.class,
+                        admin.adminId,
+                        admin.knEmail,
+                        admin.knName,
+                        admin.knDepartment,
+                        admin.knRoleCode,
+                        admin.knRoleCode
+                ));
+
+        if(type.equals("0")){
+            query.where(admin.knRoleCode.ne(AuthorityRole.ROLE_GUEST));
+        }
+        else {
+            query.where(admin.knRoleCode.eq(AuthorityRole.ROLE_GUEST));
+        }
+
+        return query.fetch();
+    }
 
 }

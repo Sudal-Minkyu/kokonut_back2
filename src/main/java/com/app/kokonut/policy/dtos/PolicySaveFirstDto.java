@@ -13,7 +13,7 @@ public class PolicySaveFirstDto {
 
     private Long piId; // -> 신규일 경우 "0"을 보내주면됨
 
-    private Double piVersion; // 개정본 버전
+    private String piVersion; // 개정본 버전
 
     private String piDate; // 개정일
 

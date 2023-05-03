@@ -38,13 +38,16 @@ public class AESGCMcrypto {
 
     public static void main(String[] args) throws Exception {
 
-        String dataKey = createDataKey(); // 데이키를 받음
-
+//        String dataKey = createDataKey(); // 데이키를 받음
+        String dataKey = "AQIDAHgJGloEIm1LwL4cPWLvM58HeuMmUWjfnn29PPq5/oTojwHwDsZqMFdbsvRrlp7Q8RrBAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMA7Gs7QY9wrawhdhRAgEQgDt5k7n9a2aeFtCmuyEUJ3EUz12Vtw7HWOb+U7NuzgAVkPORlh+sPuZeggndWuWBVXG34jJD/s9VI4Tzew==";
+        log.info("dataKey : "+dataKey);
 
         SecretKey secretKey = generateDataKey(dataKey);
         byte[] ivBytes = generateIV(); // IV 값
 
-        String plaintext = "김민규만규김민규만규김민규만규김민규만규";
+        String plaintext = "김민규";
+
+
 //        plaintext : 20
 //        15:02:00.315 [main] INFO com.app.kokonut.common.realcomponent.AESGCMcrypto - 암호화 할 값 : 김민규만규김민규만규김민규만규김민규만규
 //        15:02:00.316 [main] INFO com.app.kokonut.common.realcomponent.AESGCMcrypto - encrypt 호출
@@ -62,9 +65,11 @@ public class AESGCMcrypto {
         
         log.info("plaintext : " + plaintext.length());
 
-//      gkstls2006@naver.com -> 암호화 : 7HS90ZkXY6yLV+qrM6e9tLQXdNbP7yZ4wyjewqO5URhCpAHF       ,NxhDfexShL83YMvt06JBtQ==
-//      hello, world -> 암호화           QsMHeorxRsS61HuhhBloKd2OZDcEJ0nNowhYUw==     ,vY78hnpLZkM13m4lfBs1kQ==
+//      gkstls2006@naver.com -> 암호화 : 7HS90ZkXY6yLV+qrM6e9tLQXdNbP7yZ4wyjewqO5URhCpAHF,NxhDfexShL83YMvt06JBtQ==
+//      hello, world -> 암호화           QsMHeorxRsS61HuhhBloKd2OZDcEJ0nNowhYUw==,vY78hnpLZkM13m4lfBs1kQ==
 //      VeLL/bShT3LHjfa5oC/lYaLwACm+IJUyC6ENi2Ba5++fvQ5f/AvP83zreTaF87eFdEPu2ndSBcsU0qQjvxis/LBCLP5WY5low51PIMgFfO/qEWq82e25Xu5LEv/XotPH9JNp0syavZDhrLACNx0+AyqttbN2K/2JlO1btm0JO9VM8FivkCCsaAFNTi/sYQIR1y6ikdaNVxsLi40IxknUPtC8Lg==
+
+        log.info("데이타 키 : "+dataKey);
 
         log.info("암호화 할 값 : " + plaintext);
 
@@ -72,6 +77,7 @@ public class AESGCMcrypto {
 
         String fieldValue = ciphertext+","+Base64.getEncoder().encodeToString(ivBytes);
         log.info("fieldValue : " + fieldValue);
+
         String[] result = fieldValue.split(",");
         String resultText = result[0];
         log.info("resultText : " + resultText);
@@ -79,6 +85,13 @@ public class AESGCMcrypto {
         log.info("resultIv : " + resultIv);
 
         log.info("암호화 값 : " + ciphertext);
+
+        if(resultText.equals("PfnDaapmYm9vqWKBYFbX4RVi2KMXUJrQww==")) {
+            log.info("암호화 값 일치!");
+        } else {
+            log.info("암호화 값 불일치!");
+        }
+
         log.info("IV 값 : " + Base64.getEncoder().encodeToString(ivBytes));
 
         String decryptedText = decrypt(resultText, secretKey, resultIv);

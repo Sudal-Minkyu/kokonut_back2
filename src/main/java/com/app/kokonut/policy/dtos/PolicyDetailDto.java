@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PolicyDetailDto {
 
-    private Double piVersion; // 개정본 버전
+    private String piVersion; // 개정본 버전
 
     private String piDate; // 개정일
 

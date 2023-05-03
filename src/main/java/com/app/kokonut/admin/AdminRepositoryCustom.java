@@ -27,4 +27,6 @@ public interface AdminRepositoryCustom {
     AdminMyInfoDto findByAdminMyInfo(String knEmail);
 
     Page<AdminListSubDto> findByAdminList(String searchText, String roleCode, Integer knState, Long companyId, String email, Pageable pageable);
+
+    List<AdminOfferListDto> findByAdminOfferList(Long companyId, String type);
 }

@@ -506,4 +506,23 @@ public class AdminService {
 
         return ResponseEntity.ok(res.success(data));
     }
+
+    // 내부제공, 외부제공 관리자목록 리스트 호출
+    public ResponseEntity<Map<String, Object>> offerAdminList(String type, JwtFilterDto jwtFilterDto) {
+        log.info("offerAdminList 호출");
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+        String email = jwtFilterDto.getEmail();
+        AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+        Long companyId = adminCompanyInfoDto.getCompanyId();
+
+        // type => "0" 내부제공, "1" 외부제공,
+        List<AdminOfferListDto> adminOfferListDtos = adminRepository.findByAdminOfferList(companyId, type);
+        data.put("offerList",adminOfferListDtos);
+
+        return ResponseEntity.ok(res.success(data));
+    }
+
 }
