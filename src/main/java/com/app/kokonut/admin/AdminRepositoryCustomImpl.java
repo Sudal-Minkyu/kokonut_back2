@@ -102,7 +102,9 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
                 .where(admin.knEmail.eq(knEmail))
                 .select(Projections.constructor(AdminInfoDto.class,
                         admin.knName,
-                        company.cpName
+                        company.cpName,
+                        company.cpElectronic,
+                        company.cpElectronicDate
                 ));
 
         return query.fetchOne();
@@ -149,6 +151,10 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
                         admin.knIsEmailAuth,
                         admin.knState
                 ));
+
+        if(!searchText.equals("")) {
+            query.where(admin.knName.like("%"+ searchText +"%").or(admin.knEmail.like("%"+ searchText +"%")));
+        }
 
         if(!roleCode.equals("")) {
             query.where(admin.knRoleCode.eq(AuthorityRole.valueOf(roleCode)));

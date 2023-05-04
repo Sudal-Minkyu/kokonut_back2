@@ -11,6 +11,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 
@@ -92,6 +94,9 @@ public class PolicyRepositoryCustomImpl extends QuerydslRepositorySupport implem
         QPolicy policy = QPolicy.policy;
         QAdmin admin = QAdmin.admin;
 
+        String stimeStart = convertLocalDateTimeToString(policySearchDto.getStimeStart());
+        String stimeEnd = convertLocalDateTimeToString(policySearchDto.getStimeEnd());
+
         JPQLQuery<PolicyListDto> query = from(policy)
                 .where(policy.cpCode.eq(policySearchDto.getCpCode())).orderBy(policy.piId.desc())
                 .where(policy.piAutosave.eq(1).and(policy.piStage.eq(7))) // 작성완료된것만 조회되도록
@@ -102,39 +107,40 @@ public class PolicyRepositoryCustomImpl extends QuerydslRepositorySupport implem
                         admin.knName,
                         admin.knRoleCode,
                         admin.knRoleCode,
-                        policy.insert_date,
+                        policy.modify_date,
                         policy.piDate
                 ));
 
 
         if(!policySearchDto.getSearchText().equals("")) {
-            query.where(admin.knName.like("%"+ policySearchDto.getSearchText() +"%").or(admin.knName.like("%"+ policySearchDto.getSearchText() +"%")));
+            query.where(admin.knName.like("%"+ policySearchDto.getSearchText() +"%"));
         }
 
-        if(policySearchDto.getFilterDate().equals("제작일")) {
+        if(policySearchDto.getFilterDate().equals("개정일")) {
+            // 개정일 경우 조회
             if(policySearchDto.getStimeStart() != null && policySearchDto.getStimeEnd() != null) {
-                query.where(policy.insert_date.goe(policySearchDto.getStimeStart()).and(policy.insert_date.loe(policySearchDto.getStimeEnd())));
+                query.where(policy.modify_date.goe(policySearchDto.getStimeStart()).and(policy.modify_date.loe(policySearchDto.getStimeEnd())));
             }
-        } else if(policySearchDto.getFilterDate().equals("개정일")) {
-            // 여기해야댐.. to. woody
-//            policy.piDate
-//            if(policySearchDto.getStimeStart() != null && policySearchDto.getStimeEnd() != null) {
-//                query.where(policy.insert_date.goe(policySearchDto.getStimeStart()).and(policy.insert_date.loe(policySearchDto.getStimeEnd())));
-//            }
         } else if(policySearchDto.getFilterDate().equals("시행일")) {
-//            if(policySearchDto.getStimeStart() != null && policySearchDto.getStimeEnd() != null) {
-//                query.where(policy.insert_date.goe(policySearchDto.getStimeStart()).and(policy.insert_date.loe(policySearchDto.getStimeEnd())));
-//            }
+            // 시행일 경우 조회
+            if(policySearchDto.getStimeStart() != null && policySearchDto.getStimeEnd() != null) {
+                query.where(policy.piDate.goe(stimeStart).and(policy.piDate.loe(stimeEnd)));
+            }
         } else {
             // 전체일 경우 조회
-            // 여기해야댐.. to. woody
             if(policySearchDto.getStimeStart() != null && policySearchDto.getStimeEnd() != null) {
-                query.where(policy.insert_date.goe(policySearchDto.getStimeStart()).and(policy.insert_date.loe(policySearchDto.getStimeEnd())));
+                query.where(policy.modify_date.goe(policySearchDto.getStimeStart()).and(policy.modify_date.loe(policySearchDto.getStimeEnd()))
+                        .or(policy.piDate.goe(stimeStart).and(policy.piDate.loe(stimeEnd))));
             }
         }
 
         final List<PolicyListDto> policyListDtos = Objects.requireNonNull(getQuerydsl()).applyPagination(pageable, query).fetch();
         return new PageImpl<>(policyListDtos, pageable, query.fetchCount());
+    }
+
+    private String convertLocalDateTimeToString(LocalDateTime localDateTime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        return localDateTime.format(formatter);
     }
 
     public PolicyDetailDto findByPolicyDetail(Long piId, String cpCode) {
@@ -149,6 +155,7 @@ public class PolicyRepositoryCustomImpl extends QuerydslRepositorySupport implem
                 .select(Projections.constructor(PolicyDetailDto.class,
 
                         policy.piVersion,
+                        policy.modify_date,
                         policy.piDate,
                         policy.piHeader,
                         admin.knName,

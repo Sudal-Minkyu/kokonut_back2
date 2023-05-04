@@ -15,7 +15,7 @@ public class PolicySaveFirstDto {
 
     private String piVersion; // 개정본 버전
 
-    private String piDate; // 개정일
+    private String piDate; // 시행일
 
     private String piHeader; // 머리말 기업명
 

@@ -5,6 +5,7 @@ import lombok.*;
 
 import javax.persistence.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -32,6 +33,14 @@ public class Company {
     @ApiModelProperty("추가한 테이블 수의 카운트")
     @Column(name = "cp_table_count")
     private Integer cpTableCount;
+
+    @ApiModelProperty("전자상거래법 대상 여부 : 0(여부묻기필요), 1(전자상거래법대상), 2(1년간안보이기)")
+    @Column(name = "cp_electronic")
+    private Integer cpElectronic;
+
+    @ApiModelProperty("전자상거랩 1년후 다시 등장")
+    @Column(name = "cp_electronic_date")
+    private LocalDate cpElectronicDate;
 
     /**
      * 결제일(5일,10일 등 일자)

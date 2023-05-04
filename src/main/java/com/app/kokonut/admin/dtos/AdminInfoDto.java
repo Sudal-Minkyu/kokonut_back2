@@ -1,9 +1,10 @@
 package com.app.kokonut.admin.dtos;
 
-import com.app.kokonut.admin.enums.AuthorityRole;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
 
 /**
  * @author Woody
@@ -20,4 +21,7 @@ public class AdminInfoDto {
 
     private String cpName; // 소속명
 
+    private Integer cpElectronic;
+
+    private LocalDate cpElectronicDate;
 }

@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 /**
  * @author Woody
  * Date : 2023-05-01
@@ -17,8 +20,10 @@ public class PolicyDetailDto {
 
     private String piVersion; // 개정본 버전
 
-    private String piDate; // 개정일
-
+    private LocalDateTime modify_date; // 개정일
+    
+    private String piDate; // 시행일
+    
     private String piHeader; // 머리말 기업명
 
     private String knName;
@@ -46,6 +51,10 @@ public class PolicyDetailDto {
     private String piMonth; // 시행일자 월
 
     private String piDay; // 시행일자 일
+
+    public String getModify_date() {
+        return DateTimeFormatter.ofPattern("yyyy. MM. dd").format(modify_date);
+    }
 
 //    public String getPiDate() {
 //        return piDate.replaceAll("-",". ");

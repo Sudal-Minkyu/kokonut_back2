@@ -29,7 +29,7 @@ public class PolicyListDto {
 
     private AuthorityRole knRoleDesc;
 
-    private LocalDateTime insert_date;
+    private LocalDateTime modify_date;
 
     private String piDate;
 
@@ -42,8 +42,8 @@ public class PolicyListDto {
         return knName.substring(0,1)+stars+knName.substring(knName.length()-1);
     }
 
-    public String getInsert_date() {
-        return DateTimeFormatter.ofPattern("yyyy. MM. dd").format(insert_date);
+    public String getModify_date() {
+        return DateTimeFormatter.ofPattern("yyyy. MM. dd").format(modify_date);
     }
 
     public String getKnRoleDesc() {

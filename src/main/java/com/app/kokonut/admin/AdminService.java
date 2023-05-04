@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -290,6 +291,22 @@ public class AdminService {
             data.put("knName",adminInfoDto.getKnName());
             data.put("cpName",adminInfoDto.getCpName());
             data.put("role",jwtFilterDto.getRole().getCode());
+
+            LocalDate nowDate = LocalDate.now();
+            // log.info("nowDate : "+nowDate);
+            LocalDate electronicDate = adminInfoDto.getCpElectronicDate();
+            // log.info("electronicDate : "+electronicDate);
+            if(adminInfoDto.getCpElectronic() == 2 ) {
+                if(electronicDate.isBefore(nowDate)) {
+                    // log.info("2이고 1년이 지났음");
+                    data.put("electronic", 0);
+                } else {
+                    // log.info("2이고 1년이 지나지 않았음");
+                    data.put("electronic", adminInfoDto.getCpElectronic());
+                }
+            } else {
+                data.put("electronic",adminInfoDto.getCpElectronic());
+            }
         }
 
         return ResponseEntity.ok(res.success(data));
