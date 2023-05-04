@@ -1,11 +1,27 @@
 version: 0.0
 os: linux
+
 files:
-  - source:  /
-    destination: /root/kokonut_backend_project/
+  - source: /
+    destination: /root/kokonut_backend/
+    # 위의 경로가 존재하지 않는다면 /usr/local/tomcat/webapps/ 경로를 사용할 수 있음
+
+hooks:
+  ApplicationStop:
+    - location: scripts/stop_server.sh
+      timeout: 60
+      runas: root
+  BeforeInstall:
+    - location: scripts/install_dependencies.sh
+      timeout: 300
+      runas: root
+  AfterInstall:
+    - location: scripts/start_server.sh
+      timeout: 60
+      runas: root
 
 permissions:
-  - object: /root/kokonut_backend_project/
+  - object: "/"
     pattern: "**"
     owner: root
     group: root
