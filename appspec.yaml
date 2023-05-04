@@ -1,11 +1,13 @@
 version: 0.0
 os: linux
+
 files:
-  - source:  /
-    destination: /root/kokonut_backend_project/
+  - source: /
+    destination: /data/apps/tomcat8.5/webapps/
+    # 위의 경로가 존재하지 않는다면 /usr/local/tomcat/webapps/ 경로를 사용할 수 있음
 
 permissions:
-  - object: /root/kokonut_backend_project/
+  - object: "/"
     pattern: "**"
     owner: root
     group: root
