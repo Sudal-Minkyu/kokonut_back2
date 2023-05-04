@@ -1,5 +1,6 @@
 package com.app.kokonut.admin.dtos;
 
+import com.app.kokonut.admin.enums.AuthorityRole;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -289,6 +289,7 @@ public class AdminService {
             log.info("해당 유저의 권한 : "+jwtFilterDto.getRole().getDesc());
             data.put("knName",adminInfoDto.getKnName());
             data.put("cpName",adminInfoDto.getCpName());
+            data.put("role",jwtFilterDto.getRole().getCode());
         }
 
         return ResponseEntity.ok(res.success(data));

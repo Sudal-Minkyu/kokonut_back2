@@ -372,7 +372,11 @@ public class KokonutUserService {
 				}
 
 				if(Extra.equals("auto_increment") && Key.equals("PRI")) {
-					query += "`"+ Field +"` bigint(20) NOT NULL PRIMARY KEY AUTO_INCREMENT";
+					if(state == 1) {
+						query += "`"+ Field +"` bigint(20) NOT NULL";
+					} else {
+						query += "`"+ Field +"` bigint(20) NOT NULL PRIMARY KEY AUTO_INCREMENT";
+					}
 				} else {
 					query += "`"+ Field +"` "+ Type;
 					if(Null.equals("NO")) {
@@ -400,6 +404,10 @@ public class KokonutUserService {
 
 				sb.append(query);
 				num++;
+			}
+
+			if(state == 1) {
+				sb.append(", INDEX kokonut_IDX_index (kokonut_IDX)");
 			}
 			sb.append(")");
 			String createQuery = sb.toString();

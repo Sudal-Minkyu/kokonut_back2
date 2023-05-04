@@ -279,7 +279,7 @@ public class QnaService {
                     }
                 }
 
-                data.put("role", jwtFilterDto.getRole().getCode());
+//                data.put("role", jwtFilterDto.getRole().getCode());
                 data.put("qnaDetail", qnaDetailDto);
                 data.put("qnaDetailFile", qnaFileListDtoList);
 

@@ -21,7 +21,7 @@ public class PolicyListDto {
 
     private Long piId;
 
-    private Double piVersion;
+    private String piVersion;
 
     private String knName;
 
