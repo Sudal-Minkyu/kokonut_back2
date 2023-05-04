@@ -3,7 +3,7 @@ os: linux
 
 files:
   - source: /
-    destination: /data/apps/tomcat8.5/webapps/
+    destination: /root/kokonut_backend/
     # 위의 경로가 존재하지 않는다면 /usr/local/tomcat/webapps/ 경로를 사용할 수 있음
 
 permissions:
