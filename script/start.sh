@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd /root/kokonut_backend/
+
 # Stop existing process
 echo "Stopping existing process..."
 pkill -f kokonut*.jar
