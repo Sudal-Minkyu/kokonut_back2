@@ -22,12 +22,12 @@ phases:
 #     - zip -r ./kokonut_deploy.zip ./deploy
 #     - aws s3 cp --region ap-northeast-2 ./kokonut_deploy.zip s3://kokonut-server-update-20230213/upload/build_projectfile/ 
 
-#artifacts:
-#  files:
-#    - build/libs/*.jar 
-#    - appspec.yml
-#    - script/start.sh
-#  discard-paths: yes
+artifacts:
+  files:
+    - build/libs/*.jar 
+    - appspec.yml
+    - script/start.sh
+  discard-paths: yes
 
 cache:
   paths:
