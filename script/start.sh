@@ -4,11 +4,6 @@
 echo "Stopping existing process..."
 pkill -f kokonut-0.0.1-SNAPSHOT.jar
 
-# Remove existing file
-echo "Removing existing file..."
-rm /root/kokonut_backend/*.jar
-
-
 # 10초간 대기합니다.
 sleep 10
 
