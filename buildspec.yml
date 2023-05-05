@@ -20,7 +20,7 @@ phases:
 #     - mkdir -p deploy
 #     - cp ./build/libs/*.jar ./deploy
 #     - zip -r ./kokonut_deploy.zip ./deploy
-#     - aws s3 cp --region ap-northeast-2 ./kokonut_deploy.zip s3://kokonut-server-update-20230213/upload/build_projectfile/
+#     - aws s3 cp --region ap-northeast-2 ./kokonut_deploy.zip s3://kokonut-server-update-20230213/upload/build_projectfile/ 
 
 artifacts:
   files:
