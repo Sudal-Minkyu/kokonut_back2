@@ -17,6 +17,7 @@ phases:
       - echo Build completed on `date`
       - echo $(basename ./build/libs/*.jar) 
       - pwd 
+      - ls -al
 #     - mkdir -p deploy
 #     - cp ./build/libs/*.jar ./deploy
 #     - zip -r ./kokonut_deploy.zip ./deploy
