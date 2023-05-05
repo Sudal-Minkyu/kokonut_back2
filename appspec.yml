@@ -4,8 +4,7 @@ os: linux
 files:
   - source: /
     destination: /root/kokonut_backend/
-    overwrite: yes
-    
+
 hooks:
 # 서버를 중지하는 스크립트
 #  ApplicationStop:
