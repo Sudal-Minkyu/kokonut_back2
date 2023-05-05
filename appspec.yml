@@ -4,6 +4,14 @@ os: linux
 files:
   - source: /
     destination: /root/kokonut_backend/
+    overwrite: yes
+    
+permissions:
+  - object: /root/kokonut_backend/
+    pattern: "**"
+    owner: root
+    group: root
+
     # 위의 경로가 존재하지 않는다면 /usr/local/tomcat/webapps/ 경로를 사용할 수 있음
 
 hooks:
@@ -17,11 +25,6 @@ hooks:
 #      runas: root
   AfterInstall:
     - location: script/start.sh
-      timeout: 60
-#     runas: root
+      timeout: 300
+      runas: root
 
-permissions:
-  - object: "/"
-    pattern: "**"
-    owner: root
-    group: root
