@@ -2,11 +2,7 @@
 
 # Stop existing process
 echo "Stopping existing process..."
-PID=$(ps -ef | grep kokonut-0.0.1-SNAPSHOT.jar | grep -v grep | awk '{print $2}')
-if [ -n "$PID" ]; then
-    echo "Killing process $PID"
-    kill -9 $PID
-fi
+pkill -f kokonut-0.0.1-SNAPSHOT.jar
 
 # Remove existing file
 echo "Removing existing file..."
