@@ -17,20 +17,20 @@ phases:
       - echo Build completed on `date`
       - echo $(basename ./build/libs/*.jar) 
       - pwd 
-      - ls -al
-      - ls -al /codebuild/output/src808979347/src/script/
 #     - mkdir -p deploy
 #     - cp ./build/libs/*.jar ./deploy
 #     - zip -r ./kokonut_deploy.zip ./deploy
 #     - aws s3 cp --region ap-northeast-2 ./kokonut_deploy.zip s3://kokonut-server-update-20230213/upload/build_projectfile/ 
 
-artifacts:
-  files:
-    - build/libs/*.jar 
-    - appspec.yml
-    - script/start.sh
-  discard-paths: yes
+#artifacts:
+#  files:
+#    - build/libs/*.jar 
+#    - appspec.yml
+#    - script/start.sh
+#  discard-paths: yes
 
 cache:
   paths:
     - '/root/.gradle/caches/**/*'
+    
+    
