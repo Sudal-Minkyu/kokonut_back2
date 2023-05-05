@@ -18,7 +18,7 @@ hooks:
   AfterInstall:
     - location: script/start.sh
       timeout: 60
-      runas: root
+#     runas: root
 
 permissions:
   - object: "/"
