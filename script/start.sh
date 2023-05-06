@@ -19,4 +19,4 @@ cp /opt/codedeploy-agent/deployment-root/$DEPLOYMENT_GROUP_ID/$DEPLOYMENT_ID/dep
 source /root/.zshrc
 
 # 새로운 프로세스 시작
-nohup java -jar kokonut-0.0.1-SNAPSHOT.jar > /dev/null 2>&1 &
+nohup java -jar kokonut-0.0.1-SNAPSHOT.jar 2>&1 > java_err.log &
