@@ -22,3 +22,4 @@ source ~/.zshrc
 nohup java -jar kokonut-0.0.1-SNAPSHOT.jar 1>vite.stdout 2>vite.stderr &
 
 exit
+
