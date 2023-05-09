@@ -11,7 +11,7 @@ kill $PID
 sleep 10
 
 # 파일 삭제
-rm *.jar
+#rm *.jar
 
 # 새로운 파일 복사
 cp /opt/codedeploy-agent/deployment-root/$DEPLOYMENT_GROUP_ID/$DEPLOYMENT_ID/deployment-archive/kokonut*.jar /root/kokonut_backend/kokonut*.jar
