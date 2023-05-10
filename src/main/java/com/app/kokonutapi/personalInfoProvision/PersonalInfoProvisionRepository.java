@@ -10,8 +10,8 @@ import org.springframework.stereotype.Repository;
  * Time :
  * Remark : 기존의 코코넛 프로젝트의 PersonalInfoDao라고 보면 됨
  */
-@Repository
-public interface PersonalInfoProvisionRepository extends JpaRepository<PersonalInfoProvision, Long>, JpaSpecificationExecutor<PersonalInfoProvision>, PersonalInfoProvisionRepositoryCustom {
+//@Repository
+//public interface PersonalInfoProvisionRepository extends JpaRepository<PersonalInfoProvision, Long>, JpaSpecificationExecutor<PersonalInfoProvision>, PersonalInfoProvisionRepositoryCustom {
 
     /////////////////////////////////////////////////////////////////
     // 정보제공
@@ -63,4 +63,4 @@ public interface PersonalInfoProvisionRepository extends JpaRepository<PersonalI
 //    List<Map<String, Object>> selectDownloadHistoryListByIdx(String idx);
 //    int deleteDownloadHistoryByNumber(String number);
 //
-}
+//}

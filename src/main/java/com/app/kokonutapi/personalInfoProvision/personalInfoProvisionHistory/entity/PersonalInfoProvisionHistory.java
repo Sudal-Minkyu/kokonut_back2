@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(of = "pphId")
 @Data
 @NoArgsConstructor
-@Table(name="kn_personal_info_provision_history")
+@Table(name="personal_info_provision_history")
 public class PersonalInfoProvisionHistory {
 
     @Id

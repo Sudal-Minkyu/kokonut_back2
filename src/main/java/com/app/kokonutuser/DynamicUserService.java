@@ -1602,6 +1602,12 @@ public class DynamicUserService {
 			Integer tableAddColumnCount = optionalCompanyTable.get().getCtAddColumnCount();
 			log.info("추가된 컬럼수 : "+tableAddColumnCount);
 
+			String ctNameStatus = optionalCompanyTable.get().getCtNameStatus();
+			String ctPhoneStatus = optionalCompanyTable.get().getCtPhoneStatus();
+			String ctGenderStatus = optionalCompanyTable.get().getCtGenderStatus();
+			String ctEmailStatus = optionalCompanyTable.get().getCtEmailStatus();
+			String ctBirthStatus = optionalCompanyTable.get().getCtBirthStatus();
+
 			List<KokonutAddColumnListDto> kokonutAddColumnListDtos = kokonutColumnAddDto.getKokonutAddColumnListDtos();
 			// 테이블에 컬럼 추가하기
 			for(KokonutAddColumnListDto kokonutAddColumnListDto : kokonutAddColumnListDtos) {
@@ -1609,7 +1615,40 @@ public class DynamicUserService {
 				Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
 						companyCode+" - "+activityCode.getDesc()+" 시도 이력"+ "추가된 컬럼명 : "+kokonutAddColumnListDto.getCiName(), "", ip, 0, jwtFilterDto.getEmail());
 
+				String fieldCode = optionalCompanyTable.get().getCtTableCount()+"_"+tableAddColumnCount;
+				String fieldName = tableName+"_"+tableAddColumnCount;
 				StringBuilder comment = new StringBuilder(kokonutAddColumnListDto.getCiName());
+
+				if(ctNameStatus.equals("")) {
+					if(comment.toString().equals("이름")) {
+						ctNameStatus = fieldName;
+					}
+				}
+
+				if(ctPhoneStatus.equals("")) {
+					if(comment.toString().equals("휴대전화번호")) {
+						ctPhoneStatus = fieldName;
+					}
+				}
+
+				if(ctGenderStatus.equals("")) {
+					if(comment.toString().equals("성별")) {
+						ctGenderStatus = fieldName;
+					}
+				}
+
+				if(ctEmailStatus.equals("")) {
+					if(comment.toString().equals("이메일주소")) {
+						ctEmailStatus = fieldName;
+					}
+				}
+
+				if(ctBirthStatus.equals("")) {
+					if(comment.toString().equals("생년월일")) {
+						ctBirthStatus = fieldName;
+					}
+				}
+
 				if(kokonutAddColumnListDto.getCiSecurity() == 0) {
 					comment.append(",비암호화");
 				} else {
@@ -1620,7 +1659,7 @@ public class DynamicUserService {
 				comment.append(",");
 				comment.append(kokonutAddColumnListDto.getTextColor());
 				comment.append(",");
-				comment.append(optionalCompanyTable.get().getCtTableCount()).append("_").append(tableAddColumnCount);
+				comment.append(fieldCode);
 				kokonutUserService.alterAddColumnTableQuery(
 						tableName, tableName+"_"+tableAddColumnCount, "VARCHAR", 256, true, "", String.valueOf(comment)
 				);
@@ -1632,7 +1671,14 @@ public class DynamicUserService {
 			}
 
 			log.info("tableAddColumnCount : "+tableAddColumnCount);
+			optionalCompanyTable.get().setCtNameStatus(ctNameStatus);
+			optionalCompanyTable.get().setCtPhoneStatus(ctPhoneStatus);
+			optionalCompanyTable.get().setCtEmailStatus(ctEmailStatus);
+			optionalCompanyTable.get().setCtGenderStatus(ctGenderStatus);
+			optionalCompanyTable.get().setCtBirthStatus(ctBirthStatus);
 			optionalCompanyTable.get().setCtAddColumnCount(tableAddColumnCount);
+			optionalCompanyTable.get().setModify_email(jwtFilterDto.getEmail());
+			optionalCompanyTable.get().setModify_date(LocalDateTime.now());
 			companyTableRepository.save(optionalCompanyTable.get());
 		}
 
@@ -1659,9 +1705,62 @@ public class DynamicUserService {
 		}
 
 		String tableName = kokonutColumnDeleteDto.getTableName();
-		for(int i=0; i<kokonutColumnDeleteDto.getFieldNames().size(); i++) {
-			log.info("삭제할 필드명 : "+kokonutColumnDeleteDto.getFieldNames().get(i));
-			kokonutUserService.alterDropColumnUserTableQuery(tableName, kokonutColumnDeleteDto.getFieldNames().get(i));
+
+		Optional<CompanyTable> optionalCompanyTable = companyTableRepository.findCompanyTableByCtName(tableName);
+		if(optionalCompanyTable.isPresent()) {
+
+			String ctNameStatus = optionalCompanyTable.get().getCtNameStatus();
+			String ctPhoneStatus = optionalCompanyTable.get().getCtPhoneStatus();
+			String ctGenderStatus = optionalCompanyTable.get().getCtGenderStatus();
+			String ctEmailStatus = optionalCompanyTable.get().getCtEmailStatus();
+			String ctBirthStatus = optionalCompanyTable.get().getCtBirthStatus();
+
+			for(int i=0; i<kokonutColumnDeleteDto.getFieldNames().size(); i++) {
+				log.info("삭제할 필드명 : "+kokonutColumnDeleteDto.getFieldNames().get(i));
+				boolean result = kokonutUserService.alterDropColumnUserTableQuery(tableName, kokonutColumnDeleteDto.getFieldNames().get(i));
+
+				if(result) {
+					if(!ctNameStatus.equals("")) {
+						if(kokonutColumnDeleteDto.getFieldNames().get(i).equals(ctNameStatus)) {
+							ctNameStatus = "";
+						}
+					}
+
+					if(!ctPhoneStatus.equals("")) {
+						if(kokonutColumnDeleteDto.getFieldNames().get(i).equals(ctPhoneStatus)) {
+							ctPhoneStatus = "";
+						}
+					}
+
+					if(!ctGenderStatus.equals("")) {
+						if(kokonutColumnDeleteDto.getFieldNames().get(i).equals(ctGenderStatus)) {
+							ctGenderStatus = "";
+						}
+					}
+
+					if(!ctEmailStatus.equals("")) {
+						if(kokonutColumnDeleteDto.getFieldNames().get(i).equals(ctEmailStatus)) {
+							ctEmailStatus = "";
+						}
+					}
+
+					if(!ctBirthStatus.equals("")) {
+						if(kokonutColumnDeleteDto.getFieldNames().get(i).equals(ctBirthStatus)) {
+							ctBirthStatus = "";
+						}
+					}
+				}
+			}
+
+			optionalCompanyTable.get().setCtNameStatus(ctNameStatus);
+			optionalCompanyTable.get().setCtPhoneStatus(ctPhoneStatus);
+			optionalCompanyTable.get().setCtEmailStatus(ctEmailStatus);
+			optionalCompanyTable.get().setCtGenderStatus(ctGenderStatus);
+			optionalCompanyTable.get().setCtBirthStatus(ctBirthStatus);
+			optionalCompanyTable.get().setModify_email(jwtFilterDto.getEmail());
+			optionalCompanyTable.get().setModify_date(LocalDateTime.now());
+			companyTableRepository.save(optionalCompanyTable.get());
+
 		}
 
 		return ResponseEntity.ok(res.success(data));

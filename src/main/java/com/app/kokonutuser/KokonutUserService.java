@@ -636,7 +636,7 @@ public class KokonutUserService {
 	 * 기존 코코넛 : AlterDropColumnTableQuery
 	 */
 	@Transactional
-	public void alterDropColumnUserTableQuery(String tableName, String field) {
+	public boolean alterDropColumnUserTableQuery(String tableName, String field) {
 		log.info("alterDropColumnUserTableQuery 호출");
 
 		try {
@@ -645,8 +645,10 @@ public class KokonutUserService {
 			dynamicUserRepositoryCustom.userCommonTable(dropQuery);
 
 			log.info("유저테이블 필드삭제 성공 : "+tableName);
+            return true;
 		} catch (Exception e) {
 			log.error("유저테이블 필드삭제 에러 : "+tableName);
+            return false;
 		}
 	}
 

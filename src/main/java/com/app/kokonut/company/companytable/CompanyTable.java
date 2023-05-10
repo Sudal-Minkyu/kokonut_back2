@@ -42,30 +42,38 @@ public class CompanyTable {
     @Column(name = "ct_add_column_count")
     private Integer ctAddColumnCount;
 
-    /**
-     * 등록자 email
-     */
+    @ApiModelProperty("해당 테이블의 이름 컬럼 유무 - 공백:포함되지않음, 필드명:포함됨")
+    @Column(name = "ct_name_status")
+    private String ctNameStatus;
+
+    @ApiModelProperty("해당 테이블의 휴대폰번호 컬럼 유무 - 공백:포함되지않음, 필드명:포함됨")
+    @Column(name = "ct_phone_status")
+    private String ctPhoneStatus;
+
+    @ApiModelProperty("해당 테이블의 성별 컬럼 유무 - 공백:포함되지않음, 필드명:포함됨")
+    @Column(name = "ct_gender_status")
+    private String ctGenderStatus;
+
+    @ApiModelProperty("해당 테이블의 이메일 컬럼 유무 - 공백:포함되지않음, 필드명:포함됨")
+    @Column(name = "ct_email_status")
+    private String ctEmailStatus;
+
+    @ApiModelProperty("해당 테이블의 생년월일 컬럼 유무 - 공백:포함되지않음, 필드명:포함됨")
+    @Column(name = "ct_birth_status")
+    private String ctBirthStatus;
+
     @ApiModelProperty("등록자 email")
     @Column(name = "insert_email", nullable = false)
     private String insert_email;
 
-    /**
-     * 등록 날짜
-     */
     @ApiModelProperty("등록 날짜")
     @Column(name = "insert_date", nullable = false)
     private LocalDateTime insert_date;
 
-    /**
-     * 수정자 이름
-     */
     @ApiModelProperty("수정자 email")
     @Column(name = "modify_email")
     private String modify_email;
 
-    /**
-     * 수정 날짜
-     */
     @ApiModelProperty("수정 날짜")
     @Column(name = "modify_date")
     private LocalDateTime modify_date;

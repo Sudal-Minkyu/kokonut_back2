@@ -307,6 +307,11 @@ public class CompanyItemService {
             companyTable.setCtTableCount(String.valueOf(cpTableCount));
             companyTable.setCtDesignation(ctDesignation);
             companyTable.setCtAddColumnCount(1);
+            companyTable.setCtNameStatus("");
+            companyTable.setCtPhoneStatus("");
+            companyTable.setCtBirthStatus("");
+            companyTable.setCtGenderStatus("");
+            companyTable.setCtEmailStatus("");
             companyTable.setInsert_email(jwtFilterDto.getEmail());
             companyTable.setInsert_date(LocalDateTime.now());
             companyTableRepository.save(companyTable);

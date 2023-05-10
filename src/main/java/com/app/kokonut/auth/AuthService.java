@@ -459,6 +459,15 @@ public class AuthService {
         companyTable.setCtTableCount("1");
         companyTable.setCtDesignation("기본");
         companyTable.setCtAddColumnCount(1);
+        companyTable.setCtNameStatus("");
+        companyTable.setCtPhoneStatus("");
+        companyTable.setCtBirthStatus("");
+        companyTable.setCtGenderStatus("");
+        companyTable.setCtEmailStatus("");
+        companyTable.setCtAddColumnCount(1);
+        companyTable.setCtAddColumnCount(1);
+        companyTable.setCtAddColumnCount(1);
+        companyTable.setCtAddColumnCount(1);
         companyTable.setInsert_email(kokonutSignUp.getKnEmail());
         companyTable.setInsert_date(LocalDateTime.now());
 

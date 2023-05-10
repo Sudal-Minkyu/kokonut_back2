@@ -290,6 +290,7 @@ public class AdminService {
             log.info("해당 유저의 권한 : "+jwtFilterDto.getRole().getDesc());
             data.put("knName",adminInfoDto.getKnName());
             data.put("cpName",adminInfoDto.getCpName());
+            data.put("knEmail",email);
             data.put("role",jwtFilterDto.getRole().getCode());
 
             LocalDate nowDate = LocalDate.now();
@@ -537,7 +538,7 @@ public class AdminService {
         Long companyId = adminCompanyInfoDto.getCompanyId();
 
         // type => "0" 내부제공, "1" 외부제공,
-        List<AdminOfferListDto> adminOfferListDtos = adminRepository.findByAdminOfferList(companyId, type);
+        List<AdminOfferListDto> adminOfferListDtos = adminRepository.findByAdminOfferList(companyId, type, email);
         data.put("offerList",adminOfferListDtos);
 
         return ResponseEntity.ok(res.success(data));

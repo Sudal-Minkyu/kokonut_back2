@@ -172,7 +172,7 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
 
     // 개인정보제공할 리스트 호출
     @Override
-    public List<AdminOfferListDto> findByAdminOfferList(Long companyId, String type) {
+    public List<AdminOfferListDto> findByAdminOfferList(Long companyId, String type, String email) {
 
         QAdmin admin = QAdmin.admin;
 
@@ -193,6 +193,9 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
         else {
             query.where(admin.knRoleCode.eq(AuthorityRole.ROLE_GUEST));
         }
+
+        // 본인 조회는 제외
+        query.where(admin.knEmail.ne(email));
 
         return query.fetch();
     }
