@@ -22,7 +22,7 @@ import java.util.Map;
  */
 @Slf4j
 @RestController
-@RequestMapping("/v2/api/PersonalInfoProvision")
+@RequestMapping("/v2/api/Provision")
 public class ProvisionRestController {
 
     private final ProvisionService provisionService;

@@ -33,11 +33,11 @@ public class ProvisionEntry {
 
     @ApiModelProperty("제공할 테이블명")
     @Column(name = "pipe_table_name")
-    private String pipe_table_name;
+    private String pipeTableName;
 
     @ApiModelProperty("제공할 필드코드(,) 구분자")
-    @Column(name = "pipe_table_target")
-    private String pipe_table_target;
+    @Column(name = "pipe_table_targets")
+    private String pipeTableTargets;
 
     @ApiModelProperty("등록자 email")
     @Column(name = "insert_email")

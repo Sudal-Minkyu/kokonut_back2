@@ -1765,4 +1765,84 @@ public class DynamicUserService {
 
 		return ResponseEntity.ok(res.success(data));
 	}
+
+	// 기본테이블의 데이터를 조회한다.
+	public ResponseEntity<Map<String, Object>> tableBasicList(JwtFilterDto jwtFilterDto) {
+		log.info("tableColumnDelete 호출");
+
+		AjaxResponse res = new AjaxResponse();
+		HashMap<String, Object> data = new HashMap<>();
+
+		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(jwtFilterDto.getEmail());
+		String companyCode = adminCompanyInfoDto.getCompanyCode();
+
+		Optional<CompanyTable> optionalCompanyTable = companyTableRepository.findCompanyTableByCpCodeAndCtDesignation(companyCode, "기본");
+		if(optionalCompanyTable.isPresent()) {
+			log.info("존재하는 테이블");
+
+			String ctNameStatus = optionalCompanyTable.get().getCtNameStatus();
+			String ctPhoneStatus = optionalCompanyTable.get().getCtPhoneStatus();
+			String ctGenderStatus = optionalCompanyTable.get().getCtGenderStatus();
+			String ctEmailStatus = optionalCompanyTable.get().getCtEmailStatus();
+			String ctBirthStatus = optionalCompanyTable.get().getCtBirthStatus();
+
+			StringBuilder searchQuery = new StringBuilder();
+			searchQuery.append("SELECT ");
+			searchQuery.append("kokonut_IDX, " +
+					"DATE_FORMAT(kokonut_REGISTER_DATE, '%Y.%m.%d') as kokonut_REGISTER_DATE, " +
+					"DATE_FORMAT(kokonut_LAST_LOGIN_DATE, '%Y.%m.%d') as kokonut_LAST_LOGIN_DATE");
+
+			// CONCAT(
+			// LEFT(kokonut202301001_1_32, 1),
+			// CASE WHEN CHAR_LENGTH(kokonut202301001_1_32)-2 <= 36 THEN '*'
+			// WHEN CHAR_LENGTH(kokonut202301001_1_32)-2 <= 40 THEN '**'
+			// WHEN CHAR_LENGTH(kokonut202301001_1_32)-2 <= 44 THEN '***'
+			// ELSE '****' END,
+			// RIGHT(kokonut202301001_1_32, 1)) as basicName,
+			// 한글기준 암호화크기 : 첫글자 28, 두글자 32, 세글자 36, 네글자 40, 다섯글자 44
+			if(!ctNameStatus.equals("")) {
+				searchQuery
+						.append(", CONCAT(")
+						.append("LEFT(").append(ctNameStatus).append(", 1),")
+						.append("CASE ")
+						.append("WHEN CHAR_LENGTH(").append(ctNameStatus).append(")-2 <= 36 THEN '*' ")
+						.append("WHEN CHAR_LENGTH(").append(ctNameStatus).append(")-2 <= 40 THEN '**' ")
+						.append("WHEN CHAR_LENGTH(").append(ctNameStatus).append(")-2 <= 44 THEN '***' ")
+						.append("ELSE '****' END, ")
+						.append("RIGHT(").append(ctNameStatus).append(", 1)) as basicName");
+			}
+
+			// CONCAT(LEFT(필드명, 4),'****', SUBSTRING(필드명, CHAR_LENGTH(필드명) - 4)) as basicPhone,
+			if(!ctPhoneStatus.equals("")) {
+				searchQuery
+						.append(", CONCAT(LEFT(").append(ctPhoneStatus).append(", 4),'****',")
+						.append("SUBSTRING(").append(ctPhoneStatus).append(", CHAR_LENGTH(").append(ctPhoneStatus).append(")-4)) as basicPhone");
+			}
+
+			if(!ctGenderStatus.equals("")) {
+				searchQuery.append(", ").append(ctGenderStatus).append(" as basicGender");
+			}
+
+			if(!ctEmailStatus.equals("")) {
+				searchQuery.append(", ").append(ctEmailStatus).append(" as basicEmail");
+			}
+
+			if(!ctBirthStatus.equals("")) {
+				searchQuery.append(", ").append(ctBirthStatus).append(" as basicBirth");
+			}
+
+			searchQuery.append(" FROM ");
+
+			searchQuery.append(optionalCompanyTable.get().getCtName());
+			searchQuery.append(" WHERE 1=1");
+			log.info("searchQuery : "+ searchQuery);
+
+			List<Map<String, Object>> basicTableList = kokonutUserService.selectBasicTableList(searchQuery.toString());
+			log.info("basicTableList : "+basicTableList);
+			data.put("basicTableList",basicTableList);
+		}
+
+		return ResponseEntity.ok(res.success(data));
+	}
+
 }

@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import org.joda.time.DateTime;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -23,11 +24,11 @@ public class KokonutUserListDto {
 
     private String ID; // 아이디
 
-    private Timestamp REGDATE; // 회원가입 일시
+    private LocalDateTime REGDATE; // 회원가입 일시
 
-    private Timestamp LAST_LOGIN_DATE; // 최근 접속 일시
+    private LocalDateTime LAST_LOGIN_DATE; // 최근 접속 일시
 
-    public KokonutUserListDto(long IDX, String ID, Timestamp REGDATE, Timestamp LAST_LOGIN_DATE) {
+    public KokonutUserListDto(long IDX, String ID, LocalDateTime REGDATE, LocalDateTime LAST_LOGIN_DATE) {
         this.IDX = IDX;
         this.ID = ID;
         this.REGDATE = REGDATE;

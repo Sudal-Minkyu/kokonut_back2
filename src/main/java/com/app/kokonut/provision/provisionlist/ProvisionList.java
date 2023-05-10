@@ -32,8 +32,8 @@ public class ProvisionList {
     private String piNumber;
 
     @ApiModelProperty("'제공할 kokonut_IDX 리스트(,) 구분자'")
-    @Column(name = "pipl_table_target")
-    private String pipl_table_target;
+    @Column(name = "pipl_target_idxs")
+    private String piplTargetIdxs;
 
     @ApiModelProperty("등록자 email")
     @Column(name = "insert_email")

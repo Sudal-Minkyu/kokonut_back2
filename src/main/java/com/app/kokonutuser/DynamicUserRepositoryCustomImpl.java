@@ -157,8 +157,8 @@ public class DynamicUserRepositoryCustomImpl implements DynamicUserRepositoryCus
                 new KokonutUserListDto(
                     rs.getLong("kokonut_IDX"),
                     rs.getString("ID"),
-                    rs.getTimestamp("REGDATE"),
-                    rs.getTimestamp("LAST_LOGIN_DATE")
+                    rs.getTimestamp("REGDATE").toLocalDateTime(),
+                    rs.getTimestamp("LAST_LOGIN_DATE").toLocalDateTime()
                 )
         );
     }

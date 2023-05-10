@@ -93,7 +93,16 @@ public class DynamicUserRestController {
 		return dynamicUserService.tableColumnDelete(kokonutColumnDeleteDto, jwtFilterDto);
 	}
 
-
+	@ApiOperation(value="기본테이블의 데이터를 조회한다.", notes="" +
+			"1. 기본테이블에 추가된 개인정보리스트들을 호출한다." +
+			"2. 전자상거래법의 해당하는 컬럼들을 추가하지 않은 기본 테이블일 경우 kokonut_IDX와 아이디만 보내주며" +
+			"3. 컬럼이 존재할경우 해당컬럼과 함꼐 리스트로 보내준다.")
+	@GetMapping(value = "/tableBasicList")
+	@ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+	public ResponseEntity<Map<String,Object>> tableBasicList() {
+		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+		return dynamicUserService.tableBasicList(jwtFilterDto);
+	}
 
 
 
