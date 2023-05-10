@@ -4,22 +4,27 @@ os: linux
 files:
   - source: /
     destination: /root/kokonut_backend/
-    # 위의 경로가 존재하지 않는다면 /usr/local/tomcat/webapps/ 경로를 사용할 수 있음
 
 hooks:
+# 서버를 중지하는 스크립트
 #  ApplicationStop:
 #    - location: script/stop_server.sh
 #      timeout: 60
 #      runas: root
+
+# 종속성을 설치하는 스크립트
 #  BeforeInstall:
 #    - location: script/install_dependencies.sh
 #      timeout: 300
 #      runas: root
+
+# 애플리케이션을 시작하는 스크립트
   AfterInstall:
-    - location: script/start.sh
-      timeout: 60
+    - location: start.sh
+      timeout: 300
       runas: root
 
+# 모든 파일과 디렉토리를 root 사용자와 root 그룹으로 설정하는 권한 설정
 permissions:
   - object: "/"
     pattern: "**"
