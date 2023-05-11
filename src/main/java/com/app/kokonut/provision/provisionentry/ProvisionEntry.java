@@ -28,8 +28,8 @@ public class ProvisionEntry {
     private Long pipeId;
 
     @ApiModelProperty("개인정보제공 고유코드")
-    @Column(name = "pi_code")
-    private String piNumber;
+    @Column(name = "pro_code")
+    private String proCode;
 
     @ApiModelProperty("제공할 테이블명")
     @Column(name = "pipe_table_name")

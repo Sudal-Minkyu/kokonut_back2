@@ -1,16 +1,22 @@
 package com.app.kokonut.provision;
 
 import com.app.kokonut.admin.AdminRepository;
+import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
+import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import com.app.kokonut.common.AjaxResponse;
-import com.app.kokonut.common.realcomponent.AriaUtil;
+import com.app.kokonut.common.ResponseErrorCode;
+import com.app.kokonut.common.realcomponent.CommonUtil;
+import com.app.kokonut.common.realcomponent.Utils;
 import com.app.kokonut.configs.KeyGenerateService;
-import com.app.kokonut.configs.MailSender;
 import com.app.kokonut.history.HistoryService;
+import com.app.kokonut.history.dto.ActivityCode;
+import com.app.kokonut.provision.dtos.ProvisionListDto;
 import com.app.kokonut.provision.dtos.ProvisionSaveDto;
-import com.app.kokonutapi.personalInfoProvision.dtos.PersonalInfoProvisionSaveDto;
+import com.app.kokonut.provision.dtos.ProvisionSearchDto;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,57 +24,60 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * @author Woody
- * Date : 2023-01-17
+ * Date : 2023-05-10
  * Remark :
  */
 @Slf4j
 @Service
 public class ProvisionService {
 
-    private final AriaUtil ariaUtil;
-    private final ModelMapper modelMapper;
-    private final MailSender mailSender;
     private final KeyGenerateService keyGenerateService;
 
     private final HistoryService historyService;
 
     private final AdminRepository adminRepository;
+    private final ProvisionRepository provisionRepository;
 
     @Autowired
-    public ProvisionService(AriaUtil ariaUtil, ModelMapper modelMapper, MailSender mailSender,
-                            KeyGenerateService keyGenerateService, HistoryService historyService,
-                            AdminRepository adminRepository){
-        this.ariaUtil = ariaUtil;
-        this.modelMapper = modelMapper;
-        this.mailSender = mailSender;
+    public ProvisionService(KeyGenerateService keyGenerateService, HistoryService historyService,
+                            AdminRepository adminRepository, ProvisionRepository provisionRepository){
         this.keyGenerateService = keyGenerateService;
         this.historyService = historyService;
         this.adminRepository = adminRepository;
+        this.provisionRepository = provisionRepository;
     }
-
 
     // 개인정보제공 등록
     @Transactional
-    public ResponseEntity<Map<String, Object>> provisionSave(ProvisionSaveDto provisionSaveDto, String email) {
+    public ResponseEntity<Map<String, Object>> provisionSave(ProvisionSaveDto provisionSaveDto, JwtFilterDto jwtFilterDto) {
         log.info("provisionSave 호출");
 
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
 
         log.info("provisionSaveDto : " + provisionSaveDto);
+
+        String email = jwtFilterDto.getEmail();
         log.info("email : " + email);
 
-//        // 해당 이메일을 통해 회사 IDX 조회
-//        AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
-//
-//        long adminId;
-//        long companyId;
-//        String companyCode;
-//
+        // 해당 이메일을 통해 회사 IDX 조회
+        AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+
+        long adminId;
+        long companyId;
+        String companyCode;
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+        LocalDateTime proStartDate = LocalDateTime.parse(provisionSaveDto.getProStartDate()+" 00:00:00.000", formatter);
+        LocalDateTime proExpDate = LocalDateTime.parse(provisionSaveDto.getProExpDate()+" 00:00:00.000", formatter);
+        log.info("proStartDate : " + proStartDate);
+        log.info("proExpDate : " + proExpDate);
+
 //        if (adminCompanyInfoDto == null) {
 //            log.error("이메일 정보가 존재하지 않습니다.");
 //            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(), "해당 이메일의 정보가 " + ResponseErrorCode.KO004.getDesc()));
@@ -89,9 +98,11 @@ public class ProvisionService {
 //        String ip = CommonUtil.clientIp();
 //        Long activityHistoryId = activityHistoryService.insertHistory(4, adminId, activityCode, companyCode + " - " + activityCode.getDesc() + " 시도 이력", "", ip, 0, email);
 //
-        String nowDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+//        String nowDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         // 고유넘버
-        String piNumber = keyGenerateService.keyGenerate("kn_personal_info_provision", nowDate+"companyCode", "KokonutSystem");
+//        String proCode = keyGenerateService.keyGenerate("kn_personal_info_provision", nowDate+"companyCode", "KokonutSystem");
+
 //
 //        PersonalInfoProvision personalInfoProvision = modelMapper.map(personalInfoProvisionSaveDto,PersonalInfoProvision.class);
 //        personalInfoProvision.setAdminId(adminId);
@@ -163,6 +174,61 @@ public class ProvisionService {
 
         return ResponseEntity.ok(res.success(data));
     }
+
+    // 개인정보제공 리스트 조회
+    public ResponseEntity<Map<String, Object>> provisionList(String searchText, String stime,
+                                                             String filterDownload, String filterState, JwtFilterDto jwtFilterDto, Pageable pageable) {
+        log.info("provisionList 호출");
+
+        AjaxResponse res = new AjaxResponse();
+
+        String email = jwtFilterDto.getEmail();
+        log.info("email : " + email);
+
+        AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+
+        long adminId = adminCompanyInfoDto.getAdminId();
+        String cpCode = adminCompanyInfoDto.getCompanyCode();
+
+        ProvisionSearchDto provisionSearchDto = new ProvisionSearchDto();
+        provisionSearchDto.setAdminId(adminId);
+        provisionSearchDto.setCpCode(cpCode);
+        provisionSearchDto.setSearchText(searchText);
+        provisionSearchDto.setFilterDownload(filterDownload);
+        provisionSearchDto.setFilterState(filterState);
+
+        if(!stime.equals("")) {
+            List<LocalDateTime> stimeList = Utils.getStimeList(stime);
+            provisionSearchDto.setStimeStart(stimeList.get(0));
+            provisionSearchDto.setStimeEnd(stimeList.get(1).plusHours(23).plusMinutes(59));
+        }
+
+        log.info("provisionSearchDto : "+provisionSearchDto);
+
+        ActivityCode activityCode;
+        String ip = CommonUtil.clientIp();
+        Long activityHistoryId;
+
+        // 개인정보 제공 리스트조회 코드
+        activityCode = ActivityCode.AC_14;
+
+        // 활동이력 저장 -> 비정상 모드
+        activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
+                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+
+        Page<ProvisionListDto> provisionListDtos = provisionRepository.findByProvisionList(provisionSearchDto, pageable);
+
+        historyService.updateHistory(activityHistoryId,
+                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+
+        if(provisionListDtos.getTotalPages() == 0) {
+            log.info("조회된 데이터가 없습니다.");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO003.getCode(), ResponseErrorCode.KO003.getDesc()));
+        } else {
+            return ResponseEntity.ok(res.ResponseEntityPage(provisionListDtos));
+        }
+    }
+
 
 
 }

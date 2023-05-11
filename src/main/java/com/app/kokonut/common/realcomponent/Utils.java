@@ -209,5 +209,11 @@ public class Utils {
 		return sb.toString();
 	}
 
+	// LocalDateTime -> yyyy-mm-dd 형태로 변환
+	public static String convertLocalDateTimeToString(LocalDateTime localDateTime) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+		return localDateTime.format(formatter);
+	}
+
 
 }

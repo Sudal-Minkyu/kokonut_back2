@@ -28,8 +28,8 @@ public class ProvisionList {
     private Long piplId;
 
     @ApiModelProperty("개인정보제공 고유코드")
-    @Column(name = "pi_code")
-    private String piNumber;
+    @Column(name = "pro_code")
+    private String proCode;
 
     @ApiModelProperty("'제공할 kokonut_IDX 리스트(,) 구분자'")
     @Column(name = "pipl_target_idxs")

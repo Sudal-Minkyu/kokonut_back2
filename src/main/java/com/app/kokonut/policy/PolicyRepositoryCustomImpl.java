@@ -1,6 +1,7 @@
 package com.app.kokonut.policy;
 
 import com.app.kokonut.admin.QAdmin;
+import com.app.kokonut.common.realcomponent.Utils;
 import com.app.kokonut.policy.dtos.*;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPQLQuery;
@@ -94,8 +95,8 @@ public class PolicyRepositoryCustomImpl extends QuerydslRepositorySupport implem
         QPolicy policy = QPolicy.policy;
         QAdmin admin = QAdmin.admin;
 
-        String stimeStart = convertLocalDateTimeToString(policySearchDto.getStimeStart());
-        String stimeEnd = convertLocalDateTimeToString(policySearchDto.getStimeEnd());
+        String stimeStart = Utils.convertLocalDateTimeToString(policySearchDto.getStimeStart());
+        String stimeEnd = Utils.convertLocalDateTimeToString(policySearchDto.getStimeEnd());
 
         JPQLQuery<PolicyListDto> query = from(policy)
                 .where(policy.cpCode.eq(policySearchDto.getCpCode())).orderBy(policy.piId.desc())
@@ -136,11 +137,6 @@ public class PolicyRepositoryCustomImpl extends QuerydslRepositorySupport implem
 
         final List<PolicyListDto> policyListDtos = Objects.requireNonNull(getQuerydsl()).applyPagination(pageable, query).fetch();
         return new PageImpl<>(policyListDtos, pageable, query.fetchCount());
-    }
-
-    private String convertLocalDateTimeToString(LocalDateTime localDateTime) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        return localDateTime.format(formatter);
     }
 
     public PolicyDetailDto findByPolicyDetail(Long piId, String cpCode) {

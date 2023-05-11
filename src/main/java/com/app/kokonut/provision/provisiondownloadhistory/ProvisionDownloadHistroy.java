@@ -28,8 +28,8 @@ public class ProvisionDownloadHistroy {
     private Long piphId;
 
     @ApiModelProperty("개인정보제공 고유코드")
-    @Column(name = "pi_code")
-    private String piNumber;
+    @Column(name = "pro_code")
+    private String proCode;
 
     @ApiModelProperty("다운로드한 관리자id")
     @Column(name = "admin_id")

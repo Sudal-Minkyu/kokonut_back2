@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
  * Remark : 개인정보제공 테이블
  */
 @Entity
-@EqualsAndHashCode(of="piId")
+@EqualsAndHashCode(of="proId")
 @Data
 @NoArgsConstructor
 @Table(name="kn_personal_info_provision")
@@ -24,37 +24,41 @@ public class Provision {
 
     @Id
     @ApiModelProperty("주키")
-    @Column(name = "pi_id")
+    @Column(name = "pro_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long piId;
+    private Long proId;
+
+    @ApiModelProperty("회사코드")
+    @Column(name = "cp_code")
+    private String cpCode;
 
     @ApiModelProperty("개인정보제공 고유코드")
-    @Column(name = "pi_code")
-    private String piNumber;
+    @Column(name = "pro_code")
+    private String proCode;
 
     @ApiModelProperty("제공여부 - 0: 내부제공, 1:외부제공")
-    @Column(name = "pi_provide")
-    private Integer piProvide;
+    @Column(name = "pro_provide")
+    private Integer proProvide;
 
     @ApiModelProperty("제공시작 기간")
-    @Column(name = "pi_start_date")
-    private String piStartDate;
+    @Column(name = "pro_start_date")
+    private LocalDateTime proStartDate;
 
     @ApiModelProperty("제공만료 기간")
-    @Column(name = "pi_exp_date")
-    private String piExpDate;
+    @Column(name = "pro_exp_date")
+    private LocalDateTime proExpDate;
 
     @ApiModelProperty("다운로드 유무 - 0: NO, 1:YES")
-    @Column(name = "pi_download_yn")
-    private Integer piDownloadYn;
+    @Column(name = "pro_download_yn")
+    private Integer proDownloadYn;
 
     @ApiModelProperty("다운로드 횟수")
-    @Column(name = "pi_download_count")
-    private Integer piDownloadCount;
+    @Column(name = "pro_download_count")
+    private Integer proDownloadCount;
 
     @ApiModelProperty("제공 개인정보 여부 - 0: 전체 개인정보, 1: 일부 개인정보")
-    @Column(name = "pi_target_type")
-    private Integer piTargetType;
+    @Column(name = "pro_target_type")
+    private Integer proTargetType;
 
     @ApiModelProperty("등록자 email")
     @Column(name = "insert_email")

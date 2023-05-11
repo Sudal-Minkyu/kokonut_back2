@@ -28,8 +28,8 @@ public class ProvisionRoster {
     private Long piprId;
 
     @ApiModelProperty("개인정보제공 고유코드")
-    @Column(name = "pi_code")
-    private String piNumber;
+    @Column(name = "pro_code")
+    private String proCode;
 
     @ApiModelProperty("제공된 관리자id")
     @Column(name = "admin_id")

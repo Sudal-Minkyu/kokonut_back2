@@ -39,13 +39,13 @@ public class AESGCMcrypto {
     public static void main(String[] args) throws Exception {
 
 //        String dataKey = createDataKey(); // 데이키를 받음
-        String dataKey = "AQIDAHgJGloEIm1LwL4cPWLvM58HeuMmUWjfnn29PPq5/oTojwHwDsZqMFdbsvRrlp7Q8RrBAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMA7Gs7QY9wrawhdhRAgEQgDt5k7n9a2aeFtCmuyEUJ3EUz12Vtw7HWOb+U7NuzgAVkPORlh+sPuZeggndWuWBVXG34jJD/s9VI4Tzew==";
+        String dataKey = "AQIDAHgJGloEIm1LwL4cPWLvM58HeuMmUWjfnn29PPq5/oTojwGR3wb3zCFcINSX4GurQ+BGAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMEDlzIebb1pn56K4FAgEQgDvOlhNkuSVyQ2kjmZlUCMKIUfouVgsWCMlm3DmiGKOoKSuaAftmc+b/ga9dIR5IfE4KZkoLeZCrGCyOPw==";
         log.info("dataKey : "+dataKey);
 
         SecretKey secretKey = generateDataKey(dataKey);
         byte[] ivBytes = generateIV(); // IV 값
 
-        String plaintext = "김민규";
+        String plaintext = "쀍쀍쀍쀍쀍";
 
 
 //        plaintext : 20
@@ -81,12 +81,20 @@ public class AESGCMcrypto {
         String[] result = fieldValue.split(",");
         String resultText = result[0];
         log.info("resultText : " + resultText);
+        log.info("resultText 길이 : " + resultText.length());
+        if(resultText.length() == 44) {
+            log.info("길이가 일치함");
+            // 28, 32, 36, 40, 44
+        }else {
+            log.info("길이가 일치하지않음");
+        }
+
         String resultIv = result[1];
         log.info("resultIv : " + resultIv);
 
         log.info("암호화 값 : " + ciphertext);
 
-        if(resultText.equals("PfnDaapmYm9vqWKBYFbX4RVi2KMXUJrQww==")) {
+        if(resultText.equals("bBv0hhlbiHE72jV1+FrmCrsIebAH+pxk0kH8JfitrQ==")) {
             log.info("암호화 값 일치!");
         } else {
             log.info("암호화 값 불일치!");
