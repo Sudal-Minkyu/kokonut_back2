@@ -5,6 +5,7 @@ import com.app.kokonut.provision.dtos.ProvisionListDto;
 import com.app.kokonut.provision.dtos.ProvisionSearchDto;
 import com.app.kokonut.provision.provisiondownloadhistory.QProvisionDownloadHistroy;
 import com.app.kokonut.provision.provisionroster.QProvisionRoster;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
@@ -86,13 +87,17 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
         }
 
         if(!provisionSearchDto.getFilterState().equals("전체")) {
+            BooleanBuilder statePredicate = new BooleanBuilder();
+
             if(provisionSearchDto.getFilterState().equals("0")) {
-                query.where(provision.proStartDate.gt(today));
+                statePredicate.and(provision.proStartDate.gt(today));
             } else if(provisionSearchDto.getFilterState().equals("1")) {
-                query.where(provision.proStartDate.loe(today).and(provision.proExpDate.goe(today)));
+                statePredicate.and(provision.proStartDate.loe(today)).and(provision.proExpDate.goe(today));
             } else {
-                query.where(provision.proExpDate.lt(today));
+                statePredicate.and(provision.proExpDate.lt(today));
             }
+
+            query.where(statePredicate);
         }
 
         if(!provisionSearchDto.getFilterDownload().equals(2)) {
