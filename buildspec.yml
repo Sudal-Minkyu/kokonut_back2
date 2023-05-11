@@ -10,7 +10,7 @@ phases:
       - echo Build Starting on `date` 
 #     - cp ./src/main/resources/application.yml ./src/main/resources/application-${profile}.yml
       - chmod +x ./gradlew
-      - ./gradlew build --warning-mode all
+      - ./gradlew build
 
   post_build:
     commands:
