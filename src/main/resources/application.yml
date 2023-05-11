@@ -14,8 +14,11 @@ cloud:
       access-key: ${cert_aws_Access_key}
       secret-key: ${cert_aws_Secret_key}
 
+
+
 # JPA Setting
 spring:
+
   datasource: #DB
     kokonut:
       url: jdbc:mariadb://${DOCKER_DB_HOST}:${DOCKER_DB_PORT}/${KOKONUT_DB_DBNAME}
@@ -47,6 +50,12 @@ spring:
     redis:
       repositories:
         enabled: false
+    cors:
+      mapping: /*
+      allowed-origins: '*'
+      allowed-methods: GET, POST
+      allowed-headers: '*'
+      allow-credentials: true
 
 #Custom
 kokonut:
