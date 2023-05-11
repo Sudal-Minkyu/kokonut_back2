@@ -85,6 +85,10 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
+tasks.withType(JavaCompile) {
+    options.compilerArgs += ["--warning-mode", "none"]
+}
+
 /**
  * @author Woody
  * Date : 2022-10-24
