@@ -62,6 +62,7 @@ public class DynamicUserRestController {
 		return dynamicUserService.serviceTest(email);
 	}
 
+//  @@@@@@@@@@@@@@@@@@@@@@@@@ 개인정보 항목관리 사용 API @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 	// 테이블의 컬럼조회
 	@GetMapping(value = "/tableColumnCall")
@@ -82,6 +83,7 @@ public class DynamicUserRestController {
 		return dynamicUserService.tableColumnAdd(kokonutColumnAddDto, jwtFilterDto);
 	}
 
+	// 선택된 컬럼삭제 버튼(오른쪽)
 	@ApiOperation(value="테이블에 추가된 컬럼을 삭제한다.", notes="" +
 			"1. 삭제할 항목을 받은 리스트값과 삭제할 테이블과 otp값을 받는다." +
 			"2. OTP값을 검증한다." +
@@ -96,7 +98,7 @@ public class DynamicUserRestController {
 	@ApiOperation(value="기본테이블의 데이터를 조회한다.", notes="" +
 			"1. 기본테이블에 추가된 개인정보리스트들을 호출한다." +
 			"2. 전자상거래법의 해당하는 컬럼들을 추가하지 않은 기본 테이블일 경우 kokonut_IDX와 아이디만 보내주며" +
-			"3. 컬럼이 존재할경우 해당컬럼과 함꼐 리스트로 보내준다.")
+			"3. 컬럼이 존재할경우 해당컬럼과 함께 리스트로 보내준다.")
 	@GetMapping(value = "/tableBasicList")
 	@ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
 	public ResponseEntity<Map<String,Object>> tableBasicList() {
@@ -104,6 +106,7 @@ public class DynamicUserRestController {
 		return dynamicUserService.tableBasicList(jwtFilterDto);
 	}
 
+//  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 

@@ -41,7 +41,7 @@ public class AuthRestController {
 
     // 이메일 가입존재 여부
     @GetMapping(value = "/checkKnEmail")
-    @ApiOperation(value = "이메일 이메일 존재여부 확인" , notes = "" +
+    @ApiOperation(value = "이메일 존재여부 확인" , notes = "" +
             "1. 존재여부를 조회할 이메일을 받는다." +
             "2. 해당이메일이 존재한지 체크하여 반환한다.")
     public ResponseEntity<Map<String,Object>> checkKnEmail(@RequestParam(value="knEmail", defaultValue = "") String knEmail) {
