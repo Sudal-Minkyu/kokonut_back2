@@ -47,9 +47,9 @@ public class PolicyRestController {
             "1. 리스트의 상세보기를 누르면 나오는 데이터를 보내준다.")
     @GetMapping(value = "/policyDetail/{idx}")
     @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-    public ResponseEntity<Map<String,Object>> policyDetail(@PathVariable("idx") Long qnaId) {
+    public ResponseEntity<Map<String,Object>> policyDetail(@PathVariable("idx") Long piId) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
-        return policyService.policyDetail(qnaId, jwtFilterDto);
+        return policyService.policyDetail(piId, jwtFilterDto);
     }
 
     @ApiOperation(value="개인정보 처리방침 작성중인글 체크", notes= "" +
