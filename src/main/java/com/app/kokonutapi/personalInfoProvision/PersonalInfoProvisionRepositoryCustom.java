@@ -12,7 +12,7 @@ import java.util.List;
  * @author Woody
  * Date : 2022-11-01
  * Time :
- * Remark : 기존의 코코넛 프로젝트의 PersonalInfoProvision Sql 쿼리호출
+ * Remark : PersonalInfoProvision Sql 쿼리호출
  */
 @Repository
 public interface PersonalInfoProvisionRepositoryCustom {

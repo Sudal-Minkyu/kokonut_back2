@@ -9,7 +9,7 @@ import org.springframework.data.domain.Pageable;
  * @author joy
  * Date : 2022-12-19
  * Time :
- * Remark : 기존의 코코넛 프로젝트의 Email Sql 쿼리호출
+ * Remark : Email Sql 쿼리호출
  */
 public interface EmailRepositoryCustom {
     // 이메일 목록 조회

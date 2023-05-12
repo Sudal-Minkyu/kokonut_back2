@@ -3,12 +3,12 @@ package com.app.kokonut.provision;
 import com.app.kokonut.admin.QAdmin;
 import com.app.kokonut.provision.dtos.ProvisionListDto;
 import com.app.kokonut.provision.dtos.ProvisionSearchDto;
-import com.app.kokonut.provision.provisiondownloadhistory.QProvisionDownloadHistroy;
+import com.app.kokonut.provision.provisiondownloadhistory.QProvisionDownloadHistory;
 import com.app.kokonut.provision.provisionroster.QProvisionRoster;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import org.qlrm.mapper.JpaResultMapper;
@@ -17,8 +17,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.stereotype.Repository;
-import com.querydsl.core.types.dsl.Expressions;
-import java.time.LocalDate;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -47,7 +46,7 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
         QProvisionRoster provisionRoster = new QProvisionRoster("provisionRoster");
         QProvisionRoster provisionRosterCnt = new QProvisionRoster("provisionRosterCnt");
 
-        QProvisionDownloadHistroy provisionDownloadHistroy = QProvisionDownloadHistroy.provisionDownloadHistroy;
+        QProvisionDownloadHistory provisionDownloadHistory = QProvisionDownloadHistory.provisionDownloadHistory;
 
         QAdmin admin = QAdmin.admin;
 
@@ -60,9 +59,9 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
                 .otherwise("2");
 
         JPQLQuery<Long> downloadHistoryCountSubQuery = JPAExpressions
-                .select(provisionDownloadHistroy.count())
-                .from(provisionDownloadHistroy)
-                .where(provisionDownloadHistroy.proCode.eq(provision.proCode));
+                .select(provisionDownloadHistory.count())
+                .from(provisionDownloadHistory)
+                .where(provisionDownloadHistory.proCode.eq(provision.proCode));
 
         JPQLQuery<ProvisionListDto> query = from(provision)
                 .where(provision.cpCode.eq(provisionSearchDto.getCpCode())).orderBy(provision.proId.desc())

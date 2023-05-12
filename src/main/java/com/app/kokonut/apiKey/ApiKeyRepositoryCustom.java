@@ -7,7 +7,7 @@ import com.app.kokonut.apiKey.dtos.ApiKeyInfoDto;
  * @author Woody
  * Date : 2022-10-25
  * Time :
- * Remark : 기존의 코코넛 프로젝트의 ApiKey Sql 쿼리호출
+ * Remark : ApiKey Sql 쿼리호출
  */
 public interface ApiKeyRepositoryCustom {
 

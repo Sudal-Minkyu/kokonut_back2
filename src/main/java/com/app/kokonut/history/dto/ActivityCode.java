@@ -72,6 +72,7 @@ public enum ActivityCode {
 
     AC_46("AC_46", "개인정보 처리방침 리스트 조회"), // 사용
 
+    AC_47("AC_47", "개인정보제공 다운로드 리스트 조회"), // 사용
     ;
     
     private final String code;

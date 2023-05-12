@@ -13,7 +13,7 @@ import java.util.Optional;
  * @author Woody
  * Date : 2022-10-25
  * Time :
- * Remark : 기존의 코코넛 프로젝트의 ApiKeyDao라고 보면 됨
+ * Remark : ApiKeyDao라고 보면 됨
  */
 @Repository
 public interface ApiKeyRepository extends JpaRepository<ApiKey, Long>, JpaSpecificationExecutor<ApiKey>, ApiKeyRepositoryCustom {

@@ -13,6 +13,8 @@ import com.app.kokonut.history.dto.ActivityCode;
 import com.app.kokonut.provision.dtos.ProvisionListDto;
 import com.app.kokonut.provision.dtos.ProvisionSaveDto;
 import com.app.kokonut.provision.dtos.ProvisionSearchDto;
+import com.app.kokonut.provision.provisiondownloadhistory.ProvisionDownloadHistoryRepository;
+import com.app.kokonut.provision.provisiondownloadhistory.dtos.ProvisionDownloadHistoryListDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -42,14 +44,16 @@ public class ProvisionService {
 
     private final AdminRepository adminRepository;
     private final ProvisionRepository provisionRepository;
+    private final ProvisionDownloadHistoryRepository provisionDownloadHistoryRepository;
 
     @Autowired
     public ProvisionService(KeyGenerateService keyGenerateService, HistoryService historyService,
-                            AdminRepository adminRepository, ProvisionRepository provisionRepository){
+                            AdminRepository adminRepository, ProvisionRepository provisionRepository, ProvisionDownloadHistoryRepository provisionDownloadHistoryRepository){
         this.keyGenerateService = keyGenerateService;
         this.historyService = historyService;
         this.adminRepository = adminRepository;
         this.provisionRepository = provisionRepository;
+        this.provisionDownloadHistoryRepository = provisionDownloadHistoryRepository;
     }
 
     // 개인정보제공 등록
@@ -229,6 +233,56 @@ public class ProvisionService {
         }
     }
 
+    // 개인정보제공 다운로드 리스트 조회
+    public ResponseEntity<Map<String, Object>> provisionDownloadList(String proCode, JwtFilterDto jwtFilterDto, Pageable pageable) {
+        log.info("provisionDownloadList 호출");
 
+        AjaxResponse res = new AjaxResponse();
+
+        log.info("proCode : " + proCode);
+
+        String email = jwtFilterDto.getEmail();
+        log.info("email : " + email);
+
+        AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+
+        long adminId = adminCompanyInfoDto.getAdminId();
+        String cpCode = adminCompanyInfoDto.getCompanyCode();
+
+        ActivityCode activityCode;
+        String ip = CommonUtil.clientIp();
+        Long activityHistoryId;
+
+        // 개인정보 제공 리스트조회 코드
+        activityCode = ActivityCode.AC_47;
+
+        // 활동이력 저장 -> 비정상 모드
+        activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
+                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+
+        Page<ProvisionDownloadHistoryListDto> provisionDownloadList = provisionDownloadHistoryRepository.findByProvisionDownloadList(proCode, pageable);
+
+        historyService.updateHistory(activityHistoryId,
+                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+
+        if(provisionDownloadList.getTotalPages() == 0) {
+            log.info("조회된 데이터가 없습니다.");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO003.getCode(), ResponseErrorCode.KO003.getDesc()));
+        } else {
+            return ResponseEntity.ok(res.ResponseEntityPage(provisionDownloadList));
+        }
+    }
+
+    // 개인정보제공 상세내용 조회
+    public ResponseEntity<Map<String, Object>> provisionDetail(String proCode, JwtFilterDto jwtFilterDto) {
+        log.info("provisionDetail 호출");
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+        log.info("proCode : " + proCode);
+
+        return ResponseEntity.ok(res.success(data));
+    }
 
 }

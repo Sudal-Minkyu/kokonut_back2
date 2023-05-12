@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @Table(name="kn_personal_info_provision_histroy")
-public class ProvisionDownloadHistroy {
+public class ProvisionDownloadHistory {
 
     @Id
     @ApiModelProperty("주키")
