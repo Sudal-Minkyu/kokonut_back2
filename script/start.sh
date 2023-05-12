@@ -2,10 +2,10 @@
 
 cd /root/kokonut_backend/
 
-
+ps -ef | grep java|awk '{print $2}'
 # 프로세스 종료
-PID=$(pgrep -f kokonut*.jar)
-kill $PID
+
+kill -9 ps -ef | grep java|awk '{print $2}'
 
 # 10초간 대기합니다.
 sleep 10
