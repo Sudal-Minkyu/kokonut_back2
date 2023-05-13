@@ -46,6 +46,7 @@ public class SecurityConfig {
     @Bean
     protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+
             .cors()
             
             .and()
@@ -61,6 +62,12 @@ public class SecurityConfig {
 
             .and()
             .authorizeRequests()
+            
+            // cert test 템플릿
+            .antMatchers("/v1/api/NiceId/**").permitAll()
+            .and()
+            .addFilterBefore(new JwtAuthenticationFilter(jwtTempToken), UsernamePasswordAuthenticationFilter.class);
+            
             
             // 권한 : 없음
             .antMatchers("/favicon.ico","/swagger-ui/index.html/**","/v3/api/Auth/login","/v3/api/Auth/register","/v3/api/PersonalInfoProvision/list", "/v3/api/History/activityList").permitAll()
