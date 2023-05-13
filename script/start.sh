@@ -8,7 +8,7 @@ ps -ef | grep java|awk '{print $2}'
 kill -9 ps -ef | grep java|awk '{print $2}'
 
 # 10초간 대기합니다.
-sleep 10
+sleep 15
 
 # 파일 삭제
 #rm *.jar
