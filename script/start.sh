@@ -1,5 +1,5 @@
 #!/bin/bash
-
+sudo su -
 cd /root/kokonut_backend/
 
 # 프로세스 종료
