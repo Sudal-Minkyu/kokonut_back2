@@ -3,7 +3,7 @@ sudo su -
 cd /root/kokonut_backend/
 
 # 프로세스 종료
-kill -9 $(ps -ef | grep java | awk '{print $2}')
+pkill -9 $(ps -ef | grep java | awk '{print $2}')
 
 export KOKONUT_JWT_SECRET=$(aws secretsmanager get-secret-value --secret-id KOKONUT_JWT_SECRET --query SecretString --output text)
 
