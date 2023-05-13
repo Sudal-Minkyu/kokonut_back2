@@ -20,6 +20,6 @@ cp /opt/codedeploy-agent/deployment-root/$DEPLOYMENT_GROUP_ID/$DEPLOYMENT_ID/dep
 # source /root/kokonut_backend/.zshrc
 # 새로운 프로세스 시작
 
-nohup java -jar /root/kokonut_backend/kokonut*.jar > /root/kokonut_backend/vite.log 2>&1 &
+nohup java -jar /root/kokonut_backend/kokonut*SNAPSHOT.jar > /root/kokonut_backend/vite.log 2>&1 &
 
 exit
