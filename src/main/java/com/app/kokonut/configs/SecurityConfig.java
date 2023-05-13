@@ -29,6 +29,9 @@ public class SecurityConfig {
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
     private final JwtTokenProvider jwtTokenProvider;
     private final RedisDao redisDao;
+    
+    @Value("${jwt.secret}")
+    private String jwtSecret;
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
