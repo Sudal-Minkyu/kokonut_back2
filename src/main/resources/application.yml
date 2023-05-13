@@ -36,12 +36,6 @@ spring:
     redis:
       repositories:
         enabled: false
-    cors:
-      mapping: /**
-      allowed-origins: '*'
-      allowed-methods: GET, POST
-      allowed-headers: '*'
-      allow-credentials: true
 
 #Custom
 kokonut:
