@@ -65,14 +65,10 @@ public class SecurityConfig {
             
             // cert test 템플릿
             .antMatchers("/v1/api/NiceId/**").permitAll()
-            .and()
-            .addFilterBefore(new JwtAuthenticationFilter(jwtTempToken), UsernamePasswordAuthenticationFilter.class);
-            
             
             // 권한 : 없음
             .antMatchers("/favicon.ico","/swagger-ui/index.html/**",
-                         "/v3/api/Auth/login","/v3/api/Auth/register","/v3/api/PersonalInfoProvision/list", "/v3/api/History/activityList").permitAll()
-            
+                    "/v3/api/Auth/login","/v3/api/Auth/register","/v3/api/PersonalInfoProvision/list", "/v3/api/History/activityList").permitAll()
             // 권한 : 권한(코코넛직원:ROLE_SYSTEM, 대표관리자:ROLE_MASTER, 최고관리자:ROLE_ADMIN, 일반관리자:ROLE_USER, 게스트:ROLE_GUEST)
             // 권한에 따라 요청허용
             .antMatchers("/v2/api/Admin/systemTest")
