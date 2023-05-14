@@ -1,5 +1,5 @@
 server:
-  host: 'beta-api.kokonut.me'
+  host: 'kokonut-dev-elb-backapi-1672395031.ap-northeast-2.elb.amazonaws.com'
   port: '8050'
 
 # JPA Setting
