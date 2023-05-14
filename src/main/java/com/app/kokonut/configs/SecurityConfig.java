@@ -14,7 +14,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.beans.factory.annotation.Value;
 
 /**
  * @author Woody
@@ -30,9 +29,7 @@ public class SecurityConfig {
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
     private final JwtTokenProvider jwtTokenProvider;
     private final RedisDao redisDao;
-    
-    @Value("${jwt.secret}")
-    private String jwtSecret;
+
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
@@ -66,9 +63,6 @@ public class SecurityConfig {
 
             .and()
             .authorizeRequests()
-            
-            // cert test 템플릿
-            .antMatchers("/v1/api/NiceId/**").permitAll()
             
             // 권한 : 없음
             .antMatchers("/favicon.ico","/swagger-ui/index.html/**",
