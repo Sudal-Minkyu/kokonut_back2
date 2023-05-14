@@ -90,6 +90,18 @@ public class SecurityConfig {
             .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, redisDao), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
+    
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.addAllowedOrigin("*"); // 모든 도메인에 대해 CORS를 허용
+        configuration.addAllowedMethod("*"); // 모든 HTTP 메소드에 대해 CORS를 허용
+        configuration.addAllowedHeader("*"); // 모든 헤더에 대해 CORS를 허용
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 
 }
 
