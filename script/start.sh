@@ -7,7 +7,7 @@ pkill -9 $(ps -ef | grep java | awk '{print $2}')
 
 export KOKONUT_JWT_SECRET=$(aws secretsmanager get-secret-value --secret-id KOKONUT_JWT_SECRET --query SecretString --output text)
 
-source /root/kokonut_backend/.zshrc
+source .zshrc
 
 # 10초간 대기합니다.
 sleep 10
