@@ -29,7 +29,7 @@ public class SwaggerConfig implements WebMvcConfigurer  {
         return new ApiInfoBuilder()
                 .title("kokonut")
                 .description("kokonut API")
-                .build().useDefaultResponseMessages(false);
+                .build();
     }
 
     @Bean
