@@ -66,7 +66,7 @@ public class WebConfig implements WebMvcConfigurer {
         log.info("허용 프론트IP : "+frontServerDomainIp);
         registry
                 .addMapping("/v*/api/**")
-                .allowedOriginPatterns("http://localhost:5173","https://beta.kokonut.me:8888")
+                .allowedOriginPatterns("beta.kokonut.me:8888","https://beta.kokonut.me:8888")
                 .allowedHeaders("Authorization", "Content-type", "ApiKey")
                 .exposedHeaders("Authorization")
                 .allowedMethods(HttpMethod.GET.name(), HttpMethod.POST.name())
