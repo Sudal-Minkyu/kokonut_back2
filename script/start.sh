@@ -21,3 +21,4 @@ mkdir /root/kokonut_backend/logs
 nohup java -jar -Dserver.port=8050 kokonut-0.0.1-SNAPSHOT.jar > /root/kokonut_backend/logs/$(date +%Y-%m-%d).log 2>&1 &
 
 exit
+
