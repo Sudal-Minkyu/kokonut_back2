@@ -193,7 +193,7 @@ public class QnaService {
                 qnaFile.setInsert_date(LocalDateTime.now());
 
                 // S3에 파일 업로드
-                String storedFileName = awsS3Util.imageFileUpload(multipartFile, fileName, qnaS3Folder+date.format(new Date()));
+                String storedFileName = awsS3Util.imageFileUpload(multipartFile, fileName, "/"+filePath);
                 if(storedFileName == null) {
                     log.error("이미지 업로드를 실패했습니다. -관리자에게 문의해주세요-");
                     return ResponseEntity.ok(res.fail(ResponseErrorCode.KO039.getCode(), ResponseErrorCode.KO039.getDesc()));

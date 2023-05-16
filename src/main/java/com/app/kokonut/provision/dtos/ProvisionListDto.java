@@ -18,6 +18,8 @@ import java.time.format.DateTimeFormatter;
 @AllArgsConstructor
 public class ProvisionListDto {
 
+    private Long proId;
+
     private String proCode;
 
     private String proState; // "0" -> 대기중, "1" -> 제공중, "2" -> 제공완료

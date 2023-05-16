@@ -70,6 +70,7 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
                 .innerJoin(provisionRoster).on(provisionRoster.proCode.eq(provision.proCode).and(provisionRoster.adminId.eq(provisionSearchDto.getAdminId())))
                 .innerJoin(provisionRosterCnt).on(provisionRosterCnt.proCode.eq(provision.proCode)).groupBy(provisionRosterCnt.proCode)
                 .select(Projections.constructor(ProvisionListDto.class,
+                        provision.proId,
                         provision.proCode,
                         proState,
                         admin.knName,

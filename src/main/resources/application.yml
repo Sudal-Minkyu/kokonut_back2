@@ -1,25 +1,10 @@
 server:
   port: '8050'
-  ssl:
-    key-store-type: PKCS12
-    key-store: ${keystore_p12}
-    key-store-password: ${keystore_password}
-    key-alias: Tomcat
-    
-cloud:
-  aws:
-    region:
-      static: ap-northeast-2
-    credentials:
-      access-key: ${cert_aws_Access_key}
-      secret-key: ${cert_aws_Secret_key}
-
-
 
 # JPA Setting
 spring:
 
-  datasource: #DB
+  datasource:
     kokonut:
       url: jdbc:mariadb://${DOCKER_DB_HOST}:${DOCKER_DB_PORT}/${KOKONUT_DB_DBNAME}
       driver-class-name: org.mariadb.jdbc.Driver
@@ -50,12 +35,6 @@ spring:
     redis:
       repositories:
         enabled: false
-    cors:
-      mapping: /**
-      allowed-origins: '*'
-      allowed-methods: GET, POST
-      allowed-headers: '*'
-      allow-credentials: true
 
 #Custom
 kokonut:

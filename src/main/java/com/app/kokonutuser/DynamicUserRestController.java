@@ -109,6 +109,20 @@ public class DynamicUserRestController {
 //  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
+//  @@@@@@@@@@@@@@@@@@@@@@@@@ 개인정보 검색 사용 API @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+	// 개인정보 검색
+	@GetMapping(value = "/userSearch")
+	@ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+	public ResponseEntity<Map<String,Object>> userSearch(@RequestParam(value="searchTable", defaultValue = "") String searchTable,
+														 @RequestParam(value="searchColumn", defaultValue = "") String searchColumn,
+														 @RequestParam(value="searchText", defaultValue = "") String searchText) {
+		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+		return null;
+//		return dynamicUserService.userSearch(jwtFilterDto);
+	}
+
+//  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 	// 유저DB(테이블) 생성

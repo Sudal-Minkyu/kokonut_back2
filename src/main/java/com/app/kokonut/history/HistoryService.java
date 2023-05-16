@@ -2,6 +2,7 @@ package com.app.kokonut.history;
 
 import com.app.kokonut.admin.Admin;
 import com.app.kokonut.admin.AdminRepository;
+import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
 import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.common.realcomponent.Utils;
@@ -64,11 +65,10 @@ public class HistoryService {
         AjaxResponse res = new AjaxResponse();
 
         // 접속한 사용자 인덱스
-        Admin admin = adminRepository.findByKnEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("해당하는 유저를 찾을 수 없습니다. : "+email));
+        AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
 
         HistorySearchDto historySearchDto = new HistorySearchDto();
-        historySearchDto.setCompanyId(admin.getCompanyId());
+        historySearchDto.setCompanyId(adminCompanyInfoDto.getCompanyId());
         historySearchDto.setSearchText(searchText);
 
         if(!actvityType.equals("")) {
