@@ -18,7 +18,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  * Remark :
  */
 @Configuration
-@EnableWebMvc
 @EnableSwagger2
 public class SwaggerConfig {
 
