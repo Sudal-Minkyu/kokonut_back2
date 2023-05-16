@@ -4,7 +4,7 @@ server:
 # JPA Setting
 spring:
 
-  datasource: #DB
+  datasource:
     kokonut:
       url: jdbc:mariadb://${DOCKER_DB_HOST}:${DOCKER_DB_PORT}/${KOKONUT_DB_DBNAME}
       driver-class-name: org.mariadb.jdbc.Driver

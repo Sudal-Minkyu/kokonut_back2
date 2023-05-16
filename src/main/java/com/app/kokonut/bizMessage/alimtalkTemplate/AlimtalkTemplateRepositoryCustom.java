@@ -13,7 +13,7 @@ import java.util.List;
  * @author Woody
  * Date : 2022-11-29
  * Time :
- * Remark : 기존의 코코넛 프로젝트의 AlimtalkTemplate Sql 쿼리호출
+ * Remark : AlimtalkTemplate Sql 쿼리호출
  */
 public interface AlimtalkTemplateRepositoryCustom {
 

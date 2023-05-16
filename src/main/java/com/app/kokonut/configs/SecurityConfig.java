@@ -38,8 +38,8 @@ public class SecurityConfig {
         return web -> web.ignoring()
             .antMatchers(
                 // 필터 제외항목 API : JWT, ApiKey 모두 불필요한 API
-                "/favicon.ico", "/swagger*/**", "/v2/api-docs", "/webjars/**",
-                "/v1/api/**"
+                "/favicon*", "/swagger*/**", "/v2/api-docs", "/webjars/**",
+                "/v1/api/**", "/"
                 // 임시 제외항목 API : JWT, ApiKey 모두 필요한 API
 //                "/v2/api/**"
             );
@@ -66,8 +66,7 @@ public class SecurityConfig {
             .authorizeRequests()
             
             // 권한 : 없음
-            .antMatchers("/favicon.ico","/swagger-ui/index.html/**",
-                    "/v3/api/Auth/login","/v3/api/Auth/register","/v3/api/PersonalInfoProvision/list", "/v3/api/History/activityList").permitAll()
+            .antMatchers("/v3/api/Auth/login","/v3/api/Auth/register","/v3/api/PersonalInfoProvision/list", "/v3/api/History/activityList").permitAll()
             // 권한 : 권한(코코넛직원:ROLE_SYSTEM, 대표관리자:ROLE_MASTER, 최고관리자:ROLE_ADMIN, 일반관리자:ROLE_USER, 게스트:ROLE_GUEST)
             // 권한에 따라 요청허용
             .antMatchers("/v2/api/Admin/systemTest")
@@ -83,7 +82,7 @@ public class SecurityConfig {
                     "/v2/api/Policy/policyList", "/v2/api/Policy/policyDetail/**", "/v2/api/Provision/**")
                 .hasAnyAuthority(AuthorityRole.ROLE_USER.getDesc(), AuthorityRole.ROLE_ADMIN.getDesc(), AuthorityRole.ROLE_MASTER.getDesc(), AuthorityRole.ROLE_SYSTEM.getDesc())
 
-            .antMatchers("/v2/api/Admin/guestTest")
+            .antMatchers("/v2/api/Admin/guestTest", "/v2/api/Provision/provisionList", "/v2/api/Provision/provisionDetail/**")
                 .hasAnyAuthority(AuthorityRole.ROLE_GUEST.getDesc(), AuthorityRole.ROLE_USER.getDesc(), AuthorityRole.ROLE_ADMIN.getDesc(), AuthorityRole.ROLE_MASTER.getDesc(), AuthorityRole.ROLE_SYSTEM.getDesc())
             .anyRequest().authenticated()   // 나머지 API 는 전부 인증 필요
 

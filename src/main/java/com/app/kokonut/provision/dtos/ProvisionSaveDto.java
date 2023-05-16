@@ -26,8 +26,8 @@ public class ProvisionSaveDto {
 
 	private Integer proTargetType; // 제공 개인정보 여부 - 0: 전체 개인정보, 1: 일부 개인정보
 
-	private List<ProvisionEntrySaveDto> provisionEntrySaveDtos;
+	private List<ProvisionEntrySaveDto> provisionEntrySaveDtos; // 제공할 테이블과 선택컬럼
 
-	private List<Integer> piplTargetIdxs;
+	private List<Integer> piplTargetIdxs; // 제공할 개인정보 idx 리스트
 
 }

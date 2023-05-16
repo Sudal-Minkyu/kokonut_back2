@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
  * @author Woody
  * Date : 2022-11-01
  * Time :
- * Remark : 기존의 코코넛 프로젝트의 PersonalInfoDao라고 보면 됨
+ * Remark : PersonalInfoDao라고 보면 됨
  */
 //@Repository
 //public interface PersonalInfoProvisionRepository extends JpaRepository<PersonalInfoProvision, Long>, JpaSpecificationExecutor<PersonalInfoProvision>, PersonalInfoProvisionRepositoryCustom {

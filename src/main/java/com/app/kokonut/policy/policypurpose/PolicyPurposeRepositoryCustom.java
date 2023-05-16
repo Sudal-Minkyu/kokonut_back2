@@ -8,7 +8,7 @@ import java.util.List;
  * @author Woody
  * Date : 2023-04-25
  * Time :
- * Remark : 기존의 코코넛 프로젝트의 PolicyPurpose Sql 쿼리호출
+ * Remark : PolicyPurpose Sql 쿼리호출
  */
 public interface PolicyPurposeRepositoryCustom {
 

@@ -52,7 +52,7 @@ public class HistoryRepositoryCustomImpl extends QuerydslRepositorySupport imple
                 ));
 
         // 조회한 기업의 한해서만 조회되야함
-        query.where(admin.companyId.eq(historySearchDto.getCompanyId())).orderBy(history.ahId.desc());;
+        query.where(admin.companyId.eq(historySearchDto.getCompanyId()).and(history.ahType.eq(2))).orderBy(history.ahId.desc());;
 
         if(!historySearchDto.getSearchText().equals("")) {
             query.where(admin.knEmail.like("%"+ historySearchDto.getSearchText() +"%").or(admin.knName.like("%"+ historySearchDto.getSearchText() +"%")));
@@ -65,8 +65,6 @@ public class HistoryRepositoryCustomImpl extends QuerydslRepositorySupport imple
         if(historySearchDto.getStimeStart() != null && historySearchDto.getStimeEnd() != null) {
             query.where(history.insert_date.goe(historySearchDto.getStimeStart()).and(history.insert_date.loe(historySearchDto.getStimeEnd())));
         }
-
-        query.where(history.ahType.eq(2)).orderBy(history.insert_date.desc());
 
         final List<HistoryListDto> historyListDtos = Objects.requireNonNull(getQuerydsl()).applyPagination(pageable, query).fetch();
         return new PageImpl<>(historyListDtos, pageable, query.fetchCount());

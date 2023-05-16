@@ -7,7 +7,7 @@ import com.app.kokonut.company.company.dtos.CompanyTableCountDto;
  * @author Woody
  * Date : 2022-12-22
  * Time :
- * Remark : 기존의 코코넛 프로젝트의 Company Sql 쿼리호출
+ * Remark : Company Sql 쿼리호출
  */
 public interface CompanyRepositoryCustom {
 

@@ -9,7 +9,7 @@ import org.springframework.data.domain.Pageable;
  * @author Woody
  * Date : 2023-01-13
  * Time :
- * Remark : 기존의 코코넛 프로젝트의 TotalDbDownload Sql 쿼리호출
+ * Remark : TotalDbDownload Sql 쿼리호출
  */
 public interface TotalDbDownloadRepositoryCustom {
 

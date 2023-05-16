@@ -11,7 +11,7 @@ import org.springframework.data.domain.Pageable;
  * @author joy
  * Date : 2022-12-27
  * Time :
- * Remark : 기존의 코코넛 프로젝트의 FaqDao 쿼리호출
+ * Remark : FaqDao 쿼리호출
  */
 public interface FaqRepositoryCustom {
     // Faq 목록 조회 - 기존 SelectFaqList, SelectFaqListCount

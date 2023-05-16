@@ -4,7 +4,6 @@ import com.app.kokonut.admin.AdminService;
 import com.app.kokonut.auth.jwt.SecurityUtil;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import com.app.kokonut.provision.dtos.ProvisionSaveDto;
-import com.app.kokonutapi.personalInfoProvision.dtos.PersonalInfoProvisionSaveDto;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -15,7 +14,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
@@ -72,10 +70,29 @@ public class ProvisionRestController {
         return provisionService.provisionList(searchText, stime, filterDownload, filterState, jwtFilterDto, pageable);
     }
 
+    @GetMapping("/provisionDownloadList")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = false, dataTypeClass = String.class, paramType = "header", example = ""),
+    })
+    @ApiOperation(value = "개인정보제공 다운로드 리스트 조회 API", notes = "" +
+            "")
+    public ResponseEntity<Map<String, Object>> provisionDownloadList(@RequestParam(value="proCode", defaultValue = "") String proCode,
+                                                                     @PageableDefault Pageable pageable){
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return provisionService.provisionDownloadList(proCode, jwtFilterDto, pageable);
+    }
 
-
-
-
+    @ApiOperation(value="개인정보제공 상세내용 조회", notes="" +
+            "1. 상세내용을 조회한 proCode를 받는다." +
+            "2. 해당 코드값에 합당한 데이터를 보낸다.")
+    @GetMapping(value = "/provisionDetail/{proCode}") // -> 기존의 코코넛 호출 메서드명 : detailView - SystemQnaController, MemberQnaController
+    @ApiImplicitParams({
+            @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    })
+    public ResponseEntity<Map<String,Object>> provisionDetail(@PathVariable("proCode") String proCode) {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return provisionService.provisionDetail(proCode, jwtFilterDto);
+    }
 
 
 }
