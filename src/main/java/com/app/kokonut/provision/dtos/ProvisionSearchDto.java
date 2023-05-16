@@ -28,26 +28,26 @@ public class ProvisionSearchDto {
     private String filterDownload;
     private String filterState;
 
-    public Integer getFilterDownload() {
-        if(filterDownload.equals("N")) {
-            return 0;
-        } else if(filterDownload.equals("Y")) {
-            return 1;
-        } else {
-            return 2;
-        }
-    }
-
-    public String getFilterState() {
-        if(filterState.equals("대기중")) {
-            return "0";
-        } else if(filterState.equals("제공중")) {
-            return "1";
-        } else if(filterState.equals("제공완료")) {
-            return "2";
-        } else {
-            return "전체";
-        }
-    }
+//    public Integer getFilterDownload() {
+//        if(filterDownload.equals("N")) {
+//            return 0;
+//        } else if(filterDownload.equals("Y")) {
+//            return 1;
+//        } else {
+//            return 2;
+//        }
+//    }
+//
+//    public String getFilterState() {
+//        if(filterState.equals("대기중")) {
+//            return "0";
+//        } else if(filterState.equals("제공중")) {
+//            return "1";
+//        } else if(filterState.equals("제공완료")) {
+//            return "2";
+//        } else {
+//            return "전체";
+//        }
+//    }
 
 }

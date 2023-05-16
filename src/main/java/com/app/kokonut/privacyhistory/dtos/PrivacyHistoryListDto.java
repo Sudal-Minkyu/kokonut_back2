@@ -1,5 +1,6 @@
 package com.app.kokonut.privacyhistory.dtos;
 
+import com.app.kokonut.admin.enums.AuthorityRole;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,11 +21,23 @@ public class PrivacyHistoryListDto {
     private String knName; // 마스킹처리
     private String knEmail; // 마스킹처리
 
+    private AuthorityRole knRoleCode;
+
+    private AuthorityRole knRoleDesc;
+
     private PrivacyHistoryCode privacyHistoryCode;
 
     private LocalDateTime insert_date;
 
     private String kphIpAddr;
+
+    public String getKnRoleCode() {
+        return knRoleCode.getCode();
+    }
+
+    public String getKnRoleDesc() {
+        return knRoleDesc.getDesc();
+    }
 
     public String getKnEmail() {
 
@@ -63,4 +76,13 @@ public class PrivacyHistoryListDto {
     public String getPrivacyHistoryCode() {
         return privacyHistoryCode.getDesc();
     }
+
+    public String getKphIpAddr() {
+        if(kphIpAddr.equals("0:0:0:0:0:0:0:1")) {
+            return "127.0.0.1";
+        } else {
+            return kphIpAddr;
+        }
+    }
+
 }

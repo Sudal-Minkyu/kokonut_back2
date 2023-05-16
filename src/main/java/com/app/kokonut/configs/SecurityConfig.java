@@ -73,7 +73,7 @@ public class SecurityConfig {
                 .hasAnyAuthority(AuthorityRole.ROLE_ADMIN.getDesc(), AuthorityRole.ROLE_MASTER.getDesc(), AuthorityRole.ROLE_SYSTEM.getDesc())
 
             .antMatchers("/v2/api/Admin/userTest", "/v2/api/Admin/create", "/v2/api/Admin/**", "/v2/api/History/**", "/v2/api/Email/**", "/v2/api/Company/addCategoryList", "/v2/api/DynamicUser/tableColumnCall", "/v2/api/DynamicUser/tableBasicList",
-                    "/v2/api/Policy/policyList", "/v2/api/Policy/policyDetail/**", "/v2/api/Provision/**")
+                    "/v2/api/Policy/policyList", "/v2/api/Policy/policyDetail/**", "/v2/api/Provision/**", "/v2/api/PrivacyHistory/**")
                 .hasAnyAuthority(AuthorityRole.ROLE_USER.getDesc(), AuthorityRole.ROLE_ADMIN.getDesc(), AuthorityRole.ROLE_MASTER.getDesc(), AuthorityRole.ROLE_SYSTEM.getDesc())
 
             .antMatchers("/v2/api/Admin/guestTest", "/v2/api/Provision/provisionList", "/v2/api/Provision/provisionDetail/**")
