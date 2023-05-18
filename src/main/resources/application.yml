@@ -1,5 +1,10 @@
 server:
   port: '8050'
+  
+ssl:
+  enabled: true
+  key-store: classpath:${KOKONUT_AWS_ssl_SECRET_ARM}
+
 
 # JPA Setting
 spring:
