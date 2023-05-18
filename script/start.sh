@@ -3,7 +3,8 @@ sudo su -
 cd /root/kokonut_backend/
 
 # 프로세스 종료
-pkill -9 $(ps -ef | grep java | awk '{print $2}')
+ps aux | grep java | grep -v grep | awk '{print $2}' | xargs kill -9
+
 
 source ~/.zshrc
 
