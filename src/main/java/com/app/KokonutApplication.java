@@ -13,6 +13,12 @@ public class KokonutApplication {
         SpringApplication.run(KokonutApplication.class, args);
     }
     
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/swagger-ui/index.html", "/webjars/**")
+                .addResourceLocations("classpath:/META-INF/resources/", "classpath:/META-INF/resources/webjars/");
+    }
+    
     @Bean
     public WebMvcConfigurer webMvcConfigurer() {
         return new WebMvcConfigurer() {
