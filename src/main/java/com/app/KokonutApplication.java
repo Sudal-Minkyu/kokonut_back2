@@ -16,7 +16,7 @@ public class KokonutApplication {
             public void addViewControllers(ViewControllerRegistry registry) {
                 registry.addViewController("/swagger").setViewName("forward:/swagger-ui.html");
             }
-        }
+        };
     }
  
 }
