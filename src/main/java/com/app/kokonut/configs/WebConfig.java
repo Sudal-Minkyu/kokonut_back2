@@ -35,19 +35,6 @@ public class WebConfig implements WebMvcConfigurer {
     @Value("${kokonut.aws.s3.secret}")
     private String AWSS3SECRETKEY;
 
-    private static final String[] CLASSPATH_PATH_PATTERNS = {"swagger-ui/index.html", "/webjars/**"};
-    private static final String[] CLASSPATH_RESOURCE_LOCATIONS = {"classpath:/META-INF/resources/", "classpath:/META-INF/resources/webjars/"};
-
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler(CLASSPATH_PATH_PATTERNS).addResourceLocations(CLASSPATH_RESOURCE_LOCATIONS);
-    }
-
-    // 스웨거 엔드포인트 경로 -> "/" 셋팅
-    @Override
-    public void addViewControllers(final ViewControllerRegistry registry) {
-        registry.addViewController("/swagger").setViewName("forward:/swagger-ui/index.html");
-    }
 
     @Bean
     public BasicAWSCredentials AwsCredentianls() {
