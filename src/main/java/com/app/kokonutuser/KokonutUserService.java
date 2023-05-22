@@ -212,7 +212,7 @@ public class KokonutUserService {
 	// 테이블의 컬럼 목록 조회
 	public List<KokonutUserFieldDto> getColumns(String companyCode) {
 		log.info("getColumns 호출");
-		String searchQuery = "SHOW FULL COLUMNS FROM '"+companyCode+"'";
+		String searchQuery = "SHOW FULL COLUMNS FROM "+companyCode;
 //		log.info("searchQuery : "+searchQuery);
 		return dynamicUserRepositoryCustom.selectColumns(searchQuery);
 	}
