@@ -16,7 +16,7 @@ plugins {
 sonarqube {
 	properties {
 		property "sonar.projectName", "beta_kokonut"
-		property "sonar.projectKey", "beta”_kokonut"
+		property "sonar.projectKey", "beta_kokonut"
 		property "sonar.host.url", "http://52.79.252.55:9000"
 		property "sonar.login", "sqp_16e959ff8bb4399bfa997f0b74e3989b299cb5a5"
 	}
