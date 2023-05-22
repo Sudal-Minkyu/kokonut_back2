@@ -1,6 +1,7 @@
 package com.app.kokonut.auth.jwt.been;
 
 import com.app.kokonut.auth.jwt.dto.RedisDao;
+import com.app.kokonut.common.realcomponent.Utils;
 import io.jsonwebtoken.UnsupportedJwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,8 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
         log.info("JwtAuthenticationFilter 호출");
 
-        String token = resolveToken(request);
-
+        String token = Utils.cookieGet("accessToken", request);
         if(token != null) {
             log.info("필터 거쳐감 Jwt Access Token");
 
@@ -58,15 +58,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 } else if(result == 902) {
                     log.info("여기왔슴둥 : "+result);
                     // JWT 엑세스토큰 재발급하기
-                    Cookie[] cookies = request.getCookies();
-                    String refreshToken = null;
-                    if(cookies != null) {
-                        for(Cookie cookie : cookies) {
-                            if(cookie.getName().equals("refreshToken")) {
-                                refreshToken = cookie.getValue();
-                            }
-                        }
-                    }
+                    String refreshToken = Utils.cookieGet("refreshToken", request);
                     log.info("리플레쉬 토큰 : "+refreshToken);
 
                     if(refreshToken == null) {
@@ -80,8 +72,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         String newAccessToken = jwtTokenProvider.reissueAccessToken(authentication);
                         log.info("엑세스토큰 만료 -> 새로발급된 토큰 : "+newAccessToken);
 
-                        // 헤더에 어세스 토큰 추가
-                        jwtTokenProvider.setHeaderAccessToken(response, newAccessToken);
+                        // 쿠키에 어세스 토큰 추가
+                        Utils.cookieSave("accessToken", newAccessToken, 1800, response);
+//                        jwtTokenProvider.setHeaderAccessToken(response, newAccessToken);
 
                         // 컨텍스트에 넣기
                         this.setAuthentication(newAccessToken);
@@ -99,11 +92,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
         filterChain.doFilter(request, response);
-    }
-
-    // Request Header 에서 토큰 정보 추출
-    private String resolveToken(HttpServletRequest request) {
-        return request.getHeader(BEARER_TYPE);
     }
 
     // SecurityContext 에 Authentication 객체를 저장합니다.

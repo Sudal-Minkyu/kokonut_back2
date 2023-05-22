@@ -143,6 +143,20 @@ public class Utils {
 		}
 	}
 
+	// 쿠키 값 가져오기
+	public static String cookieGet(String cookieName, HttpServletRequest request) {
+		Cookie[] cookies = request.getCookies();
+		String cookieResult = null;
+		if(cookies != null) {
+			for(Cookie cookie : cookies) {
+				if(cookie.getName().equals(cookieName)) {
+					cookieResult = cookie.getValue();
+				}
+			}
+		}
+		return cookieResult;
+	}
+
 	// 쿠키 저장함수 -> 옵션 고정 : HttpOnly = true, Secure = true, Path = "/"
 	public static void cookieSave(String cookieName, String cookieValue, Integer maxAge, HttpServletResponse response) {
 		Cookie cookieRefreshToken = new Cookie(cookieName, cookieValue);

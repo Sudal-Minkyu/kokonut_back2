@@ -185,17 +185,16 @@ public class AuthRestController {
     @ApiOperation(value = "토큰 새로고침" , notes = "" +
             "1. Param 값으로 accessToken, refreshToken을 받는다." +
             "2. 해당 리플레쉬 토큰을 통해 새 토큰을 발급하며 이전의 토큰은 사용 불가처리를 한다.")
-    public ResponseEntity<Map<String,Object>> reissue(@Validated AuthRequestDto.Reissue reissue) {
-        return authService.reissue(reissue);
+    public ResponseEntity<Map<String,Object>> reissue(@Validated AuthRequestDto.Reissue reissue, HttpServletResponse response) {
+        return authService.reissue(reissue, response);
     }
 
     @PostMapping("/logout")
     @ApiOperation(value = "로그아웃 처리" , notes = "" +
             "1. Param 값으로 accessToken, refreshToken을 받는다." +
             "2. 받은 두 토큰을 검사하고 해당 토큰을 삭제처리 한다.")
-//    public ResponseEntity<Map<String,Object>> logout(@Validated AuthRequestDto.Logout logout, HttpServletResponse response) {
-    public ResponseEntity<Map<String,Object>> logout(@Validated AuthRequestDto.Logout logout, HttpServletRequest request, HttpServletResponse response) {
-        return authService.logout(logout, request, response);
+    public ResponseEntity<Map<String,Object>> logout(HttpServletRequest request, HttpServletResponse response) {
+        return authService.logout(request, response);
     }
 
     @GetMapping(value = "/otpQRcode")

@@ -815,6 +815,7 @@ public class AuthService {
 
                             // 쿠키저장함수 호출
                             if(response != null) {
+                                Utils.cookieSave("accessToken", jwtToken.getAccessToken(), 1800, response);
                                 Utils.cookieSave("refreshToken", jwtToken.getRefreshToken(), 604800, response);
                             }
 
@@ -863,7 +864,7 @@ public class AuthService {
     }
 
     // JWT 토큰 새로고침 기능
-    public ResponseEntity<Map<String,Object>> reissue(AuthRequestDto.Reissue reissue) {
+    public ResponseEntity<Map<String,Object>> reissue(AuthRequestDto.Reissue reissue, HttpServletResponse response) {
         log.info("reissue 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -908,19 +909,20 @@ public class AuthService {
         // RefreshToken Redis 업데이트
 //        redisDao.setValues("RT: "+authentication.getName(), jwtToken.getRefreshToken(), Duration.ofMillis(jwtToken.getRefreshTokenExpirationTime()));
 
-        data.put("jwtToken", jwtToken.getAccessToken());
+        Utils.cookieSave("accessToken", jwtToken.getAccessToken(), 1800, response);
+//        data.put("jwtToken", jwtToken.getAccessToken());
 
         return ResponseEntity.ok(res.success(data));
     }
 
     // 로그아웃 기능
-    public ResponseEntity<Map<String,Object>> logout(AuthRequestDto.Logout logout, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<Map<String,Object>> logout(HttpServletRequest request, HttpServletResponse response) {
         log.info("logout 호출");
 
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
 
-        String accessToken = logout.getAccessToken();
+        String accessToken = Utils.cookieGet("accessToken", request);
 
         // Access Token 검증
         if (jwtTokenProvider.validateToken(accessToken) == 400) {
