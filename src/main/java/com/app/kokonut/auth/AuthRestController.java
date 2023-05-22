@@ -175,9 +175,10 @@ public class AuthRestController {
             "1. 입력한 아이디와 비밀번호와 OTP값을 보낸다." +
             "2. 해당 이메일의 OTP값이 맞는지 확인하고, 로그인 여부를 체크한다." +
             "3. 확인이 다 되면, 쿠키에 refreshToken을 저장하고, 결과값으로 accessToken을 보내준다.")
-    public ResponseEntity<Map<String,Object>> authToken(@Validated AuthRequestDto.Login login, HttpServletResponse response) {
+    public ResponseEntity<Map<String,Object>> authToken(@Validated AuthRequestDto.Login login,
+                                                        HttpServletRequest request, HttpServletResponse response) {
         log.info("로그인한 이메일 : "+login.getKnEmail());
-        return authService.authToken(login, response);
+        return authService.authToken(login, request, response);
     }
 
     @PostMapping("/reissue")

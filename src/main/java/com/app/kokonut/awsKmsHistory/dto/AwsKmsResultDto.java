@@ -22,6 +22,8 @@ public class AwsKmsResultDto {
 
     private String dataKey;
 
+    private String ivKey;
+
     private SecretKey secretKey;
 
 }

@@ -4,11 +4,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
+
 
 /**
  * @author Woody
@@ -16,6 +18,7 @@ import javax.validation.constraints.Pattern;
  * Time :
  * Remark : 로그인, 회원가입, 로그아웃, 토큰재발급 응답 Dto
  */
+@Slf4j
 public class AuthRequestDto {
 
     // 리뉴얼 회원가입Dto
@@ -117,7 +120,7 @@ public class AuthRequestDto {
         @NotBlank(message = "비밀번호는 필수 입력값입니다.")
         private String knPassword;
 
-        public UsernamePasswordAuthenticationToken toAuthentication() {
+        public UsernamePasswordAuthenticationToken toAuthentication() throws Exception {
             return new UsernamePasswordAuthenticationToken(knEmail, knPassword);
         }
 

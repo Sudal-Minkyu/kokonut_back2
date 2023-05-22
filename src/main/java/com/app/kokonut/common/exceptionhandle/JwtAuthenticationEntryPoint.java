@@ -1,4 +1,4 @@
-package com.app.kokonut.auth.jwt.been;
+package com.app.kokonut.common.exceptionhandle;
 
 import com.app.kokonut.common.realcomponent.Utils;
 import lombok.extern.slf4j.Slf4j;

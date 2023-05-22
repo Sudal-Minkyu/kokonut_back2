@@ -15,30 +15,22 @@ import javax.persistence.*;
 @Table(name="kn_company_datakey")
 public class CompanyDataKey {
 
-    
-
-    /**
-     * 주키
-     */
-
     @Id
     @ApiModelProperty("주키")
     @Column(name = "cd_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long cdId;
 
-    /**
-     * 사업자코드
-     */
     @ApiModelProperty("사업자코드")
     @Column(name = "cp_code")
     private String cpCode;
 
-    /**
-     * 암호화에 사용될 데이터 키
-     */
     @Column(name = "data_key")
     @ApiModelProperty("암호화에 사용될 데이터 키")
     private String dataKey;
+
+    @Column(name = "iv_key")
+    @ApiModelProperty("해석에 사용될 데이터 키")
+    private String ivKey;
 
 }

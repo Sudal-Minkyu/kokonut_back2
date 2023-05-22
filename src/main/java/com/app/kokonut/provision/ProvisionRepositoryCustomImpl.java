@@ -86,7 +86,7 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
             query.where(admin.knName.like("%"+ provisionSearchDto.getSearchText() +"%"));
         }
 
-        if(!provisionSearchDto.getFilterState().equals("전체")) {
+        if(!provisionSearchDto.getFilterState().equals("")) {
             BooleanBuilder statePredicate = new BooleanBuilder();
 
             if(provisionSearchDto.getFilterState().equals("0")) {
@@ -100,8 +100,8 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
             query.where(statePredicate);
         }
 
-        if(!provisionSearchDto.getFilterDownload().equals(2)) {
-            query.where(provision.proDownloadYn.eq(provisionSearchDto.getFilterDownload()));
+        if(!provisionSearchDto.getFilterDownload().equals("")) {
+            query.where(provision.proDownloadYn.eq(Integer.parseInt(provisionSearchDto.getFilterDownload())));
         }
 
         final List<ProvisionListDto>  provisionListDtos = Objects.requireNonNull(getQuerydsl()).applyPagination(pageable, query).fetch();

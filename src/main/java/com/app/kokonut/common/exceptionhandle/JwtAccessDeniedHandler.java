@@ -1,4 +1,4 @@
-package com.app.kokonut.auth.jwt.been;
+package com.app.kokonut.common.exceptionhandle;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;

@@ -43,6 +43,8 @@ public class PrivacyHistoryRepositoryCustomImpl extends QuerydslRepositorySuppor
                 .select(Projections.constructor(PrivacyHistoryListDto.class,
                         admin.knName,
                         admin.knEmail,
+                        admin.knRoleCode,
+                        admin.knRoleCode,
                         privacyHistory.privacyHistoryCode,
                         privacyHistory.insert_date,
                         privacyHistory.kphIpAddr
@@ -51,10 +53,11 @@ public class PrivacyHistoryRepositoryCustomImpl extends QuerydslRepositorySuppor
         // 조회한 기업의 한해서만 조회되야함
         query.where(admin.companyId.eq(privacyHistorySearchDto.getCompanyId())).orderBy(privacyHistory.kphId.desc());;
 
-        if(privacyHistorySearchDto.getFilterState() != null) {
+        if(!privacyHistorySearchDto.getFilterState().equals("")) {
             query.where(privacyHistory.privacyHistoryCode.eq(PrivacyHistoryCode.valueOf(privacyHistorySearchDto.getFilterState())));
         }
-        if(privacyHistorySearchDto.getFilterRole() != null) {
+
+        if(!privacyHistorySearchDto.getFilterRole().equals("")) {
             query.where(admin.knRoleCode.eq(AuthorityRole.valueOf(privacyHistorySearchDto.getFilterRole())));
         }
 

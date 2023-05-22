@@ -203,7 +203,7 @@ public class DynamicUserService {
 //		log.info("result : "+result);
 
 		// kokonut_user DB 회원테이블의 컬럼리스트 조회 - 테스트완료 woody
-//		List<KokonutUserFieldDto> result = kokonutUserService.getUserColumns(companyCode);
+//		List<KokonutUserFieldDto> result = kokonutUserService.getColumns(companyCode);
 //		log.info("result : "+result);
 
 		// kokonut_user DB 회원테이블의 암호화 속성의 컬럼리스트 조회 - 테스트완료 woody
@@ -522,7 +522,7 @@ public class DynamicUserService {
 
 			boolean isFieldCheck = false; // 필드 체크
 
-			List<KokonutUserFieldDto> columns = kokonutUserService.getUserColumns(companyCode); // columns
+			List<KokonutUserFieldDto> columns = kokonutUserService.getColumns(companyCode); // columns
 			List<KokonutUserFieldDto> encryptColumns = kokonutUserService.selectUserEncryptColumns(companyCode); // encryptColumns
 
 			StringBuilder nameString = new StringBuilder();
@@ -705,7 +705,7 @@ public class DynamicUserService {
 			List<KokonutUserFieldDto> columns;
 			List<KokonutUserFieldDto> encryptColumns;
 			if(controlType.equals("사용")) {
-				columns = kokonutUserService.getUserColumns(companyCode);
+				columns = kokonutUserService.getColumns(companyCode);
 				encryptColumns = kokonutUserService.selectUserEncryptColumns(companyCode);
 			} else {
 				columns = kokonutDormantService.getDormantColumns(companyCode);
@@ -931,7 +931,7 @@ public class DynamicUserService {
 		}
 
 		try {
-			List<KokonutUserFieldDto> columns = kokonutUserService.getUserColumns(companyCode);
+			List<KokonutUserFieldDto> columns = kokonutUserService.getColumns(companyCode);
 
 			List<String> headerList = new ArrayList<>();
 			List<List<String>> dataArrayList = new ArrayList<>();
@@ -1043,7 +1043,7 @@ public class DynamicUserService {
 
 			List<KokonutUserFieldDto> columns;
 			if(type.equals("1")){ // "1"일 경우 User
-				columns = kokonutUserService.getUserColumns(companyCode);
+				columns = kokonutUserService.getColumns(companyCode);
 			} else { // "2"일 경우 Dormant
 				columns = kokonutDormantService.getDormantColumns(companyCode);
 			}
@@ -1142,7 +1142,7 @@ public class DynamicUserService {
 		boolean isNull = Boolean.parseBoolean(isNullYn);
 
 		// 대상 테이블 정보를 조회
-		List<KokonutUserFieldDto> targetTable = kokonutUserService.getUserColumns(companyCode);
+		List<KokonutUserFieldDto> targetTable = kokonutUserService.getColumns(companyCode);
 
 		// Field명과 Comment내용 중복 컬럼 체크
 		for (KokonutUserFieldDto column : targetTable) {
@@ -1269,7 +1269,7 @@ public class DynamicUserService {
 		boolean isNull = Boolean.parseBoolean(isNullYn);
 
 		// 대상 테이블 정보를 조회
-		List<KokonutUserFieldDto> targetTable = kokonutUserService.getUserColumns(companyCode);
+		List<KokonutUserFieldDto> targetTable = kokonutUserService.getColumns(companyCode);
 
 		// Field명과 Comment내용 중복 컬럼 체크
 		for (KokonutUserFieldDto column : targetTable) {
@@ -1537,7 +1537,7 @@ public class DynamicUserService {
 		AjaxResponse res = new AjaxResponse();
 		HashMap<String, Object> data = new HashMap<>();
 
-		List<KokonutUserFieldDto> kokonutUserFieldDtos = kokonutUserService.getUserColumns(tableName);
+		List<KokonutUserFieldDto> kokonutUserFieldDtos = kokonutUserService.getColumns(tableName);
 		log.info("kokonutUserFieldDtos : "+kokonutUserFieldDtos);
 
 		List<KokonutUserFieldListDto> kokonutUserFieldListDtos = new ArrayList<>();

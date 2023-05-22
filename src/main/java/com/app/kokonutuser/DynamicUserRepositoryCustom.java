@@ -7,6 +7,14 @@ import java.util.Map;
 
 public interface DynamicUserRepositoryCustom {
 
+    List<KokonutUserFieldDto> selectColumns(String searchQuery); // 테이블의 컬럼 조회
+
+    int verificationQuery(String queryStr); // 검증쿼리문 전용
+
+
+
+
+
     void userCommonTable(String commonQuery); // 생성, 삭제, 업데이트 실행 공용
 
     int selectExistUserTable(String companyCode); // 보내는 값 - tableName = companyCode
@@ -22,8 +30,6 @@ public interface DynamicUserRepositoryCustom {
     Integer selectUserCount(String searchQuery); // 회원 등록여부 조회
 
     Integer selectTableLastIdx(String searchQuery); // 저장 유저의 마지막 IDX 조회
-
-    List<KokonutUserFieldDto> selectUserColumns(String searchQuery); // 유저테이블의 컬럼 조회
 
     String selectIdByFieldAndValue(String searchQuery); // 필드값을 통해 아이디 조회
 
