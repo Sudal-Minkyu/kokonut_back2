@@ -90,6 +90,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     throw new RuntimeException("인증된 정보가 없습니다.");
                 }
             }
+        } else {
+            String refreshToken = Utils.cookieGet("refreshToken", request);
+            log.info("리플레쉬 토큰 : "+refreshToken);
+
+            if(refreshToken == null) {
+                log.info("리플레쉬 토큰이 만료되었습니다. 새로 로그인해주시길 바랍니다.");
+                throw new RuntimeException("만료된 JWT 토큰입니다.");
+            } else {
+                // 토큰 검증
+                Authentication authentication = jwtTokenProvider.getAuthentication(refreshToken);
+
+                // 토큰 발급
+                String newAccessToken = jwtTokenProvider.reissueAccessToken(authentication);
+                log.info("엑세스토큰 만료 -> 새로발급된 토큰 : "+newAccessToken);
+
+                // 쿠키에 어세스 토큰 추가
+                Utils.cookieSave("accessToken", newAccessToken, 1800, response);
+//              jwtTokenProvider.setHeaderAccessToken(response, newAccessToken);
+
+                // 컨텍스트에 넣기
+                this.setAuthentication(newAccessToken);
+            }
         }
         filterChain.doFilter(request, response);
     }

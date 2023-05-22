@@ -813,7 +813,7 @@ public class AuthService {
 
                             data.put("jwtToken", jwtToken.getAccessToken());
 
-                            // 쿠키저장함수 호출
+                            // 쿠키저장함수 호출 1800
                             if(response != null) {
                                 Utils.cookieSave("accessToken", jwtToken.getAccessToken(), 1800, response);
                                 Utils.cookieSave("refreshToken", jwtToken.getRefreshToken(), 604800, response);
