@@ -4,6 +4,7 @@ import com.app.kokonut.admin.dtos.*;
 import com.app.kokonut.admin.enums.AuthorityRole;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import com.app.kokonut.auth.jwt.dto.RedisDao;
+import com.app.kokonut.awsKmsHistory.dto.AwsKmsResultDto;
 import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.common.realcomponent.AESGCMcrypto;
@@ -450,7 +451,7 @@ public class AdminService {
             Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
                     companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
 
-            SecretKey secretKey = companyDataKeyService.findByCompanyDataKey(companyCode);
+            AwsKmsResultDto awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(companyCode);
             byte[] ivBytes = AESGCMcrypto.generateIV();
 
 //            String title = ReqUtils.filter("관리자 등록 알림1");
@@ -472,7 +473,7 @@ public class AdminService {
 
             // 이메일인증코드
             // -> 레디스서버에 24시간동안 보관
-            String knEmailAuthCode = AESGCMcrypto.encrypt(userEmail.getBytes(StandardCharsets.UTF_8), secretKey, ivBytes);
+            String knEmailAuthCode = AESGCMcrypto.encrypt(userEmail.getBytes(StandardCharsets.UTF_8), awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey()));
 
             // 관리자 등록메일 보내기
             String title = "관리자 등록 알림";

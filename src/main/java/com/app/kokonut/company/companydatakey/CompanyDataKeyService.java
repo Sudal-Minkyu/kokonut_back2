@@ -39,7 +39,7 @@ public class CompanyDataKeyService {
      * @return DATA_KEY(복호화)
      * 최종적으로 복호화한 DATA_KEY를 전달하는 메서드
      */
-    public SecretKey findByCompanyDataKey(String cpCode) {
+    public AwsKmsResultDto findByCompanyDataKey(String cpCode) {
         log.info("selectCompanyDataKey 호출");
 
         Optional<CompanyDataKey> optionalCompanyDataKey = companyDataKeyRepository.findCompanyDataKeyByCpCode(cpCode);
@@ -51,6 +51,7 @@ public class CompanyDataKeyService {
 
             String dataKey = optionalCompanyDataKey.get().getDataKey();
             AwsKmsResultDto awsKmsResultDto = awsKmsUtil.dataKeyDecrypt(dataKey);
+            awsKmsResultDto.setIvKey(optionalCompanyDataKey.get().getIvKey());
 
             if(awsKmsResultDto.getResult().equals("success")) {
                 log.info("KMS 암복호화 성공");
@@ -63,7 +64,7 @@ public class CompanyDataKeyService {
                 AwsKmsHistory saveAwsKmsHistory =  awsKmsHistoryRepository.save(awsKmsHistory);
                 log.info("KMS 복호화 이력 저장 saveAwsKmsHistory : "+saveAwsKmsHistory.getAkhIdx());
 
-                return awsKmsResultDto.getSecretKey();
+                return awsKmsResultDto;
             }
             else {
                 log.error("KMS 암복호화 실패");

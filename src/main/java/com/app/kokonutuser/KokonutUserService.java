@@ -207,18 +207,25 @@ public class KokonutUserService {
 		return dynamicUserRepositoryCustom.selectTableLastIdx(searchQuery);
 	}
 
-	/**
-	 * 유저테이블의 컬럼 목록 조회
-	 * @param companyCode 테이블 이름
-	 * @return Column 객체 리스트 -> KokonutUserFieldDto
-	 * 기존 코코넛 : SelectUserTable
-	 */
-	public List<KokonutUserFieldDto> getUserColumns(String companyCode) {
-		log.info("getUserColumns 호출");
-		String searchQuery = "SHOW FULL COLUMNS FROM `"+companyCode+"`";
+	// @@@@@@@@@@@@ 서비스 사용되고 있는 함수 @@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+	// 테이블의 컬럼 목록 조회
+	public List<KokonutUserFieldDto> getColumns(String companyCode) {
+		log.info("getColumns 호출");
+		String searchQuery = "SHOW FULL COLUMNS FROM '"+companyCode+"'";
 //		log.info("searchQuery : "+searchQuery);
-		return dynamicUserRepositoryCustom.selectUserColumns(searchQuery);
+		return dynamicUserRepositoryCustom.selectColumns(searchQuery);
 	}
+
+	// 테이블이 존재하는지 검증해주는 함수
+	public int getTableVerification(String table) {
+		log.info("getTableVerification 호출");
+		String searchQuery = "SHOW TABLES LIKE '"+table+"'";
+		log.info("searchQuery : "+searchQuery);
+		return dynamicUserRepositoryCustom.verificationQuery(searchQuery);
+	}
+
+	// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 	/**
 	 * 유저테이블의 보낼 데이터의 필드만 조회 ex) kokonut_ 들어간 필드 제외
@@ -231,7 +238,7 @@ public class KokonutUserService {
 
 		String searchQuery = "SHOW FULL COLUMNS FROM `"+companyCode+"` where Field NOT lIKE 'kokonut_%'";
 //		log.info("searchQuery : "+searchQuery);
-		return dynamicUserRepositoryCustom.selectUserColumns(searchQuery);
+		return dynamicUserRepositoryCustom.selectColumns(searchQuery);
 	}
 
 	/**
@@ -244,7 +251,7 @@ public class KokonutUserService {
 		log.info("selectUserEncryptColumns 호출");
 		String searchQuery = "SHOW FULL COLUMNS FROM `"+companyCode+"` WHERE `COMMENT` REGEXP '(.+)(\\()(.*암호화.*)(\\))'";
 //		log.info("searchQuery : "+searchQuery);
-		return dynamicUserRepositoryCustom.selectUserColumns(searchQuery);
+		return dynamicUserRepositoryCustom.selectColumns(searchQuery);
 	}
 
 	/**
@@ -777,24 +784,24 @@ public class KokonutUserService {
 	 * @param pw 검증 할 비밀번호
 	 * @return String
 	 */
-	public Long passwordConfirm(String companyCode, String id, String pw) {
+	public String passwordConfirm(String companyCode, String id, String pw) {
 		log.info("passwordConfirm 호출");
 
-		String searchQuery = "SELECT kokonut_IDX, PASSWORD FROM `"+companyCode+"` WHERE `ID`='"+id+"'";
+		String searchQuery = "SELECT kokonut_IDX, PASSWORD_1_pw FROM `"+companyCode+"` WHERE `ID_1_id`='"+id+"'";
 //		log.info("searchQuery : "+searchQuery);
 
 		List<KokonutUserPwInfoDto> nowpw = dynamicUserRepositoryCustom.findByNowPw(searchQuery);
 
 		if(nowpw.size() == 0) {
 			log.error("존재하지 않은 ID 입니다. 입력한 : "+id);
-			return 0L;
+			return "";
 		} else {
-			if(!passwordEncoder.matches(pw,nowpw.get(0).getPASSWORD())) {
+			if(!passwordEncoder.matches(pw,nowpw.get(0).getPASSWORD_1_pw())) {
 				log.error("입력한 비밀번호와 현재비밀번호가 같지 않음");
-				return -1L;
+				return "none";
 			} else {
 				log.info("입력한 비밀번호와 현재비밀번호가 같음 - 비밀번호 변경 시작");
-				return nowpw.get(0).getIDX();
+				return nowpw.get(0).getKokonut_IDX();
 			}
 		}
 	}

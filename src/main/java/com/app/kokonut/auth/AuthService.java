@@ -19,7 +19,7 @@ import com.app.kokonut.awsKmsHistory.AwsKmsHistoryRepository;
 import com.app.kokonut.awsKmsHistory.dto.AwsKmsResultDto;
 import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.ResponseErrorCode;
-import com.app.kokonut.common.component.*;
+import com.app.kokonut.common.component.ReqUtils;
 import com.app.kokonut.common.realcomponent.*;
 import com.app.kokonut.company.company.Company;
 import com.app.kokonut.company.company.CompanyRepository;
@@ -40,7 +40,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -51,10 +50,15 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
@@ -449,6 +453,7 @@ public class AuthService {
         CompanyDataKey companyDataKey = new CompanyDataKey();
         companyDataKey.setCpCode(company.getCpCode());
         companyDataKey.setDataKey(dataKey);
+        companyDataKey.setIvKey(Base64.getEncoder().encodeToString(AESGCMcrypto.generateIV()));
 
         String ctName = cpCode+"_1";
 
@@ -735,7 +740,8 @@ public class AuthService {
     }
 
     // 로그인, 구글OTP 확인후 -> JWT 발급기능
-    public ResponseEntity<Map<String,Object>> authToken(AuthRequestDto.Login login, HttpServletResponse response) {
+    public ResponseEntity<Map<String,Object>> authToken(AuthRequestDto.Login login,
+                                                        HttpServletRequest request, HttpServletResponse response) {
         log.info("authToken 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -767,7 +773,9 @@ public class AuthService {
                 try {
                     // Login ID/PW 를 기반으로 Authentication 객체 생성 -> 아아디 / 비번 검증
                     // 이때 authentication은 인증 여부를 확인하는 authenticated 값이 false
-                    UsernamePasswordAuthenticationToken authenticationToken = login.toAuthentication();
+                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                            login.getKnEmail(), decryptData(login.getKnPassword(), request.getHeader("keyBufferSto"), request.getHeader("ivSto")));
+
 
                     if(optionalAdmin.get().getKnOtpKey() == null){
                         log.error("등록된 OTP가 존재하지 않습니다. 구글 OTP 인증을 등록해주세요.");
@@ -829,12 +837,29 @@ public class AuthService {
                         }
                     }
                 }
-                catch (BadCredentialsException e) {
+                catch (Exception e) {
                     log.error("아이디 또는 비밀번호가 일치하지 않습니다.");
                     return ResponseEntity.ok(res.fail(ResponseErrorCode.KO016.getCode(),ResponseErrorCode.KO016.getDesc()));
                 }
             }
         }
+    }
+
+    public static String decryptData(String encryptedData, String keyBuffer, String iv) {
+        try {
+            byte[] decodedKey = Base64.getDecoder().decode(keyBuffer);
+            SecretKey secretKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+
+            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+            GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(128, Base64.getDecoder().decode(iv));
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, gcmParameterSpec);
+
+            byte[] decryptedTextBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedData));
+            return new String(decryptedTextBytes, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     // JWT 토큰 새로고침 기능

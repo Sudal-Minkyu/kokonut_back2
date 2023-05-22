@@ -45,29 +45,9 @@ public class AESGCMcrypto {
         SecretKey secretKey = generateDataKey(dataKey);
         byte[] ivBytes = generateIV(); // IV 값
 
-        String plaintext = "쀍쀍쀍쀍쀍";
+        String plaintext = "김민규";
 
-
-//        plaintext : 20
-//        15:02:00.315 [main] INFO com.app.kokonut.common.realcomponent.AESGCMcrypto - 암호화 할 값 : 김민규만규김민규만규김민규만규김민규만규
-//        15:02:00.316 [main] INFO com.app.kokonut.common.realcomponent.AESGCMcrypto - encrypt 호출
-//        15:02:00.318 [main] INFO com.app.kokonut.common.realcomponent.AESGCMcrypto - b : [B@4d48bd85
-//        15:02:00.318 [main] INFO com.app.kokonut.common.realcomponent.AESGCMcrypto - base64 byte : 76
-//        15:02:00.318 [main] INFO com.app.kokonut.common.realcomponent.AESGCMcrypto - base64 string : 104
-//
-//        String plaintext = "abcdeabcdeabcdeabcde";
-//        plaintext : 20
-//         - 암호화 할 값 : abcdeabcdeabcdeabcde
-//         - encrypt 호출
-//         b : [B@4d48bd85
-//         base64 byte : 36
-//         base64 string : 48
-        
         log.info("plaintext : " + plaintext.length());
-
-//      gkstls2006@naver.com -> 암호화 : 7HS90ZkXY6yLV+qrM6e9tLQXdNbP7yZ4wyjewqO5URhCpAHF,NxhDfexShL83YMvt06JBtQ==
-//      hello, world -> 암호화           QsMHeorxRsS61HuhhBloKd2OZDcEJ0nNowhYUw==,vY78hnpLZkM13m4lfBs1kQ==
-//      VeLL/bShT3LHjfa5oC/lYaLwACm+IJUyC6ENi2Ba5++fvQ5f/AvP83zreTaF87eFdEPu2ndSBcsU0qQjvxis/LBCLP5WY5low51PIMgFfO/qEWq82e25Xu5LEv/XotPH9JNp0syavZDhrLACNx0+AyqttbN2K/2JlO1btm0JO9VM8FivkCCsaAFNTi/sYQIR1y6ikdaNVxsLi40IxknUPtC8Lg==
 
         log.info("데이타 키 : "+dataKey);
 
@@ -81,20 +61,20 @@ public class AESGCMcrypto {
         String[] result = fieldValue.split(",");
         String resultText = result[0];
         log.info("resultText : " + resultText);
-        log.info("resultText 길이 : " + resultText.length());
-        if(resultText.length() == 44) {
-            log.info("길이가 일치함");
-            // 28, 32, 36, 40, 44
-        }else {
-            log.info("길이가 일치하지않음");
-        }
+//        log.info("resultText 길이 : " + resultText.length());
+//        if(resultText.length() == 44) {
+//            log.info("길이가 일치함");
+//            // 28, 32, 36, 40, 44
+//        }else {
+//            log.info("길이가 일치하지않음");
+//        }
 
         String resultIv = result[1];
         log.info("resultIv : " + resultIv);
 
         log.info("암호화 값 : " + ciphertext);
 
-        if(resultText.equals("bBv0hhlbiHE72jV1+FrmCrsIebAH+pxk0kH8JfitrQ==")) {
+        if(resultText.equals("cM6g+kiCwuq6EcnOL+tjazNufa2FF8VCqQ==")) {
             log.info("암호화 값 일치!");
         } else {
             log.info("암호화 값 불일치!");

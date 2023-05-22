@@ -15,13 +15,13 @@ import java.math.BigInteger;
 @Getter
 public class KokonutUserPwInfoDto {
 
-    private final Long IDX;
+    private final String kokonut_IDX;
 
-    private final String PASSWORD;
+    private final String PASSWORD_1_pw;
 
-    public KokonutUserPwInfoDto(long IDX, String PASSWORD) {
-        this.IDX = IDX;
-        this.PASSWORD = PASSWORD;
+    public KokonutUserPwInfoDto(String kokonut_IDX, String PASSWORD_1_pw) {
+        this.kokonut_IDX = kokonut_IDX;
+        this.PASSWORD_1_pw = PASSWORD_1_pw;
     }
 
 }

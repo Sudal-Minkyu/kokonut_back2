@@ -20,15 +20,29 @@ import java.util.Map;
 @Slf4j
 @Repository
 public class DynamicUserRepositoryCustomImpl implements DynamicUserRepositoryCustom {
-//public class DynamicUserRepositoryCustomImpl extends QuerydslRepositorySupport implements DynamicUserRepositoryCustom {
 
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
     public DynamicUserRepositoryCustomImpl(@Qualifier("kokonutUserJdbcTemplate") JdbcTemplate jdbcTemplate) {
-//        super(Object.class);
         this.jdbcTemplate = jdbcTemplate;
     }
+
+    // 테이블의 컬럼 조회
+    @Override
+    public List<KokonutUserFieldDto> selectColumns(String searchQuery) {
+        return jdbcTemplate.query(searchQuery,
+                new BeanPropertyRowMapper<>(KokonutUserFieldDto.class));
+    }
+
+    // 검증쿼리문 전용
+    @Override
+    public int verificationQuery(String queryStr) {
+        List<String> tables = jdbcTemplate.queryForList(queryStr, String.class);
+        return tables.isEmpty() ? 0 : 1;
+    }
+
+
 
     // 유저테이블 중복 체크 메서드
     @Override
@@ -41,22 +55,7 @@ public class DynamicUserRepositoryCustomImpl implements DynamicUserRepositoryCus
     // 유저테이블 생성/삭제/업데이트 메서드
     @Override
     public void userCommonTable(String commonQuery) {
-
-//        EntityManager em = getEntityManager();
-//        StringBuilder sb = new StringBuilder();
-
-        // 네이티브 쿼리문
-//        sb.append("use kokonut_user; ");
-//        sb.append(createQuery);
-
         jdbcTemplate.execute(commonQuery);
-//        return entityManager.createNativeQuery(sb.toString());
-
-        // 쿼리조건 선언부
-//        Query query = entityManager.createNativeQuery(sb.toString());
-//
-//        return 1;
-
     }
 
     // 유저테이블의 회원 조회 나중에 밑에 코드로 수정하기 Dto 정해질때
@@ -102,13 +101,6 @@ public class DynamicUserRepositoryCustomImpl implements DynamicUserRepositoryCus
         return jdbcTemplate.queryForObject(searchQuery, Integer.class);
     }
 
-    // 유저테이블의 컬럼 조회
-    @Override
-    public List<KokonutUserFieldDto> selectUserColumns(String searchQuery) {
-        return jdbcTemplate.query(searchQuery,
-                new BeanPropertyRowMapper<>(KokonutUserFieldDto.class));
-    }
-
     // 필드값을 통해 아이디 조회
     @Override
     public String selectIdByFieldAndValue(String searchQuery) {
@@ -135,8 +127,8 @@ public class DynamicUserRepositoryCustomImpl implements DynamicUserRepositoryCus
                 searchQuery,
                 (rs, rowNum) ->
                         new KokonutUserPwInfoDto(
-                                rs.getLong("kokonut_IDX"),
-                                rs.getString("PASSWORD")
+                                rs.getString("kokonut_IDX"),
+                                rs.getString("PASSWORD_1_pw")
                         )
         );
     }

@@ -1,8 +1,8 @@
 package com.app.kokonut.configs;
 
 import com.app.kokonut.admin.enums.AuthorityRole;
-import com.app.kokonut.auth.jwt.been.JwtAccessDeniedHandler;
-import com.app.kokonut.auth.jwt.been.JwtAuthenticationEntryPoint;
+import com.app.kokonut.common.exceptionhandle.JwtAccessDeniedHandler;
+import com.app.kokonut.common.exceptionhandle.JwtAuthenticationEntryPoint;
 import com.app.kokonut.auth.jwt.been.JwtAuthenticationFilter;
 import com.app.kokonut.auth.jwt.been.JwtTokenProvider;
 import com.app.kokonut.auth.jwt.dto.RedisDao;
