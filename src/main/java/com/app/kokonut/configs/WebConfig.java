@@ -46,7 +46,7 @@ public class WebConfig implements WebMvcConfigurer {
     // 스웨거 엔드포인트 경로 -> "/" 셋팅
     @Override
     public void addViewControllers(final ViewControllerRegistry registry) {
-        registry.addViewController("/swagger").setViewName("redirect::8888/swagger-ui/index.html");
+        registry.addViewController("/swagger").setViewName("forward::8888/swagger-ui/index.html");
     }
 
     @Bean
