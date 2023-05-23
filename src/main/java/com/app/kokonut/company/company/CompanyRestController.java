@@ -28,6 +28,7 @@ public class CompanyRestController {
             "1. 기본으로 제공하는 카테고리를 조회한다." +
             "2. DB내에 추가된 카테고리와 해당 카테고리의 항목을 보내준다.")
     @GetMapping(value = "/categoryList") // -> 추가된 카테고리 리스트가져오기
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> categoryList() {
         return companyItemService.categoryList();
     }
@@ -36,6 +37,7 @@ public class CompanyRestController {
             "1. cpCode를 통해 추가된 카테고리를 조회한다." +
             "2. 결과값을 보낸다.")
     @GetMapping(value = "/addItemList") // -> 추가된 카테고리 리스트가져오기
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> addItemList() {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return companyItemService.addItemList(jwtFilterDto);
@@ -45,6 +47,7 @@ public class CompanyRestController {
             "1. 항목의 이름, 암호화여부의 데이터를 받는다." +
             "2. 해당 항목을 저정한다.")
     @PostMapping(value = "/saveItem") // -> 추가 카테고리의 항목을 추가한다.
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> saveItem(@RequestParam(name="ciName", defaultValue = "") String ciName,
                                                               @RequestParam(name="ciSecurity", defaultValue = "") Integer ciSecurity) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
@@ -55,6 +58,7 @@ public class CompanyRestController {
             "1. 해당 항목의 고유ID, 항목의 이름 데이터를 받는다." +
             "2. 해당 항목을 조회하고 존해하면 받은 이름으로 수정한다.")
     @PostMapping(value = "/updateItem") // -> 추가 카테고리의 수정을 추가한다.
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> updateItem(@RequestParam(name="ciId", defaultValue = "") Long ciId,
                                                          @RequestParam(name="ciName", defaultValue = "") String ciName) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
@@ -65,6 +69,7 @@ public class CompanyRestController {
             "1. 삭제할 항목의 고유ID 데이터를 받는다." +
             "2. 해당 항목을 조회하여 삭제한다.")
     @PostMapping(value = "/deleteItem") // -> 추가 카테고리의 항목을 삭제한다.
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> deleteItem(@RequestParam(name="ciId", defaultValue = "") Long ciId) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return companyItemService.deleteItem(ciId, jwtFilterDto);
@@ -77,6 +82,7 @@ public class CompanyRestController {
             "1. 추가할 테이블명을 받는다." +
             "2. 해당 테이블을 저정한다.")
     @PostMapping(value = "/userTableSave")
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> userTableSave(@RequestParam(name="ctDesignation", defaultValue = "") String ctDesignation) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return companyItemService.userTableSave(jwtFilterDto, ctDesignation);
@@ -86,6 +92,7 @@ public class CompanyRestController {
             "1. cpCode를 통해 추가된 카테고리를 조회한다." +
             "2. 결과값을 보낸다.")
     @GetMapping(value = "/userTableList")
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> userTableList() {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return companyItemService.userTableList(jwtFilterDto);

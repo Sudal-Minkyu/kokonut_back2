@@ -5,19 +5,16 @@ import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.ResponseErrorCode;
-import com.app.kokonut.common.realcomponent.CommonUtil;
 import com.app.kokonut.common.realcomponent.Utils;
 import com.app.kokonut.company.companydatakey.CompanyDataKeyService;
-import com.app.kokonut.privacyhistory.dtos.PrivacyHistoryCode;
 import com.app.kokonutapi.auth.dtos.AuthApiLoginDto;
 import com.app.kokonutuser.KokonutUserService;
-import com.app.kokonutuser.dtos.KokonutUserFieldDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import com.app.kokonut.privacyhistory.PrivacyHistoryService;
+
 import java.util.*;
 
 /**
@@ -36,15 +33,13 @@ public class AuthApiService {
     private final PasswordEncoder passwordEncoder;
 
     private final KokonutUserService kokonutUserService;
-    private final PrivacyHistoryService privacyHistoryService;
 
     @Autowired
-    public AuthApiService(AdminRepository adminRepository, CompanyDataKeyService companyDataKeyService, PasswordEncoder passwordEncoder, KokonutUserService kokonutUserService, PrivacyHistoryService privacyHistoryService){
+    public AuthApiService(AdminRepository adminRepository, CompanyDataKeyService companyDataKeyService, PasswordEncoder passwordEncoder, KokonutUserService kokonutUserService){
         this.adminRepository = adminRepository;
         this.companyDataKeyService = companyDataKeyService;
         this.passwordEncoder = passwordEncoder;
         this.kokonutUserService = kokonutUserService;
-        this.privacyHistoryService = privacyHistoryService;
     }
 
     // API용 개인정보(고객의 고객) 로그인
@@ -95,7 +90,6 @@ public class AuthApiService {
         String email = jwtFilterDto.getEmail();
 
         AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
-        Long adminId = adminCompanyInfoDto.getAdminId();
         String cpCode = adminCompanyInfoDto.getCompanyCode();
 
 //        AwsKmsResultDto awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(cpCode);
@@ -165,7 +159,7 @@ public class AuthApiService {
                 if(groupKey.equals("1")) {
                     // 필수항목 검증 : 필수사항의 항목은 "1_id" 와 "1_pw" 입니다.
                     for (Map.Entry<String, Object> entry : groupValues) {
-                        log.info("키 : "+entry.getKey());
+                        log.info(String.valueOf(entry.getKey()));
                         if(String.valueOf(entry.getKey()).equals("1_id") || String.valueOf(entry.getKey()).equals("1_pw")) {
                             trigger++;
                         }
@@ -191,31 +185,6 @@ public class AuthApiService {
                     log.info("인서트 시작");
 
                     // 컬럼존재 검증절차 : 테이블의 컬럼 조회
-                    List<KokonutUserFieldDto> kokonutUserFieldDtos = kokonutUserService.getColumns(saveTable);
-                    log.info("kokonutUserFieldDtos : "+kokonutUserFieldDtos);
-
-                    // 컬럼 존재검증
-                    for (Map.Entry<String, Object> entry : groupValues) {
-                        String column = cpCode+"_"+entry.getKey();
-                        log.info("검증할 column : "+column);
-
-                    }
-
-
-
-                    for (KokonutUserFieldDto kokonutUserFieldDto : kokonutUserFieldDtos) {
-                        String field = kokonutUserFieldDto.getField();
-                        if(!field.contains("kokonut_")) {
-                            String comment = kokonutUserFieldDto.getComment();
-//                            log.info("comment : "+comment);
-                            if (comment != null) {
-                                String[] commentText = comment.split(",");
-                                log.info("고유코드 : "+commentText[5]);
-                            }
-                        }
-                    }
-
-
 
 
                     // 난수 생성
@@ -229,9 +198,6 @@ public class AuthApiService {
             }
 
             log.info("실행할 쿼리문 리스트 : "+queryList);
-
-            // 개인정보 생성로그 저장
-//            privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_01, CommonUtil.clientIp(), email);
         }
 
         return ResponseEntity.ok(res.success(data));

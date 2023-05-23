@@ -160,7 +160,7 @@ public class Utils {
 	// 쿠키 저장함수 -> 옵션 고정 : HttpOnly = true, Secure = true, Path = "/"
 	public static void cookieSave(String cookieName, String cookieValue, Integer maxAge, HttpServletResponse response) {
 		Cookie cookieRefreshToken = new Cookie(cookieName, cookieValue);
-		cookieRefreshToken.setMaxAge(maxAge);
+		cookieRefreshToken.setMaxAge(maxAge); // 쿠키 값을 30일로 셋팅
 		cookieRefreshToken.setPath("/");
 		cookieRefreshToken.setHttpOnly(true);
 		cookieRefreshToken.setSecure(true);
@@ -172,7 +172,7 @@ public class Utils {
 		Cookie[] cookies = request.getCookies();
 		if(cookies != null) {
 			for(Cookie cookie : cookies) {
-				if(cookie.getName().equals("refreshToken") || cookie.getName().equals("accessToken")) {
+				if(cookie.getName().equals("refreshToken")) {
 					Cookie deleteCookie = new Cookie(cookie.getName(),"");
 					deleteCookie.setMaxAge(-1);
 					deleteCookie.setPath("/");

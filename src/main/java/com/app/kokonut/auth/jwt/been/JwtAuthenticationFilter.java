@@ -57,7 +57,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     throw new io.jsonwebtoken.security.SecurityException("잘못된 JWT 토큰입니다.");
                 } else if(result == 902) {
                     log.info("여기왔슴둥 : "+result);
-                    tokenRefresh(request, response);
+                    throw new io.jsonwebtoken.security.SecurityException("재로그인 해주세요.");
+//                    // JWT 엑세스토큰 재발급하기
+//                    String refreshToken = Utils.cookieGet("refreshToken", request);
+//                    log.info("리플레쉬 토큰 : "+refreshToken);
+//
+//                    if(refreshToken == null) {
+//                        log.info("리플레쉬 토큰이 만료되었습니다. 새로 로그인해주시길 바랍니다.");
+//                        throw new RuntimeException("만료된 JWT 토큰입니다.");
+//                    } else {
+//                        // 토큰 검증
+//                        Authentication authentication = jwtTokenProvider.getAuthentication(refreshToken);
+//
+//                        // 토큰 발급
+//                        String newAccessToken = jwtTokenProvider.reissueAccessToken(authentication);
+//                        log.info("엑세스토큰 만료 -> 새로발급된 토큰 : "+newAccessToken);
+//
+//                        // 쿠키에 어세스 토큰 추가
+//                        Utils.cookieSave("accessToken", newAccessToken, 1800, response);
+////                        jwtTokenProvider.setHeaderAccessToken(response, newAccessToken);
+//
+//                        // 컨텍스트에 넣기
+//                        this.setAuthentication(newAccessToken);
+//                    }
                 } else if(result == 903) {
                     log.info("여기왔슴둥 : "+result);
                     throw new UnsupportedJwtException("지원되지 않는 JWT 토큰입니다.");
@@ -70,35 +92,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         } else {
-            tokenRefresh(request, response);
-        }
+            String refreshToken = Utils.cookieGet("refreshToken", request);
+            log.info("리플레쉬 토큰 : "+refreshToken);
 
-        filterChain.doFilter(request, response);
-    }
+            if(refreshToken == null) {
+                log.info("리플레쉬 토큰이 만료되었습니다. 새로 로그인해주시길 바랍니다.");
+                throw new RuntimeException("만료된 JWT 토큰입니다.");
+            } else {
+                // 토큰 검증
+                Authentication authentication = jwtTokenProvider.getAuthentication(refreshToken);
 
-    // 토큰새로고림
-    public void tokenRefresh(HttpServletRequest request, HttpServletResponse response) {
-        String refreshToken = Utils.cookieGet("refreshToken", request);
-        log.info("리플레쉬 토큰 : "+refreshToken);
+                // 토큰 발급
+                String newAccessToken = jwtTokenProvider.reissueAccessToken(authentication);
+                log.info("엑세스토큰 만료 -> 새로발급된 토큰 : "+newAccessToken);
 
-        if(refreshToken == null) {
-            log.info("리플레쉬 토큰이 만료되었습니다. 새로 로그인해주시길 바랍니다.");
-            throw new RuntimeException("만료된 JWT 토큰입니다.");
-        } else {
-            // 토큰 검증
-            Authentication authentication = jwtTokenProvider.getAuthentication(refreshToken);
-
-            // 토큰 발급
-            String newAccessToken = jwtTokenProvider.reissueAccessToken(authentication);
-            log.info("엑세스토큰 만료 -> 새로발급된 토큰 : "+newAccessToken);
-
-            // 쿠키에 어세스 토큰 추가
-            Utils.cookieSave("accessToken", newAccessToken, 1800, response);
+                // 쿠키에 어세스 토큰 추가
+                Utils.cookieSave("accessToken", newAccessToken, 1800, response);
 //              jwtTokenProvider.setHeaderAccessToken(response, newAccessToken);
 
-            // 컨텍스트에 넣기
-            this.setAuthentication(newAccessToken);
+                // 컨텍스트에 넣기
+                this.setAuthentication(newAccessToken);
+            }
         }
+        filterChain.doFilter(request, response);
     }
 
     // SecurityContext 에 Authentication 객체를 저장합니다.

@@ -32,6 +32,9 @@ public class QnaRestController {
             "1. 토큰과 페이지 처리를 위한 값을 받는다." +
             "2. QnA 문의 내역을 조회한다")
     @GetMapping(value = "/qnaList") // -> 기존의 코코넛 호출 메서드명 : list - SystemQnaController, MemberQnaController
+    @ApiImplicitParams({
+            @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    })
     public ResponseEntity<Map<String,Object>> qnaList(@PageableDefault Pageable pageable) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return qnaService.qnaList(jwtFilterDto, pageable);
@@ -40,6 +43,9 @@ public class QnaRestController {
     @ApiOperation(value="1:1 문의 등록", notes="" +
             "1. QnA 문의를 등록한다.")
     @PostMapping(value = "/qnaWrite", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE}) // -> 기존의 코코넛 호출 메서드명 : writeView, save - MemberQnaController
+    @ApiImplicitParams({
+            @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    })
     public ResponseEntity<Map<String,Object>> qnaWrite(@ModelAttribute QnaQuestionSaveDto qnaQuestionSaveDto) throws IOException {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return qnaService.qnaWrite(qnaQuestionSaveDto, jwtFilterDto);
@@ -49,6 +55,9 @@ public class QnaRestController {
             "1. 토큰과 조회하고자 하는 QnA 문의 ID를 받는다." +
             "2. QnA 문의 내용을 조회한다.")
     @GetMapping(value = "/qnaDetail/{idx}") // -> 기존의 코코넛 호출 메서드명 : detailView - SystemQnaController, MemberQnaController
+    @ApiImplicitParams({
+            @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    })
     public ResponseEntity<Map<String,Object>> qnaDetail(@PathVariable("idx") Long qnaId) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return qnaService.qnaDetail(qnaId, jwtFilterDto);
@@ -57,6 +66,9 @@ public class QnaRestController {
     @ApiOperation(value="1:1 문의 답변 등록", notes="" +
             "1. QnA 답변을 등록한다.")
     @PostMapping(value = "/qnaAnswer") // -> 기존의 코코넛 호출 메서드명 : answer - SystemQnaController
+    @ApiImplicitParams({
+            @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    })
     public ResponseEntity<Map<String,Object>> qnaAnswer(@RequestBody QnaAnswerSaveDto qnaAnswerSaveDto) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return qnaService.qnaAnswer(qnaAnswerSaveDto, jwtFilterDto);

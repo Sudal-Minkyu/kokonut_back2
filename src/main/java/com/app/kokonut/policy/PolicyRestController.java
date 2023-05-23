@@ -34,7 +34,7 @@ public class PolicyRestController {
     @ApiOperation(value="개인정보처리방침 리스트 조회", notes="" +
             "1. 개인정보처리방침을 제작한 리스트를 보여준다.")
     @GetMapping(value = "/policyList")
-    
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> policyList(@RequestParam(value="searchText", defaultValue = "") String searchText,
                                                          @RequestParam(value="stime", defaultValue = "") String stime,
                                                          @RequestParam(value="filterDate", defaultValue = "") String filterDate,
@@ -46,7 +46,7 @@ public class PolicyRestController {
     @ApiOperation(value="개인정보처리방침 상세내용 조회", notes="" +
             "1. 리스트의 상세보기를 누르면 나오는 데이터를 보내준다.")
     @GetMapping(value = "/policyDetail/{idx}")
-    
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> policyDetail(@PathVariable("idx") Long piId) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return policyService.policyDetail(piId, jwtFilterDto);
@@ -56,7 +56,7 @@ public class PolicyRestController {
             "1. 개인정보처리방침의 piId를 받는다." +
             "2. 단계의 따라 해당값을 보내준다.")
     @GetMapping(value = "/policyCheck")
-    
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> policyCheck() {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return policyService.policyCheck(jwtFilterDto);
@@ -67,7 +67,7 @@ public class PolicyRestController {
             "1. 작성중단 여부를 묻는다." +
             "2. 삭제를 선택할 경우 받은 'piId'를 통해 조회하여 삭제처리한다.")
     @PostMapping(value = "/privacyPolicyDelete")
-    
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> privacyPolicyDelete(@RequestParam(name="piId", defaultValue = "") Long piId) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return policyService.privacyPolicyDelete(piId, jwtFilterDto);
@@ -77,7 +77,7 @@ public class PolicyRestController {
             "1. 개인정보처리방침의 piId를 받는다." +
             "2. 해당값을 보내준다.")
     @GetMapping(value = "/privacyPolicyWriting")
-    
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> privacyPolicyWriting(@RequestParam(name="piId", defaultValue = "") Long piId) {
         return policyService.privacyPolicyWriting(piId);
     }
@@ -88,7 +88,7 @@ public class PolicyRestController {
             "2. 첫번째 뎁스의 대한 데이터를 받는다." +
             "3. 해당 내용을 저장한다.")
     @PostMapping(value = "/privacyPolicyFirstSave")
-    
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> privacyPolicyFirstSave(@RequestBody PolicySaveFirstDto policySaveFirstDto) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return policyService.privacyPolicyFirstSave(policySaveFirstDto, jwtFilterDto);
@@ -100,7 +100,7 @@ public class PolicyRestController {
             "2. 두번째 뎁스의 대한 데이터를 받는다.<br/>"+
             "3. 해당 내용을 저장한다.")
     @PostMapping(value = "/privacyPolicySecondSave")
-    
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> privacyPolicySecondSave(@RequestBody PolicySaveSecondDto policySaveSecondDto) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return policyService.privacyPolicySecondSave(policySaveSecondDto, jwtFilterDto);
@@ -112,7 +112,7 @@ public class PolicyRestController {
             "2. 세번째 뎁스의 대한 데이터를 받는다." +
             "3. 해당 내용을 저장한다.")
     @PostMapping(value = "/privacyPolicyThirdSave")
-    
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> privacyPolicyThirdSave(@RequestBody PolicySaveThirdDto policySaveThirdDto) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return policyService.privacyPolicyThirdSave(policySaveThirdDto, jwtFilterDto);
@@ -124,7 +124,7 @@ public class PolicyRestController {
             "2. 네번째 뎁스의 대한 데이터를 받는다." +
             "3. 해당 내용을 저장한다.")
     @PostMapping(value = "/privacyPolicyFourthSave")
-    
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> privacyPolicyFourthSave(@RequestBody PolicySaveFourthDto policySaveFourthDto) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return policyService.privacyPolicyFourthSave(policySaveFourthDto, jwtFilterDto);
@@ -136,7 +136,7 @@ public class PolicyRestController {
             "2. 네번째 뎁스의 대한 데이터를 받는다." +
             "3. 해당 내용을 저장한다.")
     @PostMapping(value = "/privacyPolicyFifthSave")
-    
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> privacyPolicyFifthSave(@RequestBody PolicySaveFifthDto policySaveFifthDto) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return policyService.privacyPolicyFifthSave(policySaveFifthDto, jwtFilterDto);
@@ -148,7 +148,7 @@ public class PolicyRestController {
             "2. 다섯번째 뎁스의 대한 데이터를 받는다." +
             "3. 해당 내용을 저장한다.")
     @PostMapping(value = "/privacyPolicySixthSave")
-    
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> privacyPolicySixthSave(@RequestBody PolicySaveSixthDto policySaveSixthDto) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return policyService.privacyPolicySixthSave(policySaveSixthDto, jwtFilterDto);
@@ -157,7 +157,7 @@ public class PolicyRestController {
     @ApiOperation(value="개인정보보호 마지막 뎁스 등록", notes= "" +
             "1. 개인정보처리방침 최종저장 한다.")
     @PostMapping(value = "/privacyPolicyFinalSave")
-    
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> privacyPolicyFinalSave(@RequestParam(name="piId", defaultValue = "") Long piId) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return policyService.privacyPolicyFinalSave(piId, jwtFilterDto);

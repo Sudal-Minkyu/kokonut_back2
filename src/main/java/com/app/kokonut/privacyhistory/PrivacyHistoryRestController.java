@@ -38,6 +38,9 @@ public class PrivacyHistoryRestController {
 
     @GetMapping("/privacyHistoryList")
     @ApiOperation(value="개인정보 처리 활동이력 조회", notes="")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
+    })
     public ResponseEntity<Map<String,Object>> privacyHistoryList(@RequestParam(value="searchText", defaultValue = "") String searchText,
                                                                  @RequestParam(value="stime", defaultValue = "") String stime,
                                                                  @RequestParam(value="filterRole", defaultValue = "") String filterRole,
