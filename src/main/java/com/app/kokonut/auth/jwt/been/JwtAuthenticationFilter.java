@@ -1,7 +1,6 @@
 package com.app.kokonut.auth.jwt.been;
 
 import com.app.kokonut.auth.jwt.dto.RedisDao;
-import com.app.kokonut.common.realcomponent.Utils;
 import io.jsonwebtoken.UnsupportedJwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +35,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
         log.info("JwtAuthenticationFilter 호출");
 
-        String token = Utils.cookieGet("accessToken", request);
+        String token = resolveToken(request);
+
         if(token != null) {
             log.info("필터 거쳐감 Jwt Access Token");
 
@@ -57,7 +57,35 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     throw new io.jsonwebtoken.security.SecurityException("잘못된 JWT 토큰입니다.");
                 } else if(result == 902) {
                     log.info("여기왔슴둥 : "+result);
-                    tokenRefresh(request, response);
+                    // JWT 엑세스토큰 재발급하기
+                    Cookie[] cookies = request.getCookies();
+                    String refreshToken = null;
+                    if(cookies != null) {
+                        for(Cookie cookie : cookies) {
+                            if(cookie.getName().equals("refreshToken")) {
+                                refreshToken = cookie.getValue();
+                            }
+                        }
+                    }
+                    log.info("리플레쉬 토큰 : "+refreshToken);
+
+                    if(refreshToken == null) {
+                        log.info("리플레쉬 토큰이 만료되었습니다. 새로 로그인해주시길 바랍니다.");
+                        throw new RuntimeException("만료된 JWT 토큰입니다.");
+                    } else {
+                        // 토큰 검증
+                        Authentication authentication = jwtTokenProvider.getAuthentication(refreshToken);
+
+                        // 토큰 발급
+                        String newAccessToken = jwtTokenProvider.reissueAccessToken(authentication);
+                        log.info("엑세스토큰 만료 -> 새로발급된 토큰 : "+newAccessToken);
+
+                        // 헤더에 어세스 토큰 추가
+                        jwtTokenProvider.setHeaderAccessToken(response, newAccessToken);
+
+                        // 컨텍스트에 넣기
+                        this.setAuthentication(newAccessToken);
+                    }
                 } else if(result == 903) {
                     log.info("여기왔슴둥 : "+result);
                     throw new UnsupportedJwtException("지원되지 않는 JWT 토큰입니다.");
@@ -69,36 +97,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     throw new RuntimeException("인증된 정보가 없습니다.");
                 }
             }
-        } else {
-            tokenRefresh(request, response);
         }
-
         filterChain.doFilter(request, response);
     }
 
-    // 토큰새로고림
-    public void tokenRefresh(HttpServletRequest request, HttpServletResponse response) {
-        String refreshToken = Utils.cookieGet("refreshToken", request);
-        log.info("리플레쉬 토큰 : "+refreshToken);
-
-        if(refreshToken == null) {
-            log.info("리플레쉬 토큰이 만료되었습니다. 새로 로그인해주시길 바랍니다.");
-            throw new RuntimeException("만료된 JWT 토큰입니다.");
-        } else {
-            // 토큰 검증
-            Authentication authentication = jwtTokenProvider.getAuthentication(refreshToken);
-
-            // 토큰 발급
-            String newAccessToken = jwtTokenProvider.reissueAccessToken(authentication);
-            log.info("엑세스토큰 만료 -> 새로발급된 토큰 : "+newAccessToken);
-
-            // 쿠키에 어세스 토큰 추가
-            Utils.cookieSave("accessToken", newAccessToken, 1800, response);
-//              jwtTokenProvider.setHeaderAccessToken(response, newAccessToken);
-
-            // 컨텍스트에 넣기
-            this.setAuthentication(newAccessToken);
-        }
+    // Request Header 에서 토큰 정보 추출
+    private String resolveToken(HttpServletRequest request) {
+        return request.getHeader(BEARER_TYPE);
     }
 
     // SecurityContext 에 Authentication 객체를 저장합니다.

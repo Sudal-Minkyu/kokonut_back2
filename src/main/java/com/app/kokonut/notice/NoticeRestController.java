@@ -45,7 +45,9 @@ public class NoticeRestController {
             "1. 토큰과 페이지 처리를 위한 값을 받는다." +
             "2. 공지사항 목록을 조회한다.")
     @GetMapping(value = "/noticeList") // -> 기존의 코코넛 호출 메서드명 : getList, list - NoticeController
-
+    @ApiImplicitParams({
+            @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    })
     public ResponseEntity<Map<String,Object>> noticeList(@RequestBody NoticeSearchDto noticeSearchDto, @PageableDefault Pageable pageable) {
 //        String userRole = SecurityUtil.getCurrentJwt().getRole();
         return noticeService.noticeList(null, noticeSearchDto, pageable);
@@ -55,7 +57,9 @@ public class NoticeRestController {
             "1. 토큰과 조회하고자 하는 공지사항 ID를 받는다." +
             "2. 공지사항 내용을 조회한다.")
     @GetMapping(value = "/noticeDetail/{ntId}") // -> 기존의 코코넛 호출 메서드명 : detailView - SystemNoticeController, NoticeController
-
+    @ApiImplicitParams({
+            @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    })
     public ResponseEntity<Map<String,Object>> noticeDetail(@PathVariable("ntId") Long ntId) {
 //        String userRole = SecurityUtil.getCurrentJwt().getRole();
         return noticeService.noticeDetail(null, ntId);
@@ -64,7 +68,9 @@ public class NoticeRestController {
     @ApiOperation(value="Notice 등록, 수정", notes="" +
             "1. 공지사항 수정, 등록")
     @PostMapping(value = "/noticeSave") // -> 기존의 코코넛 호출 메서드명 : save - SystemNoticeController
-
+    @ApiImplicitParams({
+            @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    })
     public ResponseEntity<Map<String,Object>> noticeSave(@RequestBody NoticeDetailDto noticeDetailDto) {
 //        String userRole = SecurityUtil.getCurrentJwt().getRole();
         String email = SecurityUtil.getCurrentJwt().getEmail();
@@ -75,7 +81,9 @@ public class NoticeRestController {
             "1. 토큰과 삭제하고자 하는 공지사항 ID를 받는다." +
             "2. 공지사항을 삭제한다.")
     @PostMapping(value = "/noticeDelete") // -> 기존의 코코넛 호출 메서드명 : delete - SystemNoticeController
-
+    @ApiImplicitParams({
+            @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    })
     public ResponseEntity<Map<String,Object>> noticeDelete(@RequestParam(name="ntId") Long ntId) {
 //        String userRole = SecurityUtil.getCurrentJwt().getRole();
         String email = SecurityUtil.getCurrentJwt().getEmail();
@@ -85,7 +93,9 @@ public class NoticeRestController {
     @ApiOperation(value="Notice 게시 상태변경", notes="" +
             "1. 공지사항 게시 상태를 변경한다.")
     @PostMapping(value = "/noticeState") // -> 기존의 코코넛 호출 메서드명 : updatePostingState, updateStopState - SystemNoticeController
-
+    @ApiImplicitParams({
+            @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    })
     public ResponseEntity<Map<String,Object>> noticeState(@RequestBody NoticeStateDto noticeStateDto) {
 //        String userRole = SecurityUtil.getCurrentJwt().getRole();
         String email = SecurityUtil.getCurrentJwt().getEmail();

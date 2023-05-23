@@ -37,12 +37,16 @@ public class ProvisionRestController {
 
     @ApiOperation(value="내부제공, 외부제공 관리자목록 리스트 호출")
     @GetMapping(value = "/offerAdminList")
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> offerAdminList(@RequestParam(value="type", defaultValue = "1") String type) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return adminService.offerAdminList(type, jwtFilterDto);
     }
 
     @PostMapping("/provisionSave")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = false, dataTypeClass = String.class, paramType = "header", example = ""),
+    })
     @ApiOperation(value = "개인정보제공 저장 API", notes = "" +
             "1. PersonalInfoProvision 저장할 데이터를 받는다." +
             "2. ")
@@ -52,6 +56,9 @@ public class ProvisionRestController {
     }
 
     @GetMapping("/provisionList")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = false, dataTypeClass = String.class, paramType = "header", example = ""),
+    })
     @ApiOperation(value = "개인정보제공 리스트 조회 API", notes = "" +
             "")
     public ResponseEntity<Map<String, Object>> provisionList(@RequestParam(value="searchText", defaultValue = "") String searchText,
@@ -64,6 +71,9 @@ public class ProvisionRestController {
     }
 
     @GetMapping("/provisionDownloadList")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = false, dataTypeClass = String.class, paramType = "header", example = ""),
+    })
     @ApiOperation(value = "개인정보제공 다운로드 리스트 조회 API", notes = "" +
             "")
     public ResponseEntity<Map<String, Object>> provisionDownloadList(@RequestParam(value="proCode", defaultValue = "") String proCode,
@@ -76,6 +86,9 @@ public class ProvisionRestController {
             "1. 상세내용을 조회한 proCode를 받는다." +
             "2. 해당 코드값에 합당한 데이터를 보낸다.")
     @GetMapping(value = "/provisionDetail/{proCode}") // -> 기존의 코코넛 호출 메서드명 : detailView - SystemQnaController, MemberQnaController
+    @ApiImplicitParams({
+            @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    })
     public ResponseEntity<Map<String,Object>> provisionDetail(@PathVariable("proCode") String proCode) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return provisionService.provisionDetail(proCode, jwtFilterDto);

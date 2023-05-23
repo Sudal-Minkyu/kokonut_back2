@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 
+
 /**
  * @author Woody
  * Date : 2022-12-01
@@ -130,6 +131,16 @@ public class AuthRequestDto {
     public static class Reissue {
         @NotBlank(message = "accessToken을 입력해주세요.")
         private String accessToken;
+    }
+
+    @Getter
+    @Setter
+    public static class Logout {
+        @NotBlank(message = "잘못된 요청입니다.")
+        private String accessToken;
+
+//        @NotBlank(message = "잘못된 요청입니다.")
+//        private String refreshToken;
     }
 
     // 관리자등록 Dto
