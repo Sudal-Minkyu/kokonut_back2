@@ -15,7 +15,7 @@ public class KokonutApplication implements WebMvcConfigurer {
     
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addViewController("/swagger").setViewName("forward:/swagger-ui/index.html");
+        registry.addViewController("/swagger").setViewName("forward::8888/swagger-ui/index.html");
     }
 
 }
