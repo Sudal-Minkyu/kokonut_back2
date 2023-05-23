@@ -25,7 +25,7 @@ public class DynamicRemoveRestController {
 
 	// 회원DB 생성
 //	@PostMapping(value = "/createUserDatabase")
-//	@ApiImplicitParams({@ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")})
+//	@ApiImplicitParams({})
 //	public ResponseEntity<Map<String,Object>> createUserDatabase(@RequestParam(name="email", defaultValue = "") String email) {
 //		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
 
