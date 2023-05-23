@@ -77,12 +77,13 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
 //        log.info("허용 프론트IP : "+frontServerDomainIp);
         registry
-            .addMapping("/*/api/**")
-            .allowedOriginPatterns(frontServerDomainIp)
-            .allowedHeaders("Content-type", "ApiKey", "keyBufferSto", "ivSto")
-            .allowedMethods(HttpMethod.GET.name(), HttpMethod.POST.name())
-            .allowCredentials(true)
-            .maxAge(900); // 타임아웃 15분으로 설정
+                .addMapping("/*/api/**")
+                .allowedOriginPatterns(frontServerDomainIp)
+                .allowedHeaders("Authorization", "Content-type", "ApiKey", "keyBufferSto", "ivSto")
+                .exposedHeaders("Authorization")
+                .allowedMethods(HttpMethod.GET.name(), HttpMethod.POST.name())
+                .allowCredentials(true)
+                .maxAge(900); // 타임아웃 15분으로 설정
     }
 
     @Bean
