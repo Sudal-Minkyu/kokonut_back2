@@ -127,9 +127,8 @@ public enum ResponseErrorCode {
 
 
     ERROR_CODE_01("ERROR_CODE_01", "지정되지 않은 값입니다. 고유코드를 확인해주시고 메뉴얼대로 호출해주시길 바랍니다."),
-    ERROR_CODE_02("ERROR_CODE_02", "존재하지 않은 고유코드입니다. 존재하는 고유코드인지 확인해주세요."),
-    ERROR_CODE_03("ERROR_CODE_03", "필수항목을 넣지 않거나, 중복전송을 하셨습니다. '1_id'와 '1_pw'는 하나씩만 보내주시길 바랍니다."),
     ;
+
 
 
     private String code;

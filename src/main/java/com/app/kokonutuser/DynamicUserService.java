@@ -1788,7 +1788,7 @@ public class DynamicUserService {
 
 			StringBuilder searchQuery = new StringBuilder();
 			searchQuery.append("SELECT ");
-			searchQuery.append("kokonut_IDX, ID_1_id as ID, " +
+			searchQuery.append("kokonut_IDX, ID, " +
 					"DATE_FORMAT(kokonut_REGISTER_DATE, '%Y.%m.%d') as kokonut_REGISTER_DATE, " +
 					"DATE_FORMAT(kokonut_LAST_LOGIN_DATE, '%Y.%m.%d') as kokonut_LAST_LOGIN_DATE");
 
