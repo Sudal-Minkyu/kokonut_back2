@@ -20,8 +20,15 @@ sonarqube {
         property 'sonar.projectKey', 'beta_kokonut'
         property 'sonar.host.url', 'http://52.79.252.55:9000'
         property 'sonar.login', 'sqp_748137faa76ea319962abde1359456cdd5088772'
+        property 'sonar.coverage.jacoco.xmlReportPaths', '**/jacoco/*.xml'
+        property 'sonar.sources', 'src'
+        property 'sonar.language', 'java'
+        property 'sonar.sourceEncoding', 'UTF-8'
+        property 'sonar.profile', 'Sonar way'
+        property 'sonar.test.inclusions', '**/*Test.java'
     }
 }
+
 
 jacoco {
     toolVersion = '0.8.7'
