@@ -33,14 +33,17 @@ tasks.named('test') {
 
 jacocoTestReport {
     reports {
-        xml.enabled = true
-        html.enabled = true
-        
-        destinationDirectory = file("$buildDir/reports/jacoco")
+        xml {
+            enabled true
+            destination file("$buildDir/reports/jacoco/report.xml")
+        }
+        html {
+            enabled true
+            destination file("$buildDir/reports/jacoco")
+        }
     }
     dependsOn test
 }
-
 
 group = 'com.app'
 version = '0.0.1-SNAPSHOT'
