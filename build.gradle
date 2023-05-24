@@ -16,8 +16,8 @@ plugins {
 /* sonarqube 설정 추가 */
 sonarqube {
     properties {
-        property 'sonar.projectName', 'beta_kokonut'
-        property 'sonar.projectKey', 'beta_kokonut'
+        property 'sonar.projectName', 'beta_kn_backend'
+        property 'sonar.projectKey', 'beta_kn_backend'
         property 'sonar.host.url', 'http://52.79.252.55:9000'
         property 'sonar.login', 'sqp_ae8e61a1ee07d91a798eaa5b6abeff7ef3dddb55'
         property 'sonar.coverage.jacoco.xmlReportPaths', '**/jacoco/*.xml'
