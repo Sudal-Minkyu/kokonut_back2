@@ -24,20 +24,21 @@ sonarqube {
 }
 
 jacoco {
-    toolVersion = '0.8.7'  // 사용할 Jacoco 버전 설정
-    reportsDir = file("$buildDir/reports/jacoco")  // Jacoco 보고서를 저장할 디렉토리 설정
+    toolVersion = '0.8.7'
 }
 
 tasks.named('test') {
-    finalizedBy jacocoTestReport  // 테스트 실행 후 Jacoco 보고서 생성
+    finalizedBy jacocoTestReport
 }
 
 jacocoTestReport {
     reports {
-        xml.enabled = true  // XML 형식의 보고서 활성화
-        html.enabled = true  // HTML 형식의 보고서 활성화
+        xml.enabled = true
+        html.enabled = true
+        
+        destinationDirectory = file("$buildDir/reports/jacoco")
     }
-    dependsOn test  // 테스트 실행 후 보고서 생성
+    dependsOn test
 }
 
 
