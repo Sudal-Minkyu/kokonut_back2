@@ -106,6 +106,15 @@ public class DynamicUserRestController {
 		return dynamicUserService.tableBasicList(jwtFilterDto);
 	}
 
+	@ApiOperation(value="테이블에 한건이라도 데이터가 존재하는지 여부를 조회한다.", notes="" +
+			"1. 존재를 조회할 테이블을 파라메터로 던져준다." +
+			"2. 한건이라도 존재하면 'Y' 아니면 'N'을 반환해준다.")
+	@GetMapping(value = "/tableDataCheck")
+	@ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+	public ResponseEntity<Map<String,Object>> tableDataCheck(@RequestParam(name="tableName", defaultValue = "") String tableName) {
+		return dynamicUserService.tableDataCheck(tableName);
+	}
+
 //  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 

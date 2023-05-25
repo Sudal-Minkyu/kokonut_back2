@@ -1,6 +1,6 @@
 package com.app.kokonut.company.companytable;
 
-import com.app.kokonut.company.companytable.dtos.CompanyTableSubListDto;
+import com.app.kokonut.company.companytable.dtos.CompanyTableListDto;
 
 import java.util.List;
 
@@ -12,6 +12,6 @@ import java.util.List;
  */
 public interface CompanyTableRepositoryCustom {
 
-    List<CompanyTableSubListDto> findByTableList(String cpCode);
+    List<CompanyTableListDto> findByTableList(String cpCode);
 
 }

@@ -37,8 +37,11 @@ public class PrivacyHistory {
     @Column(name="kph_activity_code")
     private PrivacyHistoryCode privacyHistoryCode;
 
-    // 활동 IP주소
-    @ApiModelProperty("접속IP주소")
+    @ApiModelProperty("호출타입 : 1: 개인정보처리관련(개인정보 다운로드관련, 개인정보 조회, 개인정보 열람), 2: 고객 API호출(처리이력에 안보여줌), 3: 관리자의 API호출(처리이력에 보여줌)")
+    @Column(name = "kph_type")
+    private Integer kphType;
+
+    @ApiModelProperty("활동 IP주소")
     @Column(name = "kph_ip_addr")
     private String kphIpAddr;
 

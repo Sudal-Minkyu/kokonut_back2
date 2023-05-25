@@ -1,6 +1,6 @@
 package com.app.kokonut.company.companytable;
 
-import com.app.kokonut.company.companytable.dtos.CompanyTableSubListDto;
+import com.app.kokonut.company.companytable.dtos.CompanyTableListDto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPQLQuery;
 import org.qlrm.mapper.JpaResultMapper;
@@ -26,13 +26,13 @@ public class CompanyTableRepositoryCustomImpl extends QuerydslRepositorySupport 
     }
 
     @Override
-    public List<CompanyTableSubListDto> findByTableList(String cpCode) {
+    public List<CompanyTableListDto> findByTableList(String cpCode) {
 
         QCompanyTable companyTable = QCompanyTable.companyTable;
 
-        JPQLQuery<CompanyTableSubListDto> query = from(companyTable)
+        JPQLQuery<CompanyTableListDto> query = from(companyTable)
                 .where(companyTable.cpCode.eq(cpCode))
-                .select(Projections.constructor(CompanyTableSubListDto.class,
+                .select(Projections.constructor(CompanyTableListDto.class,
                         companyTable.ctName,
                         companyTable.ctDesignation
                 ));

@@ -1538,7 +1538,7 @@ public class DynamicUserService {
 		HashMap<String, Object> data = new HashMap<>();
 
 		List<KokonutUserFieldDto> kokonutUserFieldDtos = kokonutUserService.getColumns(tableName);
-		log.info("kokonutUserFieldDtos : "+kokonutUserFieldDtos);
+//		log.info("kokonutUserFieldDtos : "+kokonutUserFieldDtos);
 
 		List<KokonutUserFieldListDto> kokonutUserFieldListDtos = new ArrayList<>();
 		KokonutUserFieldListDto kokonutUserFieldListDto;
@@ -1547,6 +1547,7 @@ public class DynamicUserService {
 			String field = kokonutUserFieldDto.getField();
 			if(!field.contains("kokonut_")) {
 				String comment = kokonutUserFieldDto.getComment();
+				String key = kokonutUserFieldDto.getKey();
 				if (comment != null) {
 					String[] commentText = comment.split(",");
 
@@ -1563,6 +1564,13 @@ public class DynamicUserService {
 						kokonutUserFieldListDto.setFieldCategory(commentText[3]);
 						kokonutUserFieldListDto.setFieldColor(commentText[4]);
 						kokonutUserFieldListDto.setFieldCode(commentText[5]);
+						if(key.equals("MUL")) {
+							kokonutUserFieldListDto.setIndexType("1");
+						} else if(key.equals("UNI")) {
+							kokonutUserFieldListDto.setIndexType("2");
+						} else {
+							kokonutUserFieldListDto.setIndexType("0");
+						}
 					}
 				}
 				kokonutUserFieldListDtos.add(kokonutUserFieldListDto);
@@ -1576,7 +1584,7 @@ public class DynamicUserService {
 	// 컬럼추가 버튼(오른쪽에 추가)
 	@Transactional
 	public ResponseEntity<Map<String, Object>> tableColumnAdd(KokonutColumnAddDto kokonutColumnAddDto, JwtFilterDto jwtFilterDto) {
-		log.info("tableColumnCall 호출");
+		log.info("tableColumnAdd 호출");
 
 		AjaxResponse res = new AjaxResponse();
 		HashMap<String, Object> data = new HashMap<>();
@@ -1843,6 +1851,26 @@ public class DynamicUserService {
 		}
 
 		return ResponseEntity.ok(res.success(data));
+	}
+
+	// 테이블의 데이터 존재여부를 조회한다.
+	public ResponseEntity<Map<String, Object>> tableDataCheck(String tableName) {
+		log.info("tableColumnDelete 호출");
+
+		AjaxResponse res = new AjaxResponse();
+		HashMap<String, Object> data = new HashMap<>();
+
+		int verifiResult= kokonutUserService.getTableVerification(tableName);
+		if(verifiResult == 0) {
+			log.error("테이블이 존재하지 않습니다.");
+			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(),"테이블이 "+ResponseErrorCode.KO004.getDesc()+" 테이블 : "+tableName));
+		}
+		else {
+			String result = kokonutUserService.getTableDataCheck(tableName);
+			data.put("anyCustomerDataExistYn", result);
+
+			return ResponseEntity.ok(res.success(data));
+		}
 	}
 
 }

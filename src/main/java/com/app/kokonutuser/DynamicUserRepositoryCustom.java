@@ -2,16 +2,20 @@ package com.app.kokonutuser;
 
 import com.app.kokonutuser.dtos.*;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface DynamicUserRepositoryCustom {
 
     List<KokonutUserFieldDto> selectColumns(String searchQuery); // 테이블의 컬럼 조회
 
+    List<Map<String, Object>> getCommentOrEncrypt(String searchQuery); // 테이블의 필드 조회
+
     int verificationQuery(String queryStr); // 검증쿼리문 전용
 
-
+    String getTableDataCheck(String queryStr); // 테이블이 하나라도 존재하는지 여부를 체크
 
 
 

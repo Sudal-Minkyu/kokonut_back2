@@ -17,7 +17,6 @@ import com.app.kokonut.company.companyitem.dtos.CompanyItemListDto;
 import com.app.kokonut.company.companytable.CompanyTable;
 import com.app.kokonut.company.companytable.CompanyTableRepository;
 import com.app.kokonut.company.companytable.dtos.CompanyTableListDto;
-import com.app.kokonut.company.companytable.dtos.CompanyTableSubListDto;
 import com.app.kokonut.history.HistoryService;
 import com.app.kokonut.history.dto.ActivityCode;
 import com.app.kokonutuser.DynamicUserService;
@@ -344,60 +343,11 @@ public class CompanyItemService {
 
         AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
         String companyCode = adminCompanyInfoDto.getCompanyCode();
-//        log.info("companyCode : "+companyCode);
 
-        // 보낼 데이터를 담는 변수
-        List<CompanyTableListDto> companyTableListDtos = new ArrayList<>();
-        CompanyTableListDto companyTableListDto;
-
-//        List<FranchiseManagerListDto> franchiseManagerListDtos =  franchiseRepository.findByManagerInFranchise(brCode);
-//        List<HashMap<String,Object>> franchiseManagerData = new ArrayList<>();
-//        HashMap<String,Object> franchiseManagerListInfo;
-//        for (FranchiseManagerListDto franchiseManagerListDto: franchiseManagerListDtos) {
-//            franchiseManagerListInfo = new HashMap<>();
-//            franchiseManagerListInfo.put("frId", franchiseManagerListDto.getFrId());
-//            franchiseManagerListInfo.put("frName", franchiseManagerListDto.getFrName());
-//            franchiseManagerListInfo.put("frTagNo", franchiseManagerListDto.getFrTagNo());
-//            franchiseManagerData.add(franchiseManagerListInfo);
-//        }
-//        if(franchiseManagerListDtos.size() != 0){
-//            data.put("branchId",franchiseManagerListDtos.get(0).getBranchId());
-//        }
-//        data.put("franchiseList",franchiseManagerData);
-
-//        // 해당 회사에 등록된 테이블의 리스트를 가져온다.
-//        List<HashMap<String,Object>> companyTableColumnData = new ArrayList<>();
-//        HashMap<String,Object> companyTableColumnDataInfo;
-
-        List<CompanyTableSubListDto> companyTableSubListDtos = companyTableRepository.findByTableList(companyCode);
-//        for(CompanyTableSubListDto companyTableSubListDto : companyTableSubListDtos) {
-//            // 테이블의 컬럼리스트를 가져온다.
-//            List<KokonutUserFieldListDto> kokonutUserFieldListDtos = dynamicUserService.tableColumnList(companyTableSubListDto.getCtName());
-//
-////            for(KokonutUserFieldListDto kokonutUserFieldListDto : kokonutUserFieldListDtos) {
-////                companyTableColumnDataInfo = new HashMap<>();
-////                companyTableColumnDataInfo.put("fieldName", kokonutUserFieldListDto.getFieldName());
-////                companyTableColumnDataInfo.put("fieldComment", kokonutUserFieldListDto.getFieldComment());
-////                companyTableColumnDataInfo.put("fieldSecrity", kokonutUserFieldListDto.getFieldSecrity());
-////                companyTableColumnDataInfo.put("fieldCategory", kokonutUserFieldListDto.getFieldCategory());
-////                companyTableColumnDataInfo.put("fieldColor", kokonutUserFieldListDto.getFieldColor());
-////                companyTableColumnData.add(companyTableColumnDataInfo);
-////            }
-//
-//            // 하나로 묶어서 보내기
-//            companyTableListDto = new CompanyTableListDto();
-//            companyTableListDto.setCtName(companyTableSubListDto.getCtName());
-//            companyTableListDto.setCtDesignation(companyTableSubListDto.getCtDesignation());
-//            companyTableListDto.setKokonutUserFieldListDtos(kokonutUserFieldListDtos);
-//
-//            companyTableListDtos.add(companyTableListDto);
-//        }
+        List<CompanyTableListDto> companyTableListDtos = companyTableRepository.findByTableList(companyCode);
 
         // 각 리스트별로 보내기
-        data.put("companyTableList", companyTableSubListDtos);
-        data.put("companyColumnList", companyTableListDtos);
-
-//        data.put("companyTableColumnData", companyTableColumnData);
+        data.put("companyTableList", companyTableListDtos);
 
         return ResponseEntity.ok(res.success(data));
     }

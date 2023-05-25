@@ -4,12 +4,12 @@ import com.app.kokonutuser.dtos.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Woody
@@ -35,6 +35,12 @@ public class DynamicUserRepositoryCustomImpl implements DynamicUserRepositoryCus
                 new BeanPropertyRowMapper<>(KokonutUserFieldDto.class));
     }
 
+    // 테이블의 필드 조회
+    @Override
+    public List<Map<String, Object>> getCommentOrEncrypt(String searchQuery) {
+        return jdbcTemplate.queryForList(searchQuery);
+    }
+
     // 검증쿼리문 전용
     @Override
     public int verificationQuery(String queryStr) {
@@ -42,6 +48,12 @@ public class DynamicUserRepositoryCustomImpl implements DynamicUserRepositoryCus
         return tables.isEmpty() ? 0 : 1;
     }
 
+    // 테이블 데이터가 하나라도 존재하는지 검증해주는 함수
+    @Override
+    public String getTableDataCheck(String queryStr) {
+        int existsFlag = jdbcTemplate.queryForObject(queryStr, Integer.class);
+        return existsFlag == 1 ? "Y" : "N";
+    }
 
 
     // 유저테이블 중복 체크 메서드
