@@ -23,8 +23,8 @@ import com.app.kokonut.common.component.ReqUtils;
 import com.app.kokonut.common.realcomponent.*;
 import com.app.kokonut.company.company.Company;
 import com.app.kokonut.company.company.CompanyRepository;
-import com.app.kokonut.company.companyFile.CompanyFile;
-import com.app.kokonut.company.companyFile.CompanyFileRepository;
+import com.app.kokonut.company.companyfile.CompanyFile;
+import com.app.kokonut.company.companyfile.CompanyFileRepository;
 import com.app.kokonut.company.companydatakey.CompanyDataKey;
 import com.app.kokonut.company.companydatakey.CompanyDataKeyRepository;
 import com.app.kokonut.company.companytable.CompanyTable;
@@ -824,11 +824,17 @@ public class AuthService {
                             // 비밀번호 틀린횟수 초기화
                             if(optionalAdmin.get().getKnPwdErrorCount() != 0) {
                                 optionalAdmin.get().setKnPwdErrorCount(0);
-                                adminRepository.save(optionalAdmin.get());
                             }
 
                             /* 해외 아이피 차단 여부 */
 //                            loginService.ResetPwdError(user.getIdx()); 패스워드에러카운트 리셋
+
+                            // 마지막 로그인 시간기록
+                            optionalAdmin.get().setKnLastLoginDate(LocalDateTime.now());
+                            // 최근 접속 IP
+                            optionalAdmin.get().setKnIpAddr(ip);
+                            adminRepository.save(optionalAdmin.get());
+
 
                             historyService.updateHistory(activityHistoryId,
                                     companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);

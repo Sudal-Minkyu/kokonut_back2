@@ -16,6 +16,7 @@ import com.app.kokonut.company.company.CompanyRepository;
 import com.app.kokonut.company.companyitem.dtos.CompanyItemListDto;
 import com.app.kokonut.company.companytable.CompanyTable;
 import com.app.kokonut.company.companytable.CompanyTableRepository;
+import com.app.kokonut.company.companytable.dtos.CompanyPrivacyTableListDto;
 import com.app.kokonut.company.companytable.dtos.CompanyTableListDto;
 import com.app.kokonut.history.HistoryService;
 import com.app.kokonut.history.dto.ActivityCode;
@@ -352,4 +353,22 @@ public class CompanyItemService {
         return ResponseEntity.ok(res.success(data));
     }
 
+    public ResponseEntity<Map<String, Object>> privacyTableList(JwtFilterDto jwtFilterDto) {
+        log.info("privacyTableList 호출");
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+        String email = jwtFilterDto.getEmail();
+
+        AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+        String companyCode = adminCompanyInfoDto.getCompanyCode();
+
+        List<CompanyPrivacyTableListDto> companyPrivacyTableListDtos = companyTableRepository.findByPrivacyTableList(companyCode);
+
+        // 각 리스트별로 보내기
+        data.put("companyTableList", companyPrivacyTableListDtos);
+
+        return ResponseEntity.ok(res.success(data));
+    }
 }

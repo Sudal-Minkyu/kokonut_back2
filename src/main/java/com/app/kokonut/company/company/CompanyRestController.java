@@ -98,4 +98,12 @@ public class CompanyRestController {
         return companyItemService.userTableList(jwtFilterDto);
     }
 
+    @ApiOperation(value="개인정보검색용 테이블리스트를 가져온다.", notes="")
+    @GetMapping(value = "/privacyTableList")
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    public ResponseEntity<Map<String,Object>> privacyTableList() {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return companyItemService.privacyTableList(jwtFilterDto);
+    }
+
 }
