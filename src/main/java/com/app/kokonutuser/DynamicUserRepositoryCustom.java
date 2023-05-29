@@ -17,7 +17,9 @@ public interface DynamicUserRepositoryCustom {
 
     String getTableDataCheck(String queryStr); // 테이블이 하나라도 존재하는지 여부를 체크
 
+    List<Map<String, Object>> privacyListPagedData(String queryStr); // 개인정보 리스트호출
 
+    int privacyListTotal(String queryStr); // 개인정보 리스트의 총합계
 
     void userCommonTable(String commonQuery); // 생성, 삭제, 업데이트 실행 공용
 

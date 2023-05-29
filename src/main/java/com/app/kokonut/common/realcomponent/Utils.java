@@ -188,6 +188,25 @@ public class Utils {
 		return stimeList;
 	}
 
+	// 알파값 생성 함수
+	public static String getAlphabetStr(int size) {
+		char[] charSet = new char[] {
+				'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+				'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'
+		};
+		StringBuilder sb = new StringBuilder();
+		SecureRandom sr = new SecureRandom();
+		sr.setSeed(new Date().getTime());
+
+		int len = charSet.length;
+		for (int i=0; i<size; i++) {
+			int idx = sr.nextInt(len);
+			sb.append(charSet[idx]);
+		}
+
+		return sb.toString();
+	}
+
 	// 난수값 생성 함수
 	public static String getRamdomStr(int size) {
 		char[] charSet = new char[] {

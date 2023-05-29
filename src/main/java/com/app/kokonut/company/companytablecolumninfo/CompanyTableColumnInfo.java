@@ -25,9 +25,17 @@ public class CompanyTableColumnInfo {
     @Column(name = "ct_name")
     private String ctName;
 
+    @ApiModelProperty("필드명")
+    @Column(name = "ctci_name")
+    private String ctciName;
+
     @ApiModelProperty("고유코드")
     @Column(name = "ctci_code")
     private String ctciCode;
+
+    @ApiModelProperty("필드명칭")
+    @Column(name = "ctci_designation")
+    private String ctciDesignation;
 
     @ApiModelProperty("암호화여부 -> 0:비암호화, 1:암호화, 2:휴대전화번호, 3:이메일 등...")
     @Column(name = "ctci_securiy")

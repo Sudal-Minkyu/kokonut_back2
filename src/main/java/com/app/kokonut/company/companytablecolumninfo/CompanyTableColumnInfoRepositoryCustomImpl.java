@@ -1,5 +1,6 @@
 package com.app.kokonut.company.companytablecolumninfo;
 
+import com.app.kokonut.company.companytablecolumninfo.dtos.CompanyTableColumnInfoCheck;
 import com.app.kokonut.company.companytablecolumninfo.dtos.CompanyTableColumnInfoCheckList;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPQLQuery;
@@ -38,6 +39,22 @@ public class CompanyTableColumnInfoRepositoryCustomImpl extends QuerydslReposito
                 ));
 
         return query.fetch();
+    }
+
+    @Override
+    public CompanyTableColumnInfoCheck findByCheck(String ctName, String ctciCode) {
+
+        QCompanyTableColumnInfo companyTableColumnInfo = QCompanyTableColumnInfo.companyTableColumnInfo;
+
+        JPQLQuery<CompanyTableColumnInfoCheck> query = from(companyTableColumnInfo)
+                .where(companyTableColumnInfo.ctciCode.eq(ctciCode).and(companyTableColumnInfo.ctName.eq(ctName)))
+                .select(Projections.constructor(CompanyTableColumnInfoCheck.class,
+                        companyTableColumnInfo.ctciName,
+                        companyTableColumnInfo.ctciDesignation,
+                        companyTableColumnInfo.ctciSecuriy
+                ));
+
+        return query.fetchOne();
     }
 
 }

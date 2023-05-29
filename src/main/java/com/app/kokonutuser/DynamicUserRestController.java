@@ -140,7 +140,7 @@ public class DynamicUserRestController {
 	public ResponseEntity<Map<String,Object>> privacyUserSearch(@RequestParam(name="searchTables", defaultValue = "") List<String> searchTables,
 																@RequestParam(name="searchCodes", defaultValue = "") List<String> searchCodes,
 																@RequestParam(name="searchTexts", defaultValue = "") List<String> searchTexts,
-																@RequestParam(name="pageNum", defaultValue = "1") int pageNum) {
+																@RequestParam(name="pageNum", defaultValue = "1") int pageNum) throws Exception {
 		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
 		KokonutSearchDto kokonutSearchDto = new KokonutSearchDto();
 		kokonutSearchDto.setPageNum(pageNum);
