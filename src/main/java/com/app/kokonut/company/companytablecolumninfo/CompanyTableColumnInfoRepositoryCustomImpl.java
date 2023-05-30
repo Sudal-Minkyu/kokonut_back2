@@ -1,5 +1,6 @@
 package com.app.kokonut.company.companytablecolumninfo;
 
+import com.app.kokonut.company.companytable.QCompanyTable;
 import com.app.kokonut.company.companytablecolumninfo.dtos.CompanyTableColumnInfoCheck;
 import com.app.kokonut.company.companytablecolumninfo.dtos.CompanyTableColumnInfoCheckList;
 import com.querydsl.core.types.Projections;
@@ -45,10 +46,13 @@ public class CompanyTableColumnInfoRepositoryCustomImpl extends QuerydslReposito
     public CompanyTableColumnInfoCheck findByCheck(String ctName, String ctciCode) {
 
         QCompanyTableColumnInfo companyTableColumnInfo = QCompanyTableColumnInfo.companyTableColumnInfo;
+        QCompanyTable companyTable = QCompanyTable.companyTable;
 
         JPQLQuery<CompanyTableColumnInfoCheck> query = from(companyTableColumnInfo)
+                .innerJoin(companyTable).on(companyTable.ctName.eq(companyTableColumnInfo.ctName))
                 .where(companyTableColumnInfo.ctciCode.eq(ctciCode).and(companyTableColumnInfo.ctName.eq(ctName)))
                 .select(Projections.constructor(CompanyTableColumnInfoCheck.class,
+                        companyTable.ctDesignation,
                         companyTableColumnInfo.ctciName,
                         companyTableColumnInfo.ctciDesignation,
                         companyTableColumnInfo.ctciSecuriy

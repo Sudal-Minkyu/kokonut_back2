@@ -59,6 +59,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.text.Normalizer;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
@@ -184,7 +185,8 @@ public class AuthService {
         HashMap<String, Object> data = new HashMap<>();
 
         // 인증번호(숫자6자리) 생성
-        String ctNumber = String.valueOf(ThreadLocalRandom.current().nextInt(100000, 1000000));
+        SecureRandom secureRandom = new SecureRandom();
+        int ctNumber = secureRandom.nextInt(900000) + 100000;
         log.info("생성된 인증번호 : "+ctNumber);
 
         // 인증번호 메일전송
@@ -214,7 +216,7 @@ public class AuthService {
         }
 
         // 인증번호 레디스에 담기
-        redisDao.setValues("CT: " + knEmail, ctNumber, Duration.ofMillis(180000)); // 제한시간 3분
+        redisDao.setValues("CT: " + knEmail, String.valueOf(ctNumber), Duration.ofMillis(180000)); // 제한시간 3분
         log.info("레디스에 인증번호 저장성공");
 
         return ResponseEntity.ok(res.success(data));

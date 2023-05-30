@@ -110,7 +110,6 @@ public class AdminService {
 
         AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(jwtFilterDto.getEmail());
         Long adminId = adminCompanyInfoDto.getAdminId();
-//        Long companyId = adminCompanyInfoDto.getCompanyId();
         String companyCode = adminCompanyInfoDto.getCompanyCode();
 
         // 휴대전화변경 코드
@@ -156,7 +155,6 @@ public class AdminService {
 
         AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(jwtFilterDto.getEmail());
         Long adminId = adminCompanyInfoDto.getAdminId();
-//        Long companyId = adminCompanyInfoDto.getCompanyId();
         String companyCode = adminCompanyInfoDto.getCompanyCode();
 
         // 활동 코드
@@ -225,7 +223,6 @@ public class AdminService {
 
         AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(jwtFilterDto.getEmail());
         Long adminId = adminCompanyInfoDto.getAdminId();
-//        Long companyId = adminCompanyInfoDto.getCompanyId();
         String companyCode = adminCompanyInfoDto.getCompanyCode();
 
         // 활동 코드

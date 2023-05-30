@@ -127,7 +127,7 @@ public class DynamicUserRestController {
 	@GetMapping(value = "/searchColumnCall")
 	@ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
 	public ResponseEntity<Map<String,Object>> searchColumnCall(@RequestParam(name="tableName", defaultValue = "") String tableName) {
-		return dynamicUserService.searchColumnCall(tableName);
+		return dynamicUserService.searchColumnCall("kokonut20"+tableName);
 	}
 
 	// 개인정보 검색
@@ -140,10 +140,12 @@ public class DynamicUserRestController {
 	public ResponseEntity<Map<String,Object>> privacyUserSearch(@RequestParam(name="searchTables", defaultValue = "") List<String> searchTables,
 																@RequestParam(name="searchCodes", defaultValue = "") List<String> searchCodes,
 																@RequestParam(name="searchTexts", defaultValue = "") List<String> searchTexts,
-																@RequestParam(name="pageNum", defaultValue = "1") int pageNum) throws Exception {
+																@RequestParam(name="pageNum", defaultValue = "1") int pageNum,
+																@RequestParam(name="limitNum", defaultValue = "10") int limitNum) throws Exception {
 		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
 		KokonutSearchDto kokonutSearchDto = new KokonutSearchDto();
 		kokonutSearchDto.setPageNum(pageNum);
+		kokonutSearchDto.setLimitNum(limitNum);
 		kokonutSearchDto.setSearchTables(searchTables);
 		kokonutSearchDto.setSearchCodes(searchCodes);
 		kokonutSearchDto.setSearchTexts(searchTexts);

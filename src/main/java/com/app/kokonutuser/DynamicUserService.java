@@ -42,10 +42,14 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import javax.crypto.SecretKey;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Woody
@@ -1588,7 +1592,6 @@ public class DynamicUserService {
 
 		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(jwtFilterDto.getEmail());
 		Long adminId = adminCompanyInfoDto.getAdminId();
-//        Long companyId = adminCompanyInfoDto.getCompanyId();
 		String companyCode = adminCompanyInfoDto.getCompanyCode();
 
 		// 휴대전화변경 코드
@@ -1903,6 +1906,17 @@ public class DynamicUserService {
 		log.info("searchCodes : "+searchCodes);
 		log.info("searchTexts : "+searchTexts);
 
+		// 코드중복 검사
+		Set<String> duplicates = searchCodes.stream()
+				.filter(i -> Collections.frequency(searchCodes, i) > 1)
+				.collect(Collectors.toSet());
+
+		if(!duplicates.isEmpty()) {
+			log.error("중복되는 고유코드가 존재합니다. 중복되지 않도록 고유코드를 보내주세요. 고유코드 : "+duplicates);
+			return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_06.getCode(),ResponseErrorCode.ERROR_CODE_06.getDesc()+" 고유코드 : "+duplicates));
+		}
+
+
 		Map<String, List<Map<String, String>>> result = new HashMap<>();
 
 		String email = jwtFilterDto.getEmail();
@@ -1917,6 +1931,7 @@ public class DynamicUserService {
 //		AESGCMcrypto.decrypt(testData, awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey();
 
 		for (int i = 0; i < searchTables.size(); i++) {
+
 			String table = searchTables.get(i).split("_")[0] + "_" + searchCodes.get(i).split("_")[0];
 			String code = searchCodes.get(i);
 			String text = searchTexts.get(i);
@@ -1939,10 +1954,16 @@ public class DynamicUserService {
 		StringBuilder joinQuery = new StringBuilder(); // 조인 쿼리문
 		StringBuilder whereQuery = new StringBuilder(); // 조건 쿼리문
 
+		List<String> securityHeaderNames = new ArrayList<>(); // 암호화된 데이터의 as 이름리스트
+//		headerNames.add("IDX");
+//		headerNames.add("회원가입일시");
+//		headerNames.add("마지막로그인일시");
+
 		if(searchTables.size() != searchCodes.size() && searchCodes.size() != searchTexts.size()) {
 			log.error("사이즈가 같지 않음");
 			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(),"사이즈가 같지 않음"));
 		} else {
+
 			// 쿼리 기본셋팅
 			resultQuery.append("SELECT ");
 
@@ -1953,7 +1974,7 @@ public class DynamicUserService {
 							"COALESCE(kokonut.kokonut_LAST_LOGIN_DATE, '없음') as 마지막로그인일시, ");
 
 			whereQuery.append("WHERE ");
-
+			
 			Map<String, Integer> nameCountMap = new HashMap<>();
 			List<String> allKeys = new ArrayList<>(result.keySet());
 			int resultSize = allKeys.size();
@@ -1978,7 +1999,7 @@ public class DynamicUserService {
 							log.error("존재하지 않은 고유코드 입니다. 고유코드를 확인 해주세요. 고유코드 : "+code);
 							return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_04.getCode(),ResponseErrorCode.ERROR_CODE_04.getDesc()+" 고유코드 : "+code));
 						} else {
-							String designation = companyTableColumnInfoCheck.getCtciDesignation();
+							String designation = companyTableColumnInfoCheck.getCtDsignation()+"의 "+companyTableColumnInfoCheck.getCtciDesignation();
 							Integer count = nameCountMap.get(designation);
 							if (count == null) {
 								count = 0;
@@ -1988,11 +2009,22 @@ public class DynamicUserService {
 
 							String value = map.get(code);
 							if(companyTableColumnInfoCheck.getCtciSecuriy().equals("1")) {
-//								if(!companyTableColumnInfoCheck.getCtciDesignation().equals("휴대전화번호")) {
-									value = AESGCMcrypto.encrypt(value.getBytes(StandardCharsets.UTF_8),
-											awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey()));
-									map.put(code, value);
-//								}
+								if(!companyTableColumnInfoCheck.getCtciDesignation().equals("휴대전화번호")) {
+									if(companyTableColumnInfoCheck.getCtciDesignation().equals("이름")) {
+										if (value.length() == 2) {
+											value = value.charAt(0) + "-" + AESGCMcrypto.encrypt(value.substring(1,2).getBytes(StandardCharsets.UTF_8),
+													awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey()));
+										} else {
+											value = value.charAt(0) + "-" + AESGCMcrypto.encrypt(value.substring(1,value.length() - 1).getBytes(StandardCharsets.UTF_8),
+													awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey())) + "-" +value.substring(value.length() - 1);
+										}
+									} else {
+										value = AESGCMcrypto.encrypt(value.getBytes(StandardCharsets.UTF_8),
+												awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey()));
+									}
+								}
+								map.put(code, value);
+								securityHeaderNames.add(uniqueDesignation);
 							}
 
 							boolean isLastKey = currentKeyIndex == resultSize - 1;
@@ -2008,11 +2040,11 @@ public class DynamicUserService {
 							}
 
 							if (isLastKey && isLastMapInList) {
-								selectQuery.append(asName).append(".").append(companyTableColumnInfoCheck.getCtciName()).append(as).append(uniqueDesignation).append(" ");
+								selectQuery.append(asName).append(".").append(companyTableColumnInfoCheck.getCtciName()).append(as).append("'").append(uniqueDesignation).append("'").append(" ");
 								whereQuery.append(asName).append(".").append(cpCode).append("_").append(code).append(" LIKE '%").append(value).append("%' ");
 							} else {
-								selectQuery.append(asName).append(".").append(companyTableColumnInfoCheck.getCtciName()).append(as).append(uniqueDesignation).append(", ");
-								whereQuery.append(asName).append(".").append(cpCode).append("_").append(code).append(" LIKE '%").append(value).append("%' OR ");
+								selectQuery.append(asName).append(".").append(companyTableColumnInfoCheck.getCtciName()).append(as).append("'").append(uniqueDesignation).append("'").append(", ");
+								whereQuery.append(asName).append(".").append(cpCode).append("_").append(code).append(" LIKE '%").append(value).append("%' AND ");
 							}
 						}
 						log.info("companyTableColumnInfoCheck : "+companyTableColumnInfoCheck);
@@ -2024,24 +2056,70 @@ public class DynamicUserService {
 			log.info("selectQuery : "+selectQuery);
 			log.info("joinQuery : "+joinQuery);
 			log.info("whereQuery : "+whereQuery);
-
+			
 			resultQuery.append(selectQuery).append("FROM ").append(cpCode).append("_1 as kokonut ").append(joinQuery).append(whereQuery);
 
 			resultQuery.append("GROUP BY kokonut.kokonut_IDX");
 			log.info("resultQuery : "+resultQuery);
 		}
 
-		List<Map<String, Object>> privacyList = dynamicUserRepositoryCustom.privacyListPagedData(resultQuery +" LIMIT 10 OFFSET "+offset);
+		List<Map<String, Object>> privacyList = dynamicUserRepositoryCustom.privacyListPagedData(resultQuery +" LIMIT "+kokonutSearchDto.getLimitNum()+" OFFSET "+offset);
 		log.info("privacyList : "+privacyList);
 		int totalCount = dynamicUserRepositoryCustom.privacyListTotal("SELECT COUNT(*) FROM ("+ resultQuery +") as totalCount");
 		log.info("totalCount : "+totalCount);
+		
+		log.info("securityHeaderNames : "+securityHeaderNames);
+		for(Map<String, Object> map : privacyList) {
+
+			log.info("수정전 map : "+map);
+			for(String securityHeaderName : securityHeaderNames) {
+				log.info("securityHeaderName : "+securityHeaderName);
+
+				Object key = map.get(securityHeaderName);
+				if(key != null) {
+					if(!String.valueOf(key).equals("없음")) { // 벨류값이 Null(없음)일 경우 제외
+						log.info("암호화 여부 체크시작");
+
+						String[] value = String.valueOf(key).split("-");
+						String securiryResultValue; // 복호화된 데이터
+						String decryptValue;
+						if(value.length >= 2) {
+							log.info("'-' 구분자로 들어간 암호화");
+							decryptValue = AESGCMcrypto.decrypt(value[1], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
+							if(value.length == 2) {
+								securiryResultValue = value[0] + Utils.starsForString(decryptValue);
+							} else {
+								securiryResultValue = value[0] + Utils.starsForString(decryptValue) + value[2];
+							}
+						} else {
+							log.info("구분자가 없는 암호화");
+							decryptValue = AESGCMcrypto.decrypt(value[0], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
+							securiryResultValue = decryptValue.charAt(0) + Utils.starsForString(decryptValue).substring(2)  + decryptValue.substring(decryptValue.length() - 1);
+						}
+						log.info("value : "+ Arrays.toString(value));
+						log.info("securiryResultValue : "+ securiryResultValue);
+						map.put(securityHeaderName, securiryResultValue);
+					}
+				}
+			}
+		}
+
+		URL url = new URL("http://checkip.amazonaws.com");
+		BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+		String ip = br.readLine();
+		br.close();
+		log.info("공인아이피: " + ip);
+
+		for(Map<String, Object> map : privacyList) {
+			log.info("수정된 map : "+map);
+		}
+
+
+
+
 
 		data.put("privacyList", privacyList);
 		data.put("totalCount", totalCount);
-		
-		for(Map<String, Object> map : privacyList) {
-			log.info("map : "+map);
-		}
 
 //		public List<Map<String, Object>> getPagedData(int page, int size) {
 //			String sql = "SELECT * FROM your_table LIMIT ? OFFSET ?";

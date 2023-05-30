@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CompanyTableColumnInfoCheck {
 
+    private String ctDsignation;
+
     private String ctciName;
 
     private String ctciDesignation;

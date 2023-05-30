@@ -233,5 +233,13 @@ public class Utils {
 		return localDateTime.format(formatter);
 	}
 
+	// 문자열 길이만큼 -> *로 반환
+	public static String starsForString(String input) {
+		StringBuilder stars = new StringBuilder();
+		for (int i = 0; i < input.length(); i++) {
+			stars.append("*");
+		}
+		return stars.toString();
+	}
 
 }

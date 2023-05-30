@@ -262,15 +262,30 @@ public class AuthApiService {
                             if(names.get(i).equals("이름")) {
                                 // 이름의 데이터의 대한 암호화
                                 int nameLength = value.length();
+
                                 String middleName;
+                                String lastName;
                                 if (nameLength % 2 == 0) {
-                                    middleName = value.substring(nameLength / 2 - 1, nameLength / 2 + 1); // 이름이 짝수 글자일 때
+                                    if(nameLength == 2) {
+                                        // 이름이 두글자 일 경우
+                                        middleName = value.substring(1,2);
+                                        lastName = "";
+                                    } else {
+                                        middleName = value.substring(nameLength / 2 - 1, nameLength / 2 + 1); // 이름이 짝수 글자일 때
+                                        lastName = value.substring(nameLength - 1);
+                                    }
                                 } else {
                                     middleName = value.substring(nameLength / 2, nameLength / 2 + 1); // 이름이 홀수 글자일 때
+                                    lastName = value.substring(nameLength - 1);
                                 }
 
-                                value = value.charAt(0) + AESGCMcrypto.encrypt(middleName.getBytes(StandardCharsets.UTF_8), awsKmsResultDto.getSecretKey(),
-                                        Base64.getDecoder().decode(awsKmsResultDto.getIvKey())) + value.substring(nameLength - 1);
+                                log.info("middleName : "+middleName);
+
+                                value = value.charAt(0)+ "-" +
+                                        AESGCMcrypto.encrypt(middleName.getBytes(StandardCharsets.UTF_8), awsKmsResultDto.getSecretKey(),
+                                                Base64.getDecoder().decode(awsKmsResultDto.getIvKey())) + "-" +
+                                        lastName;
+
                             } else if(names.get(i).equals("휴대전화번호")) {
                                 // 휴대전화번호의 데이터의 대한 암호화
                                 if(value.length() == 11) {

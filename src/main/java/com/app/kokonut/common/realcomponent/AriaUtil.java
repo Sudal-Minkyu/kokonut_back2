@@ -378,8 +378,6 @@ public class AriaUtil {
 		{
 			if(n[j] < 0)
 				n[j] = n[j] + 256;
-			else
-				n[j] = n[j];
 		}
 	}
 	
@@ -602,9 +600,12 @@ public class AriaUtil {
 		String strDecrypt = "";
 
 		byte[] b = ToHex(input);
-		int[] n = new int[b.length];
-		Arrays.fill(n, 0);
-		ConvertIntArray(b, n);
+		int[] n = new int[0];
+		if(b != null) {
+			n = new int[b.length];
+			Arrays.fill(n, 0);
+			ConvertIntArray(b, n);
+		}
 
 		int r = DecKeySetup(m_MasterKey, rk, 256);
 		ConvertIntArray(rk);

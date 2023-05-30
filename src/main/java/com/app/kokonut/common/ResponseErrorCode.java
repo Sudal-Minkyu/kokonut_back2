@@ -132,6 +132,8 @@ public enum ResponseErrorCode {
     ERROR_CODE_03("ERROR_CODE_03", "필수항목을 넣지 않거나, 중복전송을 하셨습니다. '1_id'와'1_pw' 는 하나씩만 보내주시길 바랍니다."),
     ERROR_CODE_04("ERROR_CODE_04", "존재하지 않은 고유코드 입니다. 고유코드를 확인 해주세요."),
     ERROR_CODE_05("ERROR_CODE_05", "휴대전화번호는 '-'를 뺀 형태로 보내주시길 바랍니다."),
+    ERROR_CODE_06("ERROR_CODE_06", "중복되는 고유코드가 존재합니다. 중복되지 않도록 고유코드를 보내주세요."),
+    ERROR_CODE_99("ERROR_CODE_99", "허용되지 않은 IP 입니다. APIKey관리 페이지에서 허용IP를 추가해주세요."),
     ;
 
 
