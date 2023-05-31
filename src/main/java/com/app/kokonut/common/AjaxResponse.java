@@ -27,8 +27,6 @@ public class AjaxResponse {
         res.put("status",200);
         res.put("timestamp", new Timestamp(System.currentTimeMillis()));
         res.put("message", "SUCCESS");
-        res.put("err_code", "");
-        res.put("err_msg", "");
         return this.res;
     }
 
@@ -73,8 +71,6 @@ public class AjaxResponse {
         res.put("status",200);
         res.put("timestamp", new Timestamp(System.currentTimeMillis()));
         res.put("message", "SUCCESS");
-        res.put("err_code", "");
-        res.put("err_msg", "");
         return this.res;
     }
 
@@ -85,8 +81,6 @@ public class AjaxResponse {
         res.put("status",200);
         res.put("timestamp", new Timestamp(System.currentTimeMillis()));
         res.put("message", "SUCCESS");
-        res.put("err_code", "");
-        res.put("err_msg", "");
         if(pages.getTotalElements()> 0 ){
             res.put("datalist",pages.getContent());
             res.put("total_page",pages.getTotalPages());

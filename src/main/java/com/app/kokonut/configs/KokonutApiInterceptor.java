@@ -11,6 +11,9 @@ import org.springframework.web.servlet.AsyncHandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
 
 /**
  * @author Woody
@@ -50,8 +53,11 @@ public class KokonutApiInterceptor implements AsyncHandlerInterceptor {
 					return false;
 				} else {
 
-					String userIp = Utils.getClientIp(request);
-					log.info("유저 IP : " + userIp);
+					URL url = new URL("http://checkip.amazonaws.com");
+					BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+					String ip = br.readLine();
+					br.close();
+					log.info("호출한 공인 IP : " + ip);
 
 					// 해당 APiKey의 사용할 수 있는 IP 인지 체크하는 거 추가해야됨. woody
 //                	Long ipCheck = apiKeyService.findByApiKeyCheck(userIp);

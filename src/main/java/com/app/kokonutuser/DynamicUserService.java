@@ -2104,47 +2104,17 @@ public class DynamicUserService {
 			}
 		}
 
-		URL url = new URL("http://checkip.amazonaws.com");
-		BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
-		String ip = br.readLine();
-		br.close();
-		log.info("공인아이피: " + ip);
-
 		for(Map<String, Object> map : privacyList) {
 			log.info("수정된 map : "+map);
 		}
 
-
-
-
-
 		data.put("privacyList", privacyList);
 		data.put("totalCount", totalCount);
-
-//		public List<Map<String, Object>> getPagedData(int page, int size) {
-//			String sql = "SELECT * FROM your_table LIMIT ? OFFSET ?";
-//			int offset = (page - 1) * size; // 0부터 시작하므로 page - 1을 곱합니다.
-//			return jdbcTemplate.queryForList(sql, size, offset);
-//		}
-//
-//		public int getTotalCount() {
-//			String sql = "SELECT COUNT(*) FROM your_table";
-//			return jdbcTemplate.queryForObject(sql, Integer.class);
-//		}
-//
-//		List<Map<String, Object>> pageData = getPagedData(1, 10); // 첫 페이지의 10개의 데이터
-//		int totalCount = getTotalCount(); // 전체 데이터의 수
-
-//		log.error("테이블이 존재하지 않습니다.");
-//		return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(),"테이블이 "+ResponseErrorCode.KO004.getDesc()+" 테이블 : "+tableName));
-
 
 		// 개인정보 조회로그 저장
 		privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_04, 1, CommonUtil.clientIp(), email);
 
 		return ResponseEntity.ok(res.success(data));
-
-
 	}
 
 	// 검색할 컬럼리스트 조회(파일 관련 컬럼은 제외)
@@ -2165,9 +2135,10 @@ public class DynamicUserService {
 				String comment = kokonutUserFieldDto.getComment();
 				if (comment != null) {
 					String[] commentText = comment.split(",");
+					log.info("commentText : "+ Arrays.toString(commentText));
 
 					// 카테고리가 파일이면 제외
-					if(commentText.length == 6 || !commentText[3].equals("파일") || !commentText[5].equals("1_pw")) {
+					if(commentText.length == 6 && (!commentText[3].equals("파일") && !commentText[0].equals("비밀번호"))) {
 						if (commentText[1].equals("암호화")) {
 							kokonutPrivacySearchFieldListDto.setFieldSecrity(1);
 						} else {
@@ -2176,10 +2147,9 @@ public class DynamicUserService {
 
 						kokonutPrivacySearchFieldListDto.setFieldComment(commentText[0]);
 						kokonutPrivacySearchFieldListDto.setFieldCode(commentText[5]);
-
+						kokonutPrivacySearchFieldListDtos.add(kokonutPrivacySearchFieldListDto);
 					}
 				}
-				kokonutPrivacySearchFieldListDtos.add(kokonutPrivacySearchFieldListDto);
 			}
 		}
 
