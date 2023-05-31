@@ -395,8 +395,8 @@ public class ApiKeyService {
         return apiKeyRepository.findByCheck(apikey);
     }
 
-    public ApiKeyInfoDto findByApiKeyInfo(String apikey) {
-        return apiKeyRepository.findByApiKeyInfo(apikey);
+    public ApiKeyInfoDto findByApiKeyInfo(String apikey, String ip) {
+        return apiKeyRepository.findByApiKeyInfo(apikey, ip);
     }
 
     // 유저IP 체킹

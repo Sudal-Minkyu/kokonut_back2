@@ -133,9 +133,14 @@ public enum ResponseErrorCode {
     ERROR_CODE_04("ERROR_CODE_04", "존재하지 않은 고유코드 입니다. 고유코드를 확인 해주세요."),
     ERROR_CODE_05("ERROR_CODE_05", "휴대전화번호는 '-'를 뺀 형태로 보내주시길 바랍니다."),
     ERROR_CODE_06("ERROR_CODE_06", "중복되는 고유코드가 존재합니다. 중복되지 않도록 고유코드를 보내주세요."),
-    ERROR_CODE_99("ERROR_CODE_99", "허용되지 않은 IP 입니다. APIKey관리 페이지에서 허용IP를 추가해주세요."),
-    ;
 
+
+
+    ERROR_CODE_96("ERROR_CODE_96", "헤더에 APIKey가 존재하지 않습니다. APIKey를 담아 보내주세요."), // 400
+    ERROR_CODE_97("ERROR_CODE_97", "호출하신 APIKey는 존재하지 않은 APIKey 입니다. APIKey관리 페이지에서 APIKey를 확인해주세요."), // 404
+    ERROR_CODE_98("ERROR_CODE_98", "관리자에 의해 사용에 제한된 APIKey 입니다. 관리자에게 문의해주세요."), // 402
+    ERROR_CODE_99("ERROR_CODE_99", "허용되지 않은 IP 입니다. APIKey관리 페이지에서 허용IP를 추가해주세요."), // 403
+    ;
 
     private String code;
     private String desc;

@@ -42,7 +42,7 @@ public interface ApiKeyRepositoryCustom {
 
     Long findByCheck(String akKey); // ApiKey가 존재하는지 그리고 유효한지 검증하는 메서드
 
-    ApiKeyInfoDto findByApiKeyInfo(String apikey);
+    ApiKeyInfoDto findByApiKeyInfo(String apikey, String ip);
 
     Long findByApiKeyCheck(String userIp);
 

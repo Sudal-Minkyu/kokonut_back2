@@ -1970,8 +1970,9 @@ public class DynamicUserService {
 			// 셀렉트 기본셋팅
 			selectQuery.append(
 					"kokonut.kokonut_IDX  as IDX, " +
-							"kokonut.kokonut_REGISTER_DATE as 회원가입일시, " +
-							"COALESCE(kokonut.kokonut_LAST_LOGIN_DATE, '없음') as 마지막로그인일시, ");
+//							"DATE_FORMAT(kokonut.kokonut_REGISTER_DATE, '%Y-%m-%d %H시 %i분') as 회원가입일시, " +
+							"DATE_FORMAT(kokonut.kokonut_REGISTER_DATE, '%Y-%m-%d %H시') as 회원가입일시, " +
+							"COALESCE(DATE_FORMAT(kokonut.kokonut_LAST_LOGIN_DATE, '%Y-%m-%d %H시'), '없음') as 마지막로그인일시, ");
 
 			whereQuery.append("WHERE ");
 			

@@ -2,6 +2,7 @@ package com.app.kokonut.configs;
 
 import com.app.kokonut.apiKey.ApiKeyService;
 import com.app.kokonut.apiKey.dtos.ApiKeyInfoDto;
+import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.common.realcomponent.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
@@ -42,15 +43,15 @@ public class KokonutApiInterceptor implements AsyncHandlerInterceptor {
 
 		// 헤더 값에 API Key가 존재하지 않을 경우 -> 400에러를 내보낸다.
 		// 코코넛 DB안에 존재하지 않은 API Key 일 경우 -> 404 에러를 내보낸다.
-		// 사용에 제한된 API Key 일 경우 -> 403 에러를 내보낸다.
+		// 관리자에 의해 사용에 제한된 API Key 일 경우 -> 402 에러를 내보낸다.
 		// API Key에 사용될 수 없는 IP 접근 일 경우 -> 403 에러를 내보낸다.
 		if(token == null) {
 			if(apikey != null) {
 				Long check = apiKeyService.validateApiKey(apikey);
 				if(check == 0) {
-					log.error("존재하지 않은 APIKey 입니다. (404에러)");
-					response.sendError(HttpStatus.SC_NOT_FOUND);
-					return false;
+					log.error("호출하신 APIKey는 존재하지 않은 APIKey 입니다. APIKey관리 페이지에서 APIKey를 확인해주세요. (404에러)");
+					request.setAttribute("apiKeyError", ResponseErrorCode.ERROR_CODE_97);
+					response.sendError(HttpStatus.SC_NOT_FOUND, ResponseErrorCode.ERROR_CODE_97.getDesc());
 				} else {
 
 					URL url = new URL("http://checkip.amazonaws.com");
@@ -59,25 +60,23 @@ public class KokonutApiInterceptor implements AsyncHandlerInterceptor {
 					br.close();
 					log.info("호출한 공인 IP : " + ip);
 
-					// 해당 APiKey의 사용할 수 있는 IP 인지 체크하는 거 추가해야됨. woody
-//                	Long ipCheck = apiKeyService.findByApiKeyCheck(userIp);
-//					log.error("APIKey 사용에 적절하지 않은 사용처 입니다. (403에러)");
-//					response.setStatus(HttpStatus.SC_FORBIDDEN);
-
-					ApiKeyInfoDto apiKeyInfoDto = apiKeyService.findByApiKeyInfo(apikey);
-					if(apiKeyInfoDto.getAkUseYn().equals("N")) {
-						log.error("사용에 제한된 APIKey 입니다. (402에러)");
-						response.sendError(HttpStatus.SC_PAYMENT_REQUIRED);
-						return false;
+					ApiKeyInfoDto apiKeyInfoDto = apiKeyService.findByApiKeyInfo(apikey, ip);
+					if(apiKeyInfoDto == null) {
+						log.error("허용되지 않은 IP 입니다. APIKey관리 페이지에서 허용IP를 추가해주세요. (403에러)");
+						response.sendError(HttpStatus.SC_FORBIDDEN, ResponseErrorCode.ERROR_CODE_99.getDesc());
 					} else {
-						log.info("apiKeyInfoDto : " + apiKeyInfoDto);
-						request.setAttribute("apiKeyInfoDto", apiKeyInfoDto);
+						if(apiKeyInfoDto.getAkUseYn().equals("N")) {
+							log.error("관리자에 의해 사용에 제한된 APIKey 입니다. 관리자에게 문의해주세요. (402에러)");
+							response.sendError(HttpStatus.SC_PAYMENT_REQUIRED, ResponseErrorCode.ERROR_CODE_98.getDesc());
+						} else {
+							log.info("apiKeyInfoDto : " + apiKeyInfoDto);
+							request.setAttribute("apiKeyInfoDto", apiKeyInfoDto);
+						}
 					}
 				}
 			} else {
-				log.error("헤더에 APIKey가 존재하지 않습니다. (400에러)");
-				response.sendError(HttpStatus.SC_BAD_REQUEST);
-				return false;
+				log.error("헤더에 APIKey가 존재하지 않습니다. APIKey를 담아 보내주세요. (400에러)");
+				response.sendError(HttpStatus.SC_BAD_REQUEST, ResponseErrorCode.ERROR_CODE_96.getDesc());
 			}
 		}
 		return AsyncHandlerInterceptor.super.preHandle(request, response, handler);
