@@ -28,6 +28,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -118,7 +119,7 @@ public class CompanyItemService {
 
     // 추가 카테고리의 항목을 추가한다.
     @Transactional
-    public ResponseEntity<Map<String, Object>> saveItem(JwtFilterDto jwtFilterDto, String ciName, Integer ciSecurity) {
+    public ResponseEntity<Map<String, Object>> saveItem(JwtFilterDto jwtFilterDto, String ciName, Integer ciSecurity) throws IOException {
         log.info("saveItem 호출");
 
         log.info("ciName : "+ciName);
@@ -145,7 +146,7 @@ public class CompanyItemService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
+                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
 
             CompanyItem companyItem = new CompanyItem();
             companyItem.setCpCode(companyCode);
@@ -164,7 +165,7 @@ public class CompanyItemService {
 
     // 추가 카테고리의 항목을 수정한다.
     @Transactional
-    public ResponseEntity<Map<String, Object>> updateItem(Long ciId, String ciName, JwtFilterDto jwtFilterDto) {
+    public ResponseEntity<Map<String, Object>> updateItem(Long ciId, String ciName, JwtFilterDto jwtFilterDto) throws IOException {
         log.info("updateItem 호출");
 
 //        log.info("ciId : "+ciId);
@@ -193,7 +194,7 @@ public class CompanyItemService {
 
                 // 활동이력 저장 -> 비정상 모드
                 activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
+                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
 
                 optionalCompanyItem.get().setCiName(ciName);
                 optionalCompanyItem.get().setModify_email(jwtFilterDto.getEmail());
@@ -214,7 +215,7 @@ public class CompanyItemService {
 
     // 추가 카테고리의 항목을 삭제한다.
     @Transactional
-    public ResponseEntity<Map<String, Object>> deleteItem(Long ciId, JwtFilterDto jwtFilterDto) {
+    public ResponseEntity<Map<String, Object>> deleteItem(Long ciId, JwtFilterDto jwtFilterDto) throws IOException {
         log.info("deleteItem 호출");
 
         log.info("ciId : "+ciId);
@@ -239,7 +240,7 @@ public class CompanyItemService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
+                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
 
             companyItemRepository.delete(optionalCompanyItem.get());
 
@@ -255,7 +256,7 @@ public class CompanyItemService {
 
     // 테이블 추가
     @Transactional
-    public ResponseEntity<Map<String, Object>> userTableSave(JwtFilterDto jwtFilterDto, String ctDesignation) {
+    public ResponseEntity<Map<String, Object>> userTableSave(JwtFilterDto jwtFilterDto, String ctDesignation) throws IOException {
         log.info("userTableSave 호출");
 
         log.info("ctDesignation : "+ctDesignation);
@@ -286,7 +287,7 @@ public class CompanyItemService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
+                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
 
             Optional<Company> optionalCompany = companyRepository.findByCpCode(cpCode);
 
@@ -334,7 +335,7 @@ public class CompanyItemService {
     }
 
     // 유저테이블 리스트 호출
-    public ResponseEntity<Map<String, Object>> userTableList(JwtFilterDto jwtFilterDto) {
+    public ResponseEntity<Map<String, Object>> userTableList(JwtFilterDto jwtFilterDto) throws IOException {
         log.info("userTableList 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -353,7 +354,7 @@ public class CompanyItemService {
         return ResponseEntity.ok(res.success(data));
     }
 
-    public ResponseEntity<Map<String, Object>> privacyTableList(JwtFilterDto jwtFilterDto) {
+    public ResponseEntity<Map<String, Object>> privacyTableList(JwtFilterDto jwtFilterDto) throws IOException {
         log.info("privacyTableList 호출");
 
         AjaxResponse res = new AjaxResponse();

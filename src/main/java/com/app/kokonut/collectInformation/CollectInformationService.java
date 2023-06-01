@@ -19,6 +19,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -73,7 +75,7 @@ public class CollectInformationService {
     /**
      * 개인정보처리방침 조회
      * @param userRole  사용자 권한
-     * @param idx       개인정보처리방침 인덱스
+     * @param ciId       개인정보처리방침 인덱스
      */
     public ResponseEntity<Map<String,Object>> collectInfoDetail(String userRole, Long ciId) {
         log.info("collectInfoDetail 호출, userRole : " + userRole);
@@ -113,7 +115,7 @@ public class CollectInformationService {
      * @param collectInfoDetailDto 개인정보처리방침 내용
      */
     @Transactional
-    public ResponseEntity<Map<String, Object>> collectInfoSave(String userRole, String email, CollectInfoDetailDto collectInfoDetailDto) {
+    public ResponseEntity<Map<String, Object>> collectInfoSave(String userRole, String email, CollectInfoDetailDto collectInfoDetailDto) throws IOException {
         log.info("collectInfoSave 호출, userRole : " + userRole);
 
         AjaxResponse res = new AjaxResponse();
@@ -171,7 +173,7 @@ public class CollectInformationService {
 
                 // 활동이력 -> 비정상 모드
                 Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode
-                        , companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+                        , companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
                 try{
                     log.info("개인정보처리방침 등록/수정 시작.");
                     Long savedIdx = collectInfoRepository.save(saveCollectInfo).getCiId();
@@ -197,10 +199,10 @@ public class CollectInformationService {
      * 개인정보처리방침 삭제
      * @param userRole  사용자 권한
      * @param email     사용자 이메일
-     * @param idx       개인정보처리방침 인덱스
+     * @param ciId       개인정보처리방침 인덱스
      */
     @Transactional
-    public ResponseEntity<Map<String, Object>> collectInfoDelete(String userRole, String email, Long ciId) {
+    public ResponseEntity<Map<String, Object>> collectInfoDelete(String userRole, String email, Long ciId) throws IOException {
         log.info("collectInfoDelete 호출, userRole : " + userRole);
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
@@ -233,7 +235,7 @@ public class CollectInformationService {
 
                     // 활동이력 -> 비정상 모드
                     Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode
-                            , companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+                            , companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
 
                     collectInfoRepository.deleteById(ciId);
                     if(!collectInfoRepository.existsById(ciId)){

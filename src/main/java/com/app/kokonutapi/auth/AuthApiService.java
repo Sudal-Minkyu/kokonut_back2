@@ -286,7 +286,8 @@ public class AuthApiService {
                                                 Base64.getDecoder().decode(awsKmsResultDto.getIvKey())) + "-" +
                                         lastName;
 
-                            } else if(names.get(i).equals("휴대전화번호")) {
+                            }
+                            else if (names.get(i).equals("휴대전화번호")) {
                                 // 휴대전화번호의 데이터의 대한 암호화
                                 if(value.length() == 11) {
                                     value = value.substring(0,3) + "-" +
@@ -298,7 +299,23 @@ public class AuthApiService {
                                     return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_05.getCode(),
                                             ResponseErrorCode.ERROR_CODE_05.getDesc() + " 보내신 휴대전화번호 : " + value));
                                 }
-                            } else {
+                            }
+                            else if (names.get(i).equals("이메일주소")) {
+                                String[] emailAddress = value.split("@");
+                                log.info("emailAddress : "+ Arrays.toString(emailAddress));
+                                log.info("emailAddress.length : "+ emailAddress.length);
+                                if(emailAddress.length == 2) {
+                                    value = AESGCMcrypto.encrypt(emailAddress[0].getBytes(StandardCharsets.UTF_8), awsKmsResultDto.getSecretKey(),
+                                            Base64.getDecoder().decode(awsKmsResultDto.getIvKey())) + "-@" +
+                                            emailAddress[1];
+                                } else {
+                                    log.error("이메일주소 형식과 맞지 않습니다. 다시 한번 확인해주시길 바랍니다. 보내신 이메일주소 : " + value);
+                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_09.getCode(),
+                                            ResponseErrorCode.ERROR_CODE_09.getDesc() + " 보내신 이메일주소 : " + value));
+                                }
+                            }
+
+                            else {
                                 // 데이터 암호화하기
                                 value = AESGCMcrypto.encrypt(value.getBytes(StandardCharsets.UTF_8), awsKmsResultDto.getSecretKey(),
                                         Base64.getDecoder().decode(awsKmsResultDto.getIvKey()));
@@ -329,7 +346,7 @@ public class AuthApiService {
             }
 
             // 개인정보 생성로그 저장
-            privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_01, 2, CommonUtil.clientIp(), email);
+            privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_01, 2, CommonUtil.publicIp(), email);
         } else {
             log.error("파라메터 데이터가 없습니다.");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_00.getCode(),ResponseErrorCode.ERROR_CODE_00.getDesc()));

@@ -1,10 +1,17 @@
 package com.app.kokonutuser;
 
+import com.app.kokonut.admin.AdminRepository;
+import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
 import com.app.kokonut.admin.dtos.AdminOtpKeyDto;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import com.app.kokonut.awsKmsHistory.dto.AwsKmsResultDto;
+import com.app.kokonut.common.AjaxResponse;
+import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.common.realcomponent.AESGCMcrypto;
+import com.app.kokonut.common.realcomponent.CommonUtil;
 import com.app.kokonut.common.realcomponent.Utils;
+import com.app.kokonut.company.company.CompanyRepository;
+import com.app.kokonut.company.company.CompanyService;
 import com.app.kokonut.company.companydatakey.CompanyDataKeyService;
 import com.app.kokonut.company.companytable.CompanyTable;
 import com.app.kokonut.company.companytable.CompanyTableRepository;
@@ -13,17 +20,10 @@ import com.app.kokonut.company.companytablecolumninfo.CompanyTableColumnInfo;
 import com.app.kokonut.company.companytablecolumninfo.CompanyTableColumnInfoRepository;
 import com.app.kokonut.company.companytablecolumninfo.dtos.CompanyTableColumnInfoCheck;
 import com.app.kokonut.company.companytablecolumninfo.dtos.CompanyTableColumnInfoCheckList;
+import com.app.kokonut.configs.ExcelService;
 import com.app.kokonut.configs.GoogleOTP;
 import com.app.kokonut.history.HistoryService;
 import com.app.kokonut.history.dto.ActivityCode;
-import com.app.kokonut.admin.AdminRepository;
-import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
-import com.app.kokonut.common.AjaxResponse;
-import com.app.kokonut.common.ResponseErrorCode;
-import com.app.kokonut.common.realcomponent.CommonUtil;
-import com.app.kokonut.company.company.CompanyRepository;
-import com.app.kokonut.company.company.CompanyService;
-import com.app.kokonut.configs.ExcelService;
 import com.app.kokonut.privacyhistory.PrivacyHistoryService;
 import com.app.kokonut.privacyhistory.dtos.PrivacyHistoryCode;
 import com.app.kokonutdormant.KokonutDormantService;
@@ -44,9 +44,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import javax.crypto.SecretKey;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URL;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -481,7 +479,7 @@ public class DynamicUserService {
 	// 유저생성(회원생성)
 	@Transactional
 	@SuppressWarnings("unchecked")
-	public ResponseEntity<Map<String, Object>> userSaveCall(HashMap<String, Object> paramMap, String email) {
+	public ResponseEntity<Map<String, Object>> userSaveCall(HashMap<String, Object> paramMap, String email) throws IOException {
 		log.info("userSaveCall 호출");
 
 		AjaxResponse res = new AjaxResponse();
@@ -521,7 +519,7 @@ public class DynamicUserService {
 		// 활동이력 저장 -> 비정상 모드
 		String ip = CommonUtil.clientIp();
 		Long activityHistoryId = historyService.insertHistory(1, adminId, activityCode,
-				companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+				companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
 		String id = null;
 		try {
 
@@ -660,7 +658,7 @@ public class DynamicUserService {
 	// 유저정보 수정(회원수정)
 	@Transactional
 	@SuppressWarnings("unchecked")
-	public ResponseEntity<Map<String, Object>> userUpdateCall(HashMap<String, Object> paramMap, String email) {
+	public ResponseEntity<Map<String, Object>> userUpdateCall(HashMap<String, Object> paramMap, String email) throws IOException {
 		log.info("userUpdateCall 호출");
 
 		AjaxResponse res = new AjaxResponse();
@@ -699,7 +697,7 @@ public class DynamicUserService {
 		ActivityCode activityCode = ActivityCode.AC_02;
 		// 활동이력 저장 -> 비정상 모드
 		String ip = CommonUtil.clientIp();
-		Long activityHistoryId = historyService.insertHistory(1, adminId, activityCode, companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+		Long activityHistoryId = historyService.insertHistory(1, adminId, activityCode, companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
 
 		try {
 
@@ -835,7 +833,7 @@ public class DynamicUserService {
 
 	// 유저삭제(회원삭제)
 	@Transactional
-	public ResponseEntity<Map<String, Object>> userDeleteCall(String TYPE, Integer IDX, String email) {
+	public ResponseEntity<Map<String, Object>> userDeleteCall(String TYPE, Integer IDX, String email) throws IOException {
 		log.info("userDeleteCall 호출");
 
 		AjaxResponse res = new AjaxResponse();
@@ -884,7 +882,7 @@ public class DynamicUserService {
 		// 활동이력 저장 -> 비정상 모드
 		String ip = CommonUtil.clientIp();
 		Long activityHistoryId = historyService.insertHistory(1, adminId, activityCode,
-				companyCode+" - "+activityCode.getDesc()+" 시도 이력 ID : "+kokonutRemoveInfoDtos.get(0).getID(), "", ip, 0, email);
+				companyCode+" - "+activityCode.getDesc()+" 시도 이력 ID : "+kokonutRemoveInfoDtos.get(0).getID(), "", ip,  CommonUtil.publicIp(), 0, email);
 
 		try {
 
@@ -1088,7 +1086,7 @@ public class DynamicUserService {
 
 	// 개인정보 테이블 + 휴면 테이블 필드 추가
 	@Transactional
-	public ResponseEntity<Map<String, Object>> columSave(KokonutColumSaveDto kokonutColumSaveDto, String email) {
+	public ResponseEntity<Map<String, Object>> columSave(KokonutColumSaveDto kokonutColumSaveDto, String email) throws IOException {
 		log.info("columSave 호출");
 
 		AjaxResponse res = new AjaxResponse();
@@ -1190,7 +1188,7 @@ public class DynamicUserService {
 		// 활동이력 저장 -> 비정상 모드
 		String ip = CommonUtil.clientIp();
 		Long activityHistoryId = historyService.insertHistory(3, adminId, activityCode,
-				companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+				companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
 
 		// 사용테이블에 컬럼 추가
 		kokonutUserService.alterAddColumnTableQuery(companyCode, fieldName, type, length, isNull, defaultValue, comment);
@@ -1321,7 +1319,7 @@ public class DynamicUserService {
 		// 활동이력 저장 -> 비정상 모드
 		String ip = CommonUtil.clientIp();
 		Long activityHistoryId = historyService.insertHistory(3, adminId, activityCode,
-				companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+				companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
 
 		// 암호화, 복호화 전환로직
 		if(changeColumnComment != null) {
@@ -1460,7 +1458,7 @@ public class DynamicUserService {
 
 	// 개인정보 테이블 + 휴면 테이블 필드 삭제 - 기존코코넛 메서드 : 없음
 	@Transactional
-	public ResponseEntity<Map<String, Object>> columDelete(String fieldName, String email) {
+	public ResponseEntity<Map<String, Object>> columDelete(String fieldName, String email) throws IOException {
 		log.info("columDelete 호출");
 
 		AjaxResponse res = new AjaxResponse();
@@ -1514,7 +1512,7 @@ public class DynamicUserService {
 		ActivityCode activityCode = ActivityCode.AC_21;
 		// 활동이력 저장 -> 비정상 모드
 		String ip = CommonUtil.clientIp();
-		Long activityHistoryId = historyService.insertHistory(3, adminId, activityCode, companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+		Long activityHistoryId = historyService.insertHistory(3, adminId, activityCode, companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
 
 		if(companyCode.equals(userTableCheck.get(0).getTABLE_NAME()) && fieldName.equals(userTableCheck.get(0).getCOLUMN_NAME()) &&
 				companyCode.equals(dormantTableCheck.get(0).getTABLE_NAME()) && fieldName.equals(dormantTableCheck.get(0).getCOLUMN_NAME())){
@@ -1586,7 +1584,7 @@ public class DynamicUserService {
 
 	// 컬럼추가 버튼(오른쪽에 추가)
 	@Transactional
-	public ResponseEntity<Map<String, Object>> tableColumnAdd(KokonutColumnAddDto kokonutColumnAddDto, JwtFilterDto jwtFilterDto) {
+	public ResponseEntity<Map<String, Object>> tableColumnAdd(KokonutColumnAddDto kokonutColumnAddDto, JwtFilterDto jwtFilterDto) throws IOException {
 		log.info("tableColumnAdd 호출");
 
 		AjaxResponse res = new AjaxResponse();
@@ -1630,7 +1628,7 @@ public class DynamicUserService {
 				companyTableColumnInfo.setInsert_date(LocalDateTime.now());
 
 				Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-						companyCode+" - "+activityCode.getDesc()+" 시도 이력"+ "추가된 컬럼명 : "+kokonutAddColumnListDto.getCiName(), "", ip, 0, jwtFilterDto.getEmail());
+						companyCode+" - "+activityCode.getDesc()+" 시도 이력"+ "추가된 컬럼명 : "+kokonutAddColumnListDto.getCiName(), "", ip,  CommonUtil.publicIp(),0, jwtFilterDto.getEmail());
 
 				String fieldCode = optionalCompanyTable.get().getCtTableCount()+"_"+tableAddColumnCount;
 				companyTableColumnInfo.setCtciCode(fieldCode);
@@ -1713,7 +1711,7 @@ public class DynamicUserService {
 
 	// 테이블에 추가된 컬럼을 삭제한다.
 	@Transactional
-	public ResponseEntity<Map<String, Object>> tableColumnDelete(KokonutColumnDeleteDto kokonutColumnDeleteDto, JwtFilterDto jwtFilterDto) {
+	public ResponseEntity<Map<String, Object>> tableColumnDelete(KokonutColumnDeleteDto kokonutColumnDeleteDto, JwtFilterDto jwtFilterDto) throws IOException {
 		log.info("tableColumnDelete 호출");
 
 		AjaxResponse res = new AjaxResponse();
@@ -1794,7 +1792,7 @@ public class DynamicUserService {
 	}
 
 	// 기본테이블의 데이터를 조회한다.
-	public ResponseEntity<Map<String, Object>> tableBasicList(JwtFilterDto jwtFilterDto) {
+	public ResponseEntity<Map<String, Object>> tableBasicList(JwtFilterDto jwtFilterDto) throws IOException {
 		log.info("tableColumnDelete 호출");
 
 		AjaxResponse res = new AjaxResponse();
@@ -2067,7 +2065,17 @@ public class DynamicUserService {
 											value = value.charAt(0) + "-" + AESGCMcrypto.encrypt(value.substring(1,value.length() - 1).getBytes(StandardCharsets.UTF_8),
 													awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey())) + "-" +value.substring(value.length() - 1);
 										}
-									} else {
+									} else if(companyTableColumnInfoCheck.getCtciDesignation().equals("이메일주소")) {
+										String[] emailAddress = value.split("@");
+										if(emailAddress.length != 2) {
+											log.error("이메일주소 형식과 맞지 않습니다. 다시 한번 확인해주시길 바랍니다. 보내신 이메일주소 : " + value);
+											return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_09.getCode(),
+													ResponseErrorCode.ERROR_CODE_09.getDesc() + " 보내신 이메일주소 : " + value));
+										} else {
+											value = AESGCMcrypto.encrypt(emailAddress[0].getBytes(StandardCharsets.UTF_8),
+													awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey())) + "-@" +emailAddress[1];
+										}
+									}else {
 										value = AESGCMcrypto.encrypt(value.getBytes(StandardCharsets.UTF_8),
 												awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey()));
 									}
@@ -2140,13 +2148,21 @@ public class DynamicUserService {
 						String decryptValue;
 						if(value.length >= 2) {
 							log.info("'-' 구분자로 들어간 암호화");
-							decryptValue = AESGCMcrypto.decrypt(value[1], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
-							if(value.length == 2) {
-								securiryResultValue = value[0] + Utils.starsForString(decryptValue);
-							} else {
-								securiryResultValue = value[0] + Utils.starsForString(decryptValue) + value[2];
+							if(String.valueOf(key).equals("이름")) {
+								decryptValue = AESGCMcrypto.decrypt(value[1], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
+								if(value.length == 2) {
+									securiryResultValue = value[0] + Utils.starsForString(decryptValue);
+								} else {
+									securiryResultValue = value[0] + Utils.starsForString(decryptValue) + value[2];
+								}
+							}
+							else {
+								// 이메일주소 암호화 일 경우
+								decryptValue = AESGCMcrypto.decrypt(value[0], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
+								securiryResultValue = decryptValue.charAt(0) + Utils.starsForString(decryptValue).substring(2)  + decryptValue.substring(decryptValue.length() - 1)+value[1];
 							}
 						} else {
+							// 만약 이메일일 경우
 							log.info("구분자가 없는 암호화");
 							decryptValue = AESGCMcrypto.decrypt(value[0], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
 							securiryResultValue = decryptValue.charAt(0) + Utils.starsForString(decryptValue).substring(2)  + decryptValue.substring(decryptValue.length() - 1);

@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.SecretKey;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -100,7 +101,7 @@ public class AdminService {
 
     // 휴대전화번호 변경
     @Transactional
-    public ResponseEntity<Map<String, Object>> phoneChange(String knName, String knPhoneNumber, JwtFilterDto jwtFilterDto) {
+    public ResponseEntity<Map<String, Object>> phoneChange(String knName, String knPhoneNumber, JwtFilterDto jwtFilterDto) throws IOException {
         log.info("phoneChange 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -122,7 +123,7 @@ public class AdminService {
         Optional<Admin> optionalAdmin = adminRepository.findByKnEmail(email);
         if(optionalAdmin.isPresent()) {
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
+                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
 
             optionalAdmin.get().setKnName(knName);
             optionalAdmin.get().setKnPhoneNumber(knPhoneNumber);
@@ -142,7 +143,7 @@ public class AdminService {
 
     // 소속명 변경
     @Transactional
-    public ResponseEntity<Map<String, Object>> cpChange(String cpContent, String knPassword, Integer state, JwtFilterDto jwtFilterDto) {
+    public ResponseEntity<Map<String, Object>> cpChange(String cpContent, String knPassword, Integer state, JwtFilterDto jwtFilterDto) throws IOException {
         log.info("cpChange 호출");
 
         log.info("변경내용 : "+cpContent);
@@ -180,7 +181,7 @@ public class AdminService {
 
             // 활동이력 저장 -> 비정상 모드
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
+                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
 
             if(state == 1) {
                 // 소속명 변경
@@ -213,7 +214,7 @@ public class AdminService {
 
     // 비밀번호 변경
     @Transactional
-    public ResponseEntity<Map<String, Object>> pwdChange(String oldknPassword, String newknPassword, String newknPasswordCheck, JwtFilterDto jwtFilterDto) {
+    public ResponseEntity<Map<String, Object>> pwdChange(String oldknPassword, String newknPassword, String newknPasswordCheck, JwtFilterDto jwtFilterDto) throws IOException {
         log.info("pwdChange 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -246,7 +247,7 @@ public class AdminService {
 
             // 활동이력 저장 -> 비정상 모드
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
+                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(),0, jwtFilterDto.getEmail());
 
             optionalAdmin.get().setKnPassword(passwordEncoder.encode(newknPassword));
             optionalAdmin.get().setKnPwdChangeDate(LocalDateTime.now());
@@ -446,7 +447,7 @@ public class AdminService {
 
             // 관리자추가 저장 -> 비정상 모드
             Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
+                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
 
             AwsKmsResultDto awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(companyCode);
             byte[] ivBytes = AESGCMcrypto.generateIV();
@@ -525,7 +526,7 @@ public class AdminService {
     }
 
     // 내부제공, 외부제공 관리자목록 리스트 호출
-    public ResponseEntity<Map<String, Object>> offerAdminList(String type, JwtFilterDto jwtFilterDto) {
+    public ResponseEntity<Map<String, Object>> offerAdminList(String type, JwtFilterDto jwtFilterDto) throws IOException {
         log.info("offerAdminList 호출");
 
         AjaxResponse res = new AjaxResponse();

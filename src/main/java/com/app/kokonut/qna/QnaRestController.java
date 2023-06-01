@@ -58,7 +58,7 @@ public class QnaRestController {
     @ApiImplicitParams({
             @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     })
-    public ResponseEntity<Map<String,Object>> qnaDetail(@PathVariable("idx") Long qnaId) {
+    public ResponseEntity<Map<String,Object>> qnaDetail(@PathVariable("idx") Long qnaId) throws IOException {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return qnaService.qnaDetail(qnaId, jwtFilterDto);
     }
@@ -69,7 +69,7 @@ public class QnaRestController {
     @ApiImplicitParams({
             @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     })
-    public ResponseEntity<Map<String,Object>> qnaAnswer(@RequestBody QnaAnswerSaveDto qnaAnswerSaveDto) {
+    public ResponseEntity<Map<String,Object>> qnaAnswer(@RequestBody QnaAnswerSaveDto qnaAnswerSaveDto) throws IOException {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return qnaService.qnaAnswer(qnaAnswerSaveDto, jwtFilterDto);
     }

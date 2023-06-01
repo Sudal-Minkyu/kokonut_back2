@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.Map;
 import org.springframework.data.web.PageableDefault;
 
@@ -67,7 +68,7 @@ public class CollectInformationRestController {
     @ApiImplicitParams({
             @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header")
     })
-    public ResponseEntity<Map<String,Object>> collectInfoSave(@RequestBody CollectInfoDetailDto collectInfoDetailDto) {
+    public ResponseEntity<Map<String,Object>> collectInfoSave(@RequestBody CollectInfoDetailDto collectInfoDetailDto) throws IOException {
         // String userRole = SecurityUtil.getCurrentJwt().getRole();
         String email = SecurityUtil.getCurrentJwt().getEmail();
         return collectInformationService.collectInfoSave(null, email, collectInfoDetailDto);
@@ -80,7 +81,7 @@ public class CollectInformationRestController {
     @ApiImplicitParams({
             @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header")
     })
-    public ResponseEntity<Map<String,Object>> collectInfoDelete(@RequestParam(name="ciId") Long ciId) {
+    public ResponseEntity<Map<String,Object>> collectInfoDelete(@RequestParam(name="ciId") Long ciId) throws IOException {
         // String userRole = SecurityUtil.getCurrentJwt().getRole();
         String email = SecurityUtil.getCurrentJwt().getEmail();
         return collectInformationService.collectInfoDelete(null, email, ciId);

@@ -55,10 +55,15 @@ public class History {
     @Column(name = "ah_reason")
     private String ahReason;
 
-    // 접속IP주소
-    @ApiModelProperty("접속IP주소")
-    @Column(name = "ah_ip_addr")
-    private String ahIpAddr;
+    // IP주소 : IPv4를 뜻함
+    @ApiModelProperty("IP주소 : IPv4를 뜻함")
+    @Column(name = "ah_ipv4_ip_addr")
+    private String ahIpv4IpAddr;
+
+    // IP주소 : 공인IP를 뜻함
+    @ApiModelProperty("IP주소 : 공인IP를 뜻함")
+    @Column(name = "ah_public_ip_addr")
+    private String ahPublicIpAddr;
 
     // 0:비정상,1:정상
     @Column(name = "ah_state")

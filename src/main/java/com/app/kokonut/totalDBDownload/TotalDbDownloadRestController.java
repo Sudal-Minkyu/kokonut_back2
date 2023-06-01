@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -40,7 +41,7 @@ public class TotalDbDownloadRestController {
 			@ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
     })
     public ResponseEntity<Map<String, Object>> userDbDataDownloadApply(@RequestParam(name="otpValue", defaultValue = "") String otpValue,
-                                                                       @RequestParam(name="reason", defaultValue = "") String reason) {
+                                                                       @RequestParam(name="reason", defaultValue = "") String reason) throws IOException {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return totalDbDownloadService.userDbDataDownloadApply(otpValue, reason, jwtFilterDto.getEmail());
     }

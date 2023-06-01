@@ -3,7 +3,7 @@ package com.app.kokonut.configs;
 import com.app.kokonut.apiKey.ApiKeyService;
 import com.app.kokonut.apiKey.dtos.ApiKeyInfoDto;
 import com.app.kokonut.common.ResponseErrorCode;
-import com.app.kokonut.common.realcomponent.Utils;
+import com.app.kokonut.common.realcomponent.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +12,6 @@ import org.springframework.web.servlet.AsyncHandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URL;
 
 /**
  * @author Woody
@@ -54,10 +51,7 @@ public class KokonutApiInterceptor implements AsyncHandlerInterceptor {
 					response.sendError(HttpStatus.SC_NOT_FOUND, ResponseErrorCode.ERROR_CODE_97.getDesc());
 				} else {
 
-					URL url = new URL("http://checkip.amazonaws.com");
-					BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
-					String ip = br.readLine();
-					br.close();
+					String ip = CommonUtil.publicIp();
 					log.info("호출한 공인 IP : " + ip);
 
 					ApiKeyInfoDto apiKeyInfoDto = apiKeyService.findByApiKeyInfo(apikey, ip);

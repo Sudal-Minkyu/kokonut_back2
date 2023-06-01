@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -73,7 +74,7 @@ public class TotalDbDownloadService {
 
     // 개인정보 DB 데이터 전체 다운로드 요청
     @Transactional
-    public ResponseEntity<Map<String, Object>> userDbDataDownloadApply(String otpValue, String reason, String email) {
+    public ResponseEntity<Map<String, Object>> userDbDataDownloadApply(String otpValue, String reason, String email) throws IOException {
         log.info("userDbDataDownloadApply 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -119,7 +120,7 @@ public class TotalDbDownloadService {
         ActivityCode activityCode = ActivityCode.AC_22;
         // 활동이력 저장 -> 비정상 모드
         String ip = CommonUtil.clientIp();
-        Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode, companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+        Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode, companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
 
         // 회원 DB데이터 다운로드 요청건 insert
         TotalDbDownload totalDbDownload = new TotalDbDownload();
@@ -205,7 +206,7 @@ public class TotalDbDownloadService {
             // 활동이력 저장 -> 비정상 모드
             String ip = CommonUtil.clientIp();
             Long activityHistoryId = historyService.insertHistory(3, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
 
             Optional<TotalDbDownload> optionalTotalDbDownload = totalDbDownloadRepository.findById(tdId);
             if(optionalTotalDbDownload.isPresent()) {

@@ -30,6 +30,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -75,7 +76,7 @@ public class ProvisionService {
 
     // 개인정보제공 등록
     @Transactional
-    public ResponseEntity<Map<String, Object>> provisionSave(ProvisionSaveDto provisionSaveDto, JwtFilterDto jwtFilterDto) {
+    public ResponseEntity<Map<String, Object>> provisionSave(ProvisionSaveDto provisionSaveDto, JwtFilterDto jwtFilterDto) throws IOException {
         log.info("provisionSave 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -135,7 +136,7 @@ public class ProvisionService {
 
         // 활동이력 저장 -> 비정상 모드
         activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(),0, email);
 
         try {
             Provision saveprovision = provisionRepository.save(provision);
@@ -280,7 +281,7 @@ public class ProvisionService {
 
     // 개인정보제공 리스트 조회
     public ResponseEntity<Map<String, Object>> provisionList(String searchText, String stime,
-                                                             String filterDownload, String filterState, JwtFilterDto jwtFilterDto, Pageable pageable) {
+                                                             String filterDownload, String filterState, JwtFilterDto jwtFilterDto, Pageable pageable) throws IOException {
         log.info("provisionList 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -317,7 +318,7 @@ public class ProvisionService {
 
         // 활동이력 저장 -> 비정상 모드
         activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
 
         Page<ProvisionListDto> provisionListDtos = provisionRepository.findByProvisionList(provisionSearchDto, pageable);
 
@@ -333,7 +334,7 @@ public class ProvisionService {
     }
 
     // 개인정보제공 다운로드 리스트 조회
-    public ResponseEntity<Map<String, Object>> provisionDownloadList(String proCode, JwtFilterDto jwtFilterDto, Pageable pageable) {
+    public ResponseEntity<Map<String, Object>> provisionDownloadList(String proCode, JwtFilterDto jwtFilterDto, Pageable pageable) throws IOException {
         log.info("provisionDownloadList 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -357,7 +358,7 @@ public class ProvisionService {
 
         // 활동이력 저장 -> 비정상 모드
         activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
 
         Page<ProvisionDownloadHistoryListDto> provisionDownloadList = provisionDownloadHistoryRepository.findByProvisionDownloadList(proCode, pageable);
 
@@ -373,7 +374,7 @@ public class ProvisionService {
     }
 
     // 개인정보제공 상세내용 조회
-    public ResponseEntity<Map<String, Object>> provisionDetail(String proCode, JwtFilterDto jwtFilterDto) {
+    public ResponseEntity<Map<String, Object>> provisionDetail(String proCode, JwtFilterDto jwtFilterDto) throws IOException {
         log.info("provisionDetail 호출");
 
         AjaxResponse res = new AjaxResponse();

@@ -47,7 +47,7 @@ public class HistoryRepositoryCustomImpl extends QuerydslRepositorySupport imple
                         history.activityCode,
                         history.ahActivityDetail,
                         history.insert_date,
-                        history.ahIpAddr,
+                        history.ahIpv4IpAddr,
                         history.ahState
                 ));
 
@@ -79,7 +79,7 @@ public class HistoryRepositoryCustomImpl extends QuerydslRepositorySupport imple
                 .where(history.insert_email.eq(knEmail).and(history.activityCode.eq(ActivityCode.AC_01))).orderBy(history.ahId.desc()).limit(1)
                 .select(Projections.constructor(HistoryLoginInfoDto.class,
                         history.insert_date,
-                        history.ahIpAddr
+                        history.ahIpv4IpAddr
                 ));
 
         return query.fetchOne();
@@ -201,7 +201,7 @@ public class HistoryRepositoryCustomImpl extends QuerydslRepositorySupport imple
                     history.activityCode,
                     history.ahActivityDetail,
                     history.ahReason,
-                    history.ahIpAddr,
+                    history.ahIpv4IpAddr,
                     history.ahState,
                     history.insert_email
                 ));

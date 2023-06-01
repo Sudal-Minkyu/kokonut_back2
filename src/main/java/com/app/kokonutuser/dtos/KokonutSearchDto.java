@@ -21,6 +21,4 @@ public class KokonutSearchDto {
 
     private List<String> searchTexts; // 조회할 텍스트
 
-    private List<String> searchSecuriys; // 조회하는 암호화여부
-
 }
