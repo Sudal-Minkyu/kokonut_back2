@@ -134,22 +134,33 @@ public class DynamicUserRestController {
 	@ApiOperation(value="개인정보를 검색한다.", notes="" +
 			"1. 검색할 테이블과 선택된 테이블의 컬럼을 선택하고 검색할 문자를 입력한다." +
 			"2. 받은 값을 통해 조회하여 리스트로 보여준다.")
-	@GetMapping(value = "/privacyUserSearch")
+	@PostMapping(value = "/privacyUserSearch")
 	@ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-//	public ResponseEntity<Map<String,Object>> privacyUserSearch(@RequestBody KokonutSearchDto kokonutSearchDto) {
-	public ResponseEntity<Map<String,Object>> privacyUserSearch(@RequestParam(name="searchTables", defaultValue = "") List<String> searchTables,
-																@RequestParam(name="searchCodes", defaultValue = "") List<String> searchCodes,
-																@RequestParam(name="searchTexts", defaultValue = "") List<String> searchTexts,
-																@RequestParam(name="pageNum", defaultValue = "1") int pageNum,
-																@RequestParam(name="limitNum", defaultValue = "10") int limitNum) throws Exception {
+	public ResponseEntity<Map<String,Object>> privacyUserSearch(@RequestBody KokonutSearchDto kokonutSearchDto) throws Exception {
+//	public ResponseEntity<Map<String,Object>> privacyUserSearch(@RequestParam(name="searchTables", defaultValue = "") List<String> searchTables,
+//																@RequestParam(name="searchCodes", defaultValue = "") List<String> searchCodes,
+//																@RequestParam(name="searchTexts", defaultValue = "") List<String> searchTexts,
+//																@RequestParam(name="pageNum", defaultValue = "1") int pageNum,
+//																@RequestParam(name="limitNum", defaultValue = "10") int limitNum) throws Exception {
 		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
-		KokonutSearchDto kokonutSearchDto = new KokonutSearchDto();
-		kokonutSearchDto.setPageNum(pageNum);
-		kokonutSearchDto.setLimitNum(limitNum);
-		kokonutSearchDto.setSearchTables(searchTables);
-		kokonutSearchDto.setSearchCodes(searchCodes);
-		kokonutSearchDto.setSearchTexts(searchTexts);
+//		KokonutSearchDto kokonutSearchDto = new KokonutSearchDto();
+//		kokonutSearchDto.setPageNum(pageNum);
+//		kokonutSearchDto.setLimitNum(limitNum);
+//		kokonutSearchDto.setSearchTables(searchTables);
+//		kokonutSearchDto.setSearchCodes(searchCodes);
+//		kokonutSearchDto.setSearchTexts(searchTexts);
 		return dynamicUserService.privacyUserSearch(kokonutSearchDto, jwtFilterDto);
+	}
+
+	// 개인정보 열람
+	@ApiOperation(value="개인정보를 열람한다.", notes="" +
+			"1. 열람할 IDX를 받는다." +
+			"2. 해당 IDX의 관련된 데이터를 모두 보내준다.")
+	@GetMapping(value = "/privacyUserOpen")
+	@ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+	public ResponseEntity<Map<String,Object>> privacyUserOpen(@RequestParam(name="IDX", defaultValue = "") String idx) throws Exception {
+		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+		return dynamicUserService.privacyUserOpen(idx, jwtFilterDto);
 	}
 
 //  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

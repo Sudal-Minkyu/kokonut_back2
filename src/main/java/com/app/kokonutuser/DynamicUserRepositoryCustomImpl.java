@@ -65,6 +65,12 @@ public class DynamicUserRepositoryCustomImpl implements DynamicUserRepositoryCus
         }
     }
 
+    // 개인정보 열람호출
+    public List<Map<String, Object>> privacyOpenInfoData(String queryStr) {
+        log.info("개인정보 열람 쿼리문 : "+queryStr);
+        return jdbcTemplate.queryForList(queryStr);
+    }
+
     // 테이블 데이터가 하나라도 존재하는지 검증해주는 함수
     @Override
     public String getTableDataCheck(String queryStr) {

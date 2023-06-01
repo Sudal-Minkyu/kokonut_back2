@@ -13,7 +13,7 @@ import java.util.List;
  */
 public interface CompanyTableColumnInfoRepositoryCustom {
 
-    List<CompanyTableColumnInfoCheckList> findByCheckList(List<String> codes);
+    List<CompanyTableColumnInfoCheckList> findByCheckList(String ctName);
 
     CompanyTableColumnInfoCheck findByCheck(String ctName, String ctciCode);
 

@@ -9,7 +9,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CompanyTableColumnInfoCheckList {
 
-    private String ctciCode;
+    private String ctciDesignation;
+
+    private String ctciName;
 
     private String ctciSecuriy;
 

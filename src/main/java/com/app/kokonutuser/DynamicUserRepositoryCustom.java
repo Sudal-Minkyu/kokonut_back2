@@ -21,6 +21,10 @@ public interface DynamicUserRepositoryCustom {
 
     int privacyListTotal(String queryStr); // 개인정보 리스트의 총합계
 
+    List<Map<String, Object>> privacyOpenInfoData(String queryStr); // 개인정보 열람호출
+
+
+
     void userCommonTable(String commonQuery); // 생성, 삭제, 업데이트 실행 공용
 
     int selectExistUserTable(String companyCode); // 보내는 값 - tableName = companyCode

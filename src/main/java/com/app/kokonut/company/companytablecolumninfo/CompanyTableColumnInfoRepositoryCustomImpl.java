@@ -28,16 +28,19 @@ public class CompanyTableColumnInfoRepositoryCustomImpl extends QuerydslReposito
     }
 
     @Override
-    public List<CompanyTableColumnInfoCheckList> findByCheckList(List<String> codes) {
+    public List<CompanyTableColumnInfoCheckList> findByCheckList(String ctName) {
 
         QCompanyTableColumnInfo companyTableColumnInfo = QCompanyTableColumnInfo.companyTableColumnInfo;
 
         JPQLQuery<CompanyTableColumnInfoCheckList> query = from(companyTableColumnInfo)
-                .where(companyTableColumnInfo.ctciCode.in(codes))
+                .where(companyTableColumnInfo.ctName.eq(ctName))
                 .select(Projections.constructor(CompanyTableColumnInfoCheckList.class,
-                        companyTableColumnInfo.ctciCode,
+                        companyTableColumnInfo.ctciDesignation,
+                        companyTableColumnInfo.ctciName,
                         companyTableColumnInfo.ctciSecuriy
                 ));
+
+        query.orderBy(companyTableColumnInfo.ctciCode.asc());
 
         return query.fetch();
     }

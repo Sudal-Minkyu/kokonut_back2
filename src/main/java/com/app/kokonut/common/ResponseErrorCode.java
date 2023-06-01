@@ -133,7 +133,8 @@ public enum ResponseErrorCode {
     ERROR_CODE_04("ERROR_CODE_04", "존재하지 않은 고유코드 입니다. 고유코드를 확인 해주세요."),
     ERROR_CODE_05("ERROR_CODE_05", "휴대전화번호는 '-'를 뺀 형태로 보내주시길 바랍니다."),
     ERROR_CODE_06("ERROR_CODE_06", "중복되는 고유코드가 존재합니다. 중복되지 않도록 고유코드를 보내주세요."),
-
+    ERROR_CODE_07("ERROR_CODE_07", "조회하고자 하는 파라메터 값이 일정하지 않습니다. 보내시는 파라메터 값을 다시 한번 확인해주세요."),
+    ERROR_CODE_08("ERROR_CODE_08", "조회하실 파라메터가 존재하지 않습니다. 보내시는 파라메터 값을 추가해주세요."),
 
 
     ERROR_CODE_96("ERROR_CODE_96", "헤더에 APIKey가 존재하지 않습니다. APIKey를 담아 보내주세요."), // 400
