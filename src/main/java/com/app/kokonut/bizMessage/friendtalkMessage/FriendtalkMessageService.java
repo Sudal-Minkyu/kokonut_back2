@@ -136,16 +136,16 @@ public class FriendtalkMessageService {
             if(mFile != null) {
                 log.info("친구톡 이미지 업로드 시작");
 
-                File file = Utils.convertMultipartFileToFile(mFile);
-                result = naverCloudPlatformService.setImageFile(friendtalkMessageSendDto.getKcChannelId(), file, request.getContentType());
-                if(result.getResultCode().equals(200)) {
-                    HashMap<String,Object> response = Utils.convertJSONstringToMap(result.getResultText());
-                    imageId = response.get("imageId").toString();
-                    imageUrl = response.get("imageUrl").toString();
-                } else {
-                    log.error("친구톡 이미지 업로드를 실패했습니다.");
-                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO030.getCode(), ResponseErrorCode.KO030.getDesc()));
-                }
+//                File file = Utils.convertMultipartFileToFile(mFile);
+//                result = naverCloudPlatformService.setImageFile(friendtalkMessageSendDto.getKcChannelId(), file, request.getContentType());
+//                if(result.getResultCode().equals(200)) {
+//                    HashMap<String,Object> response = Utils.convertJSONstringToMap(result.getResultText());
+//                    imageId = response.get("imageId").toString();
+//                    imageUrl = response.get("imageUrl").toString();
+//                } else {
+//                    log.error("친구톡 이미지 업로드를 실패했습니다.");
+//                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO030.getCode(), ResponseErrorCode.KO030.getDesc()));
+//                }
             }
 
             result = naverCloudPlatformService.postFriendMessages(friendtalkMessageSendDto, imageId, imageUrl);

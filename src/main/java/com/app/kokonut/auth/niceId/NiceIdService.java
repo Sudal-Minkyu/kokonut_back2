@@ -205,7 +205,7 @@ public class NiceIdService {
 		String reqData = "{\"returnurl\":\""+frontServerDomainIp+"/#/niceId/redirect"+"?state="+state+"\", \"sitecode\":\""+cryptoToken.getSiteCode()+"\", \"popupyn\" : \"Y\", \"receivedata\" : \"xxxxdddeee\", \"authtype\":\"M\"}";
 
 		String key = resultVal.substring(0, 16);
-		String iv = resultVal.substring(resultVal.length() - 16, resultVal.length());
+		String iv = resultVal.substring(resultVal.length() - 16);
 		String hmac_key = resultVal.substring(0, 32);
 		try {
 			SecretKey secureKey = new SecretKeySpec(key.getBytes(), "AES");
@@ -284,13 +284,7 @@ public class NiceIdService {
 
 			String resData =   new String(c.doFinal(cipherEnc), "euc-kr");
 			HashMap<String, Object> resMap = CommonUtil.jsonStringToHashMap(resData);
-//			String mobileno = "01020450716" ;
-//			resMap.get("mobileno").toString();
-//			String name = "김민규";
-//			resMap.get("name").toString();
 
-//			data.put("mobileno", resMap.get("mobileno").toString());
-//			data.put("name", resMap.get("name").toString());
 			String knName = resMap.get("name").toString();
 			String knPhoneNumber = resMap.get("mobileno").toString();
 

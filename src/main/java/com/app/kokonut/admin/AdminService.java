@@ -490,7 +490,7 @@ public class AdminService {
                 log.info("### 메일전송 성공했습니다. reciver Email : "+ userEmail);
 
                 // 인증번호 레디스에 담기
-                redisDao.setValues("EV: " + userEmail, knEmailAuthCode, Duration.ofMillis(1000*60*60*24)); // 제한시간 3분
+                redisDao.setValues("EV: " + userEmail, knEmailAuthCode, Duration.ofMillis((long)1000*60*60*24)); // 제한시간 3분
 
                 Admin admin = new Admin();
                 admin.setKnEmail(userEmail);

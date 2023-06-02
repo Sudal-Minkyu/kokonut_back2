@@ -805,10 +805,11 @@ public class AuthService {
                             // 로그인 코드
                             ActivityCode activityCode = ActivityCode.AC_01;
                             String ip = CommonUtil.clientIp();
+                            String publicIp = CommonUtil.publicIp();
 
                             // 활동이력 저장 -> 비정상 모드
                             Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-                                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, knEmail);
+                                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, publicIp, 0, knEmail);
 
                             // 인증 정보를 기반으로 JWT 토큰 생성
                             AuthResponseDto.TokenInfo jwtToken = jwtTokenProvider.generateToken(authentication);
@@ -834,7 +835,7 @@ public class AuthService {
                             // 마지막 로그인 시간기록
                             optionalAdmin.get().setKnLastLoginDate(LocalDateTime.now());
                             // 최근 접속 IP
-                            optionalAdmin.get().setKnIpAddr(ip);
+                            optionalAdmin.get().setKnIpAddr(publicIp);
                             adminRepository.save(optionalAdmin.get());
 
 

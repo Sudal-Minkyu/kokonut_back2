@@ -61,6 +61,8 @@ import java.util.stream.Collectors;
 @Service
 public class DynamicUserService {
 
+	private static final String SEP_TYPE = "%%__%%";
+
 	private final PasswordEncoder passwordEncoder;
 
 	private final AdminRepository adminRepository;
@@ -1711,7 +1713,7 @@ public class DynamicUserService {
 
 	// 테이블에 추가된 컬럼을 삭제한다.
 	@Transactional
-	public ResponseEntity<Map<String, Object>> tableColumnDelete(KokonutColumnDeleteDto kokonutColumnDeleteDto, JwtFilterDto jwtFilterDto) throws IOException {
+	public ResponseEntity<Map<String, Object>> tableColumnDelete(KokonutColumnDeleteDto kokonutColumnDeleteDto, JwtFilterDto jwtFilterDto) {
 		log.info("tableColumnDelete 호출");
 
 		AjaxResponse res = new AjaxResponse();
@@ -2015,14 +2017,14 @@ public class DynamicUserService {
 
 			// 셀렉트 기본셋팅
 			selectQuery.append(
-					"kokonut.kokonut_IDX  as IDX, " +
+					"kokonut.kokonut_IDX  as kokonut_IDX, " +
 //							"DATE_FORMAT(kokonut.kokonut_REGISTER_DATE, '%Y-%m-%d %H시 %i분') as 회원가입일시, " +
 							"DATE_FORMAT(kokonut.kokonut_REGISTER_DATE, '%Y-%m-%d %H시') as 회원가입일시, " +
 							"COALESCE(DATE_FORMAT(kokonut.kokonut_LAST_LOGIN_DATE, '%Y-%m-%d %H시'), '없음') as 마지막로그인일시, ");
 
 			whereQuery.append("WHERE ");
 
-			Map<String, Integer> nameCountMap = new HashMap<>();
+//			Map<String, Integer> nameCountMap = new HashMap<>();
 			List<String> allKeys = new ArrayList<>(result.keySet());
 			int resultSize = allKeys.size();
 			for (int currentKeyIndex = 0; currentKeyIndex < resultSize; currentKeyIndex++) {
@@ -2046,17 +2048,20 @@ public class DynamicUserService {
 							log.error("존재하지 않은 고유코드 입니다. 고유코드를 확인 해주세요. 고유코드 : "+code);
 							return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_04.getCode(),ResponseErrorCode.ERROR_CODE_04.getDesc()+" 고유코드 : "+code));
 						} else {
-							String designation = companyTableColumnInfoCheck.getCtDesignation()+"의 "+companyTableColumnInfoCheck.getCtciDesignation();
-							Integer count = nameCountMap.get(designation);
-							if (count == null) {
-								count = 0;
-							}
-							nameCountMap.put(designation, count + 1);
-							String uniqueDesignation = designation + count;
+							String designation = companyTableColumnInfoCheck.getCtDesignation()+SEP_TYPE+companyTableColumnInfoCheck.getCtciDesignation();
+//							Integer count = nameCountMap.get(designation);
+//							if (count == null) {
+//								count = 0;
+//							}
+//							nameCountMap.put(designation, count + 1);
+
+							// 구분자 : SEP_TYPE
+							String uniqueDesignation = designation + SEP_TYPE + code;
 
 							String value = map.get(code);
 							if(companyTableColumnInfoCheck.getCtciSecuriy().equals("1")) {
 								if(!companyTableColumnInfoCheck.getCtciDesignation().equals("휴대전화번호")) {
+
 									if(companyTableColumnInfoCheck.getCtciDesignation().equals("이름")) {
 										if (value.length() == 2) {
 											value = value.charAt(0) + "-" + AESGCMcrypto.encrypt(value.substring(1,2).getBytes(StandardCharsets.UTF_8),
@@ -2148,7 +2153,7 @@ public class DynamicUserService {
 						String decryptValue;
 						if(value.length >= 2) {
 							log.info("'-' 구분자로 들어간 암호화");
-							if(String.valueOf(key).equals("이름")) {
+							if(String.valueOf(securityHeaderName).contains("%%__%%이름%%__%%")) {
 								decryptValue = AESGCMcrypto.decrypt(value[1], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
 								if(value.length == 2) {
 									securiryResultValue = value[0] + Utils.starsForString(decryptValue);
