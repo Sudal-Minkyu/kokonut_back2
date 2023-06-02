@@ -6,17 +6,21 @@ import lombok.NoArgsConstructor;
 
 /**
  * @author Woody
- * Date : 2023-04-13
+ * Date : 2023-05-26
  * Time :
- * Remark :
+ * Remark : 개인정보검색용 테이블 리스트 호출 Dto
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CompanyTableSubListDto {
+public class CompanyPrivacyTableListDto {
 
-    private String ctName;
+    private String ctName; // 테이블 일련번호
 
     private String ctDesignation;
+
+    public String getCtName() {
+        return ctName.substring(9);
+    }
 
 }

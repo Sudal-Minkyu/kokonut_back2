@@ -10,10 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @author Woody
@@ -217,12 +214,28 @@ public class KokonutUserService {
 		return dynamicUserRepositoryCustom.selectColumns(searchQuery);
 	}
 
+	// 테이블의 코멘트+암호화여부 목록 조회
+	public List<Map<String, Object>> getCommentOrEncrypt(String companyCode) {
+		log.info("getFields 호출");
+		String searchQuery = "SHOW FULL COLUMNS FROM "+companyCode;
+		log.info("searchQuery : "+searchQuery);
+		return dynamicUserRepositoryCustom.getCommentOrEncrypt(searchQuery);
+	}
+
 	// 테이블이 존재하는지 검증해주는 함수
 	public int getTableVerification(String table) {
 		log.info("getTableVerification 호출");
 		String searchQuery = "SHOW TABLES LIKE '"+table+"'";
 		log.info("searchQuery : "+searchQuery);
 		return dynamicUserRepositoryCustom.verificationQuery(searchQuery);
+	}
+
+	// 테이블 데이터가 하나라도 존재하는지 검증해주는 함수
+	public String getTableDataCheck(String table) {
+		log.info("getTableDataCheck 호출");
+		String searchQuery = "SELECT EXISTS(SELECT 1 FROM "+table+" LIMIT 1) as exists_flag";
+		log.info("searchQuery : "+searchQuery);
+		return dynamicUserRepositoryCustom.getTableDataCheck(searchQuery);
 	}
 
 	// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

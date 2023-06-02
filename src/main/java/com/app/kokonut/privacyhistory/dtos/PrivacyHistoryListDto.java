@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * @author Woody
@@ -83,6 +84,10 @@ public class PrivacyHistoryListDto {
         } else {
             return kphIpAddr;
         }
+    }
+
+    public String getInsert_date() {
+        return DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(insert_date);
     }
 
 }

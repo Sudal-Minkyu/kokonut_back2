@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -41,7 +40,11 @@ public class AuthApiRestController {
     @ApiImplicitParam(name ="ApiKey", value="API Key",required = true, dataTypeClass = String.class, paramType = "header")
     public ResponseEntity<Map<String,Object>> apiLogin(@RequestBody AuthApiLoginDto authApiLoginDto, HttpServletRequest request) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwtOrApiKey(request);
-        return authApiService.apiLogin(authApiLoginDto, jwtFilterDto);
+        if(jwtFilterDto == null) {
+            return null;
+        } else {
+            return authApiService.apiLogin(authApiLoginDto, jwtFilterDto);
+        }
     }
 
 
@@ -53,8 +56,17 @@ public class AuthApiRestController {
     @ApiImplicitParam(name ="ApiKey", value="API Key",required = true, dataTypeClass = String.class, paramType = "header")
     public ResponseEntity<Map<String,Object>> apiRegister(@RequestBody HashMap<String, Object> paramMap, HttpServletRequest request) throws Exception {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwtOrApiKey(request);
-        return authApiService.apiRegister(paramMap, jwtFilterDto);
+        if(jwtFilterDto == null) {
+            return null;
+        } else {
+            return authApiService.apiRegister(paramMap, jwtFilterDto);
+        }
     }
+
+
+
+
+
 
 
 

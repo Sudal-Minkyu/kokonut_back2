@@ -1,4 +1,4 @@
-package com.app.kokonut.company.companyFile;
+package com.app.kokonut.company.companyfile;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

@@ -53,7 +53,7 @@ public class AdminRestController {
             @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
     })
     public ResponseEntity<Map<String,Object>> phoneChange(@RequestParam(value="knName", defaultValue = "") String knName,
-                                                          @RequestParam(value="knPhoneNumber", defaultValue = "") String knPhoneNumber) {
+                                                          @RequestParam(value="knPhoneNumber", defaultValue = "") String knPhoneNumber) throws IOException {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return adminService.phoneChange(knName, knPhoneNumber, jwtFilterDto);
     }
@@ -68,7 +68,7 @@ public class AdminRestController {
     })
     public ResponseEntity<Map<String,Object>> cpChange(@RequestParam(value="cpContent", defaultValue = "") String cpContent,
                                                           @RequestParam(value="knPassword", defaultValue = "") String knPassword,
-                                                          @RequestParam(value="state", defaultValue = "") Integer state) {
+                                                          @RequestParam(value="state", defaultValue = "") Integer state) throws IOException {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return adminService.cpChange(cpContent, knPassword, state, jwtFilterDto);
     }
@@ -84,7 +84,7 @@ public class AdminRestController {
     })
     public ResponseEntity<Map<String,Object>> pwdChange(@RequestParam(value="oldknPassword", defaultValue = "") String oldknPassword,
                                                        @RequestParam(value="newknPassword", defaultValue = "") String newknPassword,
-                                                       @RequestParam(value="newknPasswordCheck", defaultValue = "") String newknPasswordCheck) {
+                                                       @RequestParam(value="newknPasswordCheck", defaultValue = "") String newknPasswordCheck) throws IOException {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return adminService.pwdChange(oldknPassword, newknPassword, newknPasswordCheck, jwtFilterDto);
     }

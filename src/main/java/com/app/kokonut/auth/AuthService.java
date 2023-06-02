@@ -23,8 +23,8 @@ import com.app.kokonut.common.component.ReqUtils;
 import com.app.kokonut.common.realcomponent.*;
 import com.app.kokonut.company.company.Company;
 import com.app.kokonut.company.company.CompanyRepository;
-import com.app.kokonut.company.companyFile.CompanyFile;
-import com.app.kokonut.company.companyFile.CompanyFileRepository;
+import com.app.kokonut.company.companyfile.CompanyFile;
+import com.app.kokonut.company.companyfile.CompanyFileRepository;
 import com.app.kokonut.company.companydatakey.CompanyDataKey;
 import com.app.kokonut.company.companydatakey.CompanyDataKeyRepository;
 import com.app.kokonut.company.companytable.CompanyTable;
@@ -59,6 +59,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.text.Normalizer;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
@@ -184,7 +185,8 @@ public class AuthService {
         HashMap<String, Object> data = new HashMap<>();
 
         // 인증번호(숫자6자리) 생성
-        String ctNumber = String.valueOf(ThreadLocalRandom.current().nextInt(100000, 1000000));
+        SecureRandom secureRandom = new SecureRandom();
+        int ctNumber = secureRandom.nextInt(900000) + 100000;
         log.info("생성된 인증번호 : "+ctNumber);
 
         // 인증번호 메일전송
@@ -214,7 +216,7 @@ public class AuthService {
         }
 
         // 인증번호 레디스에 담기
-        redisDao.setValues("CT: " + knEmail, ctNumber, Duration.ofMillis(180000)); // 제한시간 3분
+        redisDao.setValues("CT: " + knEmail, String.valueOf(ctNumber), Duration.ofMillis(180000)); // 제한시간 3분
         log.info("레디스에 인증번호 저장성공");
 
         return ResponseEntity.ok(res.success(data));
@@ -806,7 +808,7 @@ public class AuthService {
 
                             // 활동이력 저장 -> 비정상 모드
                             Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-                                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, knEmail);
+                                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, knEmail);
 
                             // 인증 정보를 기반으로 JWT 토큰 생성
                             AuthResponseDto.TokenInfo jwtToken = jwtTokenProvider.generateToken(authentication);
@@ -824,11 +826,17 @@ public class AuthService {
                             // 비밀번호 틀린횟수 초기화
                             if(optionalAdmin.get().getKnPwdErrorCount() != 0) {
                                 optionalAdmin.get().setKnPwdErrorCount(0);
-                                adminRepository.save(optionalAdmin.get());
                             }
 
                             /* 해외 아이피 차단 여부 */
 //                            loginService.ResetPwdError(user.getIdx()); 패스워드에러카운트 리셋
+
+                            // 마지막 로그인 시간기록
+                            optionalAdmin.get().setKnLastLoginDate(LocalDateTime.now());
+                            // 최근 접속 IP
+                            optionalAdmin.get().setKnIpAddr(ip);
+                            adminRepository.save(optionalAdmin.get());
+
 
                             historyService.updateHistory(activityHistoryId,
                                     companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);

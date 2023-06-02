@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -11,12 +12,7 @@ import java.util.Map;
 public class ReqUtils {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ReqUtils.class);
-	
-	/***
-	 * HttpServletRequest에서 받은 parameter를 Map으로 전환 & 값 형변환
-	 * @param HttpServletRequest
-	 * @return Map<String, Object>
-	 */
+
 	public static HashMap<String, Object> getParameterMapAndRevertCharset(HttpServletRequest request) {
 		HashMap<String, Object>  map = new HashMap<String, Object>();
         try {
@@ -44,7 +40,7 @@ public class ReqUtils {
                 	if(value[0] == null || value[0].equals("") || value[0].equals("null")){
                 		rVal = "";
                 	}else{
-                		rVal = new String(filter(rVal).getBytes("8859_1"), "utf-8");
+                		rVal = new String(filter(rVal).getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
 
                 	}
                 	map.put(key, rVal);

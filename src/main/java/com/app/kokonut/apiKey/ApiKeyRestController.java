@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
@@ -44,7 +45,7 @@ public class ApiKeyRestController {
     @PostMapping("/apiKeyIssue")
     @ApiOperation(value = "APIKey 발급", notes = "APIKey를 발급해준다.")
     @ApiImplicitParam(name ="Authorization",  value="JWT Token", required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-    public ResponseEntity<Map<String,Object>> apiKeyIssue() throws NoSuchAlgorithmException {
+    public ResponseEntity<Map<String,Object>> apiKeyIssue() throws NoSuchAlgorithmException, IOException {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return apiKeyService.apiKeyIssue(jwtFilterDto);
     }
@@ -54,7 +55,7 @@ public class ApiKeyRestController {
             "1. APIKey에 호출을 허용할 IP를 등록한다.")
     @ApiImplicitParam(name ="Authorization",  value="JWT Token", required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> apiKeyIpSave(@RequestParam(value="accessIp", defaultValue = "") String accessIp,
-                                                           @RequestParam(value="ipMemo", defaultValue = "") String ipMemo) {
+                                                           @RequestParam(value="ipMemo", defaultValue = "") String ipMemo) throws IOException {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return apiKeyService.apiKeyIpSave(accessIp, ipMemo, jwtFilterDto);
     }
@@ -63,7 +64,7 @@ public class ApiKeyRestController {
     @ApiOperation(value = "APIKey 허용 IP 삭제", notes = "" +
             "1. 등록한 허용 IP를 삭제한다.")
     @ApiImplicitParam(name ="Authorization",  value="JWT Token", required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-    public ResponseEntity<Map<String,Object>> apiKeyIpDelete(@RequestBody ApiKeyIpDeleteDto apiKeyIpDeleteDto) {
+    public ResponseEntity<Map<String,Object>> apiKeyIpDelete(@RequestBody ApiKeyIpDeleteDto apiKeyIpDeleteDto) throws IOException {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return apiKeyService.apiKeyIpDelete(apiKeyIpDeleteDto, jwtFilterDto);
     }

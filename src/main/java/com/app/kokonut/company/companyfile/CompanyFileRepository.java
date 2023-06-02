@@ -1,4 +1,4 @@
-package com.app.kokonut.company.companyFile;
+package com.app.kokonut.company.companyfile;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;

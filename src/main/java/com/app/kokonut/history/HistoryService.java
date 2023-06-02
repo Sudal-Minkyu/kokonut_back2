@@ -195,13 +195,14 @@ public class HistoryService {
      * @param activityCode
      * @param ahActivityDetail - 활동상세내역
      * @param ahReason - 사유
-     * @param ahIpAddr - 접속IP주소
+     * @param ahIpv4IpAddr - IP주소 : IPv4를 뜻함
+     * @param ahPublicIpAddr - IP주소 : 공인IP를 뜻함
      * @param ahState - 0:비정상, 1:정상
      * @return save IDX
      * 기존 코코넛 : InsertHistory
      */
     public Long insertHistory(int ahType, Long adminId, ActivityCode activityCode,
-                                      String ahActivityDetail, String ahReason, String ahIpAddr, int ahState, String email) {
+                                      String ahActivityDetail, String ahReason, String ahIpv4IpAddr, String ahPublicIpAddr, int ahState, String email) {
 
         History History = new History();
         History.setAhType(ahType);
@@ -209,7 +210,8 @@ public class HistoryService {
         History.setActivityCode(activityCode);
         History.setAhActivityDetail(ahActivityDetail);
         History.setAhReason(ahReason);
-        History.setAhIpAddr(ahIpAddr);
+        History.setAhIpv4IpAddr(ahIpv4IpAddr);
+        History.setAhPublicIpAddr(ahPublicIpAddr);
         History.setAhState(ahState);
         History.setInsert_email(email);
         History.setInsert_date(LocalDateTime.now());

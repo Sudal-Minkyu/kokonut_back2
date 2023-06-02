@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.Map;
 
 @RestController
@@ -49,7 +50,7 @@ public class CompanyRestController {
     @PostMapping(value = "/saveItem") // -> 추가 카테고리의 항목을 추가한다.
     @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> saveItem(@RequestParam(name="ciName", defaultValue = "") String ciName,
-                                                              @RequestParam(name="ciSecurity", defaultValue = "") Integer ciSecurity) {
+                                                              @RequestParam(name="ciSecurity", defaultValue = "") Integer ciSecurity) throws IOException {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return companyItemService.saveItem(jwtFilterDto, ciName, ciSecurity);
     }
@@ -60,7 +61,7 @@ public class CompanyRestController {
     @PostMapping(value = "/updateItem") // -> 추가 카테고리의 수정을 추가한다.
     @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> updateItem(@RequestParam(name="ciId", defaultValue = "") Long ciId,
-                                                         @RequestParam(name="ciName", defaultValue = "") String ciName) {
+                                                         @RequestParam(name="ciName", defaultValue = "") String ciName) throws IOException {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return companyItemService.updateItem(ciId, ciName, jwtFilterDto);
     }
@@ -70,7 +71,7 @@ public class CompanyRestController {
             "2. 해당 항목을 조회하여 삭제한다.")
     @PostMapping(value = "/deleteItem") // -> 추가 카테고리의 항목을 삭제한다.
     @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-    public ResponseEntity<Map<String,Object>> deleteItem(@RequestParam(name="ciId", defaultValue = "") Long ciId) {
+    public ResponseEntity<Map<String,Object>> deleteItem(@RequestParam(name="ciId", defaultValue = "") Long ciId) throws IOException {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return companyItemService.deleteItem(ciId, jwtFilterDto);
     }
@@ -83,7 +84,7 @@ public class CompanyRestController {
             "2. 해당 테이블을 저정한다.")
     @PostMapping(value = "/userTableSave")
     @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-    public ResponseEntity<Map<String,Object>> userTableSave(@RequestParam(name="ctDesignation", defaultValue = "") String ctDesignation) {
+    public ResponseEntity<Map<String,Object>> userTableSave(@RequestParam(name="ctDesignation", defaultValue = "") String ctDesignation) throws IOException {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return companyItemService.userTableSave(jwtFilterDto, ctDesignation);
     }
@@ -93,9 +94,17 @@ public class CompanyRestController {
             "2. 결과값을 보낸다.")
     @GetMapping(value = "/userTableList")
     @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-    public ResponseEntity<Map<String,Object>> userTableList() {
+    public ResponseEntity<Map<String,Object>> userTableList() throws IOException {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return companyItemService.userTableList(jwtFilterDto);
+    }
+
+    @ApiOperation(value="개인정보검색용 테이블리스트를 가져온다.", notes="")
+    @GetMapping(value = "/privacyTableList")
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    public ResponseEntity<Map<String,Object>> privacyTableList() throws IOException {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return companyItemService.privacyTableList(jwtFilterDto);
     }
 
 }

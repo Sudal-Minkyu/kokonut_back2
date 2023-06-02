@@ -14,6 +14,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -38,7 +39,7 @@ public class ProvisionRestController {
     @ApiOperation(value="내부제공, 외부제공 관리자목록 리스트 호출")
     @GetMapping(value = "/offerAdminList")
     @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-    public ResponseEntity<Map<String,Object>> offerAdminList(@RequestParam(value="type", defaultValue = "1") String type) {
+    public ResponseEntity<Map<String,Object>> offerAdminList(@RequestParam(value="type", defaultValue = "1") String type) throws IOException {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return adminService.offerAdminList(type, jwtFilterDto);
     }
@@ -50,7 +51,7 @@ public class ProvisionRestController {
     @ApiOperation(value = "개인정보제공 저장 API", notes = "" +
             "1. PersonalInfoProvision 저장할 데이터를 받는다." +
             "2. ")
-    public ResponseEntity<Map<String, Object>> provisionSave(@RequestBody ProvisionSaveDto provisionSaveDto){
+    public ResponseEntity<Map<String, Object>> provisionSave(@RequestBody ProvisionSaveDto provisionSaveDto) throws IOException {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return provisionService.provisionSave(provisionSaveDto, jwtFilterDto);
     }
@@ -65,7 +66,7 @@ public class ProvisionRestController {
                                                            @RequestParam(value="stime", defaultValue = "") String stime,
                                                            @RequestParam(value="filterDownload", defaultValue = "") String filterDownload,
                                                            @RequestParam(value="filterState", defaultValue = "") String filterState,
-                                                           @PageableDefault Pageable pageable){
+                                                           @PageableDefault Pageable pageable) throws IOException {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return provisionService.provisionList(searchText, stime, filterDownload, filterState, jwtFilterDto, pageable);
     }
@@ -77,7 +78,7 @@ public class ProvisionRestController {
     @ApiOperation(value = "개인정보제공 다운로드 리스트 조회 API", notes = "" +
             "")
     public ResponseEntity<Map<String, Object>> provisionDownloadList(@RequestParam(value="proCode", defaultValue = "") String proCode,
-                                                                     @PageableDefault Pageable pageable){
+                                                                     @PageableDefault Pageable pageable) throws IOException {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return provisionService.provisionDownloadList(proCode, jwtFilterDto, pageable);
     }
@@ -89,7 +90,7 @@ public class ProvisionRestController {
     @ApiImplicitParams({
             @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     })
-    public ResponseEntity<Map<String,Object>> provisionDetail(@PathVariable("proCode") String proCode) {
+    public ResponseEntity<Map<String,Object>> provisionDetail(@PathVariable("proCode") String proCode) throws IOException {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return provisionService.provisionDetail(proCode, jwtFilterDto);
     }

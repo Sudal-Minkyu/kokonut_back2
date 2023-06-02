@@ -16,8 +16,8 @@ import com.app.kokonut.company.company.CompanyRepository;
 import com.app.kokonut.company.companyitem.dtos.CompanyItemListDto;
 import com.app.kokonut.company.companytable.CompanyTable;
 import com.app.kokonut.company.companytable.CompanyTableRepository;
+import com.app.kokonut.company.companytable.dtos.CompanyPrivacyTableListDto;
 import com.app.kokonut.company.companytable.dtos.CompanyTableListDto;
-import com.app.kokonut.company.companytable.dtos.CompanyTableSubListDto;
 import com.app.kokonut.history.HistoryService;
 import com.app.kokonut.history.dto.ActivityCode;
 import com.app.kokonutuser.DynamicUserService;
@@ -28,6 +28,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -118,7 +119,7 @@ public class CompanyItemService {
 
     // 추가 카테고리의 항목을 추가한다.
     @Transactional
-    public ResponseEntity<Map<String, Object>> saveItem(JwtFilterDto jwtFilterDto, String ciName, Integer ciSecurity) {
+    public ResponseEntity<Map<String, Object>> saveItem(JwtFilterDto jwtFilterDto, String ciName, Integer ciSecurity) throws IOException {
         log.info("saveItem 호출");
 
         log.info("ciName : "+ciName);
@@ -145,7 +146,7 @@ public class CompanyItemService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
+                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
 
             CompanyItem companyItem = new CompanyItem();
             companyItem.setCpCode(companyCode);
@@ -164,7 +165,7 @@ public class CompanyItemService {
 
     // 추가 카테고리의 항목을 수정한다.
     @Transactional
-    public ResponseEntity<Map<String, Object>> updateItem(Long ciId, String ciName, JwtFilterDto jwtFilterDto) {
+    public ResponseEntity<Map<String, Object>> updateItem(Long ciId, String ciName, JwtFilterDto jwtFilterDto) throws IOException {
         log.info("updateItem 호출");
 
 //        log.info("ciId : "+ciId);
@@ -193,7 +194,7 @@ public class CompanyItemService {
 
                 // 활동이력 저장 -> 비정상 모드
                 activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
+                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
 
                 optionalCompanyItem.get().setCiName(ciName);
                 optionalCompanyItem.get().setModify_email(jwtFilterDto.getEmail());
@@ -214,7 +215,7 @@ public class CompanyItemService {
 
     // 추가 카테고리의 항목을 삭제한다.
     @Transactional
-    public ResponseEntity<Map<String, Object>> deleteItem(Long ciId, JwtFilterDto jwtFilterDto) {
+    public ResponseEntity<Map<String, Object>> deleteItem(Long ciId, JwtFilterDto jwtFilterDto) throws IOException {
         log.info("deleteItem 호출");
 
         log.info("ciId : "+ciId);
@@ -239,7 +240,7 @@ public class CompanyItemService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
+                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
 
             companyItemRepository.delete(optionalCompanyItem.get());
 
@@ -255,7 +256,7 @@ public class CompanyItemService {
 
     // 테이블 추가
     @Transactional
-    public ResponseEntity<Map<String, Object>> userTableSave(JwtFilterDto jwtFilterDto, String ctDesignation) {
+    public ResponseEntity<Map<String, Object>> userTableSave(JwtFilterDto jwtFilterDto, String ctDesignation) throws IOException {
         log.info("userTableSave 호출");
 
         log.info("ctDesignation : "+ctDesignation);
@@ -286,7 +287,7 @@ public class CompanyItemService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
+                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
 
             Optional<Company> optionalCompany = companyRepository.findByCpCode(cpCode);
 
@@ -334,7 +335,7 @@ public class CompanyItemService {
     }
 
     // 유저테이블 리스트 호출
-    public ResponseEntity<Map<String, Object>> userTableList(JwtFilterDto jwtFilterDto) {
+    public ResponseEntity<Map<String, Object>> userTableList(JwtFilterDto jwtFilterDto) throws IOException {
         log.info("userTableList 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -344,62 +345,31 @@ public class CompanyItemService {
 
         AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
         String companyCode = adminCompanyInfoDto.getCompanyCode();
-//        log.info("companyCode : "+companyCode);
 
-        // 보낼 데이터를 담는 변수
-        List<CompanyTableListDto> companyTableListDtos = new ArrayList<>();
-        CompanyTableListDto companyTableListDto;
-
-//        List<FranchiseManagerListDto> franchiseManagerListDtos =  franchiseRepository.findByManagerInFranchise(brCode);
-//        List<HashMap<String,Object>> franchiseManagerData = new ArrayList<>();
-//        HashMap<String,Object> franchiseManagerListInfo;
-//        for (FranchiseManagerListDto franchiseManagerListDto: franchiseManagerListDtos) {
-//            franchiseManagerListInfo = new HashMap<>();
-//            franchiseManagerListInfo.put("frId", franchiseManagerListDto.getFrId());
-//            franchiseManagerListInfo.put("frName", franchiseManagerListDto.getFrName());
-//            franchiseManagerListInfo.put("frTagNo", franchiseManagerListDto.getFrTagNo());
-//            franchiseManagerData.add(franchiseManagerListInfo);
-//        }
-//        if(franchiseManagerListDtos.size() != 0){
-//            data.put("branchId",franchiseManagerListDtos.get(0).getBranchId());
-//        }
-//        data.put("franchiseList",franchiseManagerData);
-
-//        // 해당 회사에 등록된 테이블의 리스트를 가져온다.
-//        List<HashMap<String,Object>> companyTableColumnData = new ArrayList<>();
-//        HashMap<String,Object> companyTableColumnDataInfo;
-
-        List<CompanyTableSubListDto> companyTableSubListDtos = companyTableRepository.findByTableList(companyCode);
-//        for(CompanyTableSubListDto companyTableSubListDto : companyTableSubListDtos) {
-//            // 테이블의 컬럼리스트를 가져온다.
-//            List<KokonutUserFieldListDto> kokonutUserFieldListDtos = dynamicUserService.tableColumnList(companyTableSubListDto.getCtName());
-//
-////            for(KokonutUserFieldListDto kokonutUserFieldListDto : kokonutUserFieldListDtos) {
-////                companyTableColumnDataInfo = new HashMap<>();
-////                companyTableColumnDataInfo.put("fieldName", kokonutUserFieldListDto.getFieldName());
-////                companyTableColumnDataInfo.put("fieldComment", kokonutUserFieldListDto.getFieldComment());
-////                companyTableColumnDataInfo.put("fieldSecrity", kokonutUserFieldListDto.getFieldSecrity());
-////                companyTableColumnDataInfo.put("fieldCategory", kokonutUserFieldListDto.getFieldCategory());
-////                companyTableColumnDataInfo.put("fieldColor", kokonutUserFieldListDto.getFieldColor());
-////                companyTableColumnData.add(companyTableColumnDataInfo);
-////            }
-//
-//            // 하나로 묶어서 보내기
-//            companyTableListDto = new CompanyTableListDto();
-//            companyTableListDto.setCtName(companyTableSubListDto.getCtName());
-//            companyTableListDto.setCtDesignation(companyTableSubListDto.getCtDesignation());
-//            companyTableListDto.setKokonutUserFieldListDtos(kokonutUserFieldListDtos);
-//
-//            companyTableListDtos.add(companyTableListDto);
-//        }
+        List<CompanyTableListDto> companyTableListDtos = companyTableRepository.findByTableList(companyCode);
 
         // 각 리스트별로 보내기
-        data.put("companyTableList", companyTableSubListDtos);
-        data.put("companyColumnList", companyTableListDtos);
-
-//        data.put("companyTableColumnData", companyTableColumnData);
+        data.put("companyTableList", companyTableListDtos);
 
         return ResponseEntity.ok(res.success(data));
     }
 
+    public ResponseEntity<Map<String, Object>> privacyTableList(JwtFilterDto jwtFilterDto) throws IOException {
+        log.info("privacyTableList 호출");
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+        String email = jwtFilterDto.getEmail();
+
+        AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+        String companyCode = adminCompanyInfoDto.getCompanyCode();
+
+        List<CompanyPrivacyTableListDto> companyPrivacyTableListDtos = companyTableRepository.findByPrivacyTableList(companyCode);
+
+        // 각 리스트별로 보내기
+        data.put("companyTableList", companyPrivacyTableListDtos);
+
+        return ResponseEntity.ok(res.success(data));
+    }
 }

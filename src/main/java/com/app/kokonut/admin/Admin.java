@@ -190,10 +190,10 @@ public class Admin implements UserDetails {
     private LocalDateTime knWithdrawalDate;
 
     /**
-     * 최근접속일시(휴면계정전환에 필요)
+     * 최근접속일시
      */
     @Column(name = "kn_last_login_date")
-    @ApiModelProperty("최근접속일시(휴면계정전환에 필요)")
+    @ApiModelProperty("최근접속일시")
     private LocalDateTime knLastLoginDate;
 
     /**

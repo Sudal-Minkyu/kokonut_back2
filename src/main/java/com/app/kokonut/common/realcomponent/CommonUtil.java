@@ -7,8 +7,12 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -33,49 +37,60 @@ public class CommonUtil {
         return requestURL;
     }
 
-    // clientIp 조회
+    // IPv4 조회
     public static String clientIp() {
     	ServletRequestAttributes sra = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
-    	HttpServletRequest request = sra.getRequest();
-    	String ip;
+		HttpServletRequest request = sra.getRequest();
+		String ip;
 
-	 	ip = request.getHeader("X-Forwarded-For");
+		ip = request.getHeader("X-Forwarded-For");
 //		ip = Inet4Address.getLocalHost().getHostAddress(); IPV4 가져오기
 
 		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-             ip = request.getHeader("Proxy-Client-IP");
-         }
+			ip = request.getHeader("Proxy-Client-IP");
+		}
 
-         if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-             ip = request.getHeader("WL-Proxy-Client-IP");
-         }
+		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getHeader("WL-Proxy-Client-IP");
+		}
 
-         if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-             ip = request.getHeader("HTTP_CLIENT_IP");
-         }
+		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getHeader("HTTP_CLIENT_IP");
+		}
 
-         if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-             ip = request.getHeader("HTTP_X_FORWARDED_FOR");
-         }
+		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getHeader("HTTP_X_FORWARDED_FOR");
+		}
 
-         if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-             ip = request.getHeader("X-Real-IP");
-         }
+		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getHeader("X-Real-IP");
+		}
 
-         if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-             ip = request.getHeader("X-RealIP");
-         }
+		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getHeader("X-RealIP");
+		}
 
-         if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-             ip = request.getHeader("REMOTE_ADDR");
-         }
+		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getHeader("REMOTE_ADDR");
+		}
 
-         if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-             ip = request.getRemoteAddr();
-         }
+		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getRemoteAddr();
+		}
 
         return ip;
     }
+
+	// public Ip 조회
+	public static String publicIp() throws IOException {
+
+		URL url = new URL("https://checkip.amazonaws.com");
+		BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+		String ip = br.readLine();
+		br.close();
+
+		return ip;
+	}
 
 //
 //    /**

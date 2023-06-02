@@ -55,7 +55,7 @@ public class SecurityUtil {
                         .role(null)
                         .build();
             }else {
-                throw new RuntimeException("해당 API Key가 존재하지 않습니다.");
+                return null;
             }
         } else {
             String desc = authentication.getAuthorities().toString().replaceAll("\\[|\\]", "");;

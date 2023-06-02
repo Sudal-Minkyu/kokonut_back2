@@ -1,21 +1,31 @@
 package com.app.kokonutuser;
 
+import com.app.kokonut.admin.AdminRepository;
+import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
 import com.app.kokonut.admin.dtos.AdminOtpKeyDto;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
+import com.app.kokonut.awsKmsHistory.dto.AwsKmsResultDto;
+import com.app.kokonut.common.AjaxResponse;
+import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.common.realcomponent.AESGCMcrypto;
+import com.app.kokonut.common.realcomponent.CommonUtil;
+import com.app.kokonut.common.realcomponent.Utils;
+import com.app.kokonut.company.company.CompanyRepository;
+import com.app.kokonut.company.company.CompanyService;
+import com.app.kokonut.company.companydatakey.CompanyDataKeyService;
 import com.app.kokonut.company.companytable.CompanyTable;
 import com.app.kokonut.company.companytable.CompanyTableRepository;
+import com.app.kokonut.company.companytable.dtos.CompanyTableListDto;
+import com.app.kokonut.company.companytablecolumninfo.CompanyTableColumnInfo;
+import com.app.kokonut.company.companytablecolumninfo.CompanyTableColumnInfoRepository;
+import com.app.kokonut.company.companytablecolumninfo.dtos.CompanyTableColumnInfoCheck;
+import com.app.kokonut.company.companytablecolumninfo.dtos.CompanyTableColumnInfoCheckList;
+import com.app.kokonut.configs.ExcelService;
 import com.app.kokonut.configs.GoogleOTP;
 import com.app.kokonut.history.HistoryService;
 import com.app.kokonut.history.dto.ActivityCode;
-import com.app.kokonut.admin.AdminRepository;
-import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
-import com.app.kokonut.common.AjaxResponse;
-import com.app.kokonut.common.ResponseErrorCode;
-import com.app.kokonut.common.realcomponent.CommonUtil;
-import com.app.kokonut.company.company.CompanyRepository;
-import com.app.kokonut.company.company.CompanyService;
-import com.app.kokonut.configs.ExcelService;
+import com.app.kokonut.privacyhistory.PrivacyHistoryService;
+import com.app.kokonut.privacyhistory.dtos.PrivacyHistoryCode;
 import com.app.kokonutdormant.KokonutDormantService;
 import com.app.kokonutdormant.dtos.KokonutDormantFieldCheckDto;
 import com.app.kokonutdormant.dtos.KokonutDormantFieldInfoDto;
@@ -34,10 +44,12 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import javax.crypto.SecretKey;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Woody
@@ -59,27 +71,37 @@ public class DynamicUserService {
 	private final KokonutUserService kokonutUserService;
 	private final CompanyService companyService;
 	private final HistoryService historyService;
+	private final PrivacyHistoryService privacyHistoryService;
+	private final CompanyDataKeyService companyDataKeyService;
 
 	private final KokonutDormantService kokonutDormantService;
 	private final KokonutRemoveService kokonutRemoveService;
+
 	private final CompanyTableRepository companyTableRepository;
+	private final CompanyTableColumnInfoRepository companyTableColumnInfoRepository;
+
+	private final DynamicUserRepositoryCustom dynamicUserRepositoryCustom;
 
 	@Autowired
 	public DynamicUserService(PasswordEncoder passwordEncoder, AdminRepository adminRepository,
 							  CompanyRepository companyRepository, GoogleOTP googleOTP, ExcelService excelService,
-							  KokonutUserService kokonutUserService, KokonutDormantService kokonutDormantService, CompanyService companyService,
-							  HistoryService historyService, KokonutRemoveService kokonutRemoveService, CompanyTableRepository companyTableRepository) {
+							  KokonutUserService kokonutUserService, CompanyDataKeyService companyDataKeyService, KokonutDormantService kokonutDormantService, CompanyService companyService,
+							  HistoryService historyService, PrivacyHistoryService privacyHistoryService, KokonutRemoveService kokonutRemoveService, CompanyTableRepository companyTableRepository, CompanyTableColumnInfoRepository companyTableColumnInfoRepository, DynamicUserRepositoryCustom dynamicUserRepositoryCustom) {
 		this.passwordEncoder = passwordEncoder;
 		this.adminRepository = adminRepository;
 		this.companyRepository = companyRepository;
 		this.googleOTP = googleOTP;
 		this.excelService = excelService;
 		this.kokonutUserService = kokonutUserService;
+		this.companyDataKeyService = companyDataKeyService;
 		this.kokonutDormantService = kokonutDormantService;
 		this.companyService = companyService;
 		this.historyService = historyService;
+		this.privacyHistoryService = privacyHistoryService;
 		this.kokonutRemoveService = kokonutRemoveService;
 		this.companyTableRepository = companyTableRepository;
+		this.companyTableColumnInfoRepository = companyTableColumnInfoRepository;
+		this.dynamicUserRepositoryCustom = dynamicUserRepositoryCustom;
 	}
 
 	/**
@@ -106,8 +128,7 @@ public class DynamicUserService {
 		if(adminCompanyInfoDto == null) {
 			log.error("이메일 정보가 존재하지 않습니다.");
 			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(), "해당 이메일의 정보가 "+ResponseErrorCode.KO004.getDesc()));
-		}
-		else {
+		} else {
 			adminId = adminCompanyInfoDto.getAdminId();
 			companyId = adminCompanyInfoDto.getCompanyId();
 			companyCode = adminCompanyInfoDto.getCompanyCode();
@@ -262,7 +283,6 @@ public class DynamicUserService {
 	}
 
 
-
 	// 동적테이블 생성
 	@Transactional
 	public ResponseEntity<Map<String,Object>> createTable(String email) {
@@ -281,8 +301,7 @@ public class DynamicUserService {
 		if(adminCompanyInfoDto == null) {
 			log.error("이메일 정보가 존재하지 않습니다.");
 			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(), "해당 이메일의 정보가 "+ResponseErrorCode.KO004.getDesc()));
-		}
-		else {
+		} else {
 			adminId = adminCompanyInfoDto.getAdminId();
 			companyId = adminCompanyInfoDto.getCompanyId();
 			companyCode = adminCompanyInfoDto.getCompanyCode();
@@ -360,7 +379,6 @@ public class DynamicUserService {
 //		return null;
 
 
-
 		return ResponseEntity.ok(res.success(data));
 	}
 
@@ -401,15 +419,13 @@ public class DynamicUserService {
 			userList = kokonutUserService.listUser(kokonutUserSearchDto, companyCode);
 			log.info("userList : "+userList);
 
-		}
-		else if(kokonutUserSearchDto.getStatus().equals("2")) {
+		} else if(kokonutUserSearchDto.getStatus().equals("2")) {
 
 			log.info("휴먼만 조회");
 			dormantList = kokonutDormantService.listDormant(kokonutUserSearchDto, companyCode);
 			log.info("dormantList : "+dormantList);
 
-		}
-		else {
+		} else {
 
 			log.info("둘다 조회");
 
@@ -463,7 +479,7 @@ public class DynamicUserService {
 	// 유저생성(회원생성)
 	@Transactional
 	@SuppressWarnings("unchecked")
-	public ResponseEntity<Map<String, Object>> userSaveCall(HashMap<String, Object> paramMap, String email) {
+	public ResponseEntity<Map<String, Object>> userSaveCall(HashMap<String, Object> paramMap, String email) throws IOException {
 		log.info("userSaveCall 호출");
 
 		AjaxResponse res = new AjaxResponse();
@@ -482,8 +498,7 @@ public class DynamicUserService {
 		if(adminCompanyInfoDto == null) {
 			log.error("이메일 정보가 존재하지 않습니다.");
 			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(), "해당 이메일의 정보가 "+ResponseErrorCode.KO004.getDesc()));
-		}
-		else {
+		} else {
 			adminId = adminCompanyInfoDto.getAdminId(); // modifierIdx
 			companyId = adminCompanyInfoDto.getCompanyId(); // companyId
 			companyCode = adminCompanyInfoDto.getCompanyCode(); // tableName
@@ -504,7 +519,7 @@ public class DynamicUserService {
 		// 활동이력 저장 -> 비정상 모드
 		String ip = CommonUtil.clientIp();
 		Long activityHistoryId = historyService.insertHistory(1, adminId, activityCode,
-				companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+				companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
 		String id = null;
 		try {
 
@@ -643,7 +658,7 @@ public class DynamicUserService {
 	// 유저정보 수정(회원수정)
 	@Transactional
 	@SuppressWarnings("unchecked")
-	public ResponseEntity<Map<String, Object>> userUpdateCall(HashMap<String, Object> paramMap, String email) {
+	public ResponseEntity<Map<String, Object>> userUpdateCall(HashMap<String, Object> paramMap, String email) throws IOException {
 		log.info("userUpdateCall 호출");
 
 		AjaxResponse res = new AjaxResponse();
@@ -662,8 +677,7 @@ public class DynamicUserService {
 		if(adminCompanyInfoDto == null) {
 			log.error("이메일 정보가 존재하지 않습니다.");
 			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(), "해당 이메일의 정보가 "+ResponseErrorCode.KO004.getDesc()));
-		}
-		else {
+		} else {
 			adminId = adminCompanyInfoDto.getAdminId(); // modifierIdx
 			companyId = adminCompanyInfoDto.getCompanyId(); // companyId
 			companyCode = adminCompanyInfoDto.getCompanyCode(); // tableName
@@ -683,7 +697,7 @@ public class DynamicUserService {
 		ActivityCode activityCode = ActivityCode.AC_02;
 		// 활동이력 저장 -> 비정상 모드
 		String ip = CommonUtil.clientIp();
-		Long activityHistoryId = historyService.insertHistory(1, adminId, activityCode, companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+		Long activityHistoryId = historyService.insertHistory(1, adminId, activityCode, companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
 
 		try {
 
@@ -819,7 +833,7 @@ public class DynamicUserService {
 
 	// 유저삭제(회원삭제)
 	@Transactional
-	public ResponseEntity<Map<String, Object>> userDeleteCall(String TYPE, Integer IDX, String email) {
+	public ResponseEntity<Map<String, Object>> userDeleteCall(String TYPE, Integer IDX, String email) throws IOException {
 		log.info("userDeleteCall 호출");
 
 		AjaxResponse res = new AjaxResponse();
@@ -839,8 +853,7 @@ public class DynamicUserService {
 		if(adminCompanyInfoDto == null) {
 			log.error("이메일 정보가 존재하지 않습니다.");
 			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(), "해당 이메일의 정보가 "+ResponseErrorCode.KO004.getDesc()));
-		}
-		else {
+		} else {
 			adminId = adminCompanyInfoDto.getAdminId(); // modifierIdx
 			companyId = adminCompanyInfoDto.getCompanyId(); // companyId
 			companyCode = adminCompanyInfoDto.getCompanyCode(); // tableName
@@ -869,7 +882,7 @@ public class DynamicUserService {
 		// 활동이력 저장 -> 비정상 모드
 		String ip = CommonUtil.clientIp();
 		Long activityHistoryId = historyService.insertHistory(1, adminId, activityCode,
-				companyCode+" - "+activityCode.getDesc()+" 시도 이력 ID : "+kokonutRemoveInfoDtos.get(0).getID(), "", ip, 0, email);
+				companyCode+" - "+activityCode.getDesc()+" 시도 이력 ID : "+kokonutRemoveInfoDtos.get(0).getID(), "", ip,  CommonUtil.publicIp(), 0, email);
 
 		try {
 
@@ -925,8 +938,7 @@ public class DynamicUserService {
 		if(adminCompanyInfoDto == null) {
 			log.error("이메일 정보가 존재하지 않습니다.");
 			return;
-		}
-		else {
+		} else {
 			companyCode = adminCompanyInfoDto.getCompanyCode(); // tableName
 		}
 
@@ -1034,8 +1046,7 @@ public class DynamicUserService {
 			if(adminCompanyInfoDto == null) {
 				log.error("이메일 정보가 존재하지 않습니다.");
 				return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(), "해당 이메일의 정보가 "+ResponseErrorCode.KO004.getDesc()));
-			}
-			else {
+			} else {
 				adminId = adminCompanyInfoDto.getAdminId(); // modifierIdx
 				companyId = adminCompanyInfoDto.getCompanyId(); // companyId
 				companyCode = adminCompanyInfoDto.getCompanyCode(); // tableName
@@ -1075,7 +1086,7 @@ public class DynamicUserService {
 
 	// 개인정보 테이블 + 휴면 테이블 필드 추가
 	@Transactional
-	public ResponseEntity<Map<String, Object>> columSave(KokonutColumSaveDto kokonutColumSaveDto, String email) {
+	public ResponseEntity<Map<String, Object>> columSave(KokonutColumSaveDto kokonutColumSaveDto, String email) throws IOException {
 		log.info("columSave 호출");
 
 		AjaxResponse res = new AjaxResponse();
@@ -1094,8 +1105,7 @@ public class DynamicUserService {
 		if(adminCompanyInfoDto == null) {
 			log.error("이메일 정보가 존재하지 않습니다.");
 			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(), "해당 이메일의 정보가 "+ResponseErrorCode.KO004.getDesc()));
-		}
-		else {
+		} else {
 			adminId = adminCompanyInfoDto.getAdminId(); // modifierIdx
 			companyId = adminCompanyInfoDto.getCompanyId(); // companyId
 			companyCode = adminCompanyInfoDto.getCompanyCode(); // tableName
@@ -1109,7 +1119,7 @@ public class DynamicUserService {
 
 		String fieldName = kokonutColumSaveDto.getFieldName(); // 필드명
 		String fieldOptionName = kokonutColumSaveDto.getFieldOptionName(); // Comment 내용
- 		String dataType = kokonutColumSaveDto.getDataType(); // 데이터 타입 : "2" -> BIGINT, "3" -> DOUBLE, "4" -> VARCHAR,  "5" -> LONGTEXT,  "6" -> BOOLEAN,  "7" -> TIMESTAMP
+		String dataType = kokonutColumSaveDto.getDataType(); // 데이터 타입 : "2" -> BIGINT, "3" -> DOUBLE, "4" -> VARCHAR,  "5" -> LONGTEXT,  "6" -> BOOLEAN,  "7" -> TIMESTAMP
 		Integer dataLength = kokonutColumSaveDto.getDataLength(); // 데이터 길이
 		String isNullYn = kokonutColumSaveDto.getIsNullYn(); // Null값 허용여부 true/false
 		String defaultValue = kokonutColumSaveDto.getDefaultValue(); // 기본값
@@ -1178,7 +1188,7 @@ public class DynamicUserService {
 		// 활동이력 저장 -> 비정상 모드
 		String ip = CommonUtil.clientIp();
 		Long activityHistoryId = historyService.insertHistory(3, adminId, activityCode,
-				companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+				companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
 
 		// 사용테이블에 컬럼 추가
 		kokonutUserService.alterAddColumnTableQuery(companyCode, fieldName, type, length, isNull, defaultValue, comment);
@@ -1212,8 +1222,7 @@ public class DynamicUserService {
 		if(adminCompanyInfoDto == null) {
 			log.error("이메일 정보가 존재하지 않습니다.");
 			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(), "해당 이메일의 정보가 "+ResponseErrorCode.KO004.getDesc()));
-		}
-		else {
+		} else {
 			adminId = adminCompanyInfoDto.getAdminId(); // modifierIdx
 			companyId = adminCompanyInfoDto.getCompanyId(); // companyId
 			companyCode = adminCompanyInfoDto.getCompanyCode(); // tableName
@@ -1310,7 +1319,7 @@ public class DynamicUserService {
 		// 활동이력 저장 -> 비정상 모드
 		String ip = CommonUtil.clientIp();
 		Long activityHistoryId = historyService.insertHistory(3, adminId, activityCode,
-				companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+				companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
 
 		// 암호화, 복호화 전환로직
 		if(changeColumnComment != null) {
@@ -1365,12 +1374,10 @@ public class DynamicUserService {
 						kokonutUserService.updateUserTable(companyCode, userIdx, queryString);
 					}
 
-				}
-				else {
+				} else {
 					comment = fieldOptionName + "(암호화,수정가능)";
 				}
-			}
-			else {
+			} else {
 				if(isEncryption.equals("0")) {
 					comment = fieldOptionName + "(암호화,수정가능)";
 
@@ -1439,8 +1446,7 @@ public class DynamicUserService {
 			historyService.updateHistory(activityHistoryId,
 					companyCode+" - "+activityCode.getDesc()+" 완료 이력", "", 1);
 
-		}
-		else {
+		} else {
 			log.error("수정할 필드가 테이블에 존재하지 않습니다.");
 			historyService.updateHistory(activityHistoryId,
 					companyCode+" - "+activityCode.getDesc()+" 실패 이력", "수정할 필드가 존재하지 않습니다.", 1);
@@ -1452,7 +1458,7 @@ public class DynamicUserService {
 
 	// 개인정보 테이블 + 휴면 테이블 필드 삭제 - 기존코코넛 메서드 : 없음
 	@Transactional
-	public ResponseEntity<Map<String, Object>> columDelete(String fieldName, String email) {
+	public ResponseEntity<Map<String, Object>> columDelete(String fieldName, String email) throws IOException {
 		log.info("columDelete 호출");
 
 		AjaxResponse res = new AjaxResponse();
@@ -1471,8 +1477,7 @@ public class DynamicUserService {
 		if(adminCompanyInfoDto == null) {
 			log.error("이메일 정보가 존재하지 않습니다.");
 			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(), "해당 이메일의 정보가 "+ResponseErrorCode.KO004.getDesc()));
-		}
-		else {
+		} else {
 			adminId = adminCompanyInfoDto.getAdminId(); // modifierIdx
 			companyId = adminCompanyInfoDto.getCompanyId(); // companyId
 			companyCode = adminCompanyInfoDto.getCompanyCode(); // tableName
@@ -1507,7 +1512,7 @@ public class DynamicUserService {
 		ActivityCode activityCode = ActivityCode.AC_21;
 		// 활동이력 저장 -> 비정상 모드
 		String ip = CommonUtil.clientIp();
-		Long activityHistoryId = historyService.insertHistory(3, adminId, activityCode, companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+		Long activityHistoryId = historyService.insertHistory(3, adminId, activityCode, companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
 
 		if(companyCode.equals(userTableCheck.get(0).getTABLE_NAME()) && fieldName.equals(userTableCheck.get(0).getCOLUMN_NAME()) &&
 				companyCode.equals(dormantTableCheck.get(0).getTABLE_NAME()) && fieldName.equals(dormantTableCheck.get(0).getCOLUMN_NAME())){
@@ -1526,10 +1531,6 @@ public class DynamicUserService {
 	}
 
 
-
-
-
-
 	// 테이블의 컬럼조회
 	public ResponseEntity<Map<String, Object>> tableColumnCall(String tableName) {
 		log.info("tableColumnCall 호출");
@@ -1538,7 +1539,7 @@ public class DynamicUserService {
 		HashMap<String, Object> data = new HashMap<>();
 
 		List<KokonutUserFieldDto> kokonutUserFieldDtos = kokonutUserService.getColumns(tableName);
-		log.info("kokonutUserFieldDtos : "+kokonutUserFieldDtos);
+//		log.info("kokonutUserFieldDtos : "+kokonutUserFieldDtos);
 
 		List<KokonutUserFieldListDto> kokonutUserFieldListDtos = new ArrayList<>();
 		KokonutUserFieldListDto kokonutUserFieldListDto;
@@ -1547,6 +1548,7 @@ public class DynamicUserService {
 			String field = kokonutUserFieldDto.getField();
 			if(!field.contains("kokonut_")) {
 				String comment = kokonutUserFieldDto.getComment();
+				String key = kokonutUserFieldDto.getKey();
 				if (comment != null) {
 					String[] commentText = comment.split(",");
 
@@ -1563,6 +1565,13 @@ public class DynamicUserService {
 						kokonutUserFieldListDto.setFieldCategory(commentText[3]);
 						kokonutUserFieldListDto.setFieldColor(commentText[4]);
 						kokonutUserFieldListDto.setFieldCode(commentText[5]);
+						if(key.equals("MUL")) {
+							kokonutUserFieldListDto.setIndexType("1");
+						} else if(key.equals("UNI")) {
+							kokonutUserFieldListDto.setIndexType("2");
+						} else {
+							kokonutUserFieldListDto.setIndexType("0");
+						}
 					}
 				}
 				kokonutUserFieldListDtos.add(kokonutUserFieldListDto);
@@ -1575,15 +1584,14 @@ public class DynamicUserService {
 
 	// 컬럼추가 버튼(오른쪽에 추가)
 	@Transactional
-	public ResponseEntity<Map<String, Object>> tableColumnAdd(KokonutColumnAddDto kokonutColumnAddDto, JwtFilterDto jwtFilterDto) {
-		log.info("tableColumnCall 호출");
+	public ResponseEntity<Map<String, Object>> tableColumnAdd(KokonutColumnAddDto kokonutColumnAddDto, JwtFilterDto jwtFilterDto) throws IOException {
+		log.info("tableColumnAdd 호출");
 
 		AjaxResponse res = new AjaxResponse();
 		HashMap<String, Object> data = new HashMap<>();
 
 		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(jwtFilterDto.getEmail());
 		Long adminId = adminCompanyInfoDto.getAdminId();
-//        Long companyId = adminCompanyInfoDto.getCompanyId();
 		String companyCode = adminCompanyInfoDto.getCompanyCode();
 
 		// 휴대전화변경 코드
@@ -1594,6 +1602,9 @@ public class DynamicUserService {
 		log.info("kokonutColumAddDto : "+ kokonutColumnAddDto);
 
 		String tableName = kokonutColumnAddDto.getTableName();
+
+		List<CompanyTableColumnInfo> companyTableColumnInfos = new ArrayList<>();
+		CompanyTableColumnInfo companyTableColumnInfo;
 		log.info("컬럼추가하는 테이블명 : "+tableName);
 
 		// 해당테이블의 추가컬럼 카운팅 값 가져오기
@@ -1611,14 +1622,21 @@ public class DynamicUserService {
 			List<KokonutAddColumnListDto> kokonutAddColumnListDtos = kokonutColumnAddDto.getKokonutAddColumnListDtos();
 			// 테이블에 컬럼 추가하기
 			for(KokonutAddColumnListDto kokonutAddColumnListDto : kokonutAddColumnListDtos) {
+				companyTableColumnInfo = new CompanyTableColumnInfo();
+				companyTableColumnInfo.setCtName(tableName);
+				companyTableColumnInfo.setInsert_email(jwtFilterDto.getEmail());
+				companyTableColumnInfo.setInsert_date(LocalDateTime.now());
 
 				Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-						companyCode+" - "+activityCode.getDesc()+" 시도 이력"+ "추가된 컬럼명 : "+kokonutAddColumnListDto.getCiName(), "", ip, 0, jwtFilterDto.getEmail());
+						companyCode+" - "+activityCode.getDesc()+" 시도 이력"+ "추가된 컬럼명 : "+kokonutAddColumnListDto.getCiName(), "", ip,  CommonUtil.publicIp(),0, jwtFilterDto.getEmail());
 
 				String fieldCode = optionalCompanyTable.get().getCtTableCount()+"_"+tableAddColumnCount;
-				String fieldName = tableName+"_"+tableAddColumnCount;
-				StringBuilder comment = new StringBuilder(kokonutAddColumnListDto.getCiName());
+				companyTableColumnInfo.setCtciCode(fieldCode);
 
+				String fieldName = tableName+"_"+tableAddColumnCount;
+				companyTableColumnInfo.setCtciName(fieldName);
+				StringBuilder comment = new StringBuilder(kokonutAddColumnListDto.getCiName());
+				companyTableColumnInfo.setCtciDesignation(String.valueOf(comment));
 				if(ctNameStatus.equals("")) {
 					if(comment.toString().equals("이름")) {
 						ctNameStatus = fieldName;
@@ -1651,8 +1669,10 @@ public class DynamicUserService {
 
 				if(kokonutAddColumnListDto.getCiSecurity() == 0) {
 					comment.append(",비암호화");
+					companyTableColumnInfo.setCtciSecuriy("0");
 				} else {
 					comment.append(",암호화");
+					companyTableColumnInfo.setCtciSecuriy("1");
 				}
 				comment.append(",수정가능,");
 				comment.append(kokonutAddColumnListDto.getCategoryName());
@@ -1668,6 +1688,7 @@ public class DynamicUserService {
 						companyCode+" - "+activityCode.getDesc()+" 시도 이력"+ "추가된 컬럼명 : "+kokonutAddColumnListDto.getCiName(), "", 1);
 
 				tableAddColumnCount++;
+				companyTableColumnInfos.add(companyTableColumnInfo);
 			}
 
 			log.info("tableAddColumnCount : "+tableAddColumnCount);
@@ -1680,6 +1701,7 @@ public class DynamicUserService {
 			optionalCompanyTable.get().setModify_email(jwtFilterDto.getEmail());
 			optionalCompanyTable.get().setModify_date(LocalDateTime.now());
 			companyTableRepository.save(optionalCompanyTable.get());
+			companyTableColumnInfoRepository.saveAll(companyTableColumnInfos);
 		}
 
 
@@ -1689,7 +1711,7 @@ public class DynamicUserService {
 
 	// 테이블에 추가된 컬럼을 삭제한다.
 	@Transactional
-	public ResponseEntity<Map<String, Object>> tableColumnDelete(KokonutColumnDeleteDto kokonutColumnDeleteDto, JwtFilterDto jwtFilterDto) {
+	public ResponseEntity<Map<String, Object>> tableColumnDelete(KokonutColumnDeleteDto kokonutColumnDeleteDto, JwtFilterDto jwtFilterDto) throws IOException {
 		log.info("tableColumnDelete 호출");
 
 		AjaxResponse res = new AjaxResponse();
@@ -1749,6 +1771,9 @@ public class DynamicUserService {
 							ctBirthStatus = "";
 						}
 					}
+
+					// 테이블컬럼정보담는 테이블에도 삭제
+					companyTableColumnInfoRepository.deleteField(kokonutColumnDeleteDto.getFieldNames().get(i));
 				}
 			}
 
@@ -1767,7 +1792,7 @@ public class DynamicUserService {
 	}
 
 	// 기본테이블의 데이터를 조회한다.
-	public ResponseEntity<Map<String, Object>> tableBasicList(JwtFilterDto jwtFilterDto) {
+	public ResponseEntity<Map<String, Object>> tableBasicList(JwtFilterDto jwtFilterDto) throws IOException {
 		log.info("tableColumnDelete 호출");
 
 		AjaxResponse res = new AjaxResponse();
@@ -1788,7 +1813,7 @@ public class DynamicUserService {
 
 			StringBuilder searchQuery = new StringBuilder();
 			searchQuery.append("SELECT ");
-			searchQuery.append("kokonut_IDX, ID, " +
+			searchQuery.append("kokonut_IDX, ID_1_id as ID, " +
 					"DATE_FORMAT(kokonut_REGISTER_DATE, '%Y.%m.%d') as kokonut_REGISTER_DATE, " +
 					"DATE_FORMAT(kokonut_LAST_LOGIN_DATE, '%Y.%m.%d') as kokonut_LAST_LOGIN_DATE");
 
@@ -1844,5 +1869,478 @@ public class DynamicUserService {
 
 		return ResponseEntity.ok(res.success(data));
 	}
+
+	// 테이블의 데이터 존재여부를 조회한다.
+	public ResponseEntity<Map<String, Object>> tableDataCheck(String tableName) {
+		log.info("tableColumnDelete 호출");
+
+		AjaxResponse res = new AjaxResponse();
+		HashMap<String, Object> data = new HashMap<>();
+
+		int verifiResult= kokonutUserService.getTableVerification(tableName);
+		if(verifiResult == 0) {
+			log.error("테이블이 존재하지 않습니다.");
+			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(),"테이블이 "+ResponseErrorCode.KO004.getDesc()+" 테이블 : "+tableName));
+		} else {
+			String result = kokonutUserService.getTableDataCheck(tableName);
+			data.put("anyCustomerDataExistYn", result);
+
+			return ResponseEntity.ok(res.success(data));
+		}
+	}
+
+	// 검색할 컬럼리스트 조회(파일 관련 컬럼은 제외)
+	public ResponseEntity<Map<String, Object>> searchColumnCall(String tableName) {
+		log.info("searchColumnCall 호출");
+
+		AjaxResponse res = new AjaxResponse();
+		HashMap<String, Object> data = new HashMap<>();
+
+		List<KokonutUserFieldDto> kokonutUserFieldDtos = kokonutUserService.getColumns(tableName);
+
+		List<KokonutPrivacySearchFieldListDto> kokonutPrivacySearchFieldListDtos = new ArrayList<>();
+		KokonutPrivacySearchFieldListDto kokonutPrivacySearchFieldListDto;
+		for (KokonutUserFieldDto kokonutUserFieldDto : kokonutUserFieldDtos) {
+			kokonutPrivacySearchFieldListDto = new KokonutPrivacySearchFieldListDto();
+			String field = kokonutUserFieldDto.getField();
+			if(!field.contains("kokonut_")) {
+				String comment = kokonutUserFieldDto.getComment();
+				if (comment != null) {
+					String[] commentText = comment.split(",");
+					log.info("commentText : "+ Arrays.toString(commentText));
+
+					// 카테고리가 파일이면 제외
+					if(commentText.length == 6 && (!commentText[3].equals("파일") && !commentText[0].equals("비밀번호"))) {
+						if (commentText[1].equals("암호화")) {
+							kokonutPrivacySearchFieldListDto.setFieldSecrity(1);
+						} else {
+							kokonutPrivacySearchFieldListDto.setFieldSecrity(0);
+						}
+
+						kokonutPrivacySearchFieldListDto.setFieldComment(commentText[0]);
+						kokonutPrivacySearchFieldListDto.setFieldCode(commentText[5]);
+						kokonutPrivacySearchFieldListDtos.add(kokonutPrivacySearchFieldListDto);
+					}
+				}
+			}
+		}
+
+		data.put("fieldList",kokonutPrivacySearchFieldListDtos);
+		return ResponseEntity.ok(res.success(data));
+
+	}
+
+	// 개인정보 검색
+	public ResponseEntity<Map<String, Object>> privacyUserSearch(KokonutSearchDto kokonutSearchDto, JwtFilterDto jwtFilterDto) throws Exception {
+		log.info("privacyUserSearch 호출");
+
+		AjaxResponse res = new AjaxResponse();
+		HashMap<String, Object> data = new HashMap<>();
+
+		List<String> searchTables = kokonutSearchDto.getSearchTables();
+		List<String> searchCodes = kokonutSearchDto.getSearchCodes();
+		List<String> searchTexts = kokonutSearchDto.getSearchTexts();
+		int offset = (kokonutSearchDto.getPageNum() - 1) * 10;
+
+		if(searchTables.size() == 0 || searchCodes.size() == 0 || searchTexts.size() == 0) {
+			log.error("조회하실 파라메터가 존재하지 않습니다. 보내시는 파라메터 값을 추가해주세요.");
+			return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_08.getCode(),ResponseErrorCode.ERROR_CODE_08.getDesc()));
+		}
+
+		log.info("페이지번호 : "+kokonutSearchDto.getPageNum());
+		log.info("searchTables : "+searchTables);
+		log.info("searchCodes : "+searchCodes);
+		log.info("searchTexts : "+searchTexts);
+
+		// 코드중복 검사
+		Set<String> duplicates = searchCodes.stream()
+				.filter(i -> Collections.frequency(searchCodes, i) > 1)
+				.collect(Collectors.toSet());
+
+		if(!duplicates.isEmpty()) {
+			log.error("중복되는 고유코드가 존재합니다. 중복되지 않도록 고유코드를 보내주세요. 고유코드 : "+duplicates);
+			return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_06.getCode(),ResponseErrorCode.ERROR_CODE_06.getDesc()+" 고유코드 : "+duplicates));
+		}
+
+
+		Map<String, List<Map<String, String>>> result = new HashMap<>();
+
+		String email = jwtFilterDto.getEmail();
+		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+		long adminId = adminCompanyInfoDto.getAdminId();
+		String cpCode = adminCompanyInfoDto.getCompanyCode();
+
+		AwsKmsResultDto awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(cpCode);
+		log.info("DataKey : "+awsKmsResultDto.getDataKey());
+		log.info("IV : "+awsKmsResultDto.getIvKey());
+//		AESGCMcrypto.encrypt(value.getBytes(StandardCharsets.UTF_8), awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey()));
+//		AESGCMcrypto.decrypt(testData, awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey();
+
+		for (int i = 0; i < searchTables.size(); i++) {
+
+			String table = searchTables.get(i).split("_")[0] + "_" + searchCodes.get(i).split("_")[0];
+			String code = searchCodes.get(i);
+			String text = searchTexts.get(i);
+
+			Map<String, String> codeTextMap = new HashMap<>();
+			codeTextMap.put(code, text);
+
+			if (!result.containsKey(table)) {
+				result.put(table, new ArrayList<>());
+			}
+
+			result.get(table).add(codeTextMap);
+		}
+
+		log.info("정렬 result : "+result);
+
+		StringBuilder resultQuery = new StringBuilder();
+
+		StringBuilder selectQuery = new StringBuilder(); // 셀렉트 쿼리문
+		StringBuilder joinQuery = new StringBuilder(); // 조인 쿼리문
+		StringBuilder whereQuery = new StringBuilder(); // 조건 쿼리문
+
+		List<String> securityHeaderNames = new ArrayList<>(); // 암호화된 데이터의 as 이름리스트
+//		headerNames.add("IDX");
+//		headerNames.add("회원가입일시");
+//		headerNames.add("마지막로그인일시");
+
+		if(searchTables.size() != searchCodes.size() && searchCodes.size() != searchTexts.size()) {
+			log.error("조회하고자 하는 파라메터 값이 일정하지 않습니다. 보내시는 파라메터 값을 다시 한번 확인해주세요.");
+			return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_07.getCode(),ResponseErrorCode.ERROR_CODE_07.getDesc()));
+		} else {
+
+			// 쿼리 기본셋팅
+			resultQuery.append("SELECT ");
+
+			// 셀렉트 기본셋팅
+			selectQuery.append(
+					"kokonut.kokonut_IDX  as IDX, " +
+//							"DATE_FORMAT(kokonut.kokonut_REGISTER_DATE, '%Y-%m-%d %H시 %i분') as 회원가입일시, " +
+							"DATE_FORMAT(kokonut.kokonut_REGISTER_DATE, '%Y-%m-%d %H시') as 회원가입일시, " +
+							"COALESCE(DATE_FORMAT(kokonut.kokonut_LAST_LOGIN_DATE, '%Y-%m-%d %H시'), '없음') as 마지막로그인일시, ");
+
+			whereQuery.append("WHERE ");
+
+			Map<String, Integer> nameCountMap = new HashMap<>();
+			List<String> allKeys = new ArrayList<>(result.keySet());
+			int resultSize = allKeys.size();
+			for (int currentKeyIndex = 0; currentKeyIndex < resultSize; currentKeyIndex++) {
+				String key = allKeys.get(currentKeyIndex);
+				log.info("테이블 일련번호 : " + key);
+
+				String asName = Utils.getAlphabetStr(5);
+				List<Map<String, String>> list = result.get(key);
+				log.info("list : " + list);
+
+				int size = list.size();
+				joinQuery.append("LEFT JOIN kokonut20").append(key).append(" ").append(asName).append(" ON ").append("kokonut.kokonut_IDX = ").append(asName).append(".kokonut_IDX ");
+
+				for (int i = 0; i < size; i++) {
+					Map<String, String> map = list.get(i);
+					log.info("map.keySet() : " + map.keySet());
+
+					for (String code : map.keySet()) {
+						CompanyTableColumnInfoCheck companyTableColumnInfoCheck = companyTableColumnInfoRepository.findByCheck("kokonut20"+key, code);
+						if(companyTableColumnInfoCheck == null) {
+							log.error("존재하지 않은 고유코드 입니다. 고유코드를 확인 해주세요. 고유코드 : "+code);
+							return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_04.getCode(),ResponseErrorCode.ERROR_CODE_04.getDesc()+" 고유코드 : "+code));
+						} else {
+							String designation = companyTableColumnInfoCheck.getCtDesignation()+"의 "+companyTableColumnInfoCheck.getCtciDesignation();
+							Integer count = nameCountMap.get(designation);
+							if (count == null) {
+								count = 0;
+							}
+							nameCountMap.put(designation, count + 1);
+							String uniqueDesignation = designation + count;
+
+							String value = map.get(code);
+							if(companyTableColumnInfoCheck.getCtciSecuriy().equals("1")) {
+								if(!companyTableColumnInfoCheck.getCtciDesignation().equals("휴대전화번호")) {
+									if(companyTableColumnInfoCheck.getCtciDesignation().equals("이름")) {
+										if (value.length() == 2) {
+											value = value.charAt(0) + "-" + AESGCMcrypto.encrypt(value.substring(1,2).getBytes(StandardCharsets.UTF_8),
+													awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey()));
+										} else {
+											value = value.charAt(0) + "-" + AESGCMcrypto.encrypt(value.substring(1,value.length() - 1).getBytes(StandardCharsets.UTF_8),
+													awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey())) + "-" +value.substring(value.length() - 1);
+										}
+									} else if(companyTableColumnInfoCheck.getCtciDesignation().equals("이메일주소")) {
+										String[] emailAddress = value.split("@");
+										if(emailAddress.length != 2) {
+											log.error("이메일주소 형식과 맞지 않습니다. 다시 한번 확인해주시길 바랍니다. 보내신 이메일주소 : " + value);
+											return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_09.getCode(),
+													ResponseErrorCode.ERROR_CODE_09.getDesc() + " 보내신 이메일주소 : " + value));
+										} else {
+											value = AESGCMcrypto.encrypt(emailAddress[0].getBytes(StandardCharsets.UTF_8),
+													awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey())) + "-@" +emailAddress[1];
+										}
+									}else {
+										value = AESGCMcrypto.encrypt(value.getBytes(StandardCharsets.UTF_8),
+												awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey()));
+									}
+								}
+								map.put(code, value);
+								securityHeaderNames.add(uniqueDesignation);
+							}
+
+							boolean isLastKey = currentKeyIndex == resultSize - 1;
+							boolean isLastMapInList = i == size - 1;
+
+							String as = ", '없음') as ";
+							String[] codeName = code.split("_");
+
+							selectQuery.append("COALESCE(");
+							if(!codeName[0].equals("1")) {
+								as = "), '없음') as ";
+								selectQuery.append("GROUP_CONCAT(");
+							}
+
+							if (isLastKey && isLastMapInList) {
+								selectQuery.append(asName).append(".").append(companyTableColumnInfoCheck.getCtciName()).append(as).append("'").append(uniqueDesignation).append("'").append(" ");
+								whereQuery.append(asName).append(".").append(cpCode).append("_").append(code).append(" LIKE '%").append(value).append("%' ");
+							} else {
+								selectQuery.append(asName).append(".").append(companyTableColumnInfoCheck.getCtciName()).append(as).append("'").append(uniqueDesignation).append("'").append(", ");
+								whereQuery.append(asName).append(".").append(cpCode).append("_").append(code).append(" LIKE '%").append(value).append("%' AND ");
+							}
+						}
+						log.info("companyTableColumnInfoCheck : "+companyTableColumnInfoCheck);
+						log.info("고유코드: " + code + ", 텍스트: " + map.get(code));
+					}
+				}
+			}
+
+			log.info("selectQuery : "+selectQuery);
+			log.info("joinQuery : "+joinQuery);
+			log.info("whereQuery : "+whereQuery);
+
+			resultQuery.append(selectQuery).append("FROM ").append(cpCode).append("_1 as kokonut ").append(joinQuery).append(whereQuery);
+
+			resultQuery.append("GROUP BY kokonut.kokonut_IDX");
+			log.info("resultQuery : "+resultQuery);
+		}
+
+		List<Map<String, Object>> privacyList = dynamicUserRepositoryCustom.privacyListPagedData(resultQuery +" LIMIT "+kokonutSearchDto.getLimitNum()+" OFFSET "+offset);
+		log.info("privacyList : "+privacyList);
+		int totalCount = dynamicUserRepositoryCustom.privacyListTotal("SELECT COUNT(*) FROM ("+ resultQuery +") as totalCount");
+		log.info("totalCount : "+totalCount);
+
+		log.info("securityHeaderNames : "+securityHeaderNames);
+		for(Map<String, Object> map : privacyList) {
+
+			log.info("수정전 map : "+map);
+			for(String securityHeaderName : securityHeaderNames) {
+				log.info("securityHeaderName : "+securityHeaderName);
+
+				Object key = map.get(securityHeaderName);
+				if(key != null) {
+					if(!String.valueOf(key).equals("없음")) { // 벨류값이 Null(없음)일 경우 제외
+						log.info("암호화 여부 체크시작");
+
+						// , 일대다일 경우 콤마의 대한 암복호화처리하기
+
+
+
+
+
+						String[] value = String.valueOf(key).split("-");
+						String securiryResultValue; // 복호화된 데이터의 마스킹처리
+						String decryptValue;
+						if(value.length >= 2) {
+							log.info("'-' 구분자로 들어간 암호화");
+							if(String.valueOf(key).equals("이름")) {
+								decryptValue = AESGCMcrypto.decrypt(value[1], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
+								if(value.length == 2) {
+									securiryResultValue = value[0] + Utils.starsForString(decryptValue);
+								} else {
+									securiryResultValue = value[0] + Utils.starsForString(decryptValue) + value[2];
+								}
+							}
+							else {
+								// 이메일주소 암호화 일 경우
+								decryptValue = AESGCMcrypto.decrypt(value[0], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
+								securiryResultValue = decryptValue.charAt(0) + Utils.starsForString(decryptValue).substring(2)  + decryptValue.substring(decryptValue.length() - 1)+value[1];
+							}
+						} else {
+							// 만약 이메일일 경우
+							log.info("구분자가 없는 암호화");
+							decryptValue = AESGCMcrypto.decrypt(value[0], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
+							securiryResultValue = decryptValue.charAt(0) + Utils.starsForString(decryptValue).substring(2)  + decryptValue.substring(decryptValue.length() - 1);
+						}
+						log.info("value : "+ Arrays.toString(value));
+						log.info("securiryResultValue : "+ securiryResultValue);
+						map.put(securityHeaderName, securiryResultValue);
+					}
+				}
+			}
+		}
+
+		for(Map<String, Object> map : privacyList) {
+			log.info("수정된 map : "+map);
+		}
+
+		data.put("privacyList", privacyList);
+		data.put("totalCount", totalCount);
+
+		// 개인정보 조회로그 저장
+		privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_04, 1, CommonUtil.clientIp(), email);
+
+		return ResponseEntity.ok(res.success(data));
+	}
+
+	// 개인정보 열람
+	public ResponseEntity<Map<String, Object>> privacyUserOpen(String idx, JwtFilterDto jwtFilterDto) throws Exception {
+		log.info("privacyUserOpen 호출");
+
+		AjaxResponse res = new AjaxResponse();
+		HashMap<String, Object> data = new HashMap<>();
+
+		log.info("idx : "+idx);
+
+		String email = jwtFilterDto.getEmail();
+		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+		long adminId = adminCompanyInfoDto.getAdminId();
+		String cpCode = adminCompanyInfoDto.getCompanyCode();
+
+		List<CompanyTableListDto> companyTableListDtos = companyTableRepository.findByTableList(cpCode);
+		log.info("companyTableListDtos : "+companyTableListDtos);
+
+		AwsKmsResultDto awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(cpCode);
+		log.info("DataKey : "+awsKmsResultDto.getDataKey());
+		log.info("IV : "+awsKmsResultDto.getIvKey());
+
+		StringBuilder selectQuery; // 셀렉트 쿼리문
+		StringBuilder whereQuery; // 조건 쿼리문
+
+		StringBuilder resultQuery; // 최종 쿼리문
+
+		Map<String, List<Map<String, Object>>> privacyInfoMap = new HashMap<>();
+		List<String> securityHeaderNames = new ArrayList<>(); // 암호화된 데이터의 as 이름리스트
+
+		Map<String, Integer> nameCountMap;
+		for(CompanyTableListDto companyTableListDto : companyTableListDtos) {
+
+			selectQuery = new StringBuilder();
+			whereQuery = new StringBuilder();
+
+			resultQuery = new StringBuilder();
+
+			nameCountMap = new HashMap<>();
+
+			List<CompanyTableColumnInfoCheckList> companyTableColumnInfoCheckLists = companyTableColumnInfoRepository.findByCheckList(companyTableListDto.getCtName());
+			log.info("companyTableColumnInfoCheckLists : "+companyTableColumnInfoCheckLists);
+
+			// 쿼리 기본셋팅
+			resultQuery.append("SELECT ");
+
+			selectQuery.append("kokonut.kokonut_IDX  as IDX ");
+
+			if(companyTableListDto.getCtDesignation().equals("기본")) {
+				// 셀렉트 기본셋팅
+				selectQuery.append(
+						", DATE_FORMAT(kokonut.kokonut_REGISTER_DATE, '%Y-%m-%d %H시') as 회원가입일시, " +
+						"COALESCE(DATE_FORMAT(kokonut.kokonut_LAST_LOGIN_DATE, '%Y-%m-%d %H시'), '없음') as 마지막로그인일시 ");
+			}
+
+			for(CompanyTableColumnInfoCheckList companyTableColumnInfoCheckList : companyTableColumnInfoCheckLists) {
+				String designation = companyTableColumnInfoCheckList.getCtciDesignation();
+				Integer count = nameCountMap.get(designation);
+
+				if (count == null) {
+					count = 0;
+				}
+
+				nameCountMap.put(designation, count + 1);
+				String uniqueDesignation = designation + count;
+
+				if(companyTableColumnInfoCheckList.getCtciSecuriy().equals("1")) {
+					securityHeaderNames.add(uniqueDesignation);
+				}
+
+				String as = ", '없음') as ";
+				selectQuery.append(", COALESCE(");
+
+				selectQuery.append(companyTableColumnInfoCheckList.getCtciName()).append(as).append("'").append(uniqueDesignation).append("'").append(" ");
+			}
+
+			whereQuery.append("WHERE kokonut_IDX = '").append(idx).append("'");
+
+			resultQuery.append(selectQuery)
+					.append("FROM ")
+					.append(companyTableListDto.getCtName()).append(" as kokonut ")
+					.append(whereQuery);
+
+			log.info("companyTableListDto.getCtName() : "+companyTableListDto.getCtName());
+			log.info("resultQuery : "+resultQuery);
+
+			log.info("securityHeaderNames : "+securityHeaderNames);
+			List<Map<String, Object>> privacyInfo = dynamicUserRepositoryCustom.privacyOpenInfoData(String.valueOf(resultQuery));
+
+			for(Map<String, Object> map : privacyInfo) {
+//				log.info("수정전 map : "+map);
+				for(String securityHeaderName : securityHeaderNames) {
+					log.info("복호화대상 : "+securityHeaderName);
+					Object key = map.get(securityHeaderName);
+					if(key != null) {
+						if(!String.valueOf(key).equals("없음")) { // 벨류값이 Null(없음)일 경우 제외
+							log.info("암호화 여부 체크시작");
+							String[] value = String.valueOf(key).split("-");
+							String decryptValue; // 복호화된 데이터
+							if(value.length >= 2) {
+								log.info("'-' 구분자로 들어간 암호화");
+								if(value.length == 2) {
+									decryptValue = value[0] + AESGCMcrypto.decrypt(value[1], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
+								} else {
+									decryptValue = value[0] + AESGCMcrypto.decrypt(value[1], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey()) + value[2];
+								}
+							} else {
+								log.info("구분자가 없는 암호화");
+								decryptValue = AESGCMcrypto.decrypt(value[0], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
+							}
+
+							log.info("value : "+ Arrays.toString(value));
+							log.info("복호화된 데이터 : "+ decryptValue);
+							map.put(securityHeaderName, decryptValue);
+						}
+					}
+				}
+			}
+
+			log.info("privacyInfo : "+privacyInfo);
+
+			privacyInfoMap.put(companyTableListDto.getCtDesignation(), privacyInfo);
+
+		}
+
+		log.info("privacyInfoMap : "+privacyInfoMap);
+
+		data.put("privacyInfo",privacyInfoMap);
+
+		// 개인정보 열람로그 저장
+		privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_05, 1, CommonUtil.clientIp(), email);
+
+		return ResponseEntity.ok(res.success(data));
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }

@@ -24,4 +24,6 @@ public class KokonutUserFieldListDto {
     private String fieldColor; // 설명텍스트색상
 
     private String fieldCode; // 코드네임
+
+    private String indexType; // 인덱스타입 -> 0: 일반컬럼, 1: 인덱스, 2: 유니크
 }

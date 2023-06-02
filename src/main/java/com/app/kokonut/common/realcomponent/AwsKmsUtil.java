@@ -118,6 +118,7 @@ public class AwsKmsUtil {
             return awsKmsResultDto;
         }
 
+        awsKmsResultDto.setDataKey(dataKey);
         awsKmsResultDto.setSecretKey(secretKey);
 
         return awsKmsResultDto;
