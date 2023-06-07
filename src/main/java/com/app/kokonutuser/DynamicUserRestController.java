@@ -145,7 +145,7 @@ public class DynamicUserRestController {
 			"2. 해당 IDX의 관련된 데이터를 모두 보내준다.")
 	@GetMapping(value = "/privacyUserOpen")
 	@ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-	public ResponseEntity<Map<String,Object>> privacyUserOpen(@RequestParam(name="IDX", defaultValue = "") String idx) throws Exception {
+	public ResponseEntity<Map<String,Object>> privacyUserOpen(@RequestParam(name="kokonut_IDX", defaultValue = "") String idx) throws Exception {
 		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
 		return dynamicUserService.privacyUserOpen(idx, jwtFilterDto);
 	}

@@ -23,7 +23,7 @@ public class CompanyRestController {
         this.companyItemService = companyItemService;
     }
 
-//  @@@@@@@@@@@@@@@@@@@@@@@@@ 카테고리 관련 API @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+//  @@@@@@@@@@@@@@@@@@@@@@@@@ 개인정보 항목관리 페이지 카테고리 관련 API @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
     @ApiOperation(value="기본 카테고리 항목을 가져온다.", notes="" +
             "1. 기본으로 제공하는 카테고리를 조회한다." +
@@ -79,6 +79,9 @@ public class CompanyRestController {
 //  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
+
+//  @@@@@@@@@@@@@@@@@@@@@@@@@ 개인정보 테이블 정보 호출 관련 API @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
     @ApiOperation(value="테이블을 추가한다.", notes="" +
             "1. 추가할 테이블명을 받는다." +
             "2. 해당 테이블을 저정한다.")
@@ -106,5 +109,25 @@ public class CompanyRestController {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return companyItemService.privacyTableList(jwtFilterDto);
     }
+
+//  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+//  @@@@@@@@@@@@@@@@@@@@@@@@@ 서비스설정 호출 관련 API @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+//    @ApiOperation(value="해외로그인 차단 서비스 설정", notes="")
+//    @GetMapping(value = "/setting")
+//    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+//    public ResponseEntity<Map<String,Object>> setting() throws IOException {
+//        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+//        return companyItemService.setting(jwtFilterDto);
+//    }
+
+
+
+
+//  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
 
 }

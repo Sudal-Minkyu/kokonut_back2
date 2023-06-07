@@ -27,6 +27,8 @@ import com.app.kokonut.company.companyfile.CompanyFile;
 import com.app.kokonut.company.companyfile.CompanyFileRepository;
 import com.app.kokonut.company.companydatakey.CompanyDataKey;
 import com.app.kokonut.company.companydatakey.CompanyDataKeyRepository;
+import com.app.kokonut.company.companysetting.CompanySetting;
+import com.app.kokonut.company.companysetting.CompanySettingRepository;
 import com.app.kokonut.company.companytable.CompanyTable;
 import com.app.kokonut.company.companytable.CompanyTableRepository;
 import com.app.kokonut.company.companytablecolumninfo.CompanyTableColumnInfo;
@@ -36,7 +38,6 @@ import com.app.kokonut.configs.KeyGenerateService;
 import com.app.kokonut.configs.MailSender;
 import com.app.kokonut.history.HistoryService;
 import com.app.kokonut.history.dto.ActivityCode;
-import com.app.kokonut.keydata.KeyDataService;
 import com.app.kokonutuser.KokonutUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,7 +102,7 @@ public class AuthService {
     private final CompanyTableRepository companyTableRepository;
     private final CompanyFileRepository companyFileRepository;
     private final CompanyTableColumnInfoRepository companyTableColumnInfoRepository;
-
+    private final CompanySettingRepository companySettingRepository;
     private final AwsKmsHistoryRepository awsKmsHistoryRepository;
 
     private final PasswordEncoder passwordEncoder;
@@ -119,7 +120,7 @@ public class AuthService {
                        KokonutUserService kokonutUserService, AwsS3Util awsS3Util, AdminRepository adminRepository,
                        AwsKmsUtil awsKmsUtil, KeyGenerateService keyGenerateService, CompanyRepository companyRepository,
                        CompanyDataKeyRepository companyDataKeyRepository, CompanyTableRepository companyTableRepository, CompanyFileRepository companyFileRepository,
-                       CompanyTableColumnInfoRepository companyTableColumnInfoRepository, AwsKmsHistoryRepository awsKmsHistoryRepository, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider,
+                       CompanyTableColumnInfoRepository companyTableColumnInfoRepository, CompanySettingRepository companySettingRepository, AwsKmsHistoryRepository awsKmsHistoryRepository, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider,
                        AuthenticationManagerBuilder authenticationManagerBuilder,
                        RedisDao redisDao, GoogleOTP googleOTP, MailSender mailSender) {
         this.adminService = adminService;
@@ -134,6 +135,7 @@ public class AuthService {
         this.companyTableRepository = companyTableRepository;
         this.companyFileRepository = companyFileRepository;
         this.companyTableColumnInfoRepository = companyTableColumnInfoRepository;
+        this.companySettingRepository = companySettingRepository;
         this.awsKmsHistoryRepository = awsKmsHistoryRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
@@ -503,7 +505,7 @@ public class AuthService {
         boolean result = kokonutUserService.createTableKokonutUser(ctName, 0);
 //        log.warn("result : "+result);
         if(result) {
-            // 기본컬럼 저장(1_id)
+            // 기본컬럼 아이디 저장(1_id)
             CompanyTableColumnInfo companyTableColumnInfo = new CompanyTableColumnInfo();
             companyTableColumnInfo.setCtName(cpCode+"_1");
             companyTableColumnInfo.setCtciName("ID_1_id");
@@ -513,7 +515,15 @@ public class AuthService {
             companyTableColumnInfo.setInsert_email(kokonutSignUp.getKnEmail());
             companyTableColumnInfo.setInsert_date(LocalDateTime.now());
             companyTableColumnInfoRepository.save(companyTableColumnInfo);
+
+            // 서비스설정 기본값 저장
+            CompanySetting companySetting = new CompanySetting();
+            companySetting.setCpCode(cpCode);
+            companySetting.setInsert_email(kokonutSignUp.getKnEmail());
+            companySetting.setInsert_date(LocalDateTime.now());
+            companySettingRepository.save(companySetting);
         }
+
         log.info("사업자 정보 저장 saveAdmin : "+saveAdmin.getAdminId());
 
         return ResponseEntity.ok(res.success(data));

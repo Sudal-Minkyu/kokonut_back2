@@ -1996,10 +1996,8 @@ public class DynamicUserService {
 		StringBuilder joinQuery = new StringBuilder(); // 조인 쿼리문
 		StringBuilder whereQuery = new StringBuilder(); // 조건 쿼리문
 
-		List<String> securityHeaderNames = new ArrayList<>(); // 암호화된 데이터의 as 이름리스트
-//		headerNames.add("IDX");
-//		headerNames.add("회원가입일시");
-//		headerNames.add("마지막로그인일시");
+		List<String> headerNames = new ArrayList<>(); // 해더 as 이름리스트
+		List<String> securityWhether = new ArrayList<>(); // 암호화여부
 
 		AwsKmsResultDto awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(cpCode);
 		log.info("DataKey : "+awsKmsResultDto.getDataKey());
@@ -2087,8 +2085,12 @@ public class DynamicUserService {
 									}
 								}
 								map.put(code, value);
-								securityHeaderNames.add(uniqueDesignation);
+								securityWhether.add("1");
+							} else {
+								securityWhether.add("0");
 							}
+
+							headerNames.add(uniqueDesignation);
 
 							boolean isLastKey = currentKeyIndex == resultSize - 1;
 							boolean isLastMapInList = i == size - 1;
@@ -2131,62 +2133,65 @@ public class DynamicUserService {
 		int totalCount = dynamicUserRepositoryCustom.privacyListTotal("SELECT COUNT(*) FROM ("+ resultQuery +") as totalCount");
 		log.info("totalCount : "+totalCount);
 
-		log.info("securityHeaderNames : "+securityHeaderNames);
+
+		log.info("headerNames : "+headerNames);
 		for(Map<String, Object> map : privacyList) {
 
 			log.info("수정전 map : "+map);
-			for(String securityHeaderName : securityHeaderNames) {
-				log.info("securityHeaderName : "+securityHeaderName);
+			for(int i=0; i<headerNames.size(); i++) {
+				log.info("headerNames.get(i) : "+headerNames.get(i));
 
-				Object key = map.get(securityHeaderName);
+				Object key = map.get(headerNames.get(i));
 				if(key != null) {
 					if(!String.valueOf(key).equals("없음")) { // 벨류값이 Null(없음)일 경우 제외
 						log.info("암호화 여부 체크시작");
 
+						// 일대다일 경우 (||__||)의 대한 데이터 처리하기
+						String keyValue = String.valueOf(key);
+						String[] manyColumn = keyValue.split("\\|\\|__\\|\\|");
 						int trigger = 0;
-						// 일대다일 경우 (||__||)의 대한 암복호화처리하기
-						String securityValue = String.valueOf(key);
-						String[] manyColumn = securityValue.split("\\|\\|__\\|\\|");
+
 						if(manyColumn.length >= 2) {
-							log.info("test");
 							trigger = 1;
-							securityValue = manyColumn[0];
+							keyValue = manyColumn[0];
 						}
 
-						String[] value = securityValue.split("-");
-						String securityResultValue; // 복호화된 데이터의 마스킹처리
-						String decryptValue;
-						if(value.length >= 2) {
-							log.info("'-' 구분자로 들어간 암호화");
-							if(String.valueOf(securityHeaderName).contains("%%__%%이름%%__%%")) {
-								decryptValue = AESGCMcrypto.decrypt(value[1], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
-								if(value.length == 2) {
-									securityResultValue = value[0] + Utils.starsForString(decryptValue);
-								} else {
-									securityResultValue = value[0] + Utils.starsForString(decryptValue) + value[2];
+						if(securityWhether.get(i).equals("1")) {
+							String[] value = keyValue.split("-");
+							String securityResultValue; // 복호화된 데이터의 마스킹처리
+							String decryptValue;
+							if(value.length >= 2) {
+								log.info("'-' 구분자로 들어간 암호화");
+								if(String.valueOf(headerNames.get(i)).contains("%%__%%이름%%__%%")) {
+									decryptValue = AESGCMcrypto.decrypt(value[1], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
+									if(value.length == 2) {
+										securityResultValue = value[0] + Utils.starsForString(decryptValue);
+									} else {
+										securityResultValue = value[0] + Utils.starsForString(decryptValue) + value[2];
+									}
 								}
-							}
-							else {
-								// 이메일주소 암호화 일 경우
+								else {
+									// 이메일주소 암호화 일 경우
+									decryptValue = AESGCMcrypto.decrypt(value[0], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
+									securityResultValue = decryptValue.charAt(0) + Utils.starsForString(decryptValue).substring(2)  + decryptValue.substring(decryptValue.length() - 1)+value[1];
+								}
+							} else {
+								// 만약 이메일일 경우
+								log.info("구분자가 없는 암호화");
 								decryptValue = AESGCMcrypto.decrypt(value[0], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
-								securityResultValue = decryptValue.charAt(0) + Utils.starsForString(decryptValue).substring(2)  + decryptValue.substring(decryptValue.length() - 1)+value[1];
+								securityResultValue = decryptValue.charAt(0) + Utils.starsForString(decryptValue).substring(2)  + decryptValue.substring(decryptValue.length() - 1);
 							}
-						} else {
-							// 만약 이메일일 경우
-							log.info("구분자가 없는 암호화");
-							decryptValue = AESGCMcrypto.decrypt(value[0], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
-							securityResultValue = decryptValue.charAt(0) + Utils.starsForString(decryptValue).substring(2)  + decryptValue.substring(decryptValue.length() - 1);
+							log.info("value : "+ Arrays.toString(value));
+							log.info("securityResultValue : "+ securityResultValue);
+							if(trigger == 1) {
+								securityResultValue = securityResultValue+" 외("+(manyColumn.length - 1)+")건";
+							}
+							map.put(headerNames.get(i), securityResultValue);
 						}
-						log.info("value : "+ Arrays.toString(value));
-						log.info("securityResultValue : "+ securityResultValue);
-						if(trigger == 1) {
-							securityResultValue = securityResultValue+" 외("+(manyColumn.length - 1)+")건";
+						else {
+							map.put(headerNames.get(i), keyValue+" 외("+(manyColumn.length - 1)+")건");
 						}
-						map.put(securityHeaderName, securityResultValue);
-						
-						
-						
-						
+
 					}
 				}
 			}
@@ -2250,7 +2255,7 @@ public class DynamicUserService {
 			// 쿼리 기본셋팅
 			resultQuery.append("SELECT ");
 
-			selectQuery.append("kokonut.kokonut_IDX  as IDX ");
+			selectQuery.append("kokonut.kokonut_IDX as kokonut_IDX ");
 
 			if(companyTableListDto.getCtDesignation().equals("기본")) {
 				// 셀렉트 기본셋팅
