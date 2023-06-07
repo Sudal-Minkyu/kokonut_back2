@@ -135,18 +135,7 @@ public class DynamicUserRestController {
 	@PostMapping(value = "/privacyUserSearch")
 	@ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
 	public ResponseEntity<Map<String,Object>> privacyUserSearch(@RequestBody KokonutSearchDto kokonutSearchDto) throws Exception {
-//	public ResponseEntity<Map<String,Object>> privacyUserSearch(@RequestParam(name="searchTables", defaultValue = "") List<String> searchTables,
-//																@RequestParam(name="searchCodes", defaultValue = "") List<String> searchCodes,
-//																@RequestParam(name="searchTexts", defaultValue = "") List<String> searchTexts,
-//																@RequestParam(name="pageNum", defaultValue = "1") int pageNum,
-//																@RequestParam(name="limitNum", defaultValue = "10") int limitNum) throws Exception {
 		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
-//		KokonutSearchDto kokonutSearchDto = new KokonutSearchDto();
-//		kokonutSearchDto.setPageNum(pageNum);
-//		kokonutSearchDto.setLimitNum(limitNum);
-//		kokonutSearchDto.setSearchTables(searchTables);
-//		kokonutSearchDto.setSearchCodes(searchCodes);
-//		kokonutSearchDto.setSearchTexts(searchTexts);
 		return dynamicUserService.privacyUserSearch(kokonutSearchDto, jwtFilterDto);
 	}
 

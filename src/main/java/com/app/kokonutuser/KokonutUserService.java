@@ -394,7 +394,7 @@ public class KokonutUserService {
 				String query = "";
 				String Field = commonFieldDto.getTableField();
 				if(state == 1) {
-					if(Objects.equals(Field, "ID") || Objects.equals(Field, "PASSWORD")){
+					if(Objects.equals(Field, "ID_1_id") || Objects.equals(Field, "PASSWORD_1_pw")){
 						num++;
 						continue;
 					}

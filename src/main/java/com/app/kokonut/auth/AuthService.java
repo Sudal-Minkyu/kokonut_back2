@@ -29,6 +29,8 @@ import com.app.kokonut.company.companydatakey.CompanyDataKey;
 import com.app.kokonut.company.companydatakey.CompanyDataKeyRepository;
 import com.app.kokonut.company.companytable.CompanyTable;
 import com.app.kokonut.company.companytable.CompanyTableRepository;
+import com.app.kokonut.company.companytablecolumninfo.CompanyTableColumnInfo;
+import com.app.kokonut.company.companytablecolumninfo.CompanyTableColumnInfoRepository;
 import com.app.kokonut.configs.GoogleOTP;
 import com.app.kokonut.configs.KeyGenerateService;
 import com.app.kokonut.configs.MailSender;
@@ -66,7 +68,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 
 /**
@@ -99,6 +100,7 @@ public class AuthService {
     private final CompanyDataKeyRepository companyDataKeyRepository;
     private final CompanyTableRepository companyTableRepository;
     private final CompanyFileRepository companyFileRepository;
+    private final CompanyTableColumnInfoRepository companyTableColumnInfoRepository;
 
     private final AwsKmsHistoryRepository awsKmsHistoryRepository;
 
@@ -114,10 +116,10 @@ public class AuthService {
 
     @Autowired
     public AuthService(AdminService adminService, HistoryService historyService,
-                       KeyDataService keyDataService, KokonutUserService kokonutUserService, AwsS3Util awsS3Util, AdminRepository adminRepository,
+                       KokonutUserService kokonutUserService, AwsS3Util awsS3Util, AdminRepository adminRepository,
                        AwsKmsUtil awsKmsUtil, KeyGenerateService keyGenerateService, CompanyRepository companyRepository,
                        CompanyDataKeyRepository companyDataKeyRepository, CompanyTableRepository companyTableRepository, CompanyFileRepository companyFileRepository,
-                       AwsKmsHistoryRepository awsKmsHistoryRepository, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider,
+                       CompanyTableColumnInfoRepository companyTableColumnInfoRepository, AwsKmsHistoryRepository awsKmsHistoryRepository, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider,
                        AuthenticationManagerBuilder authenticationManagerBuilder,
                        RedisDao redisDao, GoogleOTP googleOTP, MailSender mailSender) {
         this.adminService = adminService;
@@ -131,6 +133,7 @@ public class AuthService {
         this.companyDataKeyRepository = companyDataKeyRepository;
         this.companyTableRepository = companyTableRepository;
         this.companyFileRepository = companyFileRepository;
+        this.companyTableColumnInfoRepository = companyTableColumnInfoRepository;
         this.awsKmsHistoryRepository = awsKmsHistoryRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
@@ -498,8 +501,19 @@ public class AuthService {
         companyTableRepository.save(companyTable);
 
         boolean result = kokonutUserService.createTableKokonutUser(ctName, 0);
-        log.warn("result : "+result);
-
+//        log.warn("result : "+result);
+        if(result) {
+            // 기본컬럼 저장(1_id)
+            CompanyTableColumnInfo companyTableColumnInfo = new CompanyTableColumnInfo();
+            companyTableColumnInfo.setCtName(cpCode+"_1");
+            companyTableColumnInfo.setCtciName("ID_1_id");
+            companyTableColumnInfo.setCtciCode("1_id");
+            companyTableColumnInfo.setCtciDesignation("아이디");
+            companyTableColumnInfo.setCtciSecuriy("0");
+            companyTableColumnInfo.setInsert_email(kokonutSignUp.getKnEmail());
+            companyTableColumnInfo.setInsert_date(LocalDateTime.now());
+            companyTableColumnInfoRepository.save(companyTableColumnInfo);
+        }
         log.info("사업자 정보 저장 saveAdmin : "+saveAdmin.getAdminId());
 
         return ResponseEntity.ok(res.success(data));
