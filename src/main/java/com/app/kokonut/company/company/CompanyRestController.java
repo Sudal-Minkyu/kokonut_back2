@@ -1,9 +1,11 @@
 package com.app.kokonut.company.company;
 
+import com.app.kokonut.apiKey.dtos.ApiKeyIpDeleteDto;
 import com.app.kokonut.auth.jwt.SecurityUtil;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import com.app.kokonut.company.companyitem.CompanyItemService;
 import com.app.kokonut.company.companysetting.CompanySettingService;
+import com.app.kokonut.company.companysettingaccessip.dtos.AccessIpDeleteDto;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -172,6 +174,24 @@ public class CompanyRestController {
     public ResponseEntity<Map<String,Object>> longDisconnectionSetting(@RequestParam(name="csLongDisconnectionSetting", defaultValue = "") String csLongDisconnectionSetting) throws IOException {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return companySettingService.longDisconnectionSetting(jwtFilterDto, csLongDisconnectionSetting);
+    }
+
+    @PostMapping("/accessIpSave")
+    @ApiOperation(value = "접속허용 IP 등록", notes = "")
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token", required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    public ResponseEntity<Map<String,Object>> apiKeyIpSave(@RequestParam(value="csipIp", defaultValue = "") String csipIp,
+                                                           @RequestParam(value="csipRemarks", defaultValue = "") String csipRemarks) throws IOException {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return companySettingService.accessIpSave(csipIp, csipRemarks, jwtFilterDto);
+    }
+
+    @PostMapping("/accessIpDelete")
+    @ApiOperation(value = "접속허용 IP 삭제", notes = "" +
+            "1. 등록한 허용 IP를 삭제한다.")
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token", required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    public ResponseEntity<Map<String,Object>> apiKeyIpDelete(@RequestBody AccessIpDeleteDto accessIpDeleteDto) throws IOException {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return companySettingService.apiKeyIpDelete(accessIpDeleteDto, jwtFilterDto);
     }
 
 //  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
