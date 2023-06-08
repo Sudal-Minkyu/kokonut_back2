@@ -11,6 +11,6 @@ import org.springframework.stereotype.Repository;
  * Remark :
  */
 @Repository
-public interface CompanySettingAccessIPRepository extends JpaRepository<CompanySettingAccessIP, Long>, JpaSpecificationExecutor<CompanySettingAccessIP> {
+public interface CompanySettingAccessIPRepository extends JpaRepository<CompanySettingAccessIP, Long>, JpaSpecificationExecutor<CompanySettingAccessIP>, CompanySettingAccessIPRepositoryCustom {
 
 }

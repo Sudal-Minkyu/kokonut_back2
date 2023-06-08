@@ -3,7 +3,9 @@ package com.app.kokonut.admin;
 import com.app.kokonut.admin.dtos.*;
 import com.app.kokonut.admin.enums.AuthorityRole;
 import com.app.kokonut.company.company.QCompany;
+import com.app.kokonut.company.companysetting.QCompanySetting;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.JPQLQuery;
 import org.qlrm.mapper.JpaResultMapper;
 import org.springframework.data.domain.Page;
@@ -96,15 +98,23 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
 
         QAdmin admin = QAdmin.admin;
         QCompany company = QCompany.company;
+        QCompanySetting companySetting = QCompanySetting.companySetting;
 
         JPQLQuery<AdminInfoDto> query = from(admin)
                 .innerJoin(company).on(company.companyId.eq(admin.companyId))
+                .innerJoin(companySetting).on(companySetting.cpCode.eq(company.cpCode))
                 .where(admin.knEmail.eq(knEmail))
                 .select(Projections.constructor(AdminInfoDto.class,
                         admin.knName,
                         company.cpName,
                         company.cpElectronic,
-                        company.cpElectronicDate
+                        company.cpElectronicDate,
+
+                        new CaseBuilder()
+                                .when(admin.knPwdChangeDate.isNotNull()).then(admin.knPwdChangeDate)
+                                .otherwise(admin.insert_date),
+                        companySetting.csPasswordChangeSetting,
+                        companySetting.csAutoLogoutSetting
                 ));
 
         return query.fetchOne();

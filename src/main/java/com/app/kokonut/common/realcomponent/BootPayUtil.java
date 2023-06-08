@@ -5,7 +5,7 @@ import kr.co.bootpay.model.request.Subscribe;
 import kr.co.bootpay.model.request.SubscribePayload;
 import kr.co.bootpay.model.request.User;
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -22,10 +22,16 @@ import java.util.TimeZone;
 @Service
 public class BootPayUtil {
 
-    static Bootpay bootpay;
+    @Value("${kokonut.bootpay.restKey}")
+    public String restKey;
 
-    public static void main(String[] args) throws Exception {
-        bootpay = new Bootpay("6369c021cf9f6d001b23e2f2", "hGThNQp8XadmxJpyDx2Z5dAj9mEuFJlxbES43k+cMH0=");
+    @Value("${kokonut.bootpay.privateKey}")
+    public String privateKey;
+    
+    private Bootpay bootpay;
+    
+    public void main(String[] args) throws Exception {
+//        bootpay = new Bootpay(restKey, privateKey);
 //        goGetToken(); // 토큰 발급받기 함수
 //        getBillingKey(); // 빌링키 발급받기 함수
 //        goPay(); // 100원 결제하기 함수
@@ -35,9 +41,10 @@ public class BootPayUtil {
     }
 
 
-    public static void goGetToken() {
+    public void goGetToken() {
         log.info("토큰 발급받기 함수 실행!");
         try {
+            Bootpay bootpay = new Bootpay(restKey, privateKey);
             HashMap<String, Object> res = bootpay.getAccessToken();
             if (res.get("error_code") == null) { //success
                 log.info("토큰받기 성공: " + res);
@@ -49,9 +56,12 @@ public class BootPayUtil {
         }
     }
 
-    public static void getBillingKey() throws Exception {
+    public void getBillingKey() throws Exception {
         log.info("빌링키 발급받기 함수 실행!");
+        log.info("restKey : "+restKey);
+        log.info("privateKey : "+privateKey);
 
+        Bootpay bootpay = new Bootpay(restKey, privateKey);
         bootpay.getAccessToken();
 
         Subscribe subscribe = new Subscribe();
@@ -102,10 +112,10 @@ public class BootPayUtil {
         }
     }
 
-    public static void kokonutPayment() throws Exception {
+    public void kokonutPayment() throws Exception {
         log.info("100원 결제하기 함수 실행!");
 
-        bootpay.getAccessToken();
+        Bootpay bootpay = new Bootpay(restKey, privateKey);
 
         SubscribePayload payload = new SubscribePayload();
         payload.billingKey = "645206669f326b001fcb86e8";
@@ -131,8 +141,9 @@ public class BootPayUtil {
 
     }
 
-    public static void kokonutReservationPayment() throws Exception {
+    public void kokonutReservationPayment() throws Exception {
         log.info("100원 예약 결제하기 함수 실행!");
+        Bootpay bootpay = new Bootpay(restKey, privateKey);
         bootpay.getAccessToken();
 
         SubscribePayload payload = new SubscribePayload();
@@ -161,8 +172,9 @@ public class BootPayUtil {
 
     }
 
-    public static void billingKeyCheck() throws Exception {
+    public void billingKeyCheck() throws Exception {
         log.info("빌링키 조회하기 실행!");
+        Bootpay bootpay = new Bootpay(restKey, privateKey);
         bootpay.getAccessToken();
 
         String receiptId = "64520ca4755e27001ee19a5b";
@@ -181,8 +193,9 @@ public class BootPayUtil {
 
     }
 
-    public static void billingKeyDelete() throws Exception {
+    public void billingKeyDelete() throws Exception {
         log.info("빌링키 삭제하기 실행!");
+        Bootpay bootpay = new Bootpay(restKey, privateKey);
         bootpay.getAccessToken();
 
         String billingKey = "64520ca5755e27001ee19a5e";

@@ -45,34 +45,22 @@ public class CompanySetting {
     @Column(name = "cs_auto_logout_setting")
     private String csAutoLogoutSetting;
 
-    @ApiModelProperty("장기 미접속 접근제한(1: 1개월, 3: 3개월, 6: 6개월)기본값 : 3")
+    @ApiModelProperty("장기 미접속 접근제한(0: 제한없음, 1: 1개월, 3: 3개월, 6: 6개월) 기본값 : 0")
     @Column(name = "cs_long_disconnection_setting")
     private String csLongDisconnectionSetting;
 
-    /**
-     * 등록자 email
-     */
     @ApiModelProperty("등록자 email")
     @Column(name = "insert_email", nullable = false)
     private String insert_email;
 
-    /**
-     * 등록 날짜
-     */
     @ApiModelProperty("등록 날짜")
     @Column(name = "insert_date", nullable = false)
     private LocalDateTime insert_date;
 
-    /**
-     * 수정자 이름
-     */
     @ApiModelProperty("수정자 email")
     @Column(name = "modify_email")
     private String modify_email;
 
-    /**
-     * 수정 날짜
-     */
     @ApiModelProperty("수정 날짜")
     @Column(name = "modify_date")
     private LocalDateTime modify_date;

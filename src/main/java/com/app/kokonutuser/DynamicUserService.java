@@ -2189,7 +2189,11 @@ public class DynamicUserService {
 							map.put(headerNames.get(i), securityResultValue);
 						}
 						else {
-							map.put(headerNames.get(i), keyValue+" 외("+(manyColumn.length - 1)+")건");
+							if(trigger == 1) {
+								map.put(headerNames.get(i), keyValue+" 외("+(manyColumn.length - 1)+")건");
+							} else {
+								map.put(headerNames.get(i), keyValue);
+							}
 						}
 
 					}

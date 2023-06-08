@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * @author Woody
@@ -24,4 +25,14 @@ public class AdminInfoDto {
     private Integer cpElectronic;
 
     private LocalDate cpElectronicDate;
+
+    private LocalDateTime compareDate; // 비교할 날짜 변경날짜가 null일 경우 insertdate(회원가입)날짜로 비교한다.
+    private String csPasswordChangeSetting; // 비밀번호 변경주기
+
+    private String csAutoLogoutSetting; // 자동로그아웃 시간
+
+    public long getCsPasswordChangeSetting() {
+        return Long.parseLong(csPasswordChangeSetting);
+    }
+
 }

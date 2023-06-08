@@ -34,6 +34,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 /**
@@ -307,6 +308,20 @@ public class AdminService {
             } else {
                 data.put("electronic",adminInfoDto.getCpElectronic());
             }
+
+            data.put("csAutoLogoutSetting",adminInfoDto.getCsAutoLogoutSetting());
+
+            LocalDateTime compareDate = adminInfoDto.getCompareDate();
+            long monthsBetween = ChronoUnit.MONTHS.between(compareDate, LocalDateTime.now());
+            log.info("monthsBetween : "+monthsBetween);  // 변경날짜와 현재날짜의 월수 차이
+            if(adminInfoDto.getCsPasswordChangeSetting() <= monthsBetween) {
+                data.put("csPasswordChangeState","2");
+            } else {
+                data.put("csPasswordChangeState","1");
+            }
+
+
+
         }
 
         return ResponseEntity.ok(res.success(data));
