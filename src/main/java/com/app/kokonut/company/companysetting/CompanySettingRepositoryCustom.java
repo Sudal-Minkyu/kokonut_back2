@@ -1,5 +1,6 @@
 package com.app.kokonut.company.companysetting;
 
+import com.app.kokonut.company.companysetting.dtos.CompanySettingCheckDto;
 import com.app.kokonut.company.companysetting.dtos.CompanySettingInfoDto;
 
 /**
@@ -11,5 +12,7 @@ import com.app.kokonut.company.companysetting.dtos.CompanySettingInfoDto;
 public interface CompanySettingRepositoryCustom {
 
     CompanySettingInfoDto findByCompanySettingInfo(String cpCode);
+
+    CompanySettingCheckDto findByCompanySettingCheck(String cpCode);
 
 }

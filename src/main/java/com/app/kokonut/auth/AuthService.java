@@ -29,6 +29,8 @@ import com.app.kokonut.company.companydatakey.CompanyDataKey;
 import com.app.kokonut.company.companydatakey.CompanyDataKeyRepository;
 import com.app.kokonut.company.companysetting.CompanySetting;
 import com.app.kokonut.company.companysetting.CompanySettingRepository;
+import com.app.kokonut.company.companysetting.dtos.CompanySettingCheckDto;
+import com.app.kokonut.company.companysettingaccessip.CompanySettingAccessIPRepository;
 import com.app.kokonut.company.companytable.CompanyTable;
 import com.app.kokonut.company.companytable.CompanyTableRepository;
 import com.app.kokonut.company.companytablecolumninfo.CompanyTableColumnInfo;
@@ -103,6 +105,8 @@ public class AuthService {
     private final CompanyFileRepository companyFileRepository;
     private final CompanyTableColumnInfoRepository companyTableColumnInfoRepository;
     private final CompanySettingRepository companySettingRepository;
+    private final CompanySettingAccessIPRepository companySettingAccessIPRepository;
+
     private final AwsKmsHistoryRepository awsKmsHistoryRepository;
 
     private final PasswordEncoder passwordEncoder;
@@ -120,7 +124,7 @@ public class AuthService {
                        KokonutUserService kokonutUserService, AwsS3Util awsS3Util, AdminRepository adminRepository,
                        AwsKmsUtil awsKmsUtil, KeyGenerateService keyGenerateService, CompanyRepository companyRepository,
                        CompanyDataKeyRepository companyDataKeyRepository, CompanyTableRepository companyTableRepository, CompanyFileRepository companyFileRepository,
-                       CompanyTableColumnInfoRepository companyTableColumnInfoRepository, CompanySettingRepository companySettingRepository, AwsKmsHistoryRepository awsKmsHistoryRepository, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider,
+                       CompanyTableColumnInfoRepository companyTableColumnInfoRepository, CompanySettingRepository companySettingRepository, CompanySettingAccessIPRepository companySettingAccessIPRepository, AwsKmsHistoryRepository awsKmsHistoryRepository, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider,
                        AuthenticationManagerBuilder authenticationManagerBuilder,
                        RedisDao redisDao, GoogleOTP googleOTP, MailSender mailSender) {
         this.adminService = adminService;
@@ -136,6 +140,7 @@ public class AuthService {
         this.companyFileRepository = companyFileRepository;
         this.companyTableColumnInfoRepository = companyTableColumnInfoRepository;
         this.companySettingRepository = companySettingRepository;
+        this.companySettingAccessIPRepository = companySettingAccessIPRepository;
         this.awsKmsHistoryRepository = awsKmsHistoryRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
@@ -826,10 +831,42 @@ public class AuthService {
                             Long adminId = adminCompanyInfoDto.getAdminId();
                             String companyCode = adminCompanyInfoDto.getCompanyCode();
 
+                            int knPwdErrorCount = optionalAdmin.get().getKnPwdErrorCount(); // 비밀번호 오류횟수
+                            String publicIp = CommonUtil.publicIp();
+
+                            // *숙제*
+                            // 비밀번호 오휴 횟수 제한 가져오기
+                            // 설정해둔 횟수와 같거나 크면 로그인 제한됨 -> 비밀번호 찾기 및 재설정 기능 제공하기
+                            // 만약 접속허용IP 설정 활성화 일 경우 -> 접속허용된 IP 인지 체크하기
+                            CompanySettingCheckDto companySettingCheckDto = companySettingRepository.findByCompanySettingCheck(companyCode);
+                            if(companySettingCheckDto.getCsOverseasBlockSetting().equals("1")) {
+                                // 로그인사람이 해외인지 체크
+                                log.info("서비스 로그인 위치가 해외인지 체크");
+                                // 오픈API 라이브러리를 통해 체킹하기
+                            }
+
+                            if(companySettingCheckDto.getCsAccessSetting().equals("1")) {
+                                log.info("접속 허용IP 인지 체크");
+//                                log.info("publicIp : "+publicIp);
+                                boolean accessIpCheckResult = companySettingAccessIPRepository.existsCompanySettingAccessIPByCsIdAndCsipIp(companySettingCheckDto.getCsId(), publicIp);
+                                log.info("accessIpCheckResult : "+accessIpCheckResult);
+                                if(!accessIpCheckResult) {
+                                    log.error("접속 허용되지 않은 IP 입니다. 관리자에게 등록을 요청해주세요.");
+                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO094.getCode(),ResponseErrorCode.KO094.getDesc()));
+                                }
+                            }
+
+                            int csPasswordErrorCountSetting = Integer.parseInt(companySettingCheckDto.getCsPasswordErrorCountSetting());
+                            log.info("csPasswordErrorCountSetting : "+csPasswordErrorCountSetting);
+                            log.info("knPwdErrorCount : "+knPwdErrorCount);
+                            if(csPasswordErrorCountSetting <= knPwdErrorCount) {
+                                log.info("로그인 오류 횟수제한");
+                                // -> 다음로직 어떻게할지 안 정함
+                            }
+
                             // 로그인 코드
                             ActivityCode activityCode = ActivityCode.AC_01;
                             String ip = CommonUtil.clientIp();
-                            String publicIp = CommonUtil.publicIp();
 
                             // 활동이력 저장 -> 비정상 모드
                             Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
@@ -849,19 +886,15 @@ public class AuthService {
                             redisDao.setValues("RT: " + authentication.getName(), jwtToken.getRefreshToken(), Duration.ofMillis(jwtToken.getRefreshTokenExpirationTime()));
 
                             // 비밀번호 틀린횟수 초기화
-                            if(optionalAdmin.get().getKnPwdErrorCount() != 0) {
+                            if(knPwdErrorCount != 0) {
                                 optionalAdmin.get().setKnPwdErrorCount(0);
                             }
-
-                            /* 해외 아이피 차단 여부 */
-//                            loginService.ResetPwdError(user.getIdx()); 패스워드에러카운트 리셋
 
                             // 마지막 로그인 시간기록
                             optionalAdmin.get().setKnLastLoginDate(LocalDateTime.now());
                             // 최근 접속 IP
                             optionalAdmin.get().setKnIpAddr(publicIp);
                             adminRepository.save(optionalAdmin.get());
-
 
                             historyService.updateHistory(activityHistoryId,
                                     companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
@@ -872,6 +905,11 @@ public class AuthService {
                 }
                 catch (Exception e) {
                     log.error("아이디 또는 비밀번호가 일치하지 않습니다.");
+
+                    // 비밀번호가 틀렸기때문에 비밀번호 오류횟수 카운팅
+                    optionalAdmin.get().setKnPwdErrorCount(optionalAdmin.get().getKnPwdErrorCount()+1);
+                    adminRepository.save(optionalAdmin.get());
+
                     return ResponseEntity.ok(res.fail(ResponseErrorCode.KO016.getCode(),ResponseErrorCode.KO016.getDesc()));
                 }
             }

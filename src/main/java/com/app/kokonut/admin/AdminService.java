@@ -313,7 +313,7 @@ public class AdminService {
 
             LocalDateTime compareDate = adminInfoDto.getCompareDate();
             long monthsBetween = ChronoUnit.MONTHS.between(compareDate, LocalDateTime.now());
-            log.info("monthsBetween : "+monthsBetween);  // 변경날짜와 현재날짜의 월수 차이
+//            log.info("monthsBetween : "+monthsBetween);  // 변경날짜와 현재날짜의 월수 차이
             if(adminInfoDto.getCsPasswordChangeSetting() <= monthsBetween) {
                 data.put("csPasswordChangeState","2");
             } else {

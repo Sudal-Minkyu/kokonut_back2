@@ -23,5 +23,6 @@ public interface CompanySettingAccessIPRepository extends JpaRepository<CompanyS
     @Query("delete from CompanySettingAccessIP a where a.csipIp in :csipIps")
     void findByCompanySettingAccessIPDelete(List<String> csipIps);
 
+    boolean existsCompanySettingAccessIPByCsIdAndCsipIp(Long csId, String publicIp);
 
 }

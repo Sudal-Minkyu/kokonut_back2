@@ -1,10 +1,6 @@
 package com.app.kokonut.company.companysetting;
 
-import com.app.kokonut.auth.dtos.CompanyEncryptDto;
-import com.app.kokonut.company.company.Company;
-import com.app.kokonut.company.company.CompanyRepositoryCustom;
-import com.app.kokonut.company.company.QCompany;
-import com.app.kokonut.company.companydatakey.QCompanyDataKey;
+import com.app.kokonut.company.companysetting.dtos.CompanySettingCheckDto;
 import com.app.kokonut.company.companysetting.dtos.CompanySettingInfoDto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPQLQuery;
@@ -43,6 +39,23 @@ public class CompanySettingRepositoryCustomImpl extends QuerydslRepositorySuppor
                         companySetting.csPasswordErrorCountSetting,
                         companySetting.csAutoLogoutSetting,
                         companySetting.csLongDisconnectionSetting
+                ));
+
+        return query.fetchOne();
+    }
+
+    @Override
+    public CompanySettingCheckDto findByCompanySettingCheck(String cpCode) {
+
+        QCompanySetting companySetting = QCompanySetting.companySetting;
+
+        JPQLQuery<CompanySettingCheckDto> query = from(companySetting)
+                .where(companySetting.cpCode.eq(cpCode))
+                .select(Projections.constructor(CompanySettingCheckDto.class,
+                        companySetting.csId,
+                        companySetting.csOverseasBlockSetting,
+                        companySetting.csAccessSetting,
+                        companySetting.csPasswordErrorCountSetting
                 ));
 
         return query.fetchOne();
