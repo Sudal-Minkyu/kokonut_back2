@@ -113,20 +113,20 @@ public class Utils {
 		return map;
 	}
 
-	public static File convertMultipartFileToFile(MultipartFile mfile) {
-		File file = new File(mfile.getOriginalFilename());
-		try {
-			file.createNewFile();
-			FileOutputStream fos = new FileOutputStream(file);
-			fos.write(mfile.getBytes());
-			fos.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return file;
-	}
+//	public static File convertMultipartFileToFile(MultipartFile mfile) {
+//		File file = new File(mfile.getOriginalFilename());
+//		try {
+//			file.createNewFile();
+//			FileOutputStream fos = new FileOutputStream(file);
+//			fos.write(mfile.getBytes());
+//			fos.close();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//
+//		return file;
+//	}
 
 	/**
 	 * 엑셀 Formula injection 검사

@@ -108,7 +108,7 @@ public class TotalDbDownloadService {
 //			log.info("auth : " + auth);
 
             if (!auth) {
-                log.error("입력된 구글 OTP 값이 일치하지 않습니다. 확인해주세요.");
+                log.error("입력된 구글 OTP 값이 일치하지 않습니다. 다시 확인해주세요.");
                 return ResponseEntity.ok(res.fail(ResponseErrorCode.KO012.getCode(), ResponseErrorCode.KO012.getDesc()));
             }
         } else {

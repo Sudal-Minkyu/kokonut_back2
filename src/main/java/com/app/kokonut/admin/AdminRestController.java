@@ -123,7 +123,8 @@ public class AdminRestController {
 
 
     @GetMapping("/authorityCheck")
-    @ApiOperation(value = "JWT토큰 테스트" , notes = "JWT 토큰이 유효한지 테스트하는 메서드")
+    @ApiOperation(value = "JWT토큰 호출 기본정보 호출" , notes = "" +
+            "1. 로그인한 유저의 기본정보를 가져오는 API")
     @ApiImplicitParams({
             @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
     })

@@ -34,6 +34,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 /**
@@ -307,6 +308,20 @@ public class AdminService {
             } else {
                 data.put("electronic",adminInfoDto.getCpElectronic());
             }
+
+            data.put("csAutoLogoutSetting",adminInfoDto.getCsAutoLogoutSetting());
+
+            LocalDateTime compareDate = adminInfoDto.getCompareDate();
+            long monthsBetween = ChronoUnit.MONTHS.between(compareDate, LocalDateTime.now());
+//            log.info("monthsBetween : "+monthsBetween);  // 변경날짜와 현재날짜의 월수 차이
+            if(adminInfoDto.getCsPasswordChangeSetting() <= monthsBetween) {
+                data.put("csPasswordChangeState","2");
+            } else {
+                data.put("csPasswordChangeState","1");
+            }
+
+
+
         }
 
         return ResponseEntity.ok(res.success(data));
@@ -490,7 +505,7 @@ public class AdminService {
                 log.info("### 메일전송 성공했습니다. reciver Email : "+ userEmail);
 
                 // 인증번호 레디스에 담기
-                redisDao.setValues("EV: " + userEmail, knEmailAuthCode, Duration.ofMillis(1000*60*60*24)); // 제한시간 3분
+                redisDao.setValues("EV: " + userEmail, knEmailAuthCode, Duration.ofMillis((long)1000*60*60*24)); // 제한시간 3분
 
                 Admin admin = new Admin();
                 admin.setKnEmail(userEmail);

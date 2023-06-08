@@ -101,3 +101,8 @@ kokonut:
   #stibee
   stibee:
     apiKey: ${KOKONUT_STIBEE_APIKEY}
+
+  #bootpay
+  bootpay:
+    restKey: ${KOKONUT_BOOTPAY_REST}
+    privateKey: ${KOKONUT_BOOTPAY_PRIVATE}

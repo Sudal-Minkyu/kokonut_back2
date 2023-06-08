@@ -38,7 +38,7 @@ public class CompanyTableRepositoryCustomImpl extends QuerydslRepositorySupport 
                         companyTable.ctDesignation
                 ));
 
-        query.orderBy(companyTable.insert_date.desc());
+        query.orderBy(companyTable.insert_date.asc());
 
         return query.fetch();
     }

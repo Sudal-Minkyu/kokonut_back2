@@ -1140,18 +1140,18 @@ public class NaverCloudPlatformService {
 
             wr.write(postDataBuilder.getBytes());
             wr.writeBytes(lineEnd);
-            FileInputStream fStream = new FileInputStream(imageFile);
-
-            buffer = new byte[(int) imageFile.length()];
-            int length = -1;
-            while ((length = fStream.read(buffer)) != -1) {
-                wr.write(buffer, 0, length);
-                log.info("fStream length" + length);
-            }
-            wr.writeBytes(lineEnd);
-            wr.writeBytes(lineEnd);
-            wr.writeBytes("--" + boundary + "--" + lineEnd); // requestbody end
-            fStream.close();
+//            FileInputStream fStream = new FileInputStream(imageFile);
+//
+//            buffer = new byte[(int) imageFile.length()];
+//            int length = -1;
+//            while ((length = fStream.read(buffer)) != -1) {
+//                wr.write(buffer, 0, length);
+//                log.info("fStream length" + length);
+//            }
+//            wr.writeBytes(lineEnd);
+//            wr.writeBytes(lineEnd);
+//            wr.writeBytes("--" + boundary + "--" + lineEnd); // requestbody end
+//            fStream.close();
 
             log.info("wr.size() : " + wr.size());
             wr.flush();

@@ -26,25 +26,22 @@ public class GoogleOTP {
 //		this.hostUrl = keyDataService.findByKeyValue("otp_url");
 	}
 
-//	public HashMap<String, String> generate(String userName) {
+	private final Random random = new Random();
+
 	public GoogleOtpGenerateDto generate(String userName) {
 		GoogleOtpGenerateDto googleOtpGenerateDto = new GoogleOtpGenerateDto();
 		byte[] buffer = new byte[5 + 5 * 5];
-		new Random().nextBytes(buffer);
+		random.nextBytes(buffer);   // Use the class field here
 		Base32 codec = new Base32();
 		byte[] secretKey = Arrays.copyOf(buffer, 10);
 		byte[] bEncodedKey = codec.encode(secretKey);
 
 		String otpKey = new String(bEncodedKey);
 		String url = getQRBarcodeURL(userName, hostUrl, otpKey);
-		// Google OTP 앱에 userName@hostName 으로 저장됨
-		// key를 입력하거나 생성된 QR코드를 바코드 스캔하여 등록
 
 		googleOtpGenerateDto.setOtpKey(otpKey);
 		googleOtpGenerateDto.setUrl(url);
 
-//		map.put("encodedKey", encodedKey);
-//		map.put("url", url);
 		return googleOtpGenerateDto;
 	}
 

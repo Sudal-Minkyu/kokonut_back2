@@ -27,14 +27,19 @@ import com.app.kokonut.company.companyfile.CompanyFile;
 import com.app.kokonut.company.companyfile.CompanyFileRepository;
 import com.app.kokonut.company.companydatakey.CompanyDataKey;
 import com.app.kokonut.company.companydatakey.CompanyDataKeyRepository;
+import com.app.kokonut.company.companysetting.CompanySetting;
+import com.app.kokonut.company.companysetting.CompanySettingRepository;
+import com.app.kokonut.company.companysetting.dtos.CompanySettingCheckDto;
+import com.app.kokonut.company.companysettingaccessip.CompanySettingAccessIPRepository;
 import com.app.kokonut.company.companytable.CompanyTable;
 import com.app.kokonut.company.companytable.CompanyTableRepository;
+import com.app.kokonut.company.companytablecolumninfo.CompanyTableColumnInfo;
+import com.app.kokonut.company.companytablecolumninfo.CompanyTableColumnInfoRepository;
 import com.app.kokonut.configs.GoogleOTP;
 import com.app.kokonut.configs.KeyGenerateService;
 import com.app.kokonut.configs.MailSender;
 import com.app.kokonut.history.HistoryService;
 import com.app.kokonut.history.dto.ActivityCode;
-import com.app.kokonut.keydata.KeyDataService;
 import com.app.kokonutuser.KokonutUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,7 +71,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 
 /**
@@ -99,6 +103,9 @@ public class AuthService {
     private final CompanyDataKeyRepository companyDataKeyRepository;
     private final CompanyTableRepository companyTableRepository;
     private final CompanyFileRepository companyFileRepository;
+    private final CompanyTableColumnInfoRepository companyTableColumnInfoRepository;
+    private final CompanySettingRepository companySettingRepository;
+    private final CompanySettingAccessIPRepository companySettingAccessIPRepository;
 
     private final AwsKmsHistoryRepository awsKmsHistoryRepository;
 
@@ -114,10 +121,10 @@ public class AuthService {
 
     @Autowired
     public AuthService(AdminService adminService, HistoryService historyService,
-                       KeyDataService keyDataService, KokonutUserService kokonutUserService, AwsS3Util awsS3Util, AdminRepository adminRepository,
+                       KokonutUserService kokonutUserService, AwsS3Util awsS3Util, AdminRepository adminRepository,
                        AwsKmsUtil awsKmsUtil, KeyGenerateService keyGenerateService, CompanyRepository companyRepository,
                        CompanyDataKeyRepository companyDataKeyRepository, CompanyTableRepository companyTableRepository, CompanyFileRepository companyFileRepository,
-                       AwsKmsHistoryRepository awsKmsHistoryRepository, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider,
+                       CompanyTableColumnInfoRepository companyTableColumnInfoRepository, CompanySettingRepository companySettingRepository, CompanySettingAccessIPRepository companySettingAccessIPRepository, AwsKmsHistoryRepository awsKmsHistoryRepository, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider,
                        AuthenticationManagerBuilder authenticationManagerBuilder,
                        RedisDao redisDao, GoogleOTP googleOTP, MailSender mailSender) {
         this.adminService = adminService;
@@ -131,6 +138,9 @@ public class AuthService {
         this.companyDataKeyRepository = companyDataKeyRepository;
         this.companyTableRepository = companyTableRepository;
         this.companyFileRepository = companyFileRepository;
+        this.companyTableColumnInfoRepository = companyTableColumnInfoRepository;
+        this.companySettingRepository = companySettingRepository;
+        this.companySettingAccessIPRepository = companySettingAccessIPRepository;
         this.awsKmsHistoryRepository = awsKmsHistoryRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
@@ -498,7 +508,26 @@ public class AuthService {
         companyTableRepository.save(companyTable);
 
         boolean result = kokonutUserService.createTableKokonutUser(ctName, 0);
-        log.warn("result : "+result);
+//        log.warn("result : "+result);
+        if(result) {
+            // 기본컬럼 아이디 저장(1_id)
+            CompanyTableColumnInfo companyTableColumnInfo = new CompanyTableColumnInfo();
+            companyTableColumnInfo.setCtName(cpCode+"_1");
+            companyTableColumnInfo.setCtciName("ID_1_id");
+            companyTableColumnInfo.setCtciCode("1_id");
+            companyTableColumnInfo.setCtciDesignation("아이디");
+            companyTableColumnInfo.setCtciSecuriy("0");
+            companyTableColumnInfo.setInsert_email(kokonutSignUp.getKnEmail());
+            companyTableColumnInfo.setInsert_date(LocalDateTime.now());
+            companyTableColumnInfoRepository.save(companyTableColumnInfo);
+
+            // 서비스설정 기본값 저장
+            CompanySetting companySetting = new CompanySetting();
+            companySetting.setCpCode(cpCode);
+            companySetting.setInsert_email(kokonutSignUp.getKnEmail());
+            companySetting.setInsert_date(LocalDateTime.now());
+            companySettingRepository.save(companySetting);
+        }
 
         log.info("사업자 정보 저장 saveAdmin : "+saveAdmin.getAdminId());
 
@@ -793,7 +822,7 @@ public class AuthService {
                         log.info("auth : " + auth);
 
                         if (!auth) {
-                            log.error("입력된 구글 OTP 값이 일치하지 않습니다. 확인해주세요.");
+                            log.error("입력된 구글 OTP 값이 일치하지 않습니다. 다시 확인해주세요.");
                             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO012.getCode(), ResponseErrorCode.KO012.getDesc()));
                         } else {
                             log.info("OTP인증완료 -> JWT토큰 발급");
@@ -802,13 +831,46 @@ public class AuthService {
                             Long adminId = adminCompanyInfoDto.getAdminId();
                             String companyCode = adminCompanyInfoDto.getCompanyCode();
 
+                            int knPwdErrorCount = optionalAdmin.get().getKnPwdErrorCount(); // 비밀번호 오류횟수
+                            String publicIp = CommonUtil.publicIp();
+
+                            // *숙제*
+                            // 비밀번호 오휴 횟수 제한 가져오기
+                            // 설정해둔 횟수와 같거나 크면 로그인 제한됨 -> 비밀번호 찾기 및 재설정 기능 제공하기
+                            // 만약 접속허용IP 설정 활성화 일 경우 -> 접속허용된 IP 인지 체크하기
+                            CompanySettingCheckDto companySettingCheckDto = companySettingRepository.findByCompanySettingCheck(companyCode);
+                            if(companySettingCheckDto.getCsOverseasBlockSetting().equals("1")) {
+                                // 로그인사람이 해외인지 체크
+                                log.info("서비스 로그인 위치가 해외인지 체크");
+                                // 오픈API 라이브러리를 통해 체킹하기
+                            }
+
+                            if(companySettingCheckDto.getCsAccessSetting().equals("1")) {
+                                log.info("접속 허용IP 인지 체크");
+//                                log.info("publicIp : "+publicIp);
+                                boolean accessIpCheckResult = companySettingAccessIPRepository.existsCompanySettingAccessIPByCsIdAndCsipIp(companySettingCheckDto.getCsId(), publicIp);
+                                log.info("accessIpCheckResult : "+accessIpCheckResult);
+                                if(!accessIpCheckResult) {
+                                    log.error("접속 허용되지 않은 IP 입니다. 관리자에게 등록을 요청해주세요.");
+                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO094.getCode(),ResponseErrorCode.KO094.getDesc()));
+                                }
+                            }
+
+                            int csPasswordErrorCountSetting = Integer.parseInt(companySettingCheckDto.getCsPasswordErrorCountSetting());
+                            log.info("csPasswordErrorCountSetting : "+csPasswordErrorCountSetting);
+                            log.info("knPwdErrorCount : "+knPwdErrorCount);
+                            if(csPasswordErrorCountSetting <= knPwdErrorCount) {
+                                log.info("로그인 오류 횟수제한");
+                                // -> 다음로직 어떻게할지 안 정함
+                            }
+
                             // 로그인 코드
                             ActivityCode activityCode = ActivityCode.AC_01;
                             String ip = CommonUtil.clientIp();
 
                             // 활동이력 저장 -> 비정상 모드
                             Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-                                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, knEmail);
+                                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, publicIp, 0, knEmail);
 
                             // 인증 정보를 기반으로 JWT 토큰 생성
                             AuthResponseDto.TokenInfo jwtToken = jwtTokenProvider.generateToken(authentication);
@@ -824,19 +886,15 @@ public class AuthService {
                             redisDao.setValues("RT: " + authentication.getName(), jwtToken.getRefreshToken(), Duration.ofMillis(jwtToken.getRefreshTokenExpirationTime()));
 
                             // 비밀번호 틀린횟수 초기화
-                            if(optionalAdmin.get().getKnPwdErrorCount() != 0) {
+                            if(knPwdErrorCount != 0) {
                                 optionalAdmin.get().setKnPwdErrorCount(0);
                             }
-
-                            /* 해외 아이피 차단 여부 */
-//                            loginService.ResetPwdError(user.getIdx()); 패스워드에러카운트 리셋
 
                             // 마지막 로그인 시간기록
                             optionalAdmin.get().setKnLastLoginDate(LocalDateTime.now());
                             // 최근 접속 IP
-                            optionalAdmin.get().setKnIpAddr(ip);
+                            optionalAdmin.get().setKnIpAddr(publicIp);
                             adminRepository.save(optionalAdmin.get());
-
 
                             historyService.updateHistory(activityHistoryId,
                                     companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
@@ -847,6 +905,11 @@ public class AuthService {
                 }
                 catch (Exception e) {
                     log.error("아이디 또는 비밀번호가 일치하지 않습니다.");
+
+                    // 비밀번호가 틀렸기때문에 비밀번호 오류횟수 카운팅
+                    optionalAdmin.get().setKnPwdErrorCount(optionalAdmin.get().getKnPwdErrorCount()+1);
+                    adminRepository.save(optionalAdmin.get());
+
                     return ResponseEntity.ok(res.fail(ResponseErrorCode.KO016.getCode(),ResponseErrorCode.KO016.getDesc()));
                 }
             }
@@ -1028,7 +1091,7 @@ public class AuthService {
             String encValue = aria.Encrypt("authOtpKeyKokonut!!");
 
             if(!auth){
-                log.error("입력된 구글 OTP 값이 일치하지 않습니다. 확인해주세요.");
+                log.error("입력된 구글 OTP 값이 일치하지 않습니다. 다시 확인해주세요.");
                 return ResponseEntity.ok(res.fail(ResponseErrorCode.KO012.getCode(),ResponseErrorCode.KO012.getDesc()));
             }
             else {

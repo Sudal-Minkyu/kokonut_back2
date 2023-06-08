@@ -322,14 +322,14 @@ public class AlimtalkMessageService {
 
                 data.put("result", message);
 
-                Random random = new Random();
-                data.put("experience", true);
-                data.put("totalCount", random.nextInt(6)+random.nextInt(6));
-                data.put("successCount", random.nextInt(6));
-                data.put("failCount", random.nextInt(4));
-                data.put("processingCount", random.nextInt(2));
-                data.put("reservedCount", random.nextInt(2));
-                data.put("canceledCount", random.nextInt(2));
+//                Random random = new Random();
+//                data.put("experience", true);
+//                data.put("totalCount", random.nextInt(6)+random.nextInt(6));
+//                data.put("successCount", random.nextInt(6));
+//                data.put("failCount", random.nextInt(4));
+//                data.put("processingCount", random.nextInt(2));
+//                data.put("reservedCount", random.nextInt(2));
+//                data.put("canceledCount", random.nextInt(2));
             }
 
             data.put("alimtalkMessage", alimtalkMessage);

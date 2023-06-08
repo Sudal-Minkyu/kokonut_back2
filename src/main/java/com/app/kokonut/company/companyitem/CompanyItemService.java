@@ -20,7 +20,6 @@ import com.app.kokonut.company.companytable.dtos.CompanyPrivacyTableListDto;
 import com.app.kokonut.company.companytable.dtos.CompanyTableListDto;
 import com.app.kokonut.history.HistoryService;
 import com.app.kokonut.history.dto.ActivityCode;
-import com.app.kokonutuser.DynamicUserService;
 import com.app.kokonutuser.KokonutUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,13 +51,11 @@ public class CompanyItemService {
     private final CategoryDefaultRepository categoryDefaultRepository;
     private final CategoryItemRepository categoryItemRepository;
 
-    private final DynamicUserService dynamicUserService;
-
     @Autowired
     public CompanyItemService(KokonutUserService kokonutUserService, HistoryService historyService,
                               AdminRepository adminRepository, CompanyRepository companyRepository, CompanyItemRepository companyItemRepository,
                               CompanyTableRepository companyTableRepository, CategoryDefaultRepository categoryDefaultRepository,
-                              CategoryItemRepository categoryItemRepository, DynamicUserService dynamicUserService){
+                              CategoryItemRepository categoryItemRepository){
         this.kokonutUserService = kokonutUserService;
         this.historyService = historyService;
         this.adminRepository = adminRepository;
@@ -67,7 +64,6 @@ public class CompanyItemService {
         this.companyTableRepository = companyTableRepository;
         this.categoryDefaultRepository = categoryDefaultRepository;
         this.categoryItemRepository = categoryItemRepository;
-        this.dynamicUserService = dynamicUserService;
     }
 
     // 기본 카테고리 항목 호출
@@ -167,9 +163,6 @@ public class CompanyItemService {
     @Transactional
     public ResponseEntity<Map<String, Object>> updateItem(Long ciId, String ciName, JwtFilterDto jwtFilterDto) throws IOException {
         log.info("updateItem 호출");
-
-//        log.info("ciId : "+ciId);
-//        log.info("ciName : "+ciName);
 
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
@@ -335,7 +328,7 @@ public class CompanyItemService {
     }
 
     // 유저테이블 리스트 호출
-    public ResponseEntity<Map<String, Object>> userTableList(JwtFilterDto jwtFilterDto) throws IOException {
+    public ResponseEntity<Map<String, Object>> userTableList(JwtFilterDto jwtFilterDto) {
         log.info("userTableList 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -354,7 +347,8 @@ public class CompanyItemService {
         return ResponseEntity.ok(res.success(data));
     }
 
-    public ResponseEntity<Map<String, Object>> privacyTableList(JwtFilterDto jwtFilterDto) throws IOException {
+    // 개인정보검색용 테이블리스트 호출
+    public ResponseEntity<Map<String, Object>> privacyTableList(JwtFilterDto jwtFilterDto) {
         log.info("privacyTableList 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -372,4 +366,5 @@ public class CompanyItemService {
 
         return ResponseEntity.ok(res.success(data));
     }
+
 }
