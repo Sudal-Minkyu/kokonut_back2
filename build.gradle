@@ -24,7 +24,7 @@ sonarqube {
         property 'sonar.sources', 'src'
         property 'sonar.language', 'java'
         property 'sonar.sourceEncoding', 'UTF-8'
-        property 'sonar.profile', 'sonar way'
+        property 'sonar.profile', 'Sonar way'
         property 'sonar.test.inclusions', '**/*.java'
     }
 }
