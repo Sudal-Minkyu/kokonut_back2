@@ -259,35 +259,36 @@ public class AuthApiService {
 
                         if (encrypts.get(i).equals("암호화")) {
 
-                            if(names.get(i).equals("이름")) {
-                                // 이름의 데이터의 대한 암호화
-                                int nameLength = value.length();
-
-                                String middleName;
-                                String lastName;
-                                if (nameLength % 2 == 0) {
-                                    if(nameLength == 2) {
-                                        // 이름이 두글자 일 경우
-                                        middleName = value.substring(1,2);
-                                        lastName = "";
-                                    } else {
-                                        middleName = value.substring(nameLength / 2 - 1, nameLength / 2 + 1); // 이름이 짝수 글자일 때
-                                        lastName = value.substring(nameLength - 1);
-                                    }
-                                } else {
-                                    middleName = value.substring(nameLength / 2, nameLength / 2 + 1); // 이름이 홀수 글자일 때
-                                    lastName = value.substring(nameLength - 1);
-                                }
-
-                                log.info("middleName : "+middleName);
-
-                                value = value.charAt(0)+ "-" +
-                                        AESGCMcrypto.encrypt(middleName.getBytes(StandardCharsets.UTF_8), awsKmsResultDto.getSecretKey(),
-                                                Base64.getDecoder().decode(awsKmsResultDto.getIvKey())) + "-" +
-                                        lastName;
-
-                            }
-                            else if (names.get(i).equals("휴대전화번호")) {
+                            // 이름은 통으로 암호화로 수정 -> 2023.06.09
+//                            if(names.get(i).equals("이름")) {
+//                                // 이름의 데이터의 대한 암호화
+//                                int nameLength = value.length();
+//
+//                                String middleName;
+//                                String lastName;
+//                                if (nameLength % 2 == 0) {
+//                                    if(nameLength == 2) {
+//                                        // 이름이 두글자 일 경우
+//                                        middleName = value.substring(1,2);
+//                                        lastName = "";
+//                                    } else {
+//                                        middleName = value.substring(nameLength / 2 - 1, nameLength / 2 + 1); // 이름이 짝수 글자일 때
+//                                        lastName = value.substring(nameLength - 1);
+//                                    }
+//                                } else {
+//                                    middleName = value.substring(nameLength / 2, nameLength / 2 + 1); // 이름이 홀수 글자일 때
+//                                    lastName = value.substring(nameLength - 1);
+//                                }
+//
+//                                log.info("middleName : "+middleName);
+//
+//                                value = value.charAt(0)+ "-" +
+//                                        AESGCMcrypto.encrypt(middleName.getBytes(StandardCharsets.UTF_8), awsKmsResultDto.getSecretKey(),
+//                                                Base64.getDecoder().decode(awsKmsResultDto.getIvKey())) + "-" +
+//                                        lastName;
+//
+//                            }
+                            if (names.get(i).equals("휴대전화번호")) {
                                 // 휴대전화번호의 데이터의 대한 암호화
                                 if(value.length() == 11) {
                                     value = value.substring(0,3) + "-" +
@@ -300,20 +301,21 @@ public class AuthApiService {
                                             ResponseErrorCode.ERROR_CODE_05.getDesc() + " 보내신 휴대전화번호 : " + value));
                                 }
                             }
-                            else if (names.get(i).equals("이메일주소")) {
-                                String[] emailAddress = value.split("@");
-                                log.info("emailAddress : "+ Arrays.toString(emailAddress));
-                                log.info("emailAddress.length : "+ emailAddress.length);
-                                if(emailAddress.length == 2) {
-                                    value = AESGCMcrypto.encrypt(emailAddress[0].getBytes(StandardCharsets.UTF_8), awsKmsResultDto.getSecretKey(),
-                                            Base64.getDecoder().decode(awsKmsResultDto.getIvKey())) + "-@" +
-                                            emailAddress[1];
-                                } else {
-                                    log.error("이메일주소 형식과 맞지 않습니다. 다시 한번 확인해주시길 바랍니다. 보내신 이메일주소 : " + value);
-                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_09.getCode(),
-                                            ResponseErrorCode.ERROR_CODE_09.getDesc() + " 보내신 이메일주소 : " + value));
-                                }
-                            }
+                            // 이메일주소는 통으로 암호화로 수정 -> 2023.06.09
+//                            else if (names.get(i).equals("이메일주소")) {
+//                                String[] emailAddress = value.split("@");
+//                                log.info("emailAddress : "+ Arrays.toString(emailAddress));
+//                                log.info("emailAddress.length : "+ emailAddress.length);
+//                                if(emailAddress.length == 2) {
+//                                    value = AESGCMcrypto.encrypt(emailAddress[0].getBytes(StandardCharsets.UTF_8), awsKmsResultDto.getSecretKey(),
+//                                            Base64.getDecoder().decode(awsKmsResultDto.getIvKey())) + "-@" +
+//                                            emailAddress[1];
+//                                } else {
+//                                    log.error("이메일주소 형식과 맞지 않습니다. 다시 한번 확인해주시길 바랍니다. 보내신 이메일주소 : " + value);
+//                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_09.getCode(),
+//                                            ResponseErrorCode.ERROR_CODE_09.getDesc() + " 보내신 이메일주소 : " + value));
+//                                }
+//                            }
 
                             else {
                                 // 데이터 암호화하기
