@@ -18,14 +18,9 @@ sonarqube {
     properties {
         property 'sonar.projectName', 'beta_kn_backend'
         property 'sonar.projectKey', 'beta_kn_backend'
-        property 'sonar.host.url', 'https://beta.kokonut.me:9000'
+        property 'sonar.host.url', 'http://52.79.252.55:9000'
         property 'sonar.login', 'sqp_ae8e61a1ee07d91a798eaa5b6abeff7ef3dddb55'
         property 'sonar.coverage.jacoco.xmlReportPaths', '**/jacoco/*.xml'
-        property 'sonar.sources', 'src'
-        property 'sonar.language', 'java'
-        property 'sonar.sourceEncoding', 'UTF-8'
-        property 'sonar.profile', 'Sonar way'
-        property 'sonar.test.inclusions', '**/*.java'
     }
 }
 
