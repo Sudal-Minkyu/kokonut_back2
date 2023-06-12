@@ -10,32 +10,15 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Iterator;
 
 @Slf4j
 public class CommonUtil {
-
-    public static String getDomain(HttpServletRequest request) {
-    	boolean https = false;
-        String proto = (String) request.getHeader("x-forwarded-proto");
-        if (proto != null) {
-            https = "https".equals(proto) ? true : false;
-        } else {
-        	https = request.isSecure();
-        }
-
-    	String requestURL = request.getRequestURL().toString().replace(request.getRequestURI(), "");
-    	if(https) {
-    		requestURL = requestURL.replace("http://", "https://");
-    	}
-
-        return requestURL;
-    }
 
     // IPv4 조회
     public static String clientIp() {
@@ -85,10 +68,10 @@ public class CommonUtil {
 	public static String publicIp() throws IOException {
 
 		URL url = new URL("https://checkip.amazonaws.com");
-		BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
-		String ip = br.readLine();
-		br.close();
-
+		String ip;
+		try(BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()))){
+			ip = br.readLine();
+		}
 		return ip;
 	}
 
@@ -381,12 +364,12 @@ public class CommonUtil {
 	 * 랜덤 문자열 생성
 	 */
 	public static String makeRandomChar(int length) {
+		SecureRandom rnd = new SecureRandom();
 		StringBuilder randomChar = new StringBuilder();
 		for (int i = 1; i <= length; i++) {
-			char ch = (char) ((Math.random() * 26) + 97);
+			char ch = (char) (rnd.nextInt(26) + 97);
 			randomChar.append(ch);
-	    }
-
+		}
 		return randomChar.toString();
 	}
 

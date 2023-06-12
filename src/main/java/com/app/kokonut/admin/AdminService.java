@@ -28,7 +28,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -292,6 +291,8 @@ public class AdminService {
             data.put("cpName",adminInfoDto.getCpName());
             data.put("knEmail",email);
             data.put("role",jwtFilterDto.getRole().getCode());
+
+            data.put("knPhoneNumber",adminInfoDto.getKnPhoneNumber());
 
             LocalDate nowDate = LocalDate.now();
             // log.info("nowDate : "+nowDate);

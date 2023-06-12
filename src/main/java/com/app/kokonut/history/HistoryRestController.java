@@ -10,12 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
@@ -48,6 +44,13 @@ public class HistoryRestController {
                                                            @PageableDefault Pageable pageable) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return historyService.activityList(jwtFilterDto.getEmail(), searchText, stime, actvityType, pageable);
+    }
+
+    @PostMapping("/activityUpdate")
+    @ApiOperation(value="활동 업데이트", notes="")
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    public ResponseEntity<Map<String,Object>> activityUpdate(@RequestParam(value="ahId", defaultValue = "") long ahId) {
+        return historyService.activityUpdate(ahId);
     }
 
 //    @ApiOperation(value="활동이력 엑셀 다운로드", notes="활동이력 목록을 엑셀 파일로 다운로드", response=KokonutApiResponse.class)

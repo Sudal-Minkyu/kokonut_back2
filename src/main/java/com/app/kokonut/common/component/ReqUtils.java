@@ -1,60 +1,7 @@
 package com.app.kokonut.common.component;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.servlet.http.HttpServletRequest;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
 public class ReqUtils {
-	
-	private static final Logger logger = LoggerFactory.getLogger(ReqUtils.class);
 
-	public static HashMap<String, Object> getParameterMapAndRevertCharset(HttpServletRequest request) {
-		HashMap<String, Object>  map = new HashMap<String, Object>();
-        try {
-            Map<String, String[]> paramerterMap = request.getParameterMap();
-            Iterator<String> iter = paramerterMap.keySet().iterator();
-            String key = null;
-            String[] value = null;
-            while(iter.hasNext()) {
-                key = (String)iter.next();
-                value = (String []) paramerterMap.get(key);
-                if(value.length > 1){
-                	String[] reValue = new String[value.length];
-                	for(int i=0; i<value.length; i++){
-                		String rVal = value[i];
-                		if(value[i] == null || value[i].equals("") || value[i].equals("null")){
-                    		rVal = "";
-                    	}else{
-                    		rVal = filter(rVal);
-                    	}
-                		reValue[i] = rVal;
-                	}
-                	map.put(key, reValue);
-                } else {
-                	String rVal = value[0];
-                	if(value[0] == null || value[0].equals("") || value[0].equals("null")){
-                		rVal = "";
-                	}else{
-                		rVal = new String(filter(rVal).getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
-
-                	}
-                	map.put(key, rVal);
-                }
-            }
-        } catch(Exception e) {
-        	logger.error(e.getMessage());
-        }
-        
-        return map;
-	}
-
-
-	
 	public static String filter(String value) {
     	if(value==null) {
             return null;

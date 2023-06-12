@@ -107,6 +107,7 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
                 .select(Projections.constructor(AdminInfoDto.class,
                         admin.knName,
                         company.cpName,
+                        admin.knPhoneNumber,
                         company.cpElectronic,
                         company.cpElectronicDate,
 

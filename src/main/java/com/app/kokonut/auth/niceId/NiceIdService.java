@@ -330,7 +330,11 @@ public class NiceIdService {
 				log.info("휴대전화번호 변경 본인인증");
 				data.put("joinName", knName);
 				data.put("joinPhone", knPhoneNumber);
-			}else {
+			} else if(state.equals("6")) {
+				log.info("해외로그인 본인인증");
+				data.put("joinName", knName);
+				data.put("joinPhone", knPhoneNumber);
+			} else {
 				log.info("그 외 본인인증");
 			}
 

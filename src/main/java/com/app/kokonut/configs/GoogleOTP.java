@@ -1,9 +1,7 @@
 package com.app.kokonut.configs;
 
 import com.app.kokonut.auth.jwt.dto.GoogleOtpGenerateDto;
-import com.app.kokonut.keydata.KeyDataService;
 import org.apache.commons.codec.binary.Base32;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -11,9 +9,9 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Random;
 
 @Service
 public class GoogleOTP {
@@ -21,12 +19,7 @@ public class GoogleOTP {
 	@Value("${kokonut.otp.hostUrl}")
 	public String hostUrl;
 
-	@Autowired
-	public GoogleOTP(KeyDataService keyDataService) {
-//		this.hostUrl = keyDataService.findByKeyValue("otp_url");
-	}
-
-	private final Random random = new Random();
+	private final SecureRandom random = new SecureRandom();
 
 	public GoogleOtpGenerateDto generate(String userName) {
 		GoogleOtpGenerateDto googleOtpGenerateDto = new GoogleOtpGenerateDto();
