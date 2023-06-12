@@ -23,10 +23,10 @@ import com.app.kokonut.common.component.ReqUtils;
 import com.app.kokonut.common.realcomponent.*;
 import com.app.kokonut.company.company.Company;
 import com.app.kokonut.company.company.CompanyRepository;
-import com.app.kokonut.company.companyfile.CompanyFile;
-import com.app.kokonut.company.companyfile.CompanyFileRepository;
 import com.app.kokonut.company.companydatakey.CompanyDataKey;
 import com.app.kokonut.company.companydatakey.CompanyDataKeyRepository;
+import com.app.kokonut.company.companyfile.CompanyFile;
+import com.app.kokonut.company.companyfile.CompanyFileRepository;
 import com.app.kokonut.company.companysetting.CompanySetting;
 import com.app.kokonut.company.companysetting.CompanySettingRepository;
 import com.app.kokonut.company.companysetting.dtos.CompanySettingCheckDto;
@@ -95,7 +95,7 @@ public class AuthService {
 
     private final AwsS3Util awsS3Util;
     private final AwsKmsUtil awsKmsUtil;
-
+    private final WhoisUtil whoisUtil;
     private final KeyGenerateService keyGenerateService;
     private final AdminRepository adminRepository;
 
@@ -122,7 +122,7 @@ public class AuthService {
     @Autowired
     public AuthService(AdminService adminService, HistoryService historyService,
                        KokonutUserService kokonutUserService, AwsS3Util awsS3Util, AdminRepository adminRepository,
-                       AwsKmsUtil awsKmsUtil, KeyGenerateService keyGenerateService, CompanyRepository companyRepository,
+                       AwsKmsUtil awsKmsUtil, WhoisUtil whoisUtil, KeyGenerateService keyGenerateService, CompanyRepository companyRepository,
                        CompanyDataKeyRepository companyDataKeyRepository, CompanyTableRepository companyTableRepository, CompanyFileRepository companyFileRepository,
                        CompanyTableColumnInfoRepository companyTableColumnInfoRepository, CompanySettingRepository companySettingRepository, CompanySettingAccessIPRepository companySettingAccessIPRepository, AwsKmsHistoryRepository awsKmsHistoryRepository, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider,
                        AuthenticationManagerBuilder authenticationManagerBuilder,
@@ -133,6 +133,7 @@ public class AuthService {
         this.awsS3Util = awsS3Util;
         this.adminRepository = adminRepository;
         this.awsKmsUtil = awsKmsUtil;
+        this.whoisUtil = whoisUtil;
         this.keyGenerateService = keyGenerateService;
         this.companyRepository = companyRepository;
         this.companyDataKeyRepository = companyDataKeyRepository;
@@ -554,7 +555,7 @@ public class AuthService {
 //        String fileGroupId = "FATT_" + UUID.randomUUID();  // 파일그룹ID? 바뀔수도..
         String knPhoneNumber = signUp.getKnPhoneNumber(); // 휴대폰번호
         String knEmailAuthNumber = CommonUtil.makeRandomChar(15); // 이메일인증 코드
-        String businessNumber = signUp.getCpBusinessNumber(); // 사업자등록번호
+//        String businessNumber = signUp.getCpBusinessNumber(); // 사업자등록번호
 
         /* NICEID를 통해 휴대폰 인증을 완료했는 지 확인 */
         if(!signUp.getKnEmail().equals("kokonut@kokonut.me")) { // 테스트일 경우 패스
@@ -738,7 +739,7 @@ public class AuthService {
         // 메일보내는 로직
         // 메일 서비스 완료되면 할 것 - 2022/12/23 to.woody
 //        List<HashMap<String, Object>> systemAdminList = adminService.SelectSystemAdminList();
-        List<String> systemAdminList = new ArrayList<>();
+//        List<String> systemAdminList = new ArrayList<>();
 //            try {
 //                String mailData = URLEncoder.encode(parameter.get("knEmail").toString(), "UTF-8");
 //                String title = "사업자 회원가입 승인요청";
@@ -794,6 +795,7 @@ public class AuthService {
                 return ResponseEntity.ok(res.fail(ResponseErrorCode.KO010.getCode(),ResponseErrorCode.KO010.getDesc()));
             }
 
+            int historyState = 0;
             Optional<Admin> optionalAdmin = adminRepository.findByKnEmail(knEmail);
 
             if (optionalAdmin.isEmpty()) {
@@ -830,39 +832,10 @@ public class AuthService {
                             AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(knEmail);
                             Long adminId = adminCompanyInfoDto.getAdminId();
                             String companyCode = adminCompanyInfoDto.getCompanyCode();
+                            String roleCode = optionalAdmin.get().getKnRoleCode().getCode();
 
                             int knPwdErrorCount = optionalAdmin.get().getKnPwdErrorCount(); // 비밀번호 오류횟수
                             String publicIp = CommonUtil.publicIp();
-
-                            // *숙제*
-                            // 비밀번호 오휴 횟수 제한 가져오기
-                            // 설정해둔 횟수와 같거나 크면 로그인 제한됨 -> 비밀번호 찾기 및 재설정 기능 제공하기
-                            // 만약 접속허용IP 설정 활성화 일 경우 -> 접속허용된 IP 인지 체크하기
-                            CompanySettingCheckDto companySettingCheckDto = companySettingRepository.findByCompanySettingCheck(companyCode);
-                            if(companySettingCheckDto.getCsOverseasBlockSetting().equals("1")) {
-                                // 로그인사람이 해외인지 체크
-                                log.info("서비스 로그인 위치가 해외인지 체크");
-                                // 오픈API 라이브러리를 통해 체킹하기
-                            }
-
-                            if(companySettingCheckDto.getCsAccessSetting().equals("1")) {
-                                log.info("접속 허용IP 인지 체크");
-//                                log.info("publicIp : "+publicIp);
-                                boolean accessIpCheckResult = companySettingAccessIPRepository.existsCompanySettingAccessIPByCsIdAndCsipIp(companySettingCheckDto.getCsId(), publicIp);
-                                log.info("accessIpCheckResult : "+accessIpCheckResult);
-                                if(!accessIpCheckResult) {
-                                    log.error("접속 허용되지 않은 IP 입니다. 관리자에게 등록을 요청해주세요.");
-                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO094.getCode(),ResponseErrorCode.KO094.getDesc()));
-                                }
-                            }
-
-                            int csPasswordErrorCountSetting = Integer.parseInt(companySettingCheckDto.getCsPasswordErrorCountSetting());
-                            log.info("csPasswordErrorCountSetting : "+csPasswordErrorCountSetting);
-                            log.info("knPwdErrorCount : "+knPwdErrorCount);
-                            if(csPasswordErrorCountSetting <= knPwdErrorCount) {
-                                log.info("로그인 오류 횟수제한");
-                                // -> 다음로직 어떻게할지 안 정함
-                            }
 
                             // 로그인 코드
                             ActivityCode activityCode = ActivityCode.AC_01;
@@ -871,6 +844,65 @@ public class AuthService {
                             // 활동이력 저장 -> 비정상 모드
                             Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
                                     companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, publicIp, 0, knEmail);
+
+                            // *숙제*
+                            // 비밀번호 오휴 횟수 제한 가져오기
+                            // 설정해둔 횟수와 같거나 크면 로그인 제한됨 -> 비밀번호 찾기 미제공 -> 완관최고관리자일경우
+                            CompanySettingCheckDto companySettingCheckDto = companySettingRepository.findByCompanySettingCheck(companyCode);
+                            if(companySettingCheckDto.getCsOverseasBlockSetting().equals("1")) {
+                                // 로그인사람이 해외인지 체크
+                                log.info("서비스 로그인 위치가 해외인지 체크");
+                                // 오픈API 라이브러리를 통해 체킹하기
+                                String countryCode = whoisUtil.whoisAPI(publicIp);
+                                if(countryCode != null) {
+                                    log.info("로그인 국가코드 : "+countryCode);
+                                    if(!countryCode.equals("KR")) {
+                                        log.info("해외로그인 차단서비스 활성화");
+                                        historyState = 1;
+                                        historyService.updateHistory(activityHistoryId,
+                                                companyCode+" - "+activityCode.getDesc()+" 시도 이력", "해외로그인 차단서비스 활성화 -> 로그인 시도 해당 국가코드 : "+countryCode, 0);
+                                        data.put("blockAbroad", activityHistoryId);
+                                        data.put("knName", optionalAdmin.get().getKnName());
+                                        data.put("knPhoneNumber", optionalAdmin.get().getKnPhoneNumber());
+                                        data.put("blockAbroadMsg", "해외로그인이 차단되어 본인인증해주시길 바랍니다.");
+                                    }
+                                } else {
+                                    historyService.insertHistory(4, adminId, activityCode,
+                                            companyCode+" - "+activityCode.getDesc()+" 시도 이력", "whois library 호출오류", ip, publicIp, 0, knEmail);
+                                }
+                            }
+
+                            if(companySettingCheckDto.getCsAccessSetting().equals("1")) {
+                                log.info("접속 허용IP 체크");
+                                log.info("publicIp : "+publicIp);
+                                boolean accessIpCheckResult = companySettingAccessIPRepository.existsCompanySettingAccessIPByCsIdAndCsipIp(companySettingCheckDto.getCsId(), publicIp);
+//                                log.info("accessIpCheckResult : "+accessIpCheckResult);
+                                if(!accessIpCheckResult) {
+                                    log.error("접속 허용되지 않은 IP 입니다. 관리자에게 등록을 요청해주세요.");
+
+                                    historyService.updateHistory(activityHistoryId,
+                                            companyCode+" - "+activityCode.getDesc()+" 시도 이력", "접속 허용되지 않은 IP에서 로그인 시도하여 실패", 0);
+
+                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO094.getCode(),ResponseErrorCode.KO094.getDesc()));
+                                }
+                            }
+
+                            int csPasswordErrorCountSetting = Integer.parseInt(companySettingCheckDto.getCsPasswordErrorCountSetting());
+//                            log.info("csPasswordErrorCountSetting : "+csPasswordErrorCountSetting);
+//                            log.info("knPwdErrorCount : "+knPwdErrorCount);
+                            if(csPasswordErrorCountSetting <= knPwdErrorCount && !roleCode.equals("ROLE_SYSTEM")) {
+                                log.info("로그인 오류 횟수제한");
+                                // -> 다음로직 어떻게할지 안 정함 -> 로그인불가처리 -> 관리자가 비밀번호 재설정을 눌러줄 방법밖에 없음 마스터관리자에겐 해당안되는지?
+                                historyService.updateHistory(activityHistoryId,
+                                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "로그인 오류횟수 초과로 인한 로그인실패", 1);
+
+                                if(roleCode.equals("ROLE_MASTER")) {
+//                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO096.getCode(),"비밀번호를 "+knPwdErrorCount+"회 틀리셨습니다. contact@kokonut.me로 문의바랍니다."+"(최대횟수 : "+csPasswordErrorCountSetting+"회)"));
+                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO096.getCode(),"비밀번호를 "+knPwdErrorCount+"회 틀리셨습니다. contact@kokonut.me로 문의 바랍니다."));
+                                } else {
+                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO095.getCode(),"비밀번호를 "+knPwdErrorCount+"회 틀리셨습니다. 관리자에게 비밀번호변경을 요청 바랍니다."));
+                                }
+                            }
 
                             // 인증 정보를 기반으로 JWT 토큰 생성
                             AuthResponseDto.TokenInfo jwtToken = jwtTokenProvider.generateToken(authentication);
@@ -896,8 +928,10 @@ public class AuthService {
                             optionalAdmin.get().setKnIpAddr(publicIp);
                             adminRepository.save(optionalAdmin.get());
 
-                            historyService.updateHistory(activityHistoryId,
-                                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+                            if(historyState == 0) {
+                                historyService.updateHistory(activityHistoryId,
+                                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+                            }
 
                             return ResponseEntity.ok(res.success(data));
                         }

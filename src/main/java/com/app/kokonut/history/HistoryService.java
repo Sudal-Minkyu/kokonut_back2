@@ -16,12 +16,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Woody
@@ -303,7 +301,21 @@ public class HistoryService {
         historyRepository.deleteExpiredHistory(activityIdx, month);
     }
 
+    @Transactional
+    public ResponseEntity<Map<String, Object>> activityUpdate(long ahId) {
+        log.info("activityUpdate 호출");
 
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
 
+        History history = historyRepository.findById(ahId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않은 'activityCode' 입니다."));
+
+        history.setAhState(1);
+
+        historyRepository.save(history);
+
+        return ResponseEntity.ok(res.success(data));
+    }
 
 }

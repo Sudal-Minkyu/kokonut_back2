@@ -106,3 +106,7 @@ kokonut:
   bootpay:
     restKey: ${KOKONUT_BOOTPAY_REST}
     privateKey: ${KOKONUT_BOOTPAY_PRIVATE}
+
+  #kisa
+  whois:
+    secretKey: ${KOKONUT_WHOIS_KEY}

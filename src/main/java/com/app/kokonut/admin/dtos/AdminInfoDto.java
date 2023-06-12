@@ -22,6 +22,8 @@ public class AdminInfoDto {
 
     private String cpName; // 소속명
 
+    private String knPhoneNumber; // 휴대폰번호
+
     private Integer cpElectronic;
 
     private LocalDate cpElectronicDate;

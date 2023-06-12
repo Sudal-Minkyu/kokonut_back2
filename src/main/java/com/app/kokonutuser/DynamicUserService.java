@@ -2061,28 +2061,28 @@ public class DynamicUserService {
 							if(companyTableColumnInfoCheck.getCtciSecuriy().equals("1")) {
 								if(!companyTableColumnInfoCheck.getCtciDesignation().equals("휴대전화번호")) {
 
-									if(companyTableColumnInfoCheck.getCtciDesignation().equals("이름")) {
-										if (value.length() == 2) {
-											value = value.charAt(0) + "-" + AESGCMcrypto.encrypt(value.substring(1,2).getBytes(StandardCharsets.UTF_8),
-													awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey()));
-										} else {
-											value = value.charAt(0) + "-" + AESGCMcrypto.encrypt(value.substring(1,value.length() - 1).getBytes(StandardCharsets.UTF_8),
-													awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey())) + "-" +value.substring(value.length() - 1);
-										}
-									} else if(companyTableColumnInfoCheck.getCtciDesignation().equals("이메일주소")) {
-										String[] emailAddress = value.split("@");
-										if(emailAddress.length != 2) {
-											log.error("이메일주소 형식과 맞지 않습니다. 다시 한번 확인해주시길 바랍니다. 보내신 이메일주소 : " + value);
-											return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_09.getCode(),
-													ResponseErrorCode.ERROR_CODE_09.getDesc() + " 보내신 이메일주소 : " + value));
-										} else {
-											value = AESGCMcrypto.encrypt(emailAddress[0].getBytes(StandardCharsets.UTF_8),
-													awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey())) + "-@" +emailAddress[1];
-										}
-									}else {
+//									if(companyTableColumnInfoCheck.getCtciDesignation().equals("이름")) {
+//										if (value.length() == 2) {
+//											value = value.charAt(0) + "-" + AESGCMcrypto.encrypt(value.substring(1,2).getBytes(StandardCharsets.UTF_8),
+//													awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey()));
+//										} else {
+//											value = value.charAt(0) + "-" + AESGCMcrypto.encrypt(value.substring(1,value.length() - 1).getBytes(StandardCharsets.UTF_8),
+//													awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey())) + "-" +value.substring(value.length() - 1);
+//										}
+//									} else if(companyTableColumnInfoCheck.getCtciDesignation().equals("이메일주소")) {
+//										String[] emailAddress = value.split("@");
+//										if(emailAddress.length != 2) {
+//											log.error("이메일주소 형식과 맞지 않습니다. 다시 한번 확인해주시길 바랍니다. 보내신 이메일주소 : " + value);
+//											return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_09.getCode(),
+//													ResponseErrorCode.ERROR_CODE_09.getDesc() + " 보내신 이메일주소 : " + value));
+//										} else {
+//											value = AESGCMcrypto.encrypt(emailAddress[0].getBytes(StandardCharsets.UTF_8),
+//													awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey())) + "-@" +emailAddress[1];
+//										}
+//									}else {
 										value = AESGCMcrypto.encrypt(value.getBytes(StandardCharsets.UTF_8),
 												awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey()));
-									}
+//									}
 								}
 								map.put(code, value);
 								securityWhether.add("1");
@@ -2158,28 +2158,34 @@ public class DynamicUserService {
 
 						if(securityWhether.get(i).equals("1")) {
 							String[] value = keyValue.split("-");
-							String securityResultValue; // 복호화된 데이터의 마스킹처리
+							String securityResultValue = null; // 복호화된 데이터의 마스킹처리
 							String decryptValue;
 							if(value.length >= 2) {
 								log.info("'-' 구분자로 들어간 암호화");
-								if(String.valueOf(headerNames.get(i)).contains("%%__%%이름%%__%%")) {
+								if(String.valueOf(headerNames.get(i)).contains("%%__%%휴대전화번호%%__%%")) {
+									log.info("휴대전화번호 암호화");
 									decryptValue = AESGCMcrypto.decrypt(value[1], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
-									if(value.length == 2) {
-										securityResultValue = value[0] + Utils.starsForString(decryptValue);
-									} else {
-										securityResultValue = value[0] + Utils.starsForString(decryptValue) + value[2];
-									}
+									securityResultValue = value[0] + Utils.starsForString(decryptValue) + value[2];
 								}
-								else {
-									// 이메일주소 암호화 일 경우
-									decryptValue = AESGCMcrypto.decrypt(value[0], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
-									securityResultValue = decryptValue.charAt(0) + Utils.starsForString(decryptValue).substring(2)  + decryptValue.substring(decryptValue.length() - 1)+value[1];
-								}
+//								else {
+//									// 이메일주소 암호화 일 경우
+//									decryptValue = AESGCMcrypto.decrypt(value[0], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
+//									securityResultValue = decryptValue.charAt(0) + Utils.starsForString(decryptValue).substring(2)  + decryptValue.substring(decryptValue.length() - 1)+value[1];
+//								}
 							} else {
-								// 만약 이메일일 경우
-								log.info("구분자가 없는 암호화");
-								decryptValue = AESGCMcrypto.decrypt(value[0], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
-								securityResultValue = decryptValue.charAt(0) + Utils.starsForString(decryptValue).substring(2)  + decryptValue.substring(decryptValue.length() - 1);
+								if(String.valueOf(headerNames.get(i)).contains("%%__%%이름%%__%%")) {
+									decryptValue = AESGCMcrypto.decrypt(value[0], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
+									if(decryptValue.length() == 2) {
+										securityResultValue = decryptValue.charAt(0) + "*";
+									} else {
+										securityResultValue = decryptValue.charAt(0) + Utils.starsForString(decryptValue).substring(2) + decryptValue.substring(decryptValue.length() - 1);
+									}
+								} else {
+									// 전체암호화 일 경우
+									log.info("구분자가 없는 암호화");
+									decryptValue = AESGCMcrypto.decrypt(value[0], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
+									securityResultValue = decryptValue.charAt(0) + Utils.starsForString(decryptValue) + decryptValue.substring(decryptValue.length() - 1);
+								}
 							}
 							log.info("value : "+ Arrays.toString(value));
 							log.info("securityResultValue : "+ securityResultValue);
