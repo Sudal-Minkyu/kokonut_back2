@@ -211,4 +211,25 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
         return query.fetch();
     }
 
+    // 사용자의 대한 비밀번호 오류횟수 초과 체크용
+    @Override
+    public AdminCompanySettingDto findByAdminCompanySetting(String knEmail) {
+
+        QAdmin admin = QAdmin.admin;
+        QCompany company = QCompany.company;
+        QCompanySetting companySetting = QCompanySetting.companySetting;
+
+        JPQLQuery<AdminCompanySettingDto> query = from(admin)
+                .innerJoin(company).on(company.companyId.eq(admin.companyId))
+                .innerJoin(companySetting).on(companySetting.cpCode.eq(company.cpCode))
+                .where(admin.knEmail.eq(knEmail))
+                .select(Projections.constructor(AdminCompanySettingDto.class,
+                        admin.knPwdErrorCount,
+                        companySetting.csPasswordErrorCountSetting,
+                        admin.knRoleCode
+                ));
+
+        return query.fetchOne();
+    }
+
 }

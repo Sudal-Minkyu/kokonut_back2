@@ -4,6 +4,7 @@ import com.app.kokonut.admin.Admin;
 import com.app.kokonut.admin.AdminRepository;
 import com.app.kokonut.admin.AdminService;
 import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
+import com.app.kokonut.admin.dtos.AdminCompanySettingDto;
 import com.app.kokonut.admin.enums.AuthorityRole;
 import com.app.kokonut.auth.dtos.AdminCreateDto;
 import com.app.kokonut.auth.dtos.AdminGoogleOTPDto;
@@ -164,7 +165,25 @@ public class AuthService {
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO079.getCode(), ResponseErrorCode.KO079.getDesc()));
         }
 
-        data.put("result", adminRepository.existsByKnEmail(knEmail));
+        boolean result = adminRepository.existsByKnEmail(knEmail);
+        if(result) {
+            AdminCompanySettingDto adminCompanySettingDto = adminRepository.findByAdminCompanySetting(knEmail);
+            int knPwdErrorCount = adminCompanySettingDto.getKnPwdErrorCount();
+            String roleCode = adminCompanySettingDto.getKnRoleCode();
+
+            int csPasswordErrorCountSetting = Integer.parseInt(adminCompanySettingDto.getCsPasswordErrorCountSetting());
+            if(csPasswordErrorCountSetting <= knPwdErrorCount && !roleCode.equals("ROLE_SYSTEM")) {
+                log.error("로그인 오류 횟수제한 이메일 : "+knEmail);
+                // -> 로그인불가처리 - 관리자가 비밀번호 재설정을 눌러줄 방법밖에 없음(왕관관리자는 코코넛에게 문의)
+                if(roleCode.equals("ROLE_MASTER")) {
+                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO096.getCode(),"비밀번호를 "+knPwdErrorCount+"회 틀리셨습니다. contact@kokonut.me로 문의 바랍니다."));
+                } else {
+                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO095.getCode(),"비밀번호를 "+knPwdErrorCount+"회 틀리셨습니다. 관리자에게 비밀번호변경을 요청 바랍니다."));
+                }
+            }
+        }
+
+        data.put("result", result);
         return ResponseEntity.ok(res.success(data));
     }
 
@@ -891,8 +910,8 @@ public class AuthService {
 //                            log.info("csPasswordErrorCountSetting : "+csPasswordErrorCountSetting);
 //                            log.info("knPwdErrorCount : "+knPwdErrorCount);
                             if(csPasswordErrorCountSetting <= knPwdErrorCount && !roleCode.equals("ROLE_SYSTEM")) {
-                                log.info("로그인 오류 횟수제한");
-                                // -> 다음로직 어떻게할지 안 정함 -> 로그인불가처리 -> 관리자가 비밀번호 재설정을 눌러줄 방법밖에 없음 마스터관리자에겐 해당안되는지?
+                                log.error("로그인 오류 횟수제한 이메일 : "+knEmail);
+                                // -> 로그인불가처리 - 관리자가 비밀번호 재설정을 눌러줄 방법밖에 없음(왕관관리자는 코코넛에게 문의)
                                 historyService.updateHistory(activityHistoryId,
                                         companyCode+" - "+activityCode.getDesc()+" 시도 이력", "로그인 오류횟수 초과로 인한 로그인실패", 1);
 

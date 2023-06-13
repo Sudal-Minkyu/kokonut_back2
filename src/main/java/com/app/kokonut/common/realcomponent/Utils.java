@@ -2,6 +2,7 @@ package com.app.kokonut.common.realcomponent;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.Cookie;
@@ -17,6 +18,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Slf4j
 public class Utils {
 //	public static String getToday()
 //	{
@@ -108,7 +110,8 @@ public class Utils {
 			map = (HashMap<String, Object>) mapper.readValue(json, new TypeReference<Map<String, Object>>() {});
 		} catch (Exception e) {
 			// TODO: handle exception
-			e.printStackTrace();
+			log.error("예외처리 : "+e);
+			log.error("예외처리 메세지 : "+e.getMessage());
 		}
 		return map;
 	}

@@ -392,7 +392,8 @@ public class CommonUtil {
 				dataMap.put(key, value);
 			}
 		} catch(Exception e){
-			e.printStackTrace();
+			log.error("예외처리 : "+e);
+			log.error("예외처리 메세지 : "+e.getMessage());
 		}
 
 		return dataMap;

@@ -52,7 +52,8 @@ public class BootPayUtil {
                 log.info("토큰받기 실패: " + res);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("예외처리 : "+e);
+			log.error("예외처리 메세지 : "+e.getMessage());
         }
     }
 
@@ -108,7 +109,8 @@ public class BootPayUtil {
                 log.info("빌링키 발급 실패: " + res);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("예외처리 : "+e);
+			log.error("예외처리 메세지 : "+e.getMessage());
         }
     }
 
@@ -136,7 +138,8 @@ public class BootPayUtil {
                 System.out.println("결제 실패 : " + res);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("예외처리 : "+e);
+			log.error("예외처리 메세지 : "+e.getMessage());
         }
 
     }
@@ -167,7 +170,8 @@ public class BootPayUtil {
                 System.out.println("예약 결제 실패: " + res);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("예외처리 : "+e);
+			log.error("예외처리 메세지 : "+e.getMessage());
         }
 
     }
@@ -188,7 +192,8 @@ public class BootPayUtil {
                 System.out.println("빌링키 조회 실패 : " + res);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("예외처리 : "+e);
+			log.error("예외처리 메세지 : "+e.getMessage());
         }
 
     }
@@ -209,7 +214,8 @@ public class BootPayUtil {
                 System.out.println("빌링키 삭제 실패: " + res);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("예외처리 : "+e);
+			log.error("예외처리 메세지 : "+e.getMessage());
         }
 
     }
