@@ -18,6 +18,6 @@ public interface CompanyRepository extends JpaRepository<Company, Long>, JpaSpec
 
     boolean existsByCpCode(String companyCode);
 
-    Optional<Company> findByCpCode(String cpCOde);
+    Optional<Company> findByCpCode(String cpCode);
 
 }

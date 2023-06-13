@@ -33,6 +33,8 @@ public class AdminInfoDto {
 
     private String csAutoLogoutSetting; // 자동로그아웃 시간
 
+    private String billingCheck; // 빌링키등록 체크
+
     public long getCsPasswordChangeSetting() {
         return Long.parseLong(csPasswordChangeSetting);
     }

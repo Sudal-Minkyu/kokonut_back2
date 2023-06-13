@@ -43,59 +43,26 @@ public class Company {
     private LocalDate cpElectronicDate;
 
     /**
-     * 결제일(5일,10일 등 일자)
-     */
-    @Column(name = "cp_pay_day")
-    @ApiModelProperty("결제일(5일,10일 등 일자)")
-    private Integer cpPayDay;
-
-    /**
-     * 결제등록일
-     */
-    @Column(name = "cp_pay_date")
-    @ApiModelProperty("결제등록일")
-    private LocalDateTime cpPayDate;
-
-    /**
      * 자동결제(1:자동결제안함, 2:첫결제신청, 3: 해제, 4:첫결제 이후 재결제, 6:강제해제)
      */
-    @Column(name = "cp_is_auto_pay")
-    @ApiModelProperty("자동결제(1:자동결제안함, 2:첫결제신청, 3: 해제, 4:첫결제 이후 재결제, 6:강제해제)")
-    private Integer cpIsAutoPay;
+//    @Column(name = "cp_is_auto_pay")
+//    @ApiModelProperty("자동결제(1:자동결제안함, 2:첫결제신청, 3: 해제, 4:첫결제 이후 재결제, 6:강제해제)")
+//    private Integer cpIsAutoPay;
 
-    /**
-     * 카드(빌링키)와 1:1로 대응하는 값
-     */
-    @Column(name = "cp_billing_key")
-    @ApiModelProperty("카드(빌링키)와 1:1로 대응하는 값")
-    private String cpBillingKey;
+    @Column(name = "cp_receipt_id")
+    @ApiModelProperty("카드(빌링키)")
+    private String cpReceiptId;
 
-    /**
-     * 서비스 결제 X 강제 해지시 결제 안한 금액
-     */
-    @Column(name = "cp_stop_service_price")
-    @ApiModelProperty("서비스 결제 X 강제 해지시 결제 안한 금액")
-    private Integer cpStopServicePrice;
+    @Column(name = "cp_receipt_date")
+    @ApiModelProperty("빌링키 발급 및 변경 일자")
+    private LocalDateTime cpReceiptDate;
 
-    /**
-     * 자동결제 해지일시
-     */
-    @ApiModelProperty("자동결제 해지일시")
-    @Column(name = "cp_not_auto_pay_date")
-    private LocalDateTime cpNotAutoPayDate;
-
-    /**
-     * 회원권 시작일
-     */
-    @ApiModelProperty("회원권 시작일")
+    @ApiModelProperty("자동결제 부과 시작일")
     @Column(name = "cp_valid_start")
     private LocalDateTime cpValidStart;
 
-    /**
-     * 회원권 종료일
-     */
+    @ApiModelProperty("자동결제 부과 종료일")
     @Column(name = "cp_valid_end")
-    @ApiModelProperty("회원권 종료일")
     private LocalDateTime cpValidEnd;
 
     /**

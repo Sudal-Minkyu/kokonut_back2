@@ -321,7 +321,7 @@ public class AdminService {
                 data.put("csPasswordChangeState","1");
             }
 
-
+            data.put("paymentBillingCheck",adminInfoDto.getBillingCheck()); // "1"이면 등록됨, "0" 이면 등록되지않음(팝업창 안내)
 
         }
 

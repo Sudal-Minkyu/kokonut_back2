@@ -33,9 +33,9 @@ public class PaymentRestController {
         this.paymentService = paymentService;
     }
 
-    // 자동결제 카드 신규등록(부트페이 빌링키등록)
+    // 자동결제 카드 신규등록(부트페이 빌링키등록 & 변경)
     @PostMapping(value = "/billingSave")
-    @ApiOperation(value = "카드를 신규등록한다." , notes = "" +
+    @ApiOperation(value = "자동결제 카드 신규등록(부트페이 빌링키등록) 및 변경" , notes = "" +
             "1. 인증방식의 부트페이팝업의 정보를 입력하여 받은 receipt_id를 받는다." +
             "2. 받은 receipt_id를 저장한다.")
     @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
@@ -43,16 +43,6 @@ public class PaymentRestController {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return paymentService.billingSave(payReceiptId, jwtFilterDto);
     }
-
-    // 자동결제 카드 변경(부트페이 빌링키변경)
-    @PostMapping(value = "/billingUpdate")
-    @ApiOperation(value = "카드를 신규등록하거나, 기존의 등록된 카드를 변경한다." , notes = "")
-    @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-    public ResponseEntity<Map<String,Object>> billingUpdate(@RequestParam(value="payReceiptId", defaultValue = "") String payReceiptId) throws IOException {
-        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
-        return paymentService.billingUpdate(payReceiptId, jwtFilterDto);
-    }
-
 
 //    // 이번달 요금 결제
 //    @PostMapping(value = "/existsByKnEmail")

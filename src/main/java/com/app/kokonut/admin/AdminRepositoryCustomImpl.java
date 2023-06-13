@@ -115,7 +115,10 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
                                 .when(admin.knPwdChangeDate.isNotNull()).then(admin.knPwdChangeDate)
                                 .otherwise(admin.insert_date),
                         companySetting.csPasswordChangeSetting,
-                        companySetting.csAutoLogoutSetting
+                        companySetting.csAutoLogoutSetting,
+                        new CaseBuilder()
+                                .when(company.cpReceiptId.isNotNull()).then("1")
+                                .otherwise("0")
                 ));
 
         return query.fetchOne();

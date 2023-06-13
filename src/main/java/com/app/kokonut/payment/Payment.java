@@ -31,22 +31,6 @@ public class Payment {
     @Column(name = "cp_code")
     private String cpCode;
 
-    @ApiModelProperty("결제 receipt_id")
-    @Column(name = "pay_receipt_id")
-    private String payReceiptId;
-
-    @ApiModelProperty("상품(STANDARD, PREMIUM)")
-    @Column(name = "pay_service")
-    private String payService;
-
-    @ApiModelProperty("자동결제 부과 시작일")
-    @Column(name = "pay_valid_start")
-    private LocalDateTime payValidStart;
-
-    @ApiModelProperty("자동결제 부과 종료일")
-    @Column(name = "pay_valid_end")
-    private LocalDateTime payValidEnd;
-
     @ApiModelProperty("결제금액")
     @Column(name = "pay_amount")
     private Integer payAmount;
@@ -55,7 +39,7 @@ public class Payment {
     @Column(name = "pay_state")
     private String payState;
 
-    @ApiModelProperty("결제방법(0:자동결제, 1:요금정산, 2 : 결제실패, 3 : 해지할 때 결제, 4 : 해지 당시에 결제할 때)")
+    @ApiModelProperty("결제방법(0:자동결제, 1:요금정산, 2 : 결제실패)")
     @Column(name = "pay_method")
     private String payMethod;
 
