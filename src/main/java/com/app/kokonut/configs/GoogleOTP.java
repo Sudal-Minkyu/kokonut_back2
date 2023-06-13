@@ -50,7 +50,7 @@ public class GoogleOTP {
 			int window = 3;
 			for (int i = -window; i <= window; ++i) {
 				long hash = verify_code(decodedKey, wave + i);
-//				System.out.println("hash : " + hash);
+//				log.info("hash : " + hash);
 				if (hash == otpnum) result = true;
 			}
 		} catch (InvalidKeyException | NoSuchAlgorithmException e) {
@@ -67,12 +67,12 @@ public class GoogleOTP {
 			data[i] = (byte) value;
 		}
 
-		SecretKeySpec signKey = new SecretKeySpec(key, "HmacSHA256");
-		Mac mac = Mac.getInstance("HmacSHA256");
+		SecretKeySpec signKey = new SecretKeySpec(key, "HmacSHA1");
+		Mac mac = Mac.getInstance("HmacSHA1");
 		mac.init(signKey);
 		byte[] hash = mac.doFinal(data);
 
-		int offset = hash[32 - 1] & 0xF;
+		int offset = hash[20 - 1] & 0xF;
 
 		long truncatedHash = 0;
 		for (int i = 0; i < 4; ++i) {
