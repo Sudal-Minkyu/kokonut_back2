@@ -1,11 +1,9 @@
 package com.app.kokonut.company.company;
 
-import com.app.kokonut.apiKey.dtos.ApiKeyIpDeleteDto;
 import com.app.kokonut.auth.jwt.SecurityUtil;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import com.app.kokonut.company.companyitem.CompanyItemService;
-import com.app.kokonut.company.companysetting.CompanySettingService;
-import com.app.kokonut.company.companysettingaccessip.dtos.AccessIpDeleteDto;
+import com.app.kokonut.payment.PaymentService;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +17,12 @@ import java.util.Map;
 @RequestMapping("/v2/api/Company")
 public class CompanyRestController {
 
+    private final PaymentService paymentService;
     private final CompanyItemService companyItemService;
 
     @Autowired
-    public CompanyRestController(CompanyItemService companyItemService) {
+    public CompanyRestController(PaymentService paymentService, CompanyItemService companyItemService) {
+        this.paymentService = paymentService;
         this.companyItemService = companyItemService;
     }
 
@@ -115,6 +115,17 @@ public class CompanyRestController {
 
 //  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+//  @@@@@@@@@@@@@@@@@@@@@@@@@ 구독 관리 페이지 카테고리 관련 API @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+    @ApiOperation(value="결제정보를 가져온다.", notes="")
+    @GetMapping(value = "/companyPaymentInfo")
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    public ResponseEntity<Map<String,Object>> companyPaymentInfo() {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return paymentService.companyPaymentInfo(jwtFilterDto);
+    }
+
+//  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 

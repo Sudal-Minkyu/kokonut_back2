@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
  * @author Woody
  * Date : 2023-06-07
  * Time :
- * Remark : Payment Table Entity
+ * Remark : 결제정보 내역 Table Entity
  */
 @Entity
 @EqualsAndHashCode(of = "payId")
@@ -35,13 +35,25 @@ public class Payment {
     @Column(name = "pay_amount")
     private Integer payAmount;
 
-    @ApiModelProperty("상태(0:결제오류,1:결제완료)")
+    @ApiModelProperty("상태(0:결제오류, 1:결제완료, 2:결제예약중)")
     @Column(name = "pay_state")
     private String payState;
 
-    @ApiModelProperty("결제방법(0:자동결제, 1:요금정산, 2 : 결제실패)")
+    @ApiModelProperty("결제방법(0:자동결제, 1:요금정산, 2:결제실패)")
     @Column(name = "pay_method")
     private String payMethod;
+
+    @ApiModelProperty("결제당일 기준 현재 개인정보수")
+    @Column(name = "pay_privacy_count")
+    private String payPrivacyCount;
+
+    @ApiModelProperty("결제예약 취소 시 필요한 키")
+    @Column(name = "pay_reserve_id")
+    private String payReserveId;
+
+    @ApiModelProperty("결제예약 실행시간")
+    @Column(name = "pay_reserve_execute_date")
+    private LocalDateTime payReserveExecuteDate;
 
     @ApiModelProperty("결제자 email")
     @Column(name = "insert_email")

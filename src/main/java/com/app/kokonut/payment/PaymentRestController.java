@@ -39,7 +39,7 @@ public class PaymentRestController {
             "1. 인증방식의 부트페이팝업의 정보를 입력하여 받은 receipt_id를 받는다." +
             "2. 받은 receipt_id를 저장한다.")
     @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-    public ResponseEntity<Map<String,Object>> billingSave(@RequestParam(value="payReceiptId", defaultValue = "") String payReceiptId) throws IOException {
+    public ResponseEntity<Map<String,Object>> billingSave(@RequestParam(value="payReceiptId", defaultValue = "") String payReceiptId) throws Exception {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return paymentService.billingSave(payReceiptId, jwtFilterDto);
     }

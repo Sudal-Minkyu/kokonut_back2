@@ -117,7 +117,7 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
                         companySetting.csPasswordChangeSetting,
                         companySetting.csAutoLogoutSetting,
                         new CaseBuilder()
-                                .when(company.cpReceiptId.isNotNull()).then("1")
+                                .when(company.cpiId.isNotNull()).then("1")
                                 .otherwise("0")
                 ));
 
