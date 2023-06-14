@@ -79,14 +79,11 @@ public class PaymentService {
 
 		CompanyPaymentInfoDto companyPaymentInfoDto = null;
 		if(optionalCompany.isPresent()) {
-
 			if(optionalCompany.get().getCpiId() != null) {
 				companyPaymentInfoDto = companyPaymentInfoRepository.findByCompanyPaymentInfo(optionalCompany.get().getCpiId());
-				if(companyPaymentInfoDto != null) {
-					data.put("paymentInfo", companyPaymentInfoDto);
-				}
+			} else {
+				log.error("companyPaymentInfo : 카드정보가 존재하지 않음");
 			}
-
 		} else {
 			log.error("companyPaymentInfo : 회사가 조회되지 않음");
 		}
@@ -212,7 +209,6 @@ public class PaymentService {
 
 		return ResponseEntity.ok(res.success(data));
 	}
-
 
 	// 결제 예약걸기
 

@@ -17,6 +17,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class CompanyPaymentInfoDto {
 
+    private String cpiPayType; // 결제타입 - '0' : 월 정기구독, '1' : 연 정기구독
+
     private String cpiInfoCardName; // 카드사명(부트페이제공 데이터)
 
 }

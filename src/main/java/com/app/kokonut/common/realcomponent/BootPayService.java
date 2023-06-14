@@ -64,6 +64,7 @@ public class BootPayService {
             }
 
             return companyPaymentSaveDto;
+
         } catch (Exception e) {
             log.error("예외처리 : " + e);
             log.error("예외처리 메세지 : " + e.getMessage());
@@ -71,14 +72,6 @@ public class BootPayService {
             return null;
         }
     }
-
-
-
-//    @Autowired
-//    public BootPayUtil(String restKey, String privateKey) {
-//        this.restKey = restKey;
-//        this.privateKey = privateKey;
-//    }
 
     // 토큰발급(사용하지 않음)
     public void goGetToken() {

@@ -1,5 +1,6 @@
 package com.app.kokonut.company.companypaymentinfo;
 
+import com.app.kokonut.company.companypayment.QCompanyPayment;
 import com.app.kokonut.company.companypaymentinfo.dtos.CompanyPaymentInfoDto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPQLQuery;
@@ -26,11 +27,14 @@ public class CompanyPaymentInfoRepositoryCustomImpl extends QuerydslRepositorySu
     @Override
     public CompanyPaymentInfoDto findByCompanyPaymentInfo(Long cpiId) {
 
+        QCompanyPayment companyPayment = QCompanyPayment.companyPayment;
         QCompanyPaymentInfo companyPaymentInfo = QCompanyPaymentInfo.companyPaymentInfo;
 
         JPQLQuery<CompanyPaymentInfoDto> query = from(companyPaymentInfo)
                 .where(companyPaymentInfo.cpiId.eq(cpiId))
+                .innerJoin(companyPayment).on(companyPayment.cpiId.eq(companyPaymentInfo.cpiId))
                 .select(Projections.constructor(CompanyPaymentInfoDto.class,
+                        companyPayment.cpiPayType,
                         companyPaymentInfo.cpiInfoCardName
                 ));
 

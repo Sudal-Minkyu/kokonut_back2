@@ -59,6 +59,14 @@ public class CompanyPayment {
     @Column(name = "cpi_valid_end")
     private LocalDateTime cpiValidEnd;
 
+    @ApiModelProperty("결제타입 - '0' : 월 정기구독, '1' : 연 정기구독")
+    @Column(name = "cpi_pay_type")
+    private String cpiPayType;
+
+    @ApiModelProperty("연 정기구독일 경우 만료날짜")
+    @Column(name = "cpi_pay_expire_date")
+    private LocalDateTime cpiPayExpireDate;
+
     @ApiModelProperty("등록자 email")
     @Column(name = "insert_email", nullable = false)
     private String insert_email;
