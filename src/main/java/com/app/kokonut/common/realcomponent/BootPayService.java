@@ -32,6 +32,7 @@ public class BootPayService {
     @Value("${kokonut.bootpay.privateKey}")
     public String privateKey;
 
+    // 빌링키 및 정보 조회
     @SuppressWarnings("unchecked")
     public CompanyPaymentSaveDto billingKeyCheck(String receiptId) throws Exception {
         log.info("billingKeyCheck 호출");

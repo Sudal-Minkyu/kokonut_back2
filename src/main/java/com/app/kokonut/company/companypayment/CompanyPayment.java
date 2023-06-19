@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -53,11 +54,7 @@ public class CompanyPayment {
 
     @ApiModelProperty("자동결제 부과 시작일")
     @Column(name = "cpi_valid_start")
-    private LocalDateTime cpiValidStart;
-
-    @ApiModelProperty("자동결제 부과 종료일")
-    @Column(name = "cpi_valid_end")
-    private LocalDateTime cpiValidEnd;
+    private LocalDate cpiValidStart;
 
     @ApiModelProperty("결제타입 - '0' : 월 정기구독, '1' : 연 정기구독")
     @Column(name = "cpi_pay_type")

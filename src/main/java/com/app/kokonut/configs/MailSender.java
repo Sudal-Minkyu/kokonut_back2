@@ -89,7 +89,7 @@ public class MailSender {
 		req.setRecipients(recipients);
 		req.setUnsubscribeMessage("광고 수신 문구");
 		req.setIndividual(true);
-		req.setAdvertising(false);
+		req.setAdvertising(false); // 광고메일 여부
 
 		if(attachFiles != null) {
 			req.setAttachFiles(attachFiles);

@@ -7,6 +7,8 @@ import com.app.kokonut.payment.PaymentService;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -123,6 +125,14 @@ public class CompanyRestController {
     public ResponseEntity<Map<String,Object>> companyPaymentInfo() {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return paymentService.companyPaymentInfo(jwtFilterDto);
+    }
+
+    @ApiOperation(value="결제리스트를 가져온다.", notes="")
+    @GetMapping(value = "/paymentList")
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    public ResponseEntity<Map<String,Object>> paymentList(@PageableDefault Pageable pageable) {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return paymentService.paymentList(jwtFilterDto, pageable);
     }
 
 //  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

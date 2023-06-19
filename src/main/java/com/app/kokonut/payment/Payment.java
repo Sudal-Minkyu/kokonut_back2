@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -43,7 +44,7 @@ public class Payment {
     @Column(name = "pay_method")
     private String payMethod;
 
-    @ApiModelProperty("결제당일 기준 현재 개인정보수")
+    @ApiModelProperty("결제일 기준 개인정보 평균수")
     @Column(name = "pay_privacy_count")
     private String payPrivacyCount;
 
@@ -54,6 +55,14 @@ public class Payment {
     @ApiModelProperty("결제예약 실행시간")
     @Column(name = "pay_reserve_execute_date")
     private LocalDateTime payReserveExecuteDate;
+
+    @ApiModelProperty("요금부과 기간 시작 날짜")
+    @Column(name = "pay_billing_start_date")
+    private LocalDate payBillingStartDate;
+
+    @ApiModelProperty("요금부과 기간 끝 날짜")
+    @Column(name = "pay_billing_end_date")
+    private LocalDate payBillingEndDate;
 
     @ApiModelProperty("결제자 email")
     @Column(name = "insert_email")

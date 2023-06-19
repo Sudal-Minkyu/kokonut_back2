@@ -3,9 +3,6 @@ package com.app.kokonut.payment;
 import com.app.kokonut.admin.AdminRepository;
 import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
-import com.app.kokonut.category.categorydefault.dtos.CategoryDefaultListDto;
-import com.app.kokonut.category.categorydefault.dtos.CategoryDefaultListSubDto;
-import com.app.kokonut.category.categoryitem.dtos.CategoryItemListDto;
 import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.common.realcomponent.BootPayService;
@@ -21,15 +18,20 @@ import com.app.kokonut.company.companypaymentinfo.dtos.CompanyPaymentInfoDto;
 import com.app.kokonut.configs.MailSender;
 import com.app.kokonut.history.HistoryService;
 import com.app.kokonut.history.dto.ActivityCode;
+import com.app.kokonut.payment.dtos.PaymentListDto;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author Woody
@@ -175,7 +177,7 @@ public class PaymentService {
 					companyPayment.setCpiBillingExpireDate(companyPaymentSaveDto.getCpiBillingExpireDate());
 					companyPayment.setCpiReceiptId(companyPaymentSaveDto.getCpiReceiptId());
 					companyPayment.setCpiSubscriptionId(companyPaymentSaveDto.getCpiSubscriptionId());
-					companyPayment.setCpiValidStart(LocalDateTime.now().plusMonths(1)); // 자동결제 부과 시작일
+					companyPayment.setCpiValidStart(LocalDate.now().plusMonths(1)); // 자동결제 부과 시작일
 					companyPayment.setInsert_email(email);
 					companyPayment.setInsert_date(LocalDateTime.now());
 					CompanyPayment companyPaymentSave = companyPaymentRepository.save(companyPayment);
@@ -208,6 +210,24 @@ public class PaymentService {
 		}
 
 		return ResponseEntity.ok(res.success(data));
+	}
+
+	public ResponseEntity<Map<String, Object>> paymentList(JwtFilterDto jwtFilterDto, Pageable pageable) {
+		log.info("paymentList 호출");
+
+		AjaxResponse res = new AjaxResponse();
+
+		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(jwtFilterDto.getEmail());
+		String cpCode = adminCompanyInfoDto.getCompanyCode();
+
+		Page<PaymentListDto> paymentListDtos = paymentRepository.findPaymentPage(cpCode, jwtFilterDto.getRole().getCode(), pageable);
+		if(paymentListDtos.getTotalPages() == 0) {
+			log.info("조회된 데이터가 없습니다.");
+			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO003.getCode(), ResponseErrorCode.KO003.getDesc()));
+		} else {
+			return ResponseEntity.ok(res.ResponseEntityPage(paymentListDtos));
+		}
+
 	}
 
 	// 결제 예약걸기
