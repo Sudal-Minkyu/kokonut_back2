@@ -131,10 +131,12 @@ public class AwsS3Util {
                             .withExpiration(expiration);
             URL url = s3Client.generatePresignedUrl(generatePresignedUrlRequest);
             preSignedURL = url.toString();
-            log.info("Pre-Signed URL : " + url.toString());
+            log.info("Pre-Signed URL : " + url);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("예외처리 : "+e);
+			log.error("예외처리 메세지 : "+e.getMessage());
+            // e.printStackTrace();
         }
 
         return preSignedURL;

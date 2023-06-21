@@ -63,7 +63,8 @@ public class ExcelService {
 		        }
 		    }
 		} catch (EncryptedDocumentException | IOException e) {
-			e.printStackTrace();
+			log.error("예외처리 : "+e);
+			log.error("예외처리 메세지 : "+e.getMessage());
 		}
 
 		return data;

@@ -39,7 +39,7 @@ public class AuthRestController {
         this.authService = authService;
     }
 
-    // 이메일 가입존재 여부
+    // 이메일 가입존재 여부(비밀번호찾기 사용)
     @GetMapping(value = "/checkKnEmail")
     @ApiOperation(value = "이메일 존재여부 확인" , notes = "" +
             "1. 존재여부를 조회할 이메일을 받는다." +
@@ -151,6 +151,11 @@ public class AuthRestController {
             @Validated AuthRequestDto.SignUp signUp, HttpServletRequest request, HttpServletResponse response) throws IOException {
         log.info("사업자 회원가입 API 호출");
         return authService.signUp(signUp, request, response);
+    }
+
+    @GetMapping(value = "/bootPayWebhookCallBack")
+    public void bootPayWebhookCallBack(HttpServletRequest request) {
+        log.info("bootPayWebhookCallBack 호출");
     }
 
     @GetMapping(value = "/cookieTest")

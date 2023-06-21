@@ -1415,7 +1415,8 @@ public class NaverCloudPlatformService {
             isSuccess = true;
         }
         catch (Exception e) {
-            e.printStackTrace();
+            log.error("예외처리 : "+e);
+			log.error("예외처리 메세지 : "+e.getMessage());
             log.error("예외 발생 : "+e.getMessage());
         }
 
@@ -1445,7 +1446,8 @@ public class NaverCloudPlatformService {
             byte[] rawHmac = mac.doFinal(message.getBytes(StandardCharsets.UTF_8));
             encodeBase64String = Base64.getEncoder().encodeToString(rawHmac);
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-            e.printStackTrace();
+            log.error("예외처리 : "+e);
+			log.error("예외처리 메세지 : "+e.getMessage());
             log.error("예외 발생 : "+e.getMessage());
         }
 

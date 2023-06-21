@@ -49,14 +49,13 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
 
     // Admin 및 Company 정보 단일조회
     @Override
-    public AdminCompanyInfoDto findByCompanyInfo(String aEmail) {
+    public AdminCompanyInfoDto findByCompanyInfo(String knEmail) {
 
         QAdmin admin = QAdmin.admin;
         QCompany company = QCompany.company;
-
         JPQLQuery<AdminCompanyInfoDto> query = from(admin)
                 .innerJoin(company).on(company.companyId.eq(admin.companyId))
-                .where(admin.knEmail.eq(aEmail))
+                .where(admin.knEmail.eq(knEmail))
                 .select(Projections.constructor(AdminCompanyInfoDto.class,
                         admin.adminId,
                         company.companyId,
@@ -115,7 +114,11 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
                                 .when(admin.knPwdChangeDate.isNotNull()).then(admin.knPwdChangeDate)
                                 .otherwise(admin.insert_date),
                         companySetting.csPasswordChangeSetting,
-                        companySetting.csAutoLogoutSetting
+                        companySetting.csAutoLogoutSetting,
+                        new CaseBuilder()
+                                .when(company.cpSubscribe.eq("1").and(company.cpiId.isNotNull())).then("1")
+                                .when(company.cpSubscribe.eq("2")).then("2")
+                                .otherwise("0")
                 ));
 
         return query.fetchOne();
@@ -209,6 +212,27 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
         query.where(admin.knEmail.ne(email));
 
         return query.fetch();
+    }
+
+    // 사용자의 대한 비밀번호 오류횟수 초과 체크용
+    @Override
+    public AdminCompanySettingDto findByAdminCompanySetting(String knEmail) {
+
+        QAdmin admin = QAdmin.admin;
+        QCompany company = QCompany.company;
+        QCompanySetting companySetting = QCompanySetting.companySetting;
+
+        JPQLQuery<AdminCompanySettingDto> query = from(admin)
+                .innerJoin(company).on(company.companyId.eq(admin.companyId))
+                .innerJoin(companySetting).on(companySetting.cpCode.eq(company.cpCode))
+                .where(admin.knEmail.eq(knEmail))
+                .select(Projections.constructor(AdminCompanySettingDto.class,
+                        admin.knPwdErrorCount,
+                        companySetting.csPasswordErrorCountSetting,
+                        admin.knRoleCode
+                ));
+
+        return query.fetchOne();
     }
 
 }

@@ -4,6 +4,7 @@ import com.app.kokonut.admin.Admin;
 import com.app.kokonut.admin.AdminRepository;
 import com.app.kokonut.admin.AdminService;
 import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
+import com.app.kokonut.admin.dtos.AdminCompanySettingDto;
 import com.app.kokonut.admin.enums.AuthorityRole;
 import com.app.kokonut.auth.dtos.AdminCreateDto;
 import com.app.kokonut.auth.dtos.AdminGoogleOTPDto;
@@ -164,7 +165,25 @@ public class AuthService {
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO079.getCode(), ResponseErrorCode.KO079.getDesc()));
         }
 
-        data.put("result", adminRepository.existsByKnEmail(knEmail));
+        boolean result = adminRepository.existsByKnEmail(knEmail);
+        if(result) {
+            AdminCompanySettingDto adminCompanySettingDto = adminRepository.findByAdminCompanySetting(knEmail);
+            int knPwdErrorCount = adminCompanySettingDto.getKnPwdErrorCount();
+            String roleCode = adminCompanySettingDto.getKnRoleCode();
+
+            int csPasswordErrorCountSetting = Integer.parseInt(adminCompanySettingDto.getCsPasswordErrorCountSetting());
+            if(csPasswordErrorCountSetting <= knPwdErrorCount && !roleCode.equals("ROLE_SYSTEM")) {
+                log.error("로그인 오류 횟수제한 이메일 : "+knEmail);
+                // -> 로그인불가처리 - 관리자가 비밀번호 재설정을 눌러줄 방법밖에 없음(왕관관리자는 코코넛에게 문의)
+                if(roleCode.equals("ROLE_MASTER")) {
+                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO096.getCode(),"비밀번호를 "+knPwdErrorCount+"회 틀리셨습니다. contact@kokonut.me로 문의 바랍니다."));
+                } else {
+                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO095.getCode(),"비밀번호를 "+knPwdErrorCount+"회 틀리셨습니다. 관리자에게 비밀번호변경을 요청 바랍니다."));
+                }
+            }
+        }
+
+        data.put("result", result);
         return ResponseEntity.ok(res.success(data));
     }
 
@@ -459,6 +478,7 @@ public class AuthService {
         company.setCpCode(cpCode);
         company.setCpName(kokonutSignUp.getCpName());
         company.setCpTableCount(1);
+        company.setCpSubscribe("0");
         company.setInsert_email(kokonutSignUp.getKnEmail());
         company.setInsert_date(LocalDateTime.now());
 
@@ -845,9 +865,8 @@ public class AuthService {
                             Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
                                     companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, publicIp, 0, knEmail);
 
-                            // *숙제*
                             // 비밀번호 오휴 횟수 제한 가져오기
-                            // 설정해둔 횟수와 같거나 크면 로그인 제한됨 -> 비밀번호 찾기 미제공 -> 완관최고관리자일경우
+                            // 설정해둔 횟수와 같거나 크면 로그인 제한됨 -> 비밀번호 찾기 미제공 -> 왕관 최고관리자일경우
                             CompanySettingCheckDto companySettingCheckDto = companySettingRepository.findByCompanySettingCheck(companyCode);
                             if(companySettingCheckDto.getCsOverseasBlockSetting().equals("1")) {
                                 // 로그인사람이 해외인지 체크
@@ -891,8 +910,8 @@ public class AuthService {
 //                            log.info("csPasswordErrorCountSetting : "+csPasswordErrorCountSetting);
 //                            log.info("knPwdErrorCount : "+knPwdErrorCount);
                             if(csPasswordErrorCountSetting <= knPwdErrorCount && !roleCode.equals("ROLE_SYSTEM")) {
-                                log.info("로그인 오류 횟수제한");
-                                // -> 다음로직 어떻게할지 안 정함 -> 로그인불가처리 -> 관리자가 비밀번호 재설정을 눌러줄 방법밖에 없음 마스터관리자에겐 해당안되는지?
+                                log.error("로그인 오류 횟수제한 이메일 : "+knEmail);
+                                // -> 로그인불가처리 - 관리자가 비밀번호 재설정을 눌러줄 방법밖에 없음(왕관관리자는 코코넛에게 문의)
                                 historyService.updateHistory(activityHistoryId,
                                         companyCode+" - "+activityCode.getDesc()+" 시도 이력", "로그인 오류횟수 초과로 인한 로그인실패", 1);
 
@@ -1028,18 +1047,18 @@ public class AuthService {
         String accessToken = logout.getAccessToken();
 
         // Access Token 검증
-        if (jwtTokenProvider.validateToken(accessToken) == 400) {
-            log.error("유효하지 않은 토큰정보임");
+        if (jwtTokenProvider.validateToken(accessToken) == 200) {
+//            log.error("유효하지 않은 토큰정보임");
 //            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO006.getCode(),ResponseErrorCode.KO006.getDesc()));
-        } else {
+//        } else {
             // Access Token 에서 User knEmail 을 가져옵니다.
-            Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
+//            Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
 
             // Redis 에서 해당 User knEmail 로 저장된 Refresh Token 이 있는지 여부를 확인 후 있을 경우 삭제합니다.
-            if (redisDao.getValues("RT: "+authentication.getName()) != null) {
+//            if (redisDao.getValues("RT: "+authentication.getName()) != null) {
                 // Refresh Token 삭제
-                redisDao.deleteValues("RT: "+authentication.getName());
-            }
+//                redisDao.deleteValues("RT: "+authentication.getName());
+//            }
 
             // 해당 Access Token 유효시간 가지고 와서 BlackList로 저장하기
             Long expiration = jwtTokenProvider.getExpiration(accessToken);

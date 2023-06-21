@@ -2,6 +2,7 @@ package com.app.kokonut.common.realcomponent;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.Cookie;
@@ -17,6 +18,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Slf4j
 public class Utils {
 //	public static String getToday()
 //	{
@@ -108,7 +110,8 @@ public class Utils {
 			map = (HashMap<String, Object>) mapper.readValue(json, new TypeReference<Map<String, Object>>() {});
 		} catch (Exception e) {
 			// TODO: handle exception
-			e.printStackTrace();
+			log.error("예외처리 : "+e);
+			log.error("예외처리 메세지 : "+e.getMessage());
 		}
 		return map;
 	}
@@ -240,6 +243,27 @@ public class Utils {
 			stars.append("*");
 		}
 		return stars.toString();
+	}
+
+	// 코코넛 서비스 월결제 금액 반환
+	public static int kokonutMonthPrice(Integer countMonthAverage) {
+		int price = 0;
+
+		if(countMonthAverage < 10000) {
+			price = 99000;
+		} else if(countMonthAverage < 100000) {
+			price = 390000;
+		} else if(countMonthAverage < 300000) {
+			price = 790000;
+		} else if(countMonthAverage < 500000) {
+			price = 1490000;
+		} else if(countMonthAverage < 800000) {
+			price = 2290000;
+		} else if(countMonthAverage < 1000000) {
+			price = 2990000;
+		}
+
+		return price;
 	}
 
 }

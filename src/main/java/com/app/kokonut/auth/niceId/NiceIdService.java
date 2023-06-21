@@ -38,6 +38,7 @@ import java.util.*;
 
 @Slf4j
 @Service
+@SuppressWarnings("crypto")
 public class NiceIdService {
 
 	@Value("${kokonut.front.server.domain}")
@@ -450,8 +451,8 @@ public class NiceIdService {
 				conn.disconnect();
 			}
 		} catch (Exception e) {
-			log.info("e : "+e.getMessage());
-			e.printStackTrace();
+			log.error("예외처리 : "+e);
+			log.error("예외처리 메세지 : "+e.getMessage());
 		}
 	}
 

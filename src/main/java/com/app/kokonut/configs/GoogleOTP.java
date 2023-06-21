@@ -1,6 +1,7 @@
 package com.app.kokonut.configs;
 
 import com.app.kokonut.auth.jwt.dto.GoogleOtpGenerateDto;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base32;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Date;
 
+@Slf4j
 @Service
 public class GoogleOTP {
 
@@ -48,11 +50,12 @@ public class GoogleOTP {
 			int window = 3;
 			for (int i = -window; i <= window; ++i) {
 				long hash = verify_code(decodedKey, wave + i);
-//				System.out.println("hash : " + hash);
+//				log.info("hash : " + hash);
 				if (hash == otpnum) result = true;
 			}
 		} catch (InvalidKeyException | NoSuchAlgorithmException e) {
-			e.printStackTrace();
+			log.error("예외처리 : "+e);
+			log.error("예외처리 메세지 : "+e.getMessage());
 		}
 		return result;
 	}
@@ -71,12 +74,9 @@ public class GoogleOTP {
 
 		int offset = hash[20 - 1] & 0xF;
 
-		// We're using a long because Java hasn't got unsigned int.
 		long truncatedHash = 0;
 		for (int i = 0; i < 4; ++i) {
 			truncatedHash <<= 8;
-			// We are dealing with signed bytes:
-			// we just keep the first byte.
 			truncatedHash |= (hash[offset + i] & 0xFF);
 		}
 

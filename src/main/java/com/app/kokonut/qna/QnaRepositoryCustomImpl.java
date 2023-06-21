@@ -1,17 +1,10 @@
 package com.app.kokonut.qna;
 
-import com.app.kokonut.admin.Admin;
 import com.app.kokonut.admin.QAdmin;
-import com.app.kokonut.admin.enums.AuthorityRole;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import com.app.kokonut.qna.dtos.QnaDetailDto;
 import com.app.kokonut.qna.dtos.QnaListDto;
 import com.app.kokonut.qna.dtos.QnaSchedulerDto;
-import com.app.kokonut.qna.dtos.QnaSearchDto;
-import com.app.kokonut.qnaFile.QQnaFile;
-import com.app.kokonut.qnaFile.QnaFile;
-import com.querydsl.core.Tuple;
-import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPQLQuery;
 import org.qlrm.mapper.JpaResultMapper;
@@ -22,7 +15,6 @@ import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 

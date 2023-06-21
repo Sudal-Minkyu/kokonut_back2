@@ -31,6 +31,7 @@ import java.util.Map;
  */
 @Slf4j
 @Service
+@SuppressWarnings("unchecked")
 public class WhoisUtil implements Constants {
 
     @Value("${kokonut.whois.secretKey}")
@@ -66,7 +67,7 @@ public class WhoisUtil implements Constants {
                 String json = EntityUtils.toString(response.getEntity(), "UTF-8");
                 objectMapper = new ObjectMapper();
 
-                Map<String, Object> map = objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {});
+                Map<String, Object> map = objectMapper.readValue(json, new TypeReference<>() {});
                 Map<String, Object> responseMap = (Map<String, Object>) map.get("response");
                 Map<String, String> whois = (Map<String, String>) responseMap.get("whois");
 
@@ -77,7 +78,8 @@ public class WhoisUtil implements Constants {
             }
         } catch (URISyntaxException | IOException e) {
             log.error("해외차단 서비스 예외발생");
-            e.printStackTrace();
+            log.error("예외처리 : "+e);
+			log.error("예외처리 메세지 : "+e.getMessage());
         }
 
         return null;

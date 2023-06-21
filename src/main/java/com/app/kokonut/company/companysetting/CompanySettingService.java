@@ -174,7 +174,7 @@ public class CompanySettingService {
     // 비밀번호 변경주기 설정
     @Transactional
     public ResponseEntity<Map<String, Object>> passwordChangeSetting(JwtFilterDto jwtFilterDto, String csPasswordChangeSetting) throws IOException {
-        log.info("accessSetting 호출");
+        log.info("passwordChangeSetting 호출");
 
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
@@ -204,7 +204,7 @@ public class CompanySettingService {
     // 비밀번호 오류 접속제한 설정
     @Transactional
     public ResponseEntity<Map<String, Object>> passwordErrorCountSetting(JwtFilterDto jwtFilterDto, String csPasswordErrorCountSetting) throws IOException {
-        log.info("accessSetting 호출");
+        log.info("passwordErrorCountSetting 호출");
 
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
@@ -234,7 +234,7 @@ public class CompanySettingService {
     // 자동 로그아웃 시간 설정
     @Transactional
     public ResponseEntity<Map<String, Object>> autoLogoutSetting(JwtFilterDto jwtFilterDto, String csAutoLogoutSetting) throws IOException {
-        log.info("accessSetting 호출");
+        log.info("autoLogoutSetting 호출");
 
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
