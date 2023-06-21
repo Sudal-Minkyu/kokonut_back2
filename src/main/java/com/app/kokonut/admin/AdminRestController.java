@@ -34,8 +34,7 @@ public class AdminRestController {
     }
 
     @GetMapping("/myInfo")
-    @ApiOperation(value = "마이페이지 데이터 가져오기" , notes = "" +
-            "1. 유저가 내정보페이지를 들어간다." +
+    @ApiOperation(value = "마이페이지 데이터 가져오기" , notes = "1. 유저가 내정보페이지를 들어간다." +
             "2. 해당 유저의 정보를 프론트로 보내준다.")
     @ApiImplicitParams({
             @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
@@ -46,8 +45,7 @@ public class AdminRestController {
     }
 
     @PostMapping("/phoneChange")
-    @ApiOperation(value = "휴대전화번호 변경" , notes = "" +
-            "1. 변경할 핸드폰번호로 인증한다." +
+    @ApiOperation(value = "휴대전화번호 변경" , notes = "1. 변경할 핸드폰번호로 인증한다." +
             "2. 인증을 성공하면 인증된번호로 변경한다.")
     @ApiImplicitParams({
             @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
@@ -59,8 +57,7 @@ public class AdminRestController {
     }
 
     @PostMapping("/cpChange")
-    @ApiOperation(value = "소속명 변경 + 부서 변경/등록" , notes = "" +
-            "1. 소속 및 부서를 변경하거나 등록할때 사용됨" +
+    @ApiOperation(value = "소속명 변경 + 부서 변경/등록" , notes = "1. 소속 및 부서를 변경하거나 등록할때 사용됨" +
             "2. 변경할 내용과 비밀번호를 받는다." +
             "3. state 값을 비교하여 구분한다. 1 -> 소속명변경, 2 -> 부서 변경및등록")
     @ApiImplicitParams({
@@ -74,8 +71,7 @@ public class AdminRestController {
     }
 
     @PostMapping("/pwdChange")
-    @ApiOperation(value = "비밀번호 변경" , notes = "" +
-            "1. 현재비밀번호와 변경할 비밀번호를 받는다." +
+    @ApiOperation(value = "비밀번호 변경" , notes = "1. 현재비밀번호와 변경할 비밀번호를 받는다." +
             "2. 현재비밀번호를 검증한다." +
             "3. 변경할 비밀번호와 비밀번호확인 값과 비교한다." +
             "4. 모든 조건이 충족되면 비밀번호를 변경한다.")
@@ -90,8 +86,7 @@ public class AdminRestController {
     }
 
     @GetMapping("/list")
-    @ApiOperation(value = "관리자 목록 리스트 호출" , notes = "" +
-            "검색할 문자와 관리자등급 계정상태의 대한 필터로 목록을 조회한다.")
+    @ApiOperation(value = "관리자 목록 리스트 호출" , notes = "검색할 문자와 관리자등급 계정상태의 대한 필터로 목록을 조회한다.")
     @ApiImplicitParams({
             @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
     })
@@ -104,8 +99,7 @@ public class AdminRestController {
     }
 
     @PostMapping("/create")
-    @ApiOperation(value = "관리자 등록" , notes = "" +
-            "1. 대표관리자, 최고관리자만 할 수 있는 권한" +
+    @ApiOperation(value = "관리자 등록" , notes = "1. 대표관리자, 최고관리자만 할 수 있는 권한" +
             "2. 이메일중복체크후 해당 관리자의 권한을 선택후 등록을 누른다." +
             "3. 입력한 이메일로 인증메일을 전송한다." +
             "4. 해당메일의 링크를 통해 사용할 비밀번호를 입력하여 비밀번호를 등록한다." +
@@ -123,8 +117,7 @@ public class AdminRestController {
 
 
     @GetMapping("/authorityCheck")
-    @ApiOperation(value = "JWT토큰 호출 기본정보 호출" , notes = "" +
-            "1. 로그인한 유저의 기본정보를 가져오는 API")
+    @ApiOperation(value = "JWT토큰 호출 기본정보 호출" , notes = "1. 로그인한 유저의 기본정보를 가져오는 API")
     @ApiImplicitParams({
             @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
     })

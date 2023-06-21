@@ -28,6 +28,14 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long payId;
 
+    @ApiModelProperty("결제 orderid(고유코드)")
+    @Column(name = "pay_orderid")
+    private String payOrderid;
+
+    @ApiModelProperty("자동결제가 실행된 이후 receipt_id(실행 전에는 값이 없음)")
+    @Column(name = "pay_receiptid")
+    private String payReceiptid;
+
     @ApiModelProperty("회사코드")
     @Column(name = "cp_code")
     private String cpCode;
@@ -64,4 +72,11 @@ public class Payment {
     @Column(name = "pay_reserve_execute_date")
     private LocalDateTime payReserveExecuteDate;
 
+    @ApiModelProperty("예약결제가 실행 시작된 시간(부트페이데이터)")
+    @Column(name = "pay_reserve_started_date")
+    private LocalDateTime payReserveStartedDate;
+
+    @ApiModelProperty("예약결제가 실행이 완료된 시간(부트페이데이터)")
+    @Column(name = "pay_reserve_finished_date")
+    private LocalDateTime payReserveFinishedDate;
 }

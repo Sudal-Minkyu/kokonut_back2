@@ -26,6 +26,7 @@ import com.app.kokonut.history.dto.ActivityCode;
 import com.app.kokonut.payment.dtos.PaymentListDto;
 import com.app.kokonut.payment.dtos.PaymentPayDto;
 import com.app.kokonut.payment.dtos.PaymentReservationResultDto;
+import com.app.kokonut.payment.dtos.PaymentReservationSearchDto;
 import com.app.kokonut.payment.paymentprivacycount.PaymentPrivacyCount;
 import com.app.kokonut.payment.paymentprivacycount.PaymentPrivacyCountRepository;
 import com.app.kokonut.payment.paymentprivacycount.dtos.PaymentPrivacyCountDayDto;
@@ -174,7 +175,7 @@ public class PaymentService {
 //			log.info("결제 할 금액 : "+price);
 
 			String orderId = keyGenerateService.keyGenerate("kn_payment", cpCode, "KokonutSystem");
-//			log.info("orderId : "+orderId);
+			log.info("orderId : "+orderId);
 
 			PaymentReservationResultDto paymentReservationResultDto = bootPayService.kokonutReservationPayment(
 					orderId, price, "월간 사용료 예약결제", companyPaymentReservationListDto.getCpiBillingKey(), payDayTime);
@@ -182,6 +183,7 @@ public class PaymentService {
 
 			if(paymentReservationResultDto != null) {
 				// 결제 내역 저장
+				payment.setPayOrderid(orderId);
 				payment.setCpCode(cpCode);
 				payment.setPayAmount(price);
 				payment.setPayState("2");
@@ -206,12 +208,46 @@ public class PaymentService {
 
 
 	// 결제 예약결제 확인
-	public void kokonutCheck(LocalDate localDate) {
+	public void kokonutCheck(LocalDate localDate) throws Exception {
 		log.info("kokonutCheck 호출");
 
+		// 결제 예약중 그리고 자동결제인 항목 리스트 호출하기
+		// payReserveId 값을 통해 예약결제 상태를 조회한다.
+		List<Payment> paymentList = paymentRepository.findPaymentByPayStateAndPayMethod("2", "0");
+//		log.info("paymentList : "+paymentList);
 
+		List<Payment> updatePaymentList = new ArrayList<>();
+		if(paymentList.size() != 0) {
+			for(Payment payment : paymentList) {
+				if(!payment.getPayReserveId().equals("test")) {
 
+					String payReserveId = payment.getPayReserveId();
+//					log.info("payReserveId : "+payReserveId);
 
+					PaymentReservationSearchDto paymentReservationSearchDto = bootPayService.kokonutReservationCheck(payReserveId);
+//					log.info("paymentReservationSearchDto : "+paymentReservationSearchDto);
+
+					if(paymentReservationSearchDto != null) {
+						Integer status = paymentReservationSearchDto.getStatus();
+						if(status != 0) {
+							if(status == -1) {
+								payment.setPayState("0");
+							} else if(status == 1) {
+								payment.setPayState("1");
+							}
+							payment.setPayReserveStartedDate(paymentReservationSearchDto.getPayReserveStartedDate());
+							payment.setPayReserveFinishedDate(paymentReservationSearchDto.getPayReserveFinishedDate());
+							payment.setPayReceiptid(paymentReservationSearchDto.getPayReceiptid());
+
+							updatePaymentList.add(payment);
+						}
+					}
+				}
+			}
+
+			paymentRepository.saveAll(updatePaymentList);
+
+		}
 
 	}
 
@@ -470,10 +506,11 @@ public class PaymentService {
 			payment.setPayBillingStartDate(paymentPrivacyCountMonthAverageDto.getLowDate());
 			payment.setPayBillingEndDate(paymentPrivacyCountMonthAverageDto.getBigDate());
 			payment.setPayReserveExecuteDate(LocalDateTime.now());
-			String billingKey = companyPaymentSearchDto.getCpiBillingKey();
 
 			String orderId = keyGenerateService.keyGenerate("kn_payment", cpCode, "KokonutSystem");
+			payment.setPayOrderid(orderId);
 
+			String billingKey = companyPaymentSearchDto.getCpiBillingKey();
 			// 요금정산 처리
 			boolean payResult = bootPayService.kokonutPayment(billingKey, orderId, Integer.parseInt(payAmount),
 					"요금정산 결제", companyPaymentSearchDto.getKnName(), companyPaymentSearchDto.getKnPhoneNumber());

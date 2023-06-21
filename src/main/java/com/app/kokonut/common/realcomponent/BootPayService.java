@@ -2,6 +2,7 @@ package com.app.kokonut.common.realcomponent;
 
 import com.app.kokonut.company.companypayment.dtos.CompanyPaymentSaveDto;
 import com.app.kokonut.payment.dtos.PaymentReservationResultDto;
+import com.app.kokonut.payment.dtos.PaymentReservationSearchDto;
 import kr.co.bootpay.Bootpay;
 import kr.co.bootpay.model.request.Cancel;
 import kr.co.bootpay.model.request.Subscribe;
@@ -197,6 +198,7 @@ public class BootPayService {
                 log.info("예약 결제 성공: " + res);
                 paymentReservationResultDto.setPayReserveId(String.valueOf(res.get("reserve_id")));
                 paymentReservationResultDto.setPayReserveExecuteDate(OffsetDateTime.parse(String.valueOf(res.get("reserve_execute_at"))).toLocalDateTime());
+                return paymentReservationResultDto;
             } else {
                 log.error("예약 결제 실패: " + res);
             }
@@ -206,7 +208,7 @@ public class BootPayService {
 			log.error("예외처리 메세지 : "+e.getMessage());
         }
 
-        return paymentReservationResultDto;
+        return null;
     }
 
     // 부트페이 결제하기(요금정산)
@@ -242,6 +244,50 @@ public class BootPayService {
         }
 
         return false;
+    }
+
+    // 예약결제 조회 삭제
+    public PaymentReservationSearchDto kokonutReservationCheck(String payReserveId) throws Exception {
+        log.info("예약결제 조회하기 실행!");
+
+        Bootpay bootpay = new Bootpay(restKey, privateKey);
+        bootpay.getAccessToken();
+
+        PaymentReservationSearchDto paymentReservationSearchDto = new PaymentReservationSearchDto();
+        try {
+            HashMap<String, Object> res = bootpay.reserveSubscribeLookup(payReserveId);
+
+            if(res.get("error_code") == null) {
+                log.info("예약결제 조회 성공: " + res);
+
+//                log.info("실행후 만들어진 값 : " + res.get("receipt_id"));
+//                log.info("예약결제가 실행 시작된 시간 : " + res.get("reserve_started_at"));
+//                log.info("예약결제가 실행이 완료된 시간 : " + res.get("reserve_finished_at"));
+//                log.info("예약결제 상태 : " + res.get("status"));
+//                log.info("결제 이후 Webhook을 전달한 Feedback URL : " + res.get("feedback_url"));
+                Integer status = Integer.parseInt(String.valueOf(res.get("status")));
+                if(status == 3) {
+                    return null;
+                } else {
+                    paymentReservationSearchDto.setStatus(status);
+                    if(status != 0) {
+                        // -1(예약결제실패) 또는 1(예약결제 완료)일때만 통과
+                        paymentReservationSearchDto.setPayReceiptid(String.valueOf(res.get("receipt_id")));
+                        paymentReservationSearchDto.setPayReserveStartedDate(OffsetDateTime.parse(String.valueOf(res.get("reserve_started_at"))).toLocalDateTime());
+                        paymentReservationSearchDto.setPayReserveFinishedDate(OffsetDateTime.parse(String.valueOf(res.get("reserve_finished_at"))).toLocalDateTime());
+                    }
+                    return paymentReservationSearchDto;
+                }
+
+            } else {
+                log.error("예약결제 조회 실패: " + res);
+            }
+        } catch (Exception e) {
+            log.error("예외처리 : "+e);
+            log.error("예외처리 메세지 : "+e.getMessage());
+        }
+
+        return null;
     }
 
     // 부트페이 결제취소

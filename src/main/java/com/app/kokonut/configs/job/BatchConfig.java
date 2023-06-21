@@ -98,8 +98,8 @@ public class BatchConfig {
     // 월 사용료 결제확인 @@
     @Bean(JOB_NAME+"kokonutPayCheckJob")
     public Job kokonutPayCheckJob() {
-        return jobBuilderFactory.get("kokonutPayJob")
-                .start(kokonutPayStep(null))
+        return jobBuilderFactory.get("kokonutPayCheckJob")
+                .start(kokonutCheckStep(null))
                 .build();
     }
 
@@ -131,7 +131,7 @@ public class BatchConfig {
                 .build();
     }
 
-    @Bean(STEP_NAME+"kokonutCheckStep")
+    @Bean(STEP_NAME+"kokonutPayErrorStep")
     @JobScope
     public Step kokonutPayErrorStep(@Value("#{jobParameters[requestDate]}") String requestDate) {
         return stepBuilderFactory.get("kokonutPayErrorStep")
