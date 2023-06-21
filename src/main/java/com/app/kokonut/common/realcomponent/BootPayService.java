@@ -269,7 +269,8 @@ public class BootPayService {
                 log.error("결제취소 실패: " + res);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("결제취소 에러");
+//            e.printStackTrace();
         }
 
     }
