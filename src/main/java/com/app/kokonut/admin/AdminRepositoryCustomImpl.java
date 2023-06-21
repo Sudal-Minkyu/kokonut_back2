@@ -49,14 +49,13 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
 
     // Admin 및 Company 정보 단일조회
     @Override
-    public AdminCompanyInfoDto findByCompanyInfo(String aEmail) {
+    public AdminCompanyInfoDto findByCompanyInfo(String knEmail) {
 
         QAdmin admin = QAdmin.admin;
         QCompany company = QCompany.company;
-
         JPQLQuery<AdminCompanyInfoDto> query = from(admin)
                 .innerJoin(company).on(company.companyId.eq(admin.companyId))
-                .where(admin.knEmail.eq(aEmail))
+                .where(admin.knEmail.eq(knEmail))
                 .select(Projections.constructor(AdminCompanyInfoDto.class,
                         admin.adminId,
                         company.companyId,
@@ -117,7 +116,8 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
                         companySetting.csPasswordChangeSetting,
                         companySetting.csAutoLogoutSetting,
                         new CaseBuilder()
-                                .when(company.cpiId.isNotNull()).then("1")
+                                .when(company.cpSubscribe.eq("1").and(company.cpiId.isNotNull())).then("1")
+                                .when(company.cpSubscribe.eq("2")).then("2")
                                 .otherwise("0")
                 ));
 

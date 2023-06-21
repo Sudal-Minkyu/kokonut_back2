@@ -1,6 +1,7 @@
 package com.app.kokonut.common.realcomponent;
 
 import com.app.kokonut.company.companypayment.dtos.CompanyPaymentSaveDto;
+import com.app.kokonut.payment.dtos.PaymentReservationResultDto;
 import kr.co.bootpay.Bootpay;
 import kr.co.bootpay.model.request.Cancel;
 import kr.co.bootpay.model.request.Subscribe;
@@ -11,8 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
+import java.time.*;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.TimeZone;
@@ -134,7 +134,7 @@ public class BootPayService {
     }
 
     // 빌링키 삭제
-    public void billingKeyDelete(String billingKey) throws Exception {
+    public boolean billingKeyDelete(String billingKey) throws Exception {
         log.info("빌링키 삭제하기 실행!");
 
         Bootpay bootpay = new Bootpay(restKey, privateKey);
@@ -146,6 +146,7 @@ public class BootPayService {
 //            System.out.printf( "JSON: %s", json);
             if(res.get("error_code") == null) {
                 log.info("빌링키 삭제 성공: " + res);
+                return true;
             } else {
                 log.error("빌링키 삭제 실패: " + res);
             }
@@ -154,23 +155,23 @@ public class BootPayService {
             log.error("예외처리 메세지 : "+e.getMessage());
         }
 
+        return false;
+
     }
 
     // 부트페이 결제예약
-    public String kokonutReservationPayment(String cpCode, Integer price, String orderName, String billingKey) throws Exception {
-        log.info("100원 예약 결제하기 함수 실행!");
+    public PaymentReservationResultDto kokonutReservationPayment(String cpCode, Integer price, String orderName, String billingKey, LocalDateTime localDateTime) throws Exception {
+        log.info("월 사용료 결제예약하기 함수 실행!");
         Bootpay bootpay = new Bootpay(restKey, privateKey);
         bootpay.getAccessToken();
+
+        PaymentReservationResultDto paymentReservationResultDto = new PaymentReservationResultDto();
 
         SubscribePayload payload = new SubscribePayload();
         payload.billingKey = billingKey; // 조회한 빌링키
         payload.orderName = orderName; // 자동결제 내용 -> 무슨무슨회사의 무엇무엇결제의 금액
         payload.price = price; // 결제할 금액
         payload.orderId = cpCode; // 고유 주문번호
-
-        Date now = new Date();
-        now.setTime(now.getTime() + 10 * 1000); //10초 뒤 결제
-
 
         // 카드연결시 -> 연결날부터 한달간 서비스 무료사용
         // 이후 30일(한달)이 지나면 다음 날짜로부터 이번달말일까지 일할계산하며,
@@ -181,42 +182,48 @@ public class BootPayService {
         //   -> 2. 결제테이블(내용)은 구독관리페이지에 안내하기로함 어디에 표시할진 아직 안정함
         // 호출 동시에 금일 결제될 금액과 내용과 함께 이메일알림을 보냄.(첫 결제시에도 동일)
 
+        // LocalDateTime 컨버트
+        Instant instant = localDateTime.atZone(ZoneId.systemDefault()).toInstant();
+
+        Date now = Date.from(instant);
+
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss XXX");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         payload.reserveExecuteAt = sdf.format(now); // 결제 승인 시점
 
-        String result = "";
         try {
             HashMap<String, Object> res = bootpay.reserveSubscribe(payload);
             if(res.get("error_code") == null) { //success
                 log.info("예약 결제 성공: " + res);
+                paymentReservationResultDto.setPayReserveId(String.valueOf(res.get("reserve_id")));
+                paymentReservationResultDto.setPayReserveExecuteDate(OffsetDateTime.parse(String.valueOf(res.get("reserve_execute_at"))).toLocalDateTime());
             } else {
                 log.error("예약 결제 실패: " + res);
             }
 
-            return result;
         } catch (Exception e) {
             log.error("예외처리 : "+e);
 			log.error("예외처리 메세지 : "+e.getMessage());
-
-            return null;
         }
 
+        return paymentReservationResultDto;
     }
 
-    // 부트페이 결제하기
-    public void kokonutPayment() throws Exception {
-        log.info("100원 결제하기 함수 실행!");
+    // 부트페이 결제하기(요금정산)
+    public boolean kokonutPayment(String billingKey, String orderId, Integer payAmount, String orderName, String knName, String knPhoneNumber) throws Exception {
+        log.info("부트페이 결제하기 함수 실행!(요금정산)");
 
         Bootpay bootpay = new Bootpay(restKey, privateKey);
+        bootpay.getAccessToken();
 
         SubscribePayload payload = new SubscribePayload();
-        payload.billingKey = "645206669f326b001fcb86e8";
-        payload.orderName = "100원 결제 코코넛 테스트";
-        payload.price = 100;
+        payload.billingKey = billingKey;
+        payload.orderName = orderName;
+        payload.price = payAmount;
         payload.user = new User();
-        payload.user.phone = "01012345678";
-        payload.orderId = String.valueOf(System.currentTimeMillis() / 1000);
+        payload.user.username = knName;
+        payload.user.phone = knPhoneNumber;
+        payload.orderId = orderId;
 
         try {
             HashMap<String, Object> res = bootpay.requestSubscribe(payload);
@@ -225,6 +232,7 @@ public class BootPayService {
 
             if(res.get("error_code") == null) { //success
                 System.out.println("결제 성공 : " + res);
+                return true;
             } else {
                 System.out.println("결제 실패 : " + res);
             }
@@ -233,6 +241,7 @@ public class BootPayService {
             log.error("예외처리 메세지 : "+e.getMessage());
         }
 
+        return false;
     }
 
     // 부트페이 결제취소

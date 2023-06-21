@@ -478,6 +478,7 @@ public class AuthService {
         company.setCpCode(cpCode);
         company.setCpName(kokonutSignUp.getCpName());
         company.setCpTableCount(1);
+        company.setCpSubscribe("0");
         company.setInsert_email(kokonutSignUp.getKnEmail());
         company.setInsert_date(LocalDateTime.now());
 
@@ -864,9 +865,8 @@ public class AuthService {
                             Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
                                     companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, publicIp, 0, knEmail);
 
-                            // *숙제*
                             // 비밀번호 오휴 횟수 제한 가져오기
-                            // 설정해둔 횟수와 같거나 크면 로그인 제한됨 -> 비밀번호 찾기 미제공 -> 완관최고관리자일경우
+                            // 설정해둔 횟수와 같거나 크면 로그인 제한됨 -> 비밀번호 찾기 미제공 -> 왕관 최고관리자일경우
                             CompanySettingCheckDto companySettingCheckDto = companySettingRepository.findByCompanySettingCheck(companyCode);
                             if(companySettingCheckDto.getCsOverseasBlockSetting().equals("1")) {
                                 // 로그인사람이 해외인지 체크
@@ -1047,18 +1047,18 @@ public class AuthService {
         String accessToken = logout.getAccessToken();
 
         // Access Token 검증
-        if (jwtTokenProvider.validateToken(accessToken) == 400) {
-            log.error("유효하지 않은 토큰정보임");
+        if (jwtTokenProvider.validateToken(accessToken) == 200) {
+//            log.error("유효하지 않은 토큰정보임");
 //            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO006.getCode(),ResponseErrorCode.KO006.getDesc()));
-        } else {
+//        } else {
             // Access Token 에서 User knEmail 을 가져옵니다.
-            Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
+//            Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
 
             // Redis 에서 해당 User knEmail 로 저장된 Refresh Token 이 있는지 여부를 확인 후 있을 경우 삭제합니다.
-            if (redisDao.getValues("RT: "+authentication.getName()) != null) {
+//            if (redisDao.getValues("RT: "+authentication.getName()) != null) {
                 // Refresh Token 삭제
-                redisDao.deleteValues("RT: "+authentication.getName());
-            }
+//                redisDao.deleteValues("RT: "+authentication.getName());
+//            }
 
             // 해당 Access Token 유효시간 가지고 와서 BlackList로 저장하기
             Long expiration = jwtTokenProvider.getExpiration(accessToken);

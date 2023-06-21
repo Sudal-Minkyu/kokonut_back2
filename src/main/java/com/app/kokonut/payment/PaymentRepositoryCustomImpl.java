@@ -40,7 +40,7 @@ public class PaymentRepositoryCustomImpl extends QuerydslRepositorySupport imple
                         payment.payBillingStartDate,
                         payment.payBillingEndDate,
                         payment.payPrivacyCount,
-                        payment.insert_date,
+                        payment.payReserveExecuteDate,
                         payment.payAmount,
                         payment.payState,
                         payment.payMethod

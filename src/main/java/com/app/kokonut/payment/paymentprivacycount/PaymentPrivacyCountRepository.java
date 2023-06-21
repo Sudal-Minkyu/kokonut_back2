@@ -1,7 +1,5 @@
 package com.app.kokonut.payment.paymentprivacycount;
 
-import com.app.kokonut.payment.Payment;
-import com.app.kokonut.payment.PaymentRepositoryCustom;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
@@ -13,6 +11,6 @@ import org.springframework.stereotype.Repository;
  * Remark :
  */
 @Repository
-public interface PaymentPrivacyCountRepository extends JpaRepository<PaymentPrivacyCount, Long>, JpaSpecificationExecutor<PaymentPrivacyCount> {
+public interface PaymentPrivacyCountRepository extends JpaRepository<PaymentPrivacyCount, Long>, JpaSpecificationExecutor<PaymentPrivacyCount>, PaymentPrivacyCountRepositoryCustom {
 
 }

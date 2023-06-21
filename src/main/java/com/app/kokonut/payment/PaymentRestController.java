@@ -44,6 +44,25 @@ public class PaymentRestController {
         return paymentService.billingSave(payReceiptId, jwtFilterDto);
     }
 
+    @PostMapping(value = "/billingPay")
+    @ApiOperation(value = "요금정산 계산" , notes = "" +
+            "1. 정산받을 요금을 받는다." +
+            "2. 받은 요금의 값이 빈값이거나, 0원일 경우 에러를 던저준다." +
+            "3. 결제API를 호출하여 결제하고 디비에 기록한다.")
+    @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    public ResponseEntity<Map<String,Object>> billingPay(@RequestParam(value="payAmount", defaultValue = "") String payAmount) throws Exception {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return paymentService.billingPay(payAmount, jwtFilterDto);
+    }
+
+    @PostMapping(value = "/billingDelete")
+    @ApiOperation(value = "구독해지" , notes = "")
+    @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    public ResponseEntity<Map<String,Object>> billingDelete() throws Exception {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return paymentService.billingDelete(jwtFilterDto);
+    }
+
 //    // 이번달 요금 결제
 //    @PostMapping(value = "/existsByKnEmail")
 //    @ApiOperation(value = "이메일 중복확인 버튼" , notes = "" +

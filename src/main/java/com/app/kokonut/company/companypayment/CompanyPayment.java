@@ -60,6 +60,10 @@ public class CompanyPayment {
     @Column(name = "cpi_pay_type")
     private String cpiPayType;
 
+    @ApiModelProperty("연 정기구독 결제금액")
+    @Column(name = "cpi_pay_amount")
+    private Integer cpiPayAmount;
+
     @ApiModelProperty("연 정기구독일 경우 만료날짜")
     @Column(name = "cpi_pay_expire_date")
     private LocalDateTime cpiPayExpireDate;

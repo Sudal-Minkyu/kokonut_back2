@@ -3,7 +3,6 @@ server:
 
 # JPA Setting
 spring:
-
   datasource:
     kokonut:
       url: jdbc:mariadb://${DOCKER_DB_HOST}:${DOCKER_DB_PORT}/${KOKONUT_DB_DBNAME}
@@ -35,6 +34,8 @@ spring:
     redis:
       repositories:
         enabled: false
+
+spring.batch.job.names: ${job.name:NONE}
 
 #Custom
 kokonut:

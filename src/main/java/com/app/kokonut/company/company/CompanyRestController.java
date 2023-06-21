@@ -135,6 +135,13 @@ public class CompanyRestController {
         return paymentService.paymentList(jwtFilterDto, pageable);
     }
 
+    @ApiOperation(value="일일 개인정보 수를 가져온다.", notes="")
+    @GetMapping(value = "/paymentPrivacyCount")
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    public ResponseEntity<Map<String,Object>> paymentPrivacyCount(@RequestParam(name="choseDate", defaultValue = "") String choseDate) {
+        return paymentService.paymentPrivacyCount(choseDate);
+    }
+
 //  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 

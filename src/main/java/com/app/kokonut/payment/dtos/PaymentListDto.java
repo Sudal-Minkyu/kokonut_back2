@@ -25,9 +25,9 @@ public class PaymentListDto {
 
     private LocalDate payBillingEndDate; // 요금부과 기간 끝 날짜
 
-    private String payPrivacyCount; // 결제일 기준 개인정보 평균수
+    private Integer payPrivacyCount; // 결제일 기준 개인정보 평균수
 
-    private LocalDateTime insert_date; // 결제 일시
+    private LocalDateTime payReserveExecuteDate; // 결제 일시
 
     private Integer payAmount; // 결제금액
 
@@ -43,8 +43,9 @@ public class PaymentListDto {
         return DateTimeFormatter.ofPattern("yyyy.MM.dd").format(payBillingEndDate);
     }
 
-    public String getInsert_date() {
-        return DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(insert_date);
+    public String getPayReserveExecuteDate() {
+        return DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(payReserveExecuteDate);
     }
+
 
 }

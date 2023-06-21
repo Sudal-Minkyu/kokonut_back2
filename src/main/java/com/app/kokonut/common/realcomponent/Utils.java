@@ -245,4 +245,25 @@ public class Utils {
 		return stars.toString();
 	}
 
+	// 코코넛 서비스 월결제 금액 반환
+	public static int kokonutMonthPrice(Integer countMonthAverage) {
+		int price = 0;
+
+		if(countMonthAverage < 10000) {
+			price = 99000;
+		} else if(countMonthAverage < 100000) {
+			price = 390000;
+		} else if(countMonthAverage < 300000) {
+			price = 790000;
+		} else if(countMonthAverage < 500000) {
+			price = 1490000;
+		} else if(countMonthAverage < 800000) {
+			price = 2290000;
+		} else if(countMonthAverage < 1000000) {
+			price = 2990000;
+		}
+
+		return price;
+	}
+
 }

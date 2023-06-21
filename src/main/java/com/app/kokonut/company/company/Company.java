@@ -51,6 +51,14 @@ public class Company {
     @Column(name = "cpi_id")
     private Long cpiId;
 
+    @ApiModelProperty("구독상태 : '0' : 가입하고 카드빌링하지않음, '1' : 구독중, '2' : 구독해지")
+    @Column(name = "cp_subscribe")
+    private String cpSubscribe;
+
+    @ApiModelProperty("'구독해지 날짜'")
+    @Column(name = "cp_subscribe_date")
+    private LocalDateTime cpSubscribeDate;
+
     @ApiModelProperty("등록자 email")
     @Column(name = "insert_email", nullable = false)
     private String insert_email;

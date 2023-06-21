@@ -153,6 +153,11 @@ public class AuthRestController {
         return authService.signUp(signUp, request, response);
     }
 
+    @GetMapping(value = "/bootPayWebhookCallBack")
+    public void bootPayWebhookCallBack(HttpServletRequest request) {
+        log.info("bootPayWebhookCallBack 호출");
+    }
+
     @GetMapping(value = "/cookieTest")
     public void cookieTest(HttpServletRequest request) {
         log.info("쿠키테스트");
