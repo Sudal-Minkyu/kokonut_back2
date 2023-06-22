@@ -111,17 +111,14 @@ public class BatchConfig {
                     log.info("월 사용료 결제 확인 배치 실행");
                     log.info("현재 날짜 : " + requestDate);
 
-                    String datePart = requestDate.split(" ")[0];
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                    LocalDate localDate = LocalDate.parse(datePart, formatter);
-
-                    paymentService.kokonutCheck(localDate);
+                    paymentService.kokonutCheck();
 
                     return RepeatStatus.FINISHED;
                 })
                 .build();
     }
     //@@@@@@@@@@@@@@@@@
+
 
     // 결제에러건 결제처리 @@
     @Bean(JOB_NAME+"kokonutPayErrorJob")
@@ -150,5 +147,6 @@ public class BatchConfig {
                 .build();
     }
     //@@@@@@@@@@@@@@@@@
+
 
 }

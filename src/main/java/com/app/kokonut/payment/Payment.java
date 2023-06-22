@@ -79,4 +79,8 @@ public class Payment {
     @ApiModelProperty("예약결제가 실행이 완료된 시간(부트페이데이터)")
     @Column(name = "pay_reserve_finished_date")
     private LocalDateTime payReserveFinishedDate;
+
+    @ApiModelProperty("업데이트 날짜")
+    @Column(name = "modify_date")
+    private LocalDateTime modify_date;
 }

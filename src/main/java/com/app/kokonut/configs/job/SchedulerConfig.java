@@ -85,7 +85,7 @@ public class SchedulerConfig {
         }
     }
 
-//    @Scheduled(cron = "0 0 2 * * *") // 매일 새벽 2시에 실행 결제오류건 체크 및 인서트
+    @Scheduled(cron = "0 0 2 * * *") // 매일 새벽 2시에 실행 결제오류건 체크 및 인서트
     public void kokonutPayErrorSchedul() {
         try {
             log.info("결제오류건 결제실행 스케줄러 실행");

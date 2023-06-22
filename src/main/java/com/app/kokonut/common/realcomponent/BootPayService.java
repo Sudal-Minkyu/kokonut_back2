@@ -272,9 +272,15 @@ public class BootPayService {
                     paymentReservationSearchDto.setStatus(status);
                     if(status != 0) {
                         // -1(예약결제실패) 또는 1(예약결제 완료)일때만 통과
-                        paymentReservationSearchDto.setPayReceiptid(String.valueOf(res.get("receipt_id")));
-                        paymentReservationSearchDto.setPayReserveStartedDate(OffsetDateTime.parse(String.valueOf(res.get("reserve_started_at"))).toLocalDateTime());
-                        paymentReservationSearchDto.setPayReserveFinishedDate(OffsetDateTime.parse(String.valueOf(res.get("reserve_finished_at"))).toLocalDateTime());
+                        if(res.get("receipt_id") != null) {
+                            paymentReservationSearchDto.setPayReceiptid(String.valueOf(res.get("receipt_id")));
+                        }
+                        if(res.get("reserve_started_at") != null) {
+                            paymentReservationSearchDto.setPayReserveStartedDate(OffsetDateTime.parse(String.valueOf(res.get("reserve_started_at"))).toLocalDateTime());
+                        }
+                        if(res.get("reserve_finished_at") != null) {
+                            paymentReservationSearchDto.setPayReserveFinishedDate(OffsetDateTime.parse(String.valueOf(res.get("reserve_finished_at"))).toLocalDateTime());
+                        }
                     }
                     return paymentReservationSearchDto;
                 }

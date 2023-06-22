@@ -16,6 +16,6 @@ import java.util.Optional;
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long>, JpaSpecificationExecutor<Payment>, PaymentRepositoryCustom {
 
-    List<Payment> findPaymentByPayStateAndPayMethod(String payState, String payMethod);
+    List<Payment> findPaymentByPayStateAndPayMethodOrderByCpCodeDesc(String payState, String payMethod);
 
 }

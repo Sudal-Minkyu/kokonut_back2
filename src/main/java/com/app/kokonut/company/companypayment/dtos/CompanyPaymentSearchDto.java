@@ -1,11 +1,8 @@
 package com.app.kokonut.company.companypayment.dtos;
 
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import javax.persistence.Column;
 
 /**
  * @author Woody
