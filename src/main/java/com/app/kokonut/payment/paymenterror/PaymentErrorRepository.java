@@ -1,6 +1,5 @@
 package com.app.kokonut.payment.paymenterror;
 
-import com.app.kokonut.company.companypayment.CompanyPayment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;

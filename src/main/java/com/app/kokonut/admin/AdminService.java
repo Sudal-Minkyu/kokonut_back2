@@ -272,7 +272,7 @@ public class AdminService {
     public ResponseEntity<Map<String,Object>> authorityCheck(JwtFilterDto jwtFilterDto) {
         log.info("authorityCheck 호출");
 
-        log.info("jwtFilterDto : "+jwtFilterDto);
+//        log.info("jwtFilterDto : "+jwtFilterDto);
 
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
@@ -282,11 +282,11 @@ public class AdminService {
             log.error("사용하실 수 없는 토큰정보 입니다. 다시 로그인 해주세요.");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO009.getCode(),ResponseErrorCode.KO009.getDesc()));
         } else{
-            log.info("해당 유저의 이메일 : "+email);
+//            log.info("해당 유저의 이메일 : "+email);
 
             AdminInfoDto adminInfoDto = adminRepository.findByAdminInfo(email);
 
-            log.info("해당 유저의 권한 : "+jwtFilterDto.getRole().getDesc());
+//            log.info("해당 유저의 권한 : "+jwtFilterDto.getRole().getDesc());
             data.put("knName",adminInfoDto.getKnName());
             data.put("cpName",adminInfoDto.getCpName());
             data.put("knEmail",email);

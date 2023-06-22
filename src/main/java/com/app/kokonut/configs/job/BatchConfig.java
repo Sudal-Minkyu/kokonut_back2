@@ -1,26 +1,20 @@
 package com.app.kokonut.configs.job;
 
-import com.app.kokonut.company.companypayment.CompanyPaymentRepository;
-import com.app.kokonut.company.companypayment.dtos.CompanyPaymentListDto;
 import com.app.kokonut.payment.PaymentService;
-import com.app.kokonut.payment.paymentprivacycount.PaymentPrivacyCount;
-import com.app.kokonut.payment.paymentprivacycount.PaymentPrivacyCountRepository;
-import com.app.kokonutuser.DynamicUserRepositoryCustom;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.*;
+import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.JobScope;
+import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 @Configuration

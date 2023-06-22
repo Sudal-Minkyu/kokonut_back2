@@ -63,33 +63,4 @@ public class PaymentRestController {
         return paymentService.billingDelete(jwtFilterDto);
     }
 
-//    // 이번달 요금 결제
-//    @PostMapping(value = "/existsByKnEmail")
-//    @ApiOperation(value = "이메일 중복확인 버튼" , notes = "" +
-//            "1. 이메일 중복확인을 한다." +
-//            "2. 결과의 대해 false 또는 true를 보낸다.")
-//    public ResponseEntity<Map<String,Object>> existsKnEmail(@RequestParam(value="knEmail", defaultValue = "") String knEmail) {
-//        return paymentService.existsKnEmail(knEmail);
-//    }
-//
-//    // 구독관리 리스트 호출
-//    @GetMapping(value = "/numberSendKnEmail")
-//    @ApiOperation(value = "이메일 인증번호 보내기 버튼" , notes = "" +
-//            "1. 이메일 중복확인한 이메일의 대해 인증번호를 보낸다." +
-//            "2. 번호를 레디스DB에 담는다. (유효기간은 3분)")
-//    public ResponseEntity<Map<String,Object>> numberSendKnEmail(@RequestParam(value="knEmail", defaultValue = "") String knEmail) throws IOException {
-//        return paymentService.numberSendKnEmail(knEmail);
-//    }
-//
-//    // 구독해지하기(부트페이 빌링키 제거)
-//    @GetMapping(value = "/numberCheckKnEmail")
-//    @ApiOperation(value = "이메일 인증번호 보내기 검증" , notes = "" +
-//            "1. 받은 인증번호를 받아 맞는지 확인한다.")
-//    public ResponseEntity<Map<String,Object>> numberCheckKnEmail(@RequestParam(value="knEmail", defaultValue = "") String knEmail,
-//                                                                 @RequestParam(value="ctNumber", defaultValue = "") String ctNumber) {
-//        return paymentService.numberCheckKnEmail(knEmail, ctNumber);
-//    }
-
-
-
 }

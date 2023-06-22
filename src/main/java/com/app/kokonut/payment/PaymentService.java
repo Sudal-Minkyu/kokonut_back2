@@ -299,11 +299,12 @@ public class PaymentService {
 						String orderId = keyGenerateService.keyGenerate("kn_payment", cpCode+localDate.format(DateTimeFormatter.ofPattern("yyyyMM")), "KokonutSystem");
 
 						// 결제오류건 결제처리
-						boolean payResult = bootPayService.kokonutPayment(companyPaymentSearchDto.getCpiBillingKey(), orderId, payAmount,
+						String receiptId = bootPayService.kokonutPayment(companyPaymentSearchDto.getCpiBillingKey(), orderId, payAmount,
 								"결제오류건 재결제 처리", companyPaymentSearchDto.getKnName(), companyPaymentSearchDto.getKnPhoneNumber());
 
-						if(payResult) {
+						if(!receiptId.equals("")) {
 							payment.setPayState("1");
+							payment.setPayReceiptid(receiptId);
 							payment.setModify_date(LocalDateTime.now());
 
 							optionalPaymentError.get().setPeState("1");
@@ -581,16 +582,16 @@ public class PaymentService {
 			payment.setPayOrderid(orderId);
 
 			String billingKey = companyPaymentSearchDto.getCpiBillingKey();
-			// 요금정산 처리
-			boolean payResult = bootPayService.kokonutPayment(billingKey, orderId, Integer.parseInt(payAmount),
-					"요금정산 결제", companyPaymentSearchDto.getKnName(), companyPaymentSearchDto.getKnPhoneNumber());
 
-			if(!payResult) {
+			// 요금정산 처리
+			String receiptId = bootPayService.kokonutPayment(billingKey, orderId, Integer.parseInt(payAmount),
+					"요금정산 결제", companyPaymentSearchDto.getKnName(), companyPaymentSearchDto.getKnPhoneNumber());
+			payment.setPayReceiptid(receiptId);
+			if(!receiptId.equals("")) {
 				log.error("요금정산을 실패 했습니다. 코코넛으로 문의해 주시길 바랍니다.");
 
 				payment.setPayState("0");
 				payment.setPayMethod("1");
-				paymentRepository.save(payment);
 
 				historyService.updateHistory(activityHistoryId,
 						cpCode+" - "+activityCode.getDesc()+"시도 실패 이력", "부트페이 내에 요금정산을 실패했습니다.", 1);
@@ -601,11 +602,14 @@ public class PaymentService {
 
 				payment.setPayState("1");
 				payment.setPayMethod("1");
-				paymentRepository.save(payment);
+				payment.setPayReceiptid(receiptId);
 
 				historyService.updateHistory(activityHistoryId,
 						cpCode+" - "+activityCode.getDesc()+"시도 성공 이력", "", 1);
 			}
+
+			payment.setModify_date(LocalDateTime.now());
+			paymentRepository.save(payment);
 		}
 
 

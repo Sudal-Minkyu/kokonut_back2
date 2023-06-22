@@ -59,8 +59,10 @@ public class SecurityConfig {
 
             .and()
             .authorizeRequests()
+
             // 권한 : 없음
             .antMatchers("/v3/api/Auth/login","/v3/api/Auth/register","/v3/api/PersonalInfoProvision/list", "/v3/api/History/activityList").permitAll()
+
             // 권한 : 권한(코코넛직원:ROLE_SYSTEM, 대표관리자:ROLE_MASTER, 최고관리자:ROLE_ADMIN, 일반관리자:ROLE_USER, 게스트:ROLE_GUEST)
             // 권한에 따라 요청허용
             .antMatchers("/v2/api/Admin/systemTest")
@@ -72,13 +74,14 @@ public class SecurityConfig {
             .antMatchers("/v2/api/Admin/adminTest", "/v2/api/CompanySetting/**", "/v2/api/DynamicUser/**", "/v2/api/Policy/**", "/v2/api/Payment/**")
                 .hasAnyAuthority(AuthorityRole.ROLE_ADMIN.getDesc(), AuthorityRole.ROLE_MASTER.getDesc(), AuthorityRole.ROLE_SYSTEM.getDesc())
 
-            .antMatchers("/v2/api/Admin/userTest", "/v2/api/Admin/create", "/v2/api/ApiKey/**", "/v2/api/Admin/**", "/v2/api/History/**", "/v2/api/Email/**", "/v2/api/Company/addCategoryList", "/v2/api/DynamicUser/tableColumnCall", "/v2/api/DynamicUser/tableBasicList",
-                    "/v2/api/Policy/policyList", "/v2/api/Policy/policyDetail/**", "/v2/api/Provision/**", "/v2/api/PrivacyHistory/**")
+            .antMatchers("/v2/api/Admin/userTest", "/v2/api/Admin/create", "/v2/api/ApiKey/**", "/v2/api/Admin/**", "/v2/api/History/**", "/v2/api/Email/**",
+                    "/v2/api/Company/addCategoryList", "/v2/api/DynamicUser/tableColumnCall", "/v2/api/DynamicUser/tableBasicList",
+                    "/v2/api/Policy/policyList", "/v2/api/Policy/policyDetail/**", "/v2/api/Provision/**", "/v2/api/PrivacyHistory/**", "/v2/api/Index/**")
                 .hasAnyAuthority(AuthorityRole.ROLE_USER.getDesc(), AuthorityRole.ROLE_ADMIN.getDesc(), AuthorityRole.ROLE_MASTER.getDesc(), AuthorityRole.ROLE_SYSTEM.getDesc())
 
             .antMatchers("/v2/api/Admin/guestTest", "/v2/api/Provision/provisionList", "/v2/api/Provision/provisionDetail/**")
                 .hasAnyAuthority(AuthorityRole.ROLE_GUEST.getDesc(), AuthorityRole.ROLE_USER.getDesc(), AuthorityRole.ROLE_ADMIN.getDesc(), AuthorityRole.ROLE_MASTER.getDesc(), AuthorityRole.ROLE_SYSTEM.getDesc())
-            .anyRequest().authenticated()   // 나머지 API 는 전부 인증 필요
+            .anyRequest().authenticated() // 나머지 API 는 전부 인증 필요
 
             .and()
             .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, redisDao), UsernamePasswordAuthenticationFilter.class);

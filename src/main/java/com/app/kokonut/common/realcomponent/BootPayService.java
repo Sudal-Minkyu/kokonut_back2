@@ -75,65 +75,6 @@ public class BootPayService {
         }
     }
 
-    // 토큰발급(사용하지 않음)
-    public void goGetToken() {
-        log.info("토큰 발급받기 함수 실행!");
-        try {
-            Bootpay bootpay = new Bootpay(restKey, privateKey);
-            HashMap<String, Object> res = bootpay.getAccessToken();
-            if (res.get("error_code") == null) { //success
-                log.info("토큰받기 성공: " + res);
-            } else {
-                log.info("토큰받기 실패: " + res);
-            }
-        } catch (Exception e) {
-            log.error("예외처리 : "+e);
-			log.error("예외처리 메세지 : "+e.getMessage());
-        }
-    }
-
-    // 빌링키 발급(사용하지 않음)
-    public void getBillingKey() throws Exception {
-        log.info("빌링키 발급받기 함수 실행!");
-        log.info("restKey : "+restKey);
-        log.info("privateKey : "+privateKey);
-
-        Bootpay bootpay = new Bootpay(restKey, privateKey);
-        bootpay.getAccessToken();
-
-        Subscribe subscribe = new Subscribe();
-        subscribe.orderName = "정기결제 빌링키 발급 테스트";
-        subscribe.subscriptionId = String.valueOf(System.currentTimeMillis() / 1000);
-        subscribe.pg = "나이스페이";
-
-        subscribe.cardNo = "5105545000809043"; //실제 테스트시에는 *** 마스크처리가 아닌 숫자여야 함
-        subscribe.cardPw = "11"; //실제 테스트시에는 *** 마스크처리가 아닌 숫자여야 함
-        subscribe.cardExpireYear = "27"; //실제 테스트시에는 *** 마스크처리가 아닌 숫자여야 함
-        subscribe.cardExpireMonth = "11"; //실제 테스트시에는 *** 마스크처리가 아닌 숫자여야 함
-        subscribe.cardIdentityNo = "3488101536"; //생년월일 또는 사업자 등록번호 (- 없이 입력)
-
-        subscribe.user = new User();
-        subscribe.user.username = "";
-        subscribe.user.phone = "";
-
-        try {
-            HashMap<String, Object> res = bootpay.getBillingKey(subscribe);
-//            JSONObject json =  new JSONObject(res);
-//            System.out.printf( "JSON: %s", json);
-
-            if(res.get("error_code") == null) {
-                log.info("빌링키 발급 성공: " + res);
-                log.info("빌링키 : " + res.get("billing_key"));
-                log.info("빌링 조회키: " + res.get("receipt_id"));
-            } else {
-                log.info("빌링키 발급 실패: " + res);
-            }
-        } catch (Exception e) {
-            log.error("예외처리 : "+e);
-			log.error("예외처리 메세지 : "+e.getMessage());
-        }
-    }
-
     // 빌링키 삭제
     public boolean billingKeyDelete(String billingKey) throws Exception {
         log.info("빌링키 삭제하기 실행!");
@@ -212,7 +153,7 @@ public class BootPayService {
     }
 
     // 부트페이 결제하기(요금정산)
-    public boolean kokonutPayment(String billingKey, String orderId, Integer payAmount, String orderName, String knName, String knPhoneNumber) throws Exception {
+    public String kokonutPayment(String billingKey, String orderId, Integer payAmount, String orderName, String knName, String knPhoneNumber) throws Exception {
         log.info("부트페이 결제하기 함수 실행!(요금정산)");
 
         Bootpay bootpay = new Bootpay(restKey, privateKey);
@@ -234,7 +175,7 @@ public class BootPayService {
 
             if(res.get("error_code") == null) { //success
                 System.out.println("결제 성공 : " + res);
-                return true;
+                return String.valueOf(res.get("receipt_id"));
             } else {
                 System.out.println("결제 실패 : " + res);
             }
@@ -243,7 +184,7 @@ public class BootPayService {
             log.error("예외처리 메세지 : "+e.getMessage());
         }
 
-        return false;
+        return "";
     }
 
     // 예약결제 조회 삭제
@@ -265,7 +206,7 @@ public class BootPayService {
 //                log.info("예약결제가 실행이 완료된 시간 : " + res.get("reserve_finished_at"));
 //                log.info("예약결제 상태 : " + res.get("status"));
 //                log.info("결제 이후 Webhook을 전달한 Feedback URL : " + res.get("feedback_url"));
-                Integer status = Integer.parseInt(String.valueOf(res.get("status")));
+                int status = Integer.parseInt(String.valueOf(res.get("status")));
                 if(status == 3) {
                     return null;
                 } else {
@@ -296,7 +237,70 @@ public class BootPayService {
         return null;
     }
 
-    // 부트페이 결제취소
+
+
+
+
+    // 토큰발급(사용하지 않음)
+    public void goGetToken() {
+        log.info("토큰 발급받기 함수 실행!");
+        try {
+            Bootpay bootpay = new Bootpay(restKey, privateKey);
+            HashMap<String, Object> res = bootpay.getAccessToken();
+            if (res.get("error_code") == null) { //success
+                log.info("토큰받기 성공: " + res);
+            } else {
+                log.info("토큰받기 실패: " + res);
+            }
+        } catch (Exception e) {
+            log.error("예외처리 : "+e);
+            log.error("예외처리 메세지 : "+e.getMessage());
+        }
+    }
+
+    // 빌링키 발급(사용하지 않음)
+    public void getBillingKey() throws Exception {
+        log.info("빌링키 발급받기 함수 실행!");
+        log.info("restKey : "+restKey);
+        log.info("privateKey : "+privateKey);
+
+        Bootpay bootpay = new Bootpay(restKey, privateKey);
+        bootpay.getAccessToken();
+
+        Subscribe subscribe = new Subscribe();
+        subscribe.orderName = "정기결제 빌링키 발급 테스트";
+        subscribe.subscriptionId = String.valueOf(System.currentTimeMillis() / 1000);
+        subscribe.pg = "나이스페이";
+
+        subscribe.cardNo = "5105545000809043"; //실제 테스트시에는 *** 마스크처리가 아닌 숫자여야 함
+        subscribe.cardPw = "11"; //실제 테스트시에는 *** 마스크처리가 아닌 숫자여야 함
+        subscribe.cardExpireYear = "27"; //실제 테스트시에는 *** 마스크처리가 아닌 숫자여야 함
+        subscribe.cardExpireMonth = "11"; //실제 테스트시에는 *** 마스크처리가 아닌 숫자여야 함
+        subscribe.cardIdentityNo = "3488101536"; //생년월일 또는 사업자 등록번호 (- 없이 입력)
+
+        subscribe.user = new User();
+        subscribe.user.username = "";
+        subscribe.user.phone = "";
+
+        try {
+            HashMap<String, Object> res = bootpay.getBillingKey(subscribe);
+//            JSONObject json =  new JSONObject(res);
+//            System.out.printf( "JSON: %s", json);
+
+            if(res.get("error_code") == null) {
+                log.info("빌링키 발급 성공: " + res);
+                log.info("빌링키 : " + res.get("billing_key"));
+                log.info("빌링 조회키: " + res.get("receipt_id"));
+            } else {
+                log.info("빌링키 발급 실패: " + res);
+            }
+        } catch (Exception e) {
+            log.error("예외처리 : "+e);
+            log.error("예외처리 메세지 : "+e.getMessage());
+        }
+    }
+
+    // 부트페이 결제취소(사용하지 않음)
     public void goCancel(String receipt_id) {
         Bootpay bootpay = new Bootpay(restKey, privateKey);
 
@@ -326,62 +330,6 @@ public class BootPayService {
         }
 
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

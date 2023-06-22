@@ -33,12 +33,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
-        log.info("JwtAuthenticationFilter 호출");
+//        log.info("JwtAuthenticationFilter 호출");
 
         String token = resolveToken(request);
 
         if(token != null) {
-            log.info("필터 거쳐감 Jwt Access Token");
+//            log.info("필터 거쳐감 Jwt Access Token");
 
             if(token.equals("kokonut")) {
                 log.info("로그인 이후 이용해주세요.");
@@ -53,10 +53,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         this.setAuthentication(token);
                     }
                 } else if(result == 901) {
-                    log.info("여기왔슴둥 : "+result);
+//                    log.info("여기왔슴둥 : "+result);
                     throw new io.jsonwebtoken.security.SecurityException("잘못된 JWT 토큰입니다.");
                 } else if(result == 902) {
-                    log.info("여기왔슴둥 : "+result);
+//                    log.info("여기왔슴둥 : "+result);
                     // JWT 엑세스토큰 재발급하기
                     Cookie[] cookies = request.getCookies();
                     String refreshToken = null;
@@ -67,10 +67,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             }
                         }
                     }
-                    log.info("리플레쉬 토큰 : "+refreshToken);
+//                    log.info("리플레쉬 토큰 : "+refreshToken);
 
                     if(refreshToken == null) {
-                        log.info("리플레쉬 토큰이 만료되었습니다. 새로 로그인해주시길 바랍니다.");
+                        log.warn("리플레쉬 토큰이 만료되었습니다. 새로 로그인해주시길 바랍니다.");
                         throw new RuntimeException("만료된 JWT 토큰입니다.");
                     } else {
                         // 토큰 검증
@@ -78,7 +78,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                         // 토큰 발급
                         String newAccessToken = jwtTokenProvider.reissueAccessToken(authentication);
-                        log.info("엑세스토큰 만료 -> 새로발급된 토큰 : "+newAccessToken);
+//                        log.info("엑세스토큰 만료 -> 새로발급된 토큰 : "+newAccessToken);
 
                         // 헤더에 어세스 토큰 추가
                         jwtTokenProvider.setHeaderAccessToken(response, newAccessToken);
@@ -90,10 +90,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     log.info("여기왔슴둥 : "+result);
                     throw new UnsupportedJwtException("지원되지 않는 JWT 토큰입니다.");
                 } else if(result == 904) {
-                    log.info("여기왔슴둥 : "+result);
+//                    log.info("여기왔슴둥 : "+result);
                     throw new IllegalArgumentException("JWT 토큰이 맞지 않습니다.");
                 } else {
-                    log.info("여기왔슴둥 : "+result);
+//                    log.info("여기왔슴둥 : "+result);
                     throw new RuntimeException("인증된 정보가 없습니다.");
                 }
             }
