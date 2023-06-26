@@ -99,12 +99,12 @@ public class KokonutUserService {
 	 * 기본 테이블의 개인정보 리스트 조회 -> DynamicUserService단에서 쿼리완성후 조회
 	 */
 	public List<Map<String, Object>> selectBasicTableList(String searchQuery) {
-		log.info("selectUserList 호출");
+		log.info("selectBasicTableList 호출");
 
-		log.info("searchQuery : "+searchQuery);
+//		log.info("searchQuery : "+searchQuery);
 
 		List<Map<String, Object>> result = dynamicUserRepositoryCustom.selectUserList(searchQuery);
-		log.info("result : "+result);
+//		log.info("result : "+result);
 
 		if(result == null || result.size() == 0) {
 			log.info("기본 테이블에 개인정보가 존재하지 않습니다.");

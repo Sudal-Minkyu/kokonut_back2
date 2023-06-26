@@ -88,7 +88,7 @@ public class Admin implements UserDetails {
      * 이름
      */
     @Column(name = "kn_name")
-    @ApiModelProperty("이름(대표자명)")
+    @ApiModelProperty("이름")
     private String knName;
 
     /**
@@ -197,7 +197,7 @@ public class Admin implements UserDetails {
     private LocalDateTime knLastLoginDate;
 
     /**
-     * 이메일인증여부
+     * 이메일인증여부접
      */
     @ApiModelProperty("이메일인증여부")
     @Column(name = "kn_is_email_auth")

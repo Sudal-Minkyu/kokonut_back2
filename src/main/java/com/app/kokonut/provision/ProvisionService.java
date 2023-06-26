@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -101,9 +102,9 @@ public class ProvisionService {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
         // 제공 시작기간
-        LocalDateTime proStartDate = LocalDateTime.parse(provisionSaveDto.getProStartDate()+" 00:00:00.000", formatter);
+        LocalDate proStartDate = LocalDate.parse(provisionSaveDto.getProStartDate(), formatter);
         // 제공 만료기간
-        LocalDateTime proExpDate = LocalDateTime.parse(provisionSaveDto.getProExpDate()+" 00:00:00.000", formatter);
+        LocalDate proExpDate = LocalDate.parse(provisionSaveDto.getProExpDate(), formatter);
         log.info("proStartDate : " + proStartDate);
         log.info("proExpDate : " + proExpDate);
 
@@ -149,7 +150,7 @@ public class ProvisionService {
                 provisionRoster = new ProvisionRoster();
                 provisionRoster.setProCode(saveprovision.getProCode());
                 provisionRoster.setInsert_email(email);
-                provisionRoster.setInsert_date(LocalDateTime.now());
+                provisionRoster.setInsert_date(LocalDate.now());
                 AdminCompanyInfoDto choseAdmin = adminRepository.findByCompanyInfo(knEmail);
                 if(choseAdmin != null) {
                     provisionRoster.setAdminId(choseAdmin.getAdminId());

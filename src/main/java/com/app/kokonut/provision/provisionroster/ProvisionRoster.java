@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -41,6 +42,6 @@ public class ProvisionRoster {
 
     @ApiModelProperty("등록 날짜")
     @Column(name = "insert_date")
-    private LocalDateTime insert_date;
+    private LocalDate insert_date;
 
 }

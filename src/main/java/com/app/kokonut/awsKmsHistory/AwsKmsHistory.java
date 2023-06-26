@@ -6,9 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 @EqualsAndHashCode(of = "akhIdx")
@@ -22,6 +20,9 @@ public class AwsKmsHistory {
     @Column(name = "akh_idx", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long akhIdx;
+
+    @Column(name = "cp_code")
+    private String cpCode;
 
     /**
      * 호출 타입

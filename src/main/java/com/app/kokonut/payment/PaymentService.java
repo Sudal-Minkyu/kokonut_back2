@@ -485,6 +485,14 @@ public class PaymentService {
 					activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
 							cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
 
+					LocalDate validStart;
+					if(optionalCompany.get().getCpValidStart() != null) {
+						validStart = optionalCompany.get().getCpValidStart();
+					} else {
+						validStart = LocalDate.now().plusMonths(1);
+						optionalCompany.get().setCpValidStart(validStart);
+					}
+
 					CompanyPayment companyPayment = new CompanyPayment();
 					companyPayment.setCpCode(cpCode);
 					companyPayment.setCpiBillingKey(companyPaymentSaveDto.getCpiBillingKey());
@@ -493,7 +501,7 @@ public class PaymentService {
 					companyPayment.setCpiReceiptId(companyPaymentSaveDto.getCpiReceiptId());
 					companyPayment.setCpiPayType("0"); // 기본 월결제
 					companyPayment.setCpiSubscriptionId(companyPaymentSaveDto.getCpiSubscriptionId());
-					companyPayment.setCpiValidStart(LocalDate.now().plusMonths(1)); // 자동결제 부과 시작일
+					companyPayment.setCpiValidStart(validStart); // 자동결제 부과 시작일
 					companyPayment.setInsert_email(email);
 					companyPayment.setInsert_date(LocalDateTime.now());
 					CompanyPayment companyPaymentSave = companyPaymentRepository.save(companyPayment);
@@ -587,12 +595,11 @@ public class PaymentService {
 			String receiptId = bootPayService.kokonutPayment(billingKey, orderId, Integer.parseInt(payAmount),
 					"요금정산 결제", companyPaymentSearchDto.getKnName(), companyPaymentSearchDto.getKnPhoneNumber());
 			payment.setPayReceiptid(receiptId);
-			if(!receiptId.equals("")) {
+			if(receiptId.equals("")) {
 				log.error("요금정산을 실패 했습니다. 코코넛으로 문의해 주시길 바랍니다.");
 
 				payment.setPayState("0");
 				payment.setPayMethod("1");
-
 				historyService.updateHistory(activityHistoryId,
 						cpCode+" - "+activityCode.getDesc()+"시도 실패 이력", "부트페이 내에 요금정산을 실패했습니다.", 1);
 
@@ -658,11 +665,14 @@ public class PaymentService {
 					} else {
 						log.error("구독해지를 성공 했습니다.");
 
+						optionalCompany.get().setCpiId(null);
 						optionalCompany.get().setCpSubscribe("2");
 						optionalCompany.get().setCpSubscribeDate(LocalDateTime.now());
 						companyRepository.save(optionalCompany.get());
 
 						companyPaymentRepository.delete(optionalCompanyPayment.get());
+						Optional<CompanyPaymentInfo> optionalCompanyPaymentInfo = companyPaymentInfoRepository.findCompanyPaymentInfoByCpiId(optionalCompanyPayment.get().getCpiId());
+						optionalCompanyPaymentInfo.ifPresent(companyPaymentInfoRepository::delete);
 
 						historyService.updateHistory(activityHistoryId,
 								cpCode+" - "+activityCode.getDesc()+"시도 성공 이력", "", 1);

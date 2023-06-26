@@ -42,7 +42,7 @@ public class AuthRestController {
     }
 
     @ApiOperation(value = "부트페이 웹훅 호출용 테스트 API")
-    @GetMapping(value = "/bootPayWebhookCallBack")
+    @PostMapping(value = "/bootPayWebhookCallBack")
     public ResponseEntity<Map<String,Object>> bootPayWebhookCallBack(@RequestBody HashMap<String,Object> paramMap,
                                                                      HttpServletRequest request, HttpServletResponse response) {
         log.info("bootPayWebhookCallBack 호출");

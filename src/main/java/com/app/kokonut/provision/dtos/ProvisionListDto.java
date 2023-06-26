@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -28,9 +29,9 @@ public class ProvisionListDto {
 
     private LocalDateTime insert_date; // 만든 날짜
 
-    private LocalDateTime proStartDate; // 제공 시작 기간
+    private LocalDate proStartDate; // 제공 시작 기간
 
-    private LocalDateTime proExpDate; // 제공 만료 기간
+    private LocalDate proExpDate; // 제공 만료 기간
 
     private Integer proDownloadYn;
 

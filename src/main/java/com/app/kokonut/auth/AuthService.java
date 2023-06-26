@@ -684,6 +684,7 @@ public class AuthService {
 
         log.info("KMS 발급 이력 저장(Insert) 로직 시작");
         AwsKmsHistory awsKmsHistory = new AwsKmsHistory();
+        awsKmsHistory.setCpCode(saveCompany.getCpCode());
         awsKmsHistory.setAkhType("ENC");
         awsKmsHistory.setAkhRegdate(LocalDateTime.now());
         AwsKmsHistory saveAwsKmsHistory =  awsKmsHistoryRepository.save(awsKmsHistory);
@@ -824,6 +825,21 @@ public class AuthService {
             }
             else {
                 try {
+
+                    // 로그인 코드
+                    String publicIp = CommonUtil.publicIp();
+                    ActivityCode activityCode = ActivityCode.AC_01;
+                    String ip = CommonUtil.clientIp();
+
+                    AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(knEmail);
+                    Long adminId = adminCompanyInfoDto.getAdminId();
+                    String companyCode = adminCompanyInfoDto.getCompanyCode();
+                    String roleCode = optionalAdmin.get().getKnRoleCode().getCode();
+
+                    // 활동이력 저장 -> 로그인실패 - 비정상 모드
+                    Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
+                            companyCode+" - "+activityCode.getDesc()+" 시도 이력", "로그인 실패 비밀번호 일치하지 않음", ip, publicIp, 0, knEmail);
+
                     // Login ID/PW 를 기반으로 Authentication 객체 생성 -> 아아디 / 비번 검증
                     // 이때 authentication은 인증 여부를 확인하는 authenticated 값이 false
                     UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
@@ -849,21 +865,11 @@ public class AuthService {
                         } else {
                             log.info("OTP인증완료 -> JWT토큰 발급");
 
-                            AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(knEmail);
-                            Long adminId = adminCompanyInfoDto.getAdminId();
-                            String companyCode = adminCompanyInfoDto.getCompanyCode();
-                            String roleCode = optionalAdmin.get().getKnRoleCode().getCode();
-
                             int knPwdErrorCount = optionalAdmin.get().getKnPwdErrorCount(); // 비밀번호 오류횟수
-                            String publicIp = CommonUtil.publicIp();
 
-                            // 로그인 코드
-                            ActivityCode activityCode = ActivityCode.AC_01;
-                            String ip = CommonUtil.clientIp();
-
-                            // 활동이력 저장 -> 비정상 모드
-                            Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-                                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, publicIp, 0, knEmail);
+                            // 활동이력 저장 -> 로그인정상 - 비정상 모드
+                            historyService.updateHistory(activityHistoryId,
+                                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "로그인 성공", 0);
 
                             // 비밀번호 오휴 횟수 제한 가져오기
                             // 설정해둔 횟수와 같거나 크면 로그인 제한됨 -> 비밀번호 찾기 미제공 -> 왕관 최고관리자일경우
@@ -913,7 +919,7 @@ public class AuthService {
                                 log.error("로그인 오류 횟수제한 이메일 : "+knEmail);
                                 // -> 로그인불가처리 - 관리자가 비밀번호 재설정을 눌러줄 방법밖에 없음(왕관관리자는 코코넛에게 문의)
                                 historyService.updateHistory(activityHistoryId,
-                                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "로그인 오류횟수 초과로 인한 로그인실패", 1);
+                                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "로그인 오류횟수 초과로 인한 로그인실패", 0);
 
                                 if(roleCode.equals("ROLE_MASTER")) {
 //                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO096.getCode(),"비밀번호를 "+knPwdErrorCount+"회 틀리셨습니다. contact@kokonut.me로 문의바랍니다."+"(최대횟수 : "+csPasswordErrorCountSetting+"회)"));
@@ -949,7 +955,7 @@ public class AuthService {
 
                             if(historyState == 0) {
                                 historyService.updateHistory(activityHistoryId,
-                                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+                                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "로그인 성공", 1);
                             }
 
                             return ResponseEntity.ok(res.success(data));

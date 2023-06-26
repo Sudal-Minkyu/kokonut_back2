@@ -25,4 +25,8 @@ public interface CompanySettingAccessIPRepository extends JpaRepository<CompanyS
 
     boolean existsCompanySettingAccessIPByCsIdAndCsipIp(Long csId, String publicIp);
 
+    @Query("select a.csipRemarks from CompanySettingAccessIP a where a.csId = :csId and a.csipIp = :publicIp")
+    String findByCompanySettingAccessIPsipRemarks(Long csId, String publicIp);
+
+
 }

@@ -1,7 +1,9 @@
 package com.app.kokonut.history;
 
+import com.app.kokonut.company.companysetting.QCompanySetting;
 import com.app.kokonut.history.dto.*;
 import com.app.kokonut.admin.QAdmin;
+import com.app.kokonut.index.dtos.HistoryMyConnectListDto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPQLQuery;
 import org.qlrm.mapper.JpaResultMapper;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -288,5 +291,39 @@ public class HistoryRepositoryCustomImpl extends QuerydslRepositorySupport imple
         query.executeUpdate();
     }
 
+    @Override
+    public List<HistoryMyConnectListDto> findByMyConnectList(Long adminId, String cpCode) {
+
+        QHistory history = QHistory.history;
+        QCompanySetting companySetting = QCompanySetting.companySetting;
+
+        JPQLQuery<HistoryMyConnectListDto> query = from(history)
+                .innerJoin(companySetting).on(companySetting.cpCode.eq(cpCode))
+                .where(history.adminId.eq(adminId).and(history.activityCode.eq(ActivityCode.AC_01).and(history.ahType.eq(2))))
+                .orderBy(history.ahId.desc()).limit(5)
+                .select(Projections.constructor(HistoryMyConnectListDto.class,
+                        history.ahState,
+                        history.ahReason,
+                        history.ahPublicIpAddr,
+                        history.insert_date,
+                        history.insert_date,
+                        companySetting.csAccessSetting.as("csipRemarks")
+                ));
+
+        return query.fetch();
+    }
+
+    @Override
+    public LocalDateTime findByHistoryInsertDate(Long adminId) {
+
+        QHistory history = QHistory.history;
+
+        JPQLQuery<LocalDateTime> query = from(history)
+                .where(history.adminId.eq(adminId).and(history.ahState.eq(1)))
+                .orderBy(history.ahId.desc()).limit(1)
+                .select(history.insert_date);
+
+        return query.fetchOne();
+    }
 
 }

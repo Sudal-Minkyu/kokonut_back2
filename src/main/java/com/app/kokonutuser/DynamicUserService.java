@@ -1533,7 +1533,6 @@ public class DynamicUserService {
 		return ResponseEntity.ok(res.success(data));
 	}
 
-
 	// 테이블의 컬럼조회
 	public ResponseEntity<Map<String, Object>> tableColumnCall(String tableName) {
 		log.info("tableColumnCall 호출");
@@ -1795,8 +1794,8 @@ public class DynamicUserService {
 	}
 
 	// 기본테이블의 데이터를 조회한다.
-	public ResponseEntity<Map<String, Object>> tableBasicList(JwtFilterDto jwtFilterDto) throws IOException {
-		log.info("tableColumnDelete 호출");
+	public ResponseEntity<Map<String, Object>> tableBasicList(JwtFilterDto jwtFilterDto) throws Exception {
+		log.info("tableBasicList 호출");
 
 		AjaxResponse res = new AjaxResponse();
 		HashMap<String, Object> data = new HashMap<>();
@@ -1804,9 +1803,12 @@ public class DynamicUserService {
 		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(jwtFilterDto.getEmail());
 		String companyCode = adminCompanyInfoDto.getCompanyCode();
 
+		List<String> headerNames = new ArrayList<>();
 		Optional<CompanyTable> optionalCompanyTable = companyTableRepository.findCompanyTableByCpCodeAndCtDesignation(companyCode, "기본");
 		if(optionalCompanyTable.isPresent()) {
-			log.info("존재하는 테이블");
+//			log.info("존재하는 테이블");
+
+			AwsKmsResultDto awsKmsResultDto = null;
 
 			String ctNameStatus = optionalCompanyTable.get().getCtNameStatus();
 			String ctPhoneStatus = optionalCompanyTable.get().getCtPhoneStatus();
@@ -1829,15 +1831,9 @@ public class DynamicUserService {
 			// RIGHT(kokonut202301001_1_32, 1)) as basicName,
 			// 한글기준 암호화크기 : 첫글자 28, 두글자 32, 세글자 36, 네글자 40, 다섯글자 44
 			if(!ctNameStatus.equals("")) {
-				searchQuery
-						.append(", CONCAT(")
-						.append("LEFT(").append(ctNameStatus).append(", 1),")
-						.append("CASE ")
-						.append("WHEN CHAR_LENGTH(").append(ctNameStatus).append(")-2 <= 36 THEN '*' ")
-						.append("WHEN CHAR_LENGTH(").append(ctNameStatus).append(")-2 <= 40 THEN '**' ")
-						.append("WHEN CHAR_LENGTH(").append(ctNameStatus).append(")-2 <= 44 THEN '***' ")
-						.append("ELSE '****' END, ")
-						.append("RIGHT(").append(ctNameStatus).append(", 1)) as basicName");
+				awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(companyCode);
+				headerNames.add("basicName");
+				searchQuery.append(", ").append(ctNameStatus).append(" as basicName");
 			}
 
 			// CONCAT(LEFT(필드명, 4),'****', SUBSTRING(필드명, CHAR_LENGTH(필드명) - 4)) as basicPhone,
@@ -1848,14 +1844,20 @@ public class DynamicUserService {
 			}
 
 			if(!ctGenderStatus.equals("")) {
+				headerNames.add("basicGender");
 				searchQuery.append(", ").append(ctGenderStatus).append(" as basicGender");
 			}
 
 			if(!ctEmailStatus.equals("")) {
+				if(awsKmsResultDto == null) {
+					awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(companyCode);
+				}
+				headerNames.add("basicEmail");
 				searchQuery.append(", ").append(ctEmailStatus).append(" as basicEmail");
 			}
 
 			if(!ctBirthStatus.equals("")) {
+				headerNames.add("basicBirth");
 				searchQuery.append(", ").append(ctBirthStatus).append(" as basicBirth");
 			}
 
@@ -1863,10 +1865,36 @@ public class DynamicUserService {
 
 			searchQuery.append(optionalCompanyTable.get().getCtName());
 			searchQuery.append(" WHERE 1=1");
-			log.info("searchQuery : "+ searchQuery);
+//			log.info("searchQuery : "+ searchQuery);
 
 			List<Map<String, Object>> basicTableList = kokonutUserService.selectBasicTableList(searchQuery.toString());
-			log.info("basicTableList : "+basicTableList);
+			if(awsKmsResultDto != null) {
+				for(Map<String, Object> map : basicTableList) {
+					for (String headerName : headerNames) {
+//						log.info("headerNames.get(i) : " + headerName);
+
+						Object key = map.get(headerName);
+						if (key != null) {
+
+							String keyValue = String.valueOf(key);
+							String securityResultValue;
+							String decryptValue;
+//							log.info("복호화할 데이터 key : " + key);
+
+							decryptValue = AESGCMcrypto.decrypt(keyValue, awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
+							if (decryptValue.length() == 2) {
+								securityResultValue = decryptValue.charAt(0) + "*";
+							} else {
+								securityResultValue = decryptValue.charAt(0) + Utils.starsForString(decryptValue).substring(2) + decryptValue.substring(decryptValue.length() - 1);
+							}
+
+							map.put(headerName, securityResultValue);
+						}
+					}
+				}
+			}
+
+//			log.info("basicTableList : "+basicTableList);
 			data.put("basicTableList",basicTableList);
 		}
 
@@ -1875,7 +1903,7 @@ public class DynamicUserService {
 
 	// 테이블의 데이터 존재여부를 조회한다.
 	public ResponseEntity<Map<String, Object>> tableDataCheck(String tableName) {
-		log.info("tableColumnDelete 호출");
+		log.info("tableDataCheck 호출");
 
 		AjaxResponse res = new AjaxResponse();
 		HashMap<String, Object> data = new HashMap<>();
@@ -2201,7 +2229,6 @@ public class DynamicUserService {
 								map.put(headerNames.get(i), keyValue);
 							}
 						}
-
 					}
 				}
 			}
