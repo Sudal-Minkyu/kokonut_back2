@@ -45,13 +45,20 @@ public class IndexRestController {
         return indexService.adminConnectInfo(jwtFilterDto);
     }
 
-
     @ApiOperation(value="인덱스페이지에 표출할 개인정보 제공 건수를 가져온다.", notes="")
-    @GetMapping(value = "/privacyOfferCount")
+    @GetMapping(value = "/provisionIndexCount")
     @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> privacyOfferCount(@RequestParam(value="dateType", defaultValue = "") String dateType) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
-        return indexService.privacyOfferCount(dateType, jwtFilterDto);
+        return indexService.provisionIndexCount(dateType, jwtFilterDto);
+    }
+
+    @ApiOperation(value="인덱스페이지에 표출할 개인정보 수를 가져온다.", notes="")
+    @GetMapping(value = "/privacyIndexCount")
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    public ResponseEntity<Map<String,Object>> privacyCount(@RequestParam(value="dateType", defaultValue = "") String dateType) {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return indexService.privacyIndexCount(dateType, jwtFilterDto);
     }
 
 

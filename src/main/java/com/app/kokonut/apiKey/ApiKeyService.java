@@ -244,35 +244,29 @@ public class ApiKeyService {
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
                     companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
 
-            while(true) {
+            if(!apiKeyRepository.doesAccessIpExist(accessIp)) {
                 if(optionalApiKey.get().getAkAgreeIp1() == null) {
                     optionalApiKey.get().setAkAgreeIp1(accessIp);
                     optionalApiKey.get().setAkAgreeMemo1(ipMemo);
-                    break;
-                }
-                if(optionalApiKey.get().getAkAgreeIp2() == null) {
+                } else if(optionalApiKey.get().getAkAgreeIp2() == null) {
                     optionalApiKey.get().setAkAgreeIp2(accessIp);
                     optionalApiKey.get().setAkAgreeMemo2(ipMemo);
-                    break;
-                }
-                if(optionalApiKey.get().getAkAgreeIp3() == null) {
+                } else if(optionalApiKey.get().getAkAgreeIp3() == null) {
                     optionalApiKey.get().setAkAgreeIp3(accessIp);
                     optionalApiKey.get().setAkAgreeMemo3(ipMemo);
-                    break;
-                }
-                if(optionalApiKey.get().getAkAgreeIp4() == null) {
+                } else if(optionalApiKey.get().getAkAgreeIp4() == null) {
                     optionalApiKey.get().setAkAgreeIp4(accessIp);
                     optionalApiKey.get().setAkAgreeMemo4(ipMemo);
-                    break;
-                }
-                if(optionalApiKey.get().getAkAgreeIp5() == null) {
+                } else if(optionalApiKey.get().getAkAgreeIp5() == null) {
                     optionalApiKey.get().setAkAgreeIp5(accessIp);
                     optionalApiKey.get().setAkAgreeMemo5(ipMemo);
-                    break;
+                } else {
+                    log.error("등록되신 API Key의 허용IP 수가 초과되었습니다.");
+                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO081.getCode(),ResponseErrorCode.KO081.getDesc()));
                 }
-
-                log.error("등록되신 API Key의 허용IP 수가 초과되었습니다.");
-                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO081.getCode(),ResponseErrorCode.KO081.getDesc()));
+            } else {
+                log.error("이미 등록된 허용IP 입니다.");
+                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO101.getCode(),ResponseErrorCode.KO101.getDesc()));
             }
 
             optionalApiKey.get().setModify_email(jwtFilterDto.getEmail());

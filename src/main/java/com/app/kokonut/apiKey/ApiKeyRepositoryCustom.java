@@ -46,4 +46,6 @@ public interface ApiKeyRepositoryCustom {
 
     Long findByApiKeyCheck(String userIp);
 
+    boolean doesAccessIpExist(String accessIp);
+
 }

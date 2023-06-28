@@ -108,5 +108,48 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
         return new PageImpl<>(provisionListDtos, pageable, query.fetchCount());
     }
 
+    public Long findByProvisionIndexTodayCount(String cpCode, Integer type, LocalDate now) {
+
+        QProvision provision = QProvision.provision;
+
+        JPQLQuery<Long> query = from(provision)
+                .where(provision.proProvide.eq(type).and(provision.cpCode.eq(cpCode)))
+                .where(provision.insert_date.year().eq(now.getYear())
+                        .and(provision.insert_date.month().eq(now.getMonthValue())
+                                .and(provision.insert_date.dayOfMonth().eq(now.getDayOfMonth()))))
+                .select(Projections.constructor(Long.class,
+                        provision.count()
+                ));
+
+        return query.fetchOne();
+    }
+
+    public Long findByProvisionIndexOfferCount(String cpCode, Integer type, String dateType, LocalDate now, LocalDate filterDate) {
+
+        QProvision provision = QProvision.provision;
+
+        JPQLQuery<Long> query = from(provision)
+                .where(provision.proProvide.eq(type).and(provision.cpCode.eq(cpCode)))
+                .select(Projections.constructor(Long.class,
+                        provision.count()
+                ));
+
+        if(dateType.equals("1")) {
+            // 오늘조회
+            query.where(provision.proStartDate.eq(filterDate).or(provision.proExpDate.eq(filterDate)));
+        }else if(dateType.equals("2")) {
+            // 이번주 조회
+            query.where(provision.proStartDate.goe(filterDate).and(provision.proExpDate.loe(now))); // 날짜 사이값 정의
+        } else {
+            // 이번달 조회
+            query.where(
+                    provision.proStartDate.year().eq(filterDate.getYear()).and(provision.proStartDate.month().eq(filterDate.getMonthValue()))
+                            .or(provision.proExpDate.year().eq(filterDate.getYear()).and(provision.proExpDate.month().eq(filterDate.getMonthValue())))
+                            .or(provision.proStartDate.loe(filterDate).and(provision.proExpDate.goe(filterDate)))
+            );
+        }
+
+        return query.fetchOne();
+    }
 
 }

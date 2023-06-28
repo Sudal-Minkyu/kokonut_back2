@@ -10,6 +10,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -143,13 +145,48 @@ public class KokonutUserService {
 	}
 
 	/**
+	 * 유저테이블의 신규회원 수 조회
+	 * 기존 코코넛 :
+	 */
+	public int selectUserNewCount(String cpCode, String dateType, LocalDate now, LocalDate filterDate) {
+		log.info("selectUserListCount 호출");
+
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("SELECT COUNT(*) FROM `").append(cpCode).append("`");
+		sb.append(" WHERE 1=1 AND");
+
+		// 등록일시 kokonut_REGDATE
+		// 회원가입날짜 kokonut_REGISTER_DATE
+		if(dateType.equals("1")) {
+			log.info("오늘");
+			sb.append(" YEAR(kokonut_REGISTER_DATE) = ").append(now.getYear())
+					.append(" AND MONTH(kokonut_REGISTER_DATE) = ").append(now.getMonthValue())
+					.append(" AND DAY(kokonut_REGISTER_DATE) = ").append(now.getDayOfMonth());
+		} else if(dateType.equals("2")) {
+			log.info("이번주");
+			LocalDateTime startOfDay = filterDate.atStartOfDay(); // 시작 시간
+			LocalDateTime endOfDay = now.atTime(23, 59, 59); // 끝 시간
+			
+			sb.append("");
+		} else {
+			log.info("이번달");
+			sb.append("");
+		}
+
+		log.info("searchQuery : "+sb);
+//		return 0;
+		return dynamicUserRepositoryCustom.getCountFromTable(sb.toString());
+	}
+
+	/**
 	 * 유저테이블의 회원 수 조회
 	 * 기존 코코넛 : int SelectUserListCount
 	 */
 	public int selectUserListCount(String companyCode) {
 		log.info("selectUserListCount 호출");
 		String searchQuery = "SELECT COUNT(*) FROM `" + companyCode + "` WHERE 1=1";
-		return dynamicUserRepositoryCustom.selectUserListCount(searchQuery);
+		return dynamicUserRepositoryCustom.getCountFromTable(searchQuery);
 	}
 
 	/**

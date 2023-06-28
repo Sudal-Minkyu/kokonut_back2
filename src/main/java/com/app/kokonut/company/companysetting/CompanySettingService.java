@@ -313,13 +313,18 @@ public class CompanySettingService {
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
                     cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", CommonUtil.clientIp(), CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
 
-            CompanySettingAccessIP companySettingAccessIP = new CompanySettingAccessIP();
-            companySettingAccessIP.setCsId(optionalCompanySetting.get().getCsId());
-            companySettingAccessIP.setCsipIp(csipIp);
-            companySettingAccessIP.setCsipRemarks(csipRemarks);
-            companySettingAccessIP.setInsert_email(jwtFilterDto.getEmail());
-            companySettingAccessIP.setInsert_date(LocalDateTime.now());
-            companySettingAccessIPRepository.save(companySettingAccessIP);
+            if(!companySettingAccessIPRepository.existsCompanySettingAccessIPByCsIdAndCsipIp(optionalCompanySetting.get().getCsId(), csipIp)) {
+                CompanySettingAccessIP companySettingAccessIP = new CompanySettingAccessIP();
+                companySettingAccessIP.setCsId(optionalCompanySetting.get().getCsId());
+                companySettingAccessIP.setCsipIp(csipIp);
+                companySettingAccessIP.setCsipRemarks(csipRemarks);
+                companySettingAccessIP.setInsert_email(jwtFilterDto.getEmail());
+                companySettingAccessIP.setInsert_date(LocalDateTime.now());
+                companySettingAccessIPRepository.save(companySettingAccessIP);
+            } else {
+                log.error("이미 등록된 허용IP 입니다.");
+                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO101.getCode(),ResponseErrorCode.KO101.getDesc()));
+            }
 
             historyService.updateHistory(activityHistoryId,
                     cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
