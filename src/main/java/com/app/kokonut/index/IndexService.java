@@ -359,7 +359,7 @@ public class IndexService {
 		privacyIndexDto.setToDate(now);
 
 		// 전체(개인테이블의 로우데이터수),
-		// 기존회원(전체회원-신규회원-탈퇴회원),
+		// 기존회원(전체회원-신규회원),
 		// 신규회원(날짜 필터를 통해 그 사이 가입된 수 -> 등록 일시 데이터를 비교하여 카운팅),
 		// 탈퇴회원(날짜 필터를 통해 그 사이 탈퇴한 수 -> 탈퇴로그 테이블의 탈퇴한 날짜 비교하여 카운팅)
 
@@ -377,7 +377,7 @@ public class IndexService {
 		log.info("탈퇴수 : "+leaveUserCount);
 		privacyIndexDto.setLeaveUserCount(leaveUserCount);
 
-		nowUserCount = nowUserCount - newUserCount - leaveUserCount;
+		nowUserCount = nowUserCount - newUserCount;
 		if(nowUserCount < 0) {
 			nowUserCount = 0;
 		}

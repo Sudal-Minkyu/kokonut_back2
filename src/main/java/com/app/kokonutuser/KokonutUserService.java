@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -154,28 +155,32 @@ public class KokonutUserService {
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("SELECT COUNT(*) FROM `").append(cpCode).append("`");
-		sb.append(" WHERE 1=1 AND");
+		sb.append(" WHERE 1=1");
 
 		// 등록일시 kokonut_REGDATE
 		// 회원가입날짜 kokonut_REGISTER_DATE
 		if(dateType.equals("1")) {
-			log.info("오늘");
-			sb.append(" YEAR(kokonut_REGISTER_DATE) = ").append(now.getYear())
+//			log.info("오늘");
+			sb.append(" AND YEAR(kokonut_REGISTER_DATE) = ").append(now.getYear())
 					.append(" AND MONTH(kokonut_REGISTER_DATE) = ").append(now.getMonthValue())
 					.append(" AND DAY(kokonut_REGISTER_DATE) = ").append(now.getDayOfMonth());
 		} else if(dateType.equals("2")) {
-			log.info("이번주");
+//			log.info("이번주");
 			LocalDateTime startOfDay = filterDate.atStartOfDay(); // 시작 시간
 			LocalDateTime endOfDay = now.atTime(23, 59, 59); // 끝 시간
-			
-			sb.append("");
+			sb.append(" AND kokonut_REGISTER_DATE BETWEEN '")
+					.append(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(startOfDay))
+					.append("' AND '")
+					.append(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(endOfDay))
+					.append("'");
 		} else {
-			log.info("이번달");
-			sb.append("");
+//			log.info("이번달");
+			sb.append(" AND YEAR(kokonut_REGISTER_DATE) = ").append(now.getYear())
+					.append(" AND MONTH(kokonut_REGISTER_DATE) = ").append(now.getMonthValue());
 		}
 
-		log.info("searchQuery : "+sb);
-//		return 0;
+//		log.info("searchQuery : "+sb);
+
 		return dynamicUserRepositoryCustom.getCountFromTable(sb.toString());
 	}
 
