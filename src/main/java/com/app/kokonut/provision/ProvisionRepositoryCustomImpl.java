@@ -8,6 +8,7 @@ import com.app.kokonut.provision.provisionroster.QProvisionRoster;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
@@ -39,6 +40,10 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
     }
 
     // 리스트 조회
+    // 6월29일 woody 기록
+    // 나에게 제공받은 제공건만 리스트로 호출함.
+    // 내가 제공해준거까지 리스트로 나오게되면 문제점 : 내가 제공을해줬지만 내가포함이 아닐수도있다.
+    // 만약 위처럼 하게된다면 상세보기를 볼 수 없게하는 작업을 따로 해야된다.
     @Override
     public Page<ProvisionListDto> findByProvisionList(ProvisionSearchDto provisionSearchDto, Pageable pageable) {
 
@@ -48,7 +53,10 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
 
         QProvisionDownloadHistory provisionDownloadHistory = QProvisionDownloadHistory.provisionDownloadHistory;
 
-        QAdmin admin = QAdmin.admin;
+//        QAdmin admin = QAdmin.admin;
+
+        QAdmin admin = new QAdmin("admin");
+        QAdmin InsertAdmin = new QAdmin("InsertAdmin");
 
         LocalDate today = LocalDate.now();
 
@@ -67,7 +75,9 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
                 .where(provision.cpCode.eq(provisionSearchDto.getCpCode())).orderBy(provision.proId.desc())
                 .where(provision.insert_date.goe(provisionSearchDto.getStimeStart()).and(provision.insert_date.loe(provisionSearchDto.getStimeEnd())))
                 .innerJoin(admin).on(admin.knEmail.eq(provision.insert_email))
-                .innerJoin(provisionRoster).on(provisionRoster.proCode.eq(provision.proCode).and(provisionRoster.adminId.eq(provisionSearchDto.getAdminId())))
+                .innerJoin(InsertAdmin).on(InsertAdmin.adminId.eq(admin.adminId))
+                .innerJoin(provisionRoster).on(provisionRoster.proCode.eq(provision.proCode))
+//                .innerJoin(provisionRoster).on(provisionRoster.proCode.eq(provision.proCode).and(provisionRoster.adminId.eq(provisionSearchDto.getAdminId())))
                 .innerJoin(provisionRosterCnt).on(provisionRosterCnt.proCode.eq(provision.proCode)).groupBy(provisionRosterCnt.proCode)
                 .select(Projections.constructor(ProvisionListDto.class,
                         provision.proId,
@@ -79,7 +89,10 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
                         provision.proExpDate,
                         provision.proDownloadYn,
                         provisionRosterCnt.count(),
-                        downloadHistoryCountSubQuery
+                        downloadHistoryCountSubQuery,
+                        new CaseBuilder()
+                                .when(InsertAdmin.adminId.eq(provisionSearchDto.getAdminId())).then("1")
+                                .otherwise("2") // 자신이 제공한건이면 "1", 받은건이면 "2"로 반환
                 ));
 
         if(!provisionSearchDto.getSearchText().equals("")) {

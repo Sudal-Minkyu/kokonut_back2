@@ -98,7 +98,7 @@ public class IndexService {
 		this.kokonutUserService = kokonutUserService;
 	}
 
-	// 나의 접속 현황(로그인현황) 최근일자로부터 5건
+	// 1. 나의 접속 현황(로그인현황) 최근일자로부터 5건
 	public ResponseEntity<Map<String, Object>> myLoginInfo(JwtFilterDto jwtFilterDto) {
 		log.info("myLoginInfo 호출");
 
@@ -132,7 +132,7 @@ public class IndexService {
 		return ResponseEntity.ok(res.success(data));
 	}
 
-	// 관리자 접속현황 데이터를 가져온다
+	// 2. 관리자 접속현황 데이터를 가져온다
 	public ResponseEntity<Map<String, Object>> adminConnectInfo(JwtFilterDto jwtFilterDto) {
 		log.info("adminConnectInfo 호출");
 
@@ -234,7 +234,7 @@ public class IndexService {
 		return ResponseEntity.ok(res.success(data));
 	}
 
-	// 개인정보 제공 건수 데이터(기업내 내부제공건수, 외부제공건수 + 내가 반은 건수) - 개인+기업, 금일 개인정보 제공건수(외부건, 내부건)
+	// 3. 개인정보 제공 건수 데이터(기업내 내부제공건수, 외부제공건수 + 내가 반은 건수) - 개인+기업, 금일 개인정보 제공건수(외부건, 내부건)
 	public ResponseEntity<Map<String, Object>> provisionIndexCount(String dateType, JwtFilterDto jwtFilterDto) {
 		log.info("provisionIndexCount 호출");
 
@@ -301,17 +301,17 @@ public class IndexService {
 		return ResponseEntity.ok(res.success(data));
 	}
 
-	// 오늘 등록된 개인정보제공 건수 반환함수
+	// 오늘 등록된 개인정보제공 건수 반환함수(3번에서 사용)
 	public Long todayCount(String cpCode, Integer type, LocalDate now) {
 		return provisionRepository.findByProvisionIndexTodayCount(cpCode, type, now);
 	}
 
-	// 제공 가능한 개인정보제공 건수 반환함수
+	// 제공 가능한 개인정보제공 건수 반환함수(3번에서 사용)
 	public Long offerCount(String cpCode, Integer type, String dateType, LocalDate now, LocalDate filterDate) {
 		return provisionRepository.findByProvisionIndexOfferCount(cpCode, type, dateType, now, filterDate);
 	}
 
-	// 인덱스에 표출할 개인정보 수 데이터를 가져온다.
+	// 4. 인덱스에 표출할 개인정보 수 데이터를 가져온다.
 	// -> 전체(개인테이블의 로우데이터수),
 	//    기존회원(전체회원-신규회원-탈퇴회원),
 	//    신규회원(날짜 필터를 통해 그 사이 가입된 수 -> 등록 일시 데이터를 비교하여 카운팅),
@@ -367,9 +367,7 @@ public class IndexService {
 		privacyIndexDto.setAllCount(allCount);
 		log.info("전체 회원수 : "+allCount);
 
-		Integer nowUserCount = allCount;
-
-		Integer newUserCount = kokonutUserService.selectUserNewCount(cpCode+"_1", dateType, now, filterDate);
+		Integer newUserCount = kokonutUserService.getCountFromTable(cpCode+"_1", dateType, now, filterDate);
 		log.info("신규 회원수 : "+newUserCount);
 		privacyIndexDto.setNewUserCount(newUserCount);
 
@@ -377,7 +375,7 @@ public class IndexService {
 		log.info("탈퇴수 : "+leaveUserCount);
 		privacyIndexDto.setLeaveUserCount(leaveUserCount);
 
-		nowUserCount = nowUserCount - newUserCount;
+		int nowUserCount = allCount - newUserCount;
 		if(nowUserCount < 0) {
 			nowUserCount = 0;
 		}
@@ -388,5 +386,10 @@ public class IndexService {
 
 		return ResponseEntity.ok(res.success(data));
 	}
+
+
+
+
+
 
 }

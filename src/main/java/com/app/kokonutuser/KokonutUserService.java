@@ -145,11 +145,8 @@ public class KokonutUserService {
 		return result;
 	}
 
-	/**
-	 * 유저테이블의 신규회원 수 조회
-	 * 기존 코코넛 :
-	 */
-	public int selectUserNewCount(String cpCode, String dateType, LocalDate now, LocalDate filterDate) {
+	// 유저테이블의 개인정보 수 조회
+	public int getCountFromTable(String cpCode, String dateType, LocalDate now, LocalDate filterDate) {
 		log.info("selectUserListCount 호출");
 
 		StringBuilder sb = new StringBuilder();
