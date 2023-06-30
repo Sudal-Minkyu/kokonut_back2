@@ -61,7 +61,14 @@ public class IndexRestController {
         return indexService.privacyIndexCount(dateType, jwtFilterDto);
     }
 
-    // 금일 개인정보 다운로드 건수
+    @ApiOperation(value="오늘의 현황 그래프 데이터를 가져온다.", notes="")
+    @GetMapping(value = "/todayIndexGraph")
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    public ResponseEntity<Map<String,Object>> todayIndexGraph() {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return indexService.todayIndexGraph(jwtFilterDto);
+    }
+
 
     // 서드파티 연동 현황 - 기업
 

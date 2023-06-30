@@ -2,6 +2,8 @@ package com.app.kokonut.index;
 
 import com.app.kokonut.admin.AdminRepository;
 import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
+import com.app.kokonut.apiKey.apicallhistory.ApiCallHistoryRepository;
+import com.app.kokonut.index.dtos.ApiCallHistoryCountDto;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.realcomponent.BootPayService;
@@ -15,6 +17,8 @@ import com.app.kokonut.configs.KeyGenerateService;
 import com.app.kokonut.configs.MailSender;
 import com.app.kokonut.history.HistoryRepository;
 import com.app.kokonut.history.HistoryService;
+import com.app.kokonut.history.decrypcounthistory.DecrypCountHistoryRepository;
+import com.app.kokonut.history.encrypcounthistory.EncrypCountHistoryRepository;
 import com.app.kokonut.index.dtos.*;
 import com.app.kokonut.payment.PaymentRepository;
 import com.app.kokonut.payment.paymenterror.PaymentErrorRepository;
@@ -66,6 +70,9 @@ public class IndexService {
 	private final PaymentPrivacyCountRepository paymentPrivacyCountRepository;
 	private final DynamicUserRepositoryCustom dynamicUserRepositoryCustom;
 
+	private final ApiCallHistoryRepository apiCallHistoryRepository;
+	private final EncrypCountHistoryRepository encrypCountHistoryRepository;
+	private final DecrypCountHistoryRepository decrypCountHistoryRepository;
 	private final KokonutUserService kokonutUserService;
 
 	@Autowired
@@ -76,7 +83,9 @@ public class IndexService {
 						ProvisionRosterRepository provisionRosterRepository, CompanyPaymentRepository companyPaymentRepository,
 						CompanyPaymentInfoRepository companyPaymentInfoRepository,
 						CompanyTableLeaveHistoryRepository companyTableLeaveHistoryRepository, HistoryRepository historyRepository,
-						PaymentPrivacyCountRepository paymentPrivacyCountRepository, DynamicUserRepositoryCustom dynamicUserRepositoryCustom, KokonutUserService kokonutUserService) {
+						PaymentPrivacyCountRepository paymentPrivacyCountRepository, DynamicUserRepositoryCustom dynamicUserRepositoryCustom,
+						ApiCallHistoryRepository apiCallHistoryRepository, EncrypCountHistoryRepository encrypCountHistoryRepository, DecrypCountHistoryRepository decrypCountHistoryRepository,
+						KokonutUserService kokonutUserService) {
 		this.historyService = historyService;
 		this.mailSender = mailSender;
 		this.bootPayService = bootPayService;
@@ -95,6 +104,9 @@ public class IndexService {
 		this.historyRepository = historyRepository;
 		this.paymentPrivacyCountRepository = paymentPrivacyCountRepository;
 		this.dynamicUserRepositoryCustom = dynamicUserRepositoryCustom;
+		this.apiCallHistoryRepository = apiCallHistoryRepository;
+		this.encrypCountHistoryRepository = encrypCountHistoryRepository;
+		this.decrypCountHistoryRepository = decrypCountHistoryRepository;
 		this.kokonutUserService = kokonutUserService;
 	}
 
@@ -147,6 +159,7 @@ public class IndexService {
 		List<AdminConnectListSubDto> adminConnectListSubDtos = adminRepository.findByAdminConnectList(companyId);
 //		log.info("adminConnectListDtos : "+ adminConnectListSubDtos);
 
+		int todayConnectCount = 0;
 		LocalDateTime now = LocalDateTime.now();
 
 		List<AdminConnectListDto> adminConnectListDtos = new ArrayList<>();
@@ -170,17 +183,18 @@ public class IndexService {
 				long diffInMinutes = diffInSeconds / 60;
 				long diffInHours = diffInMinutes / 60;
 
-				if (diffInHours < 1) {
-					if (diffInMinutes > 0) {
+				if (diffInHours <= 1) {
+					// 5분전까지는 방금전으로 표시 - 23.06.30 결정
+					if (diffInMinutes > 6) {
 						result = diffInMinutes + "분 전";
+						state = "0";
 					} else {
-						result = diffInSeconds + "초 전";
+						result = "방금전";
+						state = "1";
+						todayConnectCount++;
 					}
-					state = "1";
-				} else if (diffInHours <= 2) {
-					result = diffInHours + "시간 전";
-					state = "1";
-				} else {
+				}
+				else {
 					LocalDateTime insertDate = historyRepository.findByHistoryInsertDate(adminConnectListSubDto.getAdminId());
 					diffInSeconds = ChronoUnit.SECONDS.between(insertDate, now);
 					diffInMinutes = diffInSeconds / 60;
@@ -198,20 +212,21 @@ public class IndexService {
 					} else if (diffInDays > 0) {
 						result = diffInDays + "일 전";
 						state = "0";
-					} else if (diffInHours > 2) {
-						// 2시간 이상일 경우 미접속으로 판단
+					} else if (diffInHours > 0) {
 						result = diffInHours + "시간 전";
 						state = "0";
-					} else if (diffInHours > 0) {
-						// 2시간 이하일 경우 접속으로 판단
-						result = diffInHours + "시간 전";
-						state = "1";
-					} else if (diffInMinutes > 0) {
+					} else if (diffInMinutes > 6) {
+						// 6분이상일 경우 미접속으로 판단
 						result = diffInMinutes + "분 전";
+						state = "0";
+					} else if (diffInMinutes > 0) {
+						result = "방금전";
 						state = "1";
+						todayConnectCount++;
 					} else {
-						result = "방금 전";
+						result = "방금전";
 						state = "1";
+						todayConnectCount++;
 					}
 				}
 
@@ -229,6 +244,7 @@ public class IndexService {
 			adminConnectListDtos.add(adminConnectListDto);
 		}
 
+		data.put("todayConnectCount", todayConnectCount+" / "+adminConnectListDtos.size());
 		data.put("adminConnectList", adminConnectListDtos);
 
 		return ResponseEntity.ok(res.success(data));
@@ -313,7 +329,7 @@ public class IndexService {
 
 	// 4. 인덱스에 표출할 개인정보 수 데이터를 가져온다.
 	// -> 전체(개인테이블의 로우데이터수),
-	//    기존회원(전체회원-신규회원-탈퇴회원),
+	//    기존회원(전체회원-신규회원),
 	//    신규회원(날짜 필터를 통해 그 사이 가입된 수 -> 등록 일시 데이터를 비교하여 카운팅),
 	//    탈퇴회원(날짜 필터를 통해 그 사이 탈퇴한 수 -> 탈퇴로그 테이블의 탈퇴한 날짜 비교하여 카운팅)
 	public ResponseEntity<Map<String, Object>> privacyIndexCount(String dateType, JwtFilterDto jwtFilterDto) {
@@ -333,7 +349,7 @@ public class IndexService {
 		if(dateType.equals("")) {
 			dateType = "1";
 		}
-		log.info("dateType : "+dateType);
+//		log.info("dateType : "+dateType);
 
 		PrivacyIndexDto privacyIndexDto = new PrivacyIndexDto();
 
@@ -343,16 +359,16 @@ public class IndexService {
 		if(dateType.equals("2")) {
 			// 이번주 일요일-월요일~토요알까지
 			filterDate = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY)); // 이번주 일요일
-			log.info("이번주 일요일 : " + filterDate);
+//			log.info("이번주 일요일 : " + filterDate);
 		} else if(dateType.equals("3")) {
 			// 이번달
 			filterDate = now.withDayOfMonth(1);
-			log.info("이번달 1일 : " + filterDate);
+//			log.info("이번달 1일 : " + filterDate);
 		} else {
 			dateType = "1";
 			// 오늘
 			filterDate = now;
-			log.info("오늘 : " + filterDate);
+//			log.info("오늘 : " + filterDate);
 		}
 
 		privacyIndexDto.setFromDate(filterDate);
@@ -365,27 +381,62 @@ public class IndexService {
 
 		int allCount = kokonutUserService.selectUserListCount(cpCode+"_1");
 		privacyIndexDto.setAllCount(allCount);
-		log.info("전체 회원수 : "+allCount);
+//		log.info("전체 회원수 : "+allCount);
 
 		Integer newUserCount = kokonutUserService.getCountFromTable(cpCode+"_1", dateType, now, filterDate);
-		log.info("신규 회원수 : "+newUserCount);
+//		log.info("신규 회원수 : "+newUserCount);
 		privacyIndexDto.setNewUserCount(newUserCount);
 
 		Integer leaveUserCount = companyTableLeaveHistoryRepository.findByLeaveHistoryCount(cpCode, dateType, now, filterDate);
-		log.info("탈퇴수 : "+leaveUserCount);
+//		log.info("탈퇴수 : "+leaveUserCount);
 		privacyIndexDto.setLeaveUserCount(leaveUserCount);
 
 		int nowUserCount = allCount - newUserCount;
 		if(nowUserCount < 0) {
 			nowUserCount = 0;
 		}
-		log.info("기존 회원수 : "+nowUserCount);
+//		log.info("기존 회원수 : "+nowUserCount);
 		privacyIndexDto.setNowUserCount(nowUserCount);
 
 		data.put("privacyIndexDto", privacyIndexDto);
 
 		return ResponseEntity.ok(res.success(data));
 	}
+
+	// 5. 오늘의 현황 그래프 데이터를 가져온다.
+	public ResponseEntity<Map<String, Object>> todayIndexGraph(JwtFilterDto jwtFilterDto) {
+		log.info("todayIndexGraph 호출");
+
+		AjaxResponse res = new AjaxResponse();
+		HashMap<String, Object> data = new HashMap<>();
+
+		String email = jwtFilterDto.getEmail();
+
+		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+		String cpCode = adminCompanyInfoDto.getCompanyCode();
+
+		List<Integer> apiCallIndexList = new ArrayList<>();
+		List<Integer> encryptionIndexList = new ArrayList<>();
+		List<Integer> decryptionIndexList = new ArrayList<>();
+
+		List<ApiCallHistoryCountDto> apiCallHistoryCountDtos = apiCallHistoryRepository.findTodayApiCountList(cpCode);
+//		log.info("apiCallHistoryCountDtos : " + apiCallHistoryCountDtos);
+
+		List<EncrypCountHistoryCountDto> encrypCountHistoryCountDtos = encrypCountHistoryRepository.findTodayEncrypCountList(cpCode);;
+		List<DecrypCountHistoryCountDto> decrypCountHistoryCountDtos = decrypCountHistoryRepository.findTodayDecrypCountList(cpCode);;
+		for(int i=0; i<24; i++) {
+			apiCallIndexList.add(apiCallHistoryCountDtos.get(i).getCount());
+			encryptionIndexList.add(encrypCountHistoryCountDtos.get(i).getTotal());
+			decryptionIndexList.add(decrypCountHistoryCountDtos.get(i).getTotal());
+		}
+
+		data.put("apiCallIndexList", apiCallIndexList);
+		data.put("encryptionIndexList", encryptionIndexList);
+		data.put("decryptionIndexList", decryptionIndexList);
+
+		return ResponseEntity.ok(res.success(data));
+	}
+
 
 
 

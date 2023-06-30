@@ -30,7 +30,6 @@ public class BatchConfig {
 
     private final PaymentService paymentService;
 
-
     // 일일 개인정보수 집계 @@
     @Bean(JOB_NAME+"dayPrivacyAddJob")
     public Job dayPrivacyAddJob() {
@@ -118,7 +117,7 @@ public class BatchConfig {
     @Bean(JOB_NAME+"kokonutPayErrorJob")
     public Job kokonutPayErrorJob() {
         return jobBuilderFactory.get("kokonutPayErrorJob")
-                .start(kokonutPayStep(null))
+                .start(kokonutPayErrorStep(null))
                 .build();
     }
 
