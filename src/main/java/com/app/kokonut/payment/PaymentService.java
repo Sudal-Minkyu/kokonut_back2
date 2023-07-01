@@ -22,7 +22,7 @@ import com.app.kokonut.company.companypaymentinfo.dtos.CompanyPaymentInfoDto;
 import com.app.kokonut.configs.KeyGenerateService;
 import com.app.kokonut.configs.MailSender;
 import com.app.kokonut.history.HistoryService;
-import com.app.kokonut.history.dto.ActivityCode;
+import com.app.kokonut.history.dtos.ActivityCode;
 import com.app.kokonut.payment.dtos.PaymentListDto;
 import com.app.kokonut.payment.dtos.PaymentReservationResultDto;
 import com.app.kokonut.payment.dtos.PaymentReservationSearchDto;

@@ -8,7 +8,7 @@ import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.common.realcomponent.CommonUtil;
 import com.app.kokonut.common.realcomponent.Utils;
 import com.app.kokonut.history.HistoryService;
-import com.app.kokonut.history.dto.ActivityCode;
+import com.app.kokonut.history.dtos.ActivityCode;
 import com.app.kokonut.policy.dtos.*;
 import com.app.kokonut.policy.policyafter.PolicyAfter;
 import com.app.kokonut.policy.policyafter.PolicyAfterRepository;

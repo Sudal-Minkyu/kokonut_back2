@@ -1,7 +1,5 @@
 package com.app.kokonut.index.dtos;
 
-import com.app.kokonut.admin.enums.AuthorityRole;
-import com.app.kokonut.history.dto.ActivityCode;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

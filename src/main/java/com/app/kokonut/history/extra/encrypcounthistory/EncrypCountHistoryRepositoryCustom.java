@@ -1,4 +1,4 @@
-package com.app.kokonut.history.encrypcounthistory;
+package com.app.kokonut.history.extra.encrypcounthistory;
 
 import com.app.kokonut.index.dtos.EncrypCountHistoryCountDto;
 

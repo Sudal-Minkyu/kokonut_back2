@@ -69,6 +69,13 @@ public class IndexRestController {
         return indexService.todayIndexGraph(jwtFilterDto);
     }
 
+    @ApiOperation(value="개인정보 항목(암호화 항목, 고유식별정보 항목, 민감정보 항목)의 추가 카운팅 수 데이터를 가져온다.", notes="")
+    @GetMapping(value = "/privacyItemCount")
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    public ResponseEntity<Map<String,Object>> privacyItemCount() {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return indexService.privacyItemCount(jwtFilterDto);
+    }
 
     // 서드파티 연동 현황 - 기업
 

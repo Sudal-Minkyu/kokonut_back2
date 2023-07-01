@@ -1,7 +1,7 @@
 package com.app.kokonut.history;
 
 import com.app.kokonut.company.companysetting.QCompanySetting;
-import com.app.kokonut.history.dto.*;
+import com.app.kokonut.history.dtos.*;
 import com.app.kokonut.admin.QAdmin;
 import com.app.kokonut.index.dtos.HistoryMyConnectListDto;
 import com.querydsl.core.types.Projections;

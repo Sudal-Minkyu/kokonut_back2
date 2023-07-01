@@ -1,4 +1,4 @@
-package com.app.kokonut.history.decrypcounthistory;
+package com.app.kokonut.history.extra.apicallhistory;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -10,32 +10,32 @@ import java.time.LocalDateTime;
 
 /**
  * @author Woody
- * Date : 2023-06-30
+ * Date : 2023-06-29
  * Time :
- * Remark : DecrypCountHistory Table Entity
+ * Remark : kn_api_call_history Table Entity
  */
 @Entity
-@EqualsAndHashCode(of = "dchId")
+@EqualsAndHashCode(of = "akhId")
 @Data
 @NoArgsConstructor
-@Table(name="kn_decryp_count_history")
-public class DecrypCountHistory {
+@Table(name="kn_api_call_history")
+public class ApiCallHistory {
 
     @Id
     @ApiModelProperty("주키")
-    @Column(name = "dch_id", nullable = false)
+    @Column(name = "akh_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long dchId;
+    private Long akhId;
 
     @ApiModelProperty("회사코드")
     @Column(name = "cp_code")
     private String cpCode;
 
-    @Column(name = "dch_count")
-    @ApiModelProperty("복호화 실행 횟수 카운트")
-    private Integer dchCount;
+    @ApiModelProperty("호출 URL")
+    @Column(name = "akh_url")
+    private String akhUrl;
 
-    @ApiModelProperty("복호화 실행 날짜")
+    @ApiModelProperty("호출 날짜")
     @Column(name = "insert_date", nullable = false)
     private LocalDateTime insert_date;
 

@@ -14,7 +14,7 @@ import com.app.kokonut.company.companysettingaccessip.dtos.AccessIpDeleteDto;
 import com.app.kokonut.company.companysettingaccessip.dtos.CompanySettingAccessIPListDto;
 import com.app.kokonut.configs.GoogleOTP;
 import com.app.kokonut.history.HistoryService;
-import com.app.kokonut.history.dto.ActivityCode;
+import com.app.kokonut.history.dtos.ActivityCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

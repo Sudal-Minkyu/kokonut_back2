@@ -1,4 +1,4 @@
-package com.app.kokonut.history.encrypcounthistory;
+package com.app.kokonut.history.extra.encrypcounthistory;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;

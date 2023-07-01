@@ -1,6 +1,6 @@
 package com.app.kokonut.history;
 
-import com.app.kokonut.history.dto.*;
+import com.app.kokonut.history.dtos.*;
 import com.app.kokonut.index.dtos.HistoryMyConnectListDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

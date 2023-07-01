@@ -1,4 +1,4 @@
-package com.app.kokonut.history.dto;
+package com.app.kokonut.history.dtos;
 
 import com.app.kokonut.admin.enums.AuthorityRole;
 import lombok.AllArgsConstructor;

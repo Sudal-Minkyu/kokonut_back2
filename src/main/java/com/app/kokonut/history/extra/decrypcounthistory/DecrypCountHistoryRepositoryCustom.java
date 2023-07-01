@@ -1,4 +1,4 @@
-package com.app.kokonut.history.decrypcounthistory;
+package com.app.kokonut.history.extra.decrypcounthistory;
 
 import com.app.kokonut.index.dtos.DecrypCountHistoryCountDto;
 

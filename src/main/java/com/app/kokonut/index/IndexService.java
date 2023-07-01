@@ -2,7 +2,7 @@ package com.app.kokonut.index;
 
 import com.app.kokonut.admin.AdminRepository;
 import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
-import com.app.kokonut.apiKey.apicallhistory.ApiCallHistoryRepository;
+import com.app.kokonut.history.extra.apicallhistory.ApiCallHistoryRepository;
 import com.app.kokonut.index.dtos.ApiCallHistoryCountDto;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import com.app.kokonut.common.AjaxResponse;
@@ -17,8 +17,8 @@ import com.app.kokonut.configs.KeyGenerateService;
 import com.app.kokonut.configs.MailSender;
 import com.app.kokonut.history.HistoryRepository;
 import com.app.kokonut.history.HistoryService;
-import com.app.kokonut.history.decrypcounthistory.DecrypCountHistoryRepository;
-import com.app.kokonut.history.encrypcounthistory.EncrypCountHistoryRepository;
+import com.app.kokonut.history.extra.decrypcounthistory.DecrypCountHistoryRepository;
+import com.app.kokonut.history.extra.encrypcounthistory.EncrypCountHistoryRepository;
 import com.app.kokonut.index.dtos.*;
 import com.app.kokonut.payment.PaymentRepository;
 import com.app.kokonut.payment.paymenterror.PaymentErrorRepository;
@@ -436,6 +436,52 @@ public class IndexService {
 
 		return ResponseEntity.ok(res.success(data));
 	}
+
+	// 6. 개인정보 항목(암호화 항목, 고유식별정보 항목, 민감정보 항목)의 추가 카운팅 수 데이터
+	public ResponseEntity<Map<String, Object>> privacyItemCount(JwtFilterDto jwtFilterDto) {
+		log.info("privacyItemCount 호출");
+
+		AjaxResponse res = new AjaxResponse();
+		HashMap<String, Object> data = new HashMap<>();
+
+		String email = jwtFilterDto.getEmail();
+
+		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+		String cpCode = adminCompanyInfoDto.getCompanyCode();
+
+		PrivacyItemCountDto privacyItemCountDto = new PrivacyItemCountDto();
+
+		Integer securityCount = 0;
+		Integer uniqueCount = 0;
+		Integer sensitiveCount = 0;
+
+
+
+		privacyItemCountDto.setSecurityCount(securityCount);
+		privacyItemCountDto.setUniqueCount(uniqueCount);
+		privacyItemCountDto.setSensitiveCount(sensitiveCount);
+
+		data.put("privacyItemCount", privacyItemCountDto);
+
+
+		return ResponseEntity.ok(res.success(data));
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1,7 +1,6 @@
 package com.app.kokonutuser;
 
 import com.app.kokonut.commonfield.dtos.CommonFieldDto;
-import com.app.kokonut.history.dto.Column;
 import com.app.kokonut.commonfield.CommonFieldRepositoryCustom;
 import com.app.kokonutuser.dtos.*;
 import lombok.extern.slf4j.Slf4j;

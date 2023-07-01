@@ -1,4 +1,4 @@
-package com.app.kokonut.apiKey.apicallhistory;
+package com.app.kokonut.history.extra.apicallhistory;
 
 import com.app.kokonut.index.dtos.ApiCallHistoryCountDto;
 
