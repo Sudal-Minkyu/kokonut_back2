@@ -2,6 +2,7 @@ package com.app.kokonut.index;
 
 import com.app.kokonut.admin.AdminRepository;
 import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
+import com.app.kokonut.company.companytable.CompanyTableRepository;
 import com.app.kokonut.history.extra.apicallhistory.ApiCallHistoryRepository;
 import com.app.kokonut.index.dtos.ApiCallHistoryCountDto;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
@@ -75,6 +76,8 @@ public class IndexService {
 	private final DecrypCountHistoryRepository decrypCountHistoryRepository;
 	private final KokonutUserService kokonutUserService;
 
+	private final CompanyTableRepository companyTableRepository;
+
 	@Autowired
 	public IndexService(HistoryService historyService, MailSender mailSender, BootPayService bootPayService, KeyGenerateService keyGenerateService,
 						AdminRepository adminRepository, CompanyRepository companyRepository, CompanySettingRepository companySettingRepository,
@@ -85,7 +88,7 @@ public class IndexService {
 						CompanyTableLeaveHistoryRepository companyTableLeaveHistoryRepository, HistoryRepository historyRepository,
 						PaymentPrivacyCountRepository paymentPrivacyCountRepository, DynamicUserRepositoryCustom dynamicUserRepositoryCustom,
 						ApiCallHistoryRepository apiCallHistoryRepository, EncrypCountHistoryRepository encrypCountHistoryRepository, DecrypCountHistoryRepository decrypCountHistoryRepository,
-						KokonutUserService kokonutUserService) {
+						KokonutUserService kokonutUserService, CompanyTableRepository companyTableRepository) {
 		this.historyService = historyService;
 		this.mailSender = mailSender;
 		this.bootPayService = bootPayService;
@@ -108,6 +111,7 @@ public class IndexService {
 		this.encrypCountHistoryRepository = encrypCountHistoryRepository;
 		this.decrypCountHistoryRepository = decrypCountHistoryRepository;
 		this.kokonutUserService = kokonutUserService;
+		this.companyTableRepository = companyTableRepository;
 	}
 
 	// 1. 나의 접속 현황(로그인현황) 최근일자로부터 5건
@@ -449,20 +453,8 @@ public class IndexService {
 		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
 		String cpCode = adminCompanyInfoDto.getCompanyCode();
 
-		PrivacyItemCountDto privacyItemCountDto = new PrivacyItemCountDto();
-
-		Integer securityCount = 0;
-		Integer uniqueCount = 0;
-		Integer sensitiveCount = 0;
-
-
-
-		privacyItemCountDto.setSecurityCount(securityCount);
-		privacyItemCountDto.setUniqueCount(uniqueCount);
-		privacyItemCountDto.setSensitiveCount(sensitiveCount);
-
+		PrivacyItemCountDto privacyItemCountDto = companyTableRepository.findByPrivacyItemSum(cpCode);
 		data.put("privacyItemCount", privacyItemCountDto);
-
 
 		return ResponseEntity.ok(res.success(data));
 	}
