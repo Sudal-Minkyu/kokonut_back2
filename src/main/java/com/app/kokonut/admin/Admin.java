@@ -31,76 +31,46 @@ public class Admin implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long adminId;
 
-    /**
-     * COMPANY IDX
-     */
     @Column(name = "company_id")
     @ApiModelProperty("사업자 id")
     private Long companyId;
 
-    /**
-     * 마스터IDX(마스터는 0):관리자로 등록한 마스터의 키
-     */
     @Column(name = "master_id")
     @ApiModelProperty("마스터IDX(마스터는 0):관리자로 등록한 마스터의 키")
     private Long masterId;
 
-    /**
-     * 회원타입(1:사업자,2:개인)
-     */
     @Column(name = "kn_user_type")
-    @ApiModelProperty("회원타입(1:사업자,2:개인)")
+    @ApiModelProperty("회원타입(0:시스템, 1:사업자, 2:관리자(개인))")
     private Integer knUserType;
 
     @Column(name = "kn_reg_type")
     @ApiModelProperty("최초 회원가입인지 체크하는 장치 (0:최초로그인, 1:일반)")
-    private Integer knRegType; // 최초 회원가입인지 체크하는 장치 -> 최초회원가입일경우 로그인할때 OTP등록하라는 안내팝업 자동으로 나오게 작동
+    private Integer knRegType;
 
-    /**
-     * 이메일
-     */
     @Column(name = "kn_email")
     @ApiModelProperty("이메일")
     private String knEmail;
 
-    /**
-     * 비밀번호
-     */
     @ApiModelProperty("비밀번호")
     @Column(name = "kn_password")
     private String knPassword;
 
-    /**
-     * 비밀번호 변경 일자
-     */
     @ApiModelProperty("비밀번호 변경 일자")
     @Column(name = "kn_pwd_change_date")
     private LocalDateTime knPwdChangeDate;
 
-    /**
-     * 비밀번호오류횟수
-     */
     @ApiModelProperty("비밀번호오류횟수")
     @Column(name = "kn_pwd_error_count")
     private Integer knPwdErrorCount = 0;
 
-    /**
-     * 이름
-     */
     @Column(name = "kn_name")
     @ApiModelProperty("이름")
     private String knName;
 
-    /**
-     * 휴대폰번호
-     */
     @ApiModelProperty("휴대폰번호")
     @Column(name = "kn_phone_number")
     private String knPhoneNumber;
 
-    /**
-     * 부서
-     */
     @ApiModelProperty("부서")
     @Column(name = "kn_department")
     private String knDepartment;

@@ -1,5 +1,6 @@
 package com.app.kokonut.admin;
 
+import com.app.kokonut.admin.enums.AuthorityRole;
 import com.app.kokonut.auth.jwt.SecurityUtil;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import io.swagger.annotations.ApiImplicitParam;
@@ -118,9 +119,7 @@ public class AdminRestController {
 
     @GetMapping("/authorityCheck")
     @ApiOperation(value = "JWT토큰 호출 기본정보 호출" , notes = "1. 로그인한 유저의 기본정보를 가져오는 API")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
-    })
+    @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> authorityCheck() {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return adminService.authorityCheck(jwtFilterDto);

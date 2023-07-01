@@ -1,5 +1,6 @@
 package com.app.kokonut.index;
 
+import com.app.kokonut.admin.enums.AuthorityRole;
 import com.app.kokonut.auth.jwt.SecurityUtil;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import io.swagger.annotations.ApiImplicitParam;
@@ -42,7 +43,12 @@ public class IndexRestController {
     @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> adminConnectInfo() {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
-        return indexService.adminConnectInfo(jwtFilterDto);
+        if(!jwtFilterDto.getRole().equals(AuthorityRole.ROLE_SYSTEM)) {
+            return indexService.adminConnectInfo(jwtFilterDto);
+        } else {
+            // 시스템관리자일 경우 제외
+            return null;
+        }
     }
 
     @ApiOperation(value="인덱스페이지에 표출할 개인정보 제공 건수를 가져온다.", notes="")
@@ -50,7 +56,12 @@ public class IndexRestController {
     @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> privacyOfferCount(@RequestParam(value="dateType", defaultValue = "") String dateType) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
-        return indexService.provisionIndexCount(dateType, jwtFilterDto);
+        if(!jwtFilterDto.getRole().equals(AuthorityRole.ROLE_SYSTEM)) {
+            return indexService.provisionIndexCount(dateType, jwtFilterDto);
+        } else {
+            // 시스템관리자일 경우 제외
+            return null;
+        }
     }
 
     @ApiOperation(value="인덱스페이지에 표출할 개인정보 수를 가져온다.", notes="")
@@ -58,7 +69,12 @@ public class IndexRestController {
     @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> privacyCount(@RequestParam(value="dateType", defaultValue = "") String dateType) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
-        return indexService.privacyIndexCount(dateType, jwtFilterDto);
+        if(!jwtFilterDto.getRole().equals(AuthorityRole.ROLE_SYSTEM)) {
+            return indexService.privacyIndexCount(dateType, jwtFilterDto);
+        } else {
+            // 시스템관리자일 경우 제외
+            return null;
+        }
     }
 
     @ApiOperation(value="오늘의 현황 그래프 데이터를 가져온다.", notes="")

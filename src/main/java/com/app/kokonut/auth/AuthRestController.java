@@ -6,11 +6,8 @@ import com.app.kokonut.auth.dtos.AdminPasswordChangeDto;
 import com.app.kokonut.auth.jwt.dto.AuthRequestDto;
 import com.app.kokonut.common.AjaxResponse;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -137,27 +134,15 @@ public class AuthRestController {
         return authService.createUser(kokonutCreateUser, request);
     }
 
-    // 리뉴얼 회원가입
+    // 코코넛 회원가입
     @PostMapping(value = "/kokonutSignUp")
-    @ApiOperation(value = "사업자 회원가입" , notes = "1. Param 값으로 유저 이메일과 사용할 비밀번호를 받는다." +
+    @ApiOperation(value = "코코넛 회원가입" , notes = "1. Param 값으로 유저 이메일과 사용할 비밀번호를 받는다." +
             "2. 이메일 중복체크를 한다." +
             "3. 이메일 인증체크를 한다." +
             "4. 회원가입 완료후 메일을 보낸다.")
     public ResponseEntity<Map<String,Object>> kokonutSignUp(@RequestBody AuthRequestDto.KokonutSignUp kokonutSignUp, HttpServletRequest request) {
         log.info("사업자 회원가입 API 호출");
         return authService.kokonutSignUp(kokonutSignUp, request);
-    }
-
-    // 회원가입
-    @PostMapping(value = "/signUp", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "사업자 회원가입" , notes = "1. Param 값으로 유저정보와 기업정보를 받는다." +
-            "2. 유니크 값 중복체크를 한다." +
-            "3. 기업정보를 저장한다." +
-            "4. 사업자등록증, KMS인증키 등을 발급받는다.")
-    public ResponseEntity<Map<String,Object>> signUp(@Parameter(content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE))
-            @Validated AuthRequestDto.SignUp signUp, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        log.info("사업자 회원가입 API 호출");
-        return authService.signUp(signUp, request, response);
     }
 
     @GetMapping(value = "/cookieTest")
@@ -197,7 +182,6 @@ public class AuthRestController {
     @PostMapping("/logout")
     @ApiOperation(value = "로그아웃 처리" , notes = "1. Param 값으로 accessToken, refreshToken을 받는다." +
             "2. 받은 두 토큰을 검사하고 해당 토큰을 삭제처리 한다.")
-//    public ResponseEntity<Map<String,Object>> logout(@Validated AuthRequestDto.Logout logout, HttpServletResponse response) {
     public ResponseEntity<Map<String,Object>> logout(@Validated AuthRequestDto.Logout logout, HttpServletRequest request, HttpServletResponse response) {
         return authService.logout(logout, request, response);
     }

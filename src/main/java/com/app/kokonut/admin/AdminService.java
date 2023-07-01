@@ -298,7 +298,7 @@ public class AdminService {
             // log.info("nowDate : "+nowDate);
             LocalDate electronicDate = adminInfoDto.getCpElectronicDate();
             // log.info("electronicDate : "+electronicDate);
-            if(adminInfoDto.getCpElectronic() == 2 ) {
+            if(adminInfoDto.getCpElectronic() == 2) {
                 if(electronicDate.isBefore(nowDate)) {
                     // log.info("2이고 1년이 지났음");
                     data.put("electronic", 0);
