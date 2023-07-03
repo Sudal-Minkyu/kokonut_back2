@@ -71,33 +71,33 @@ public class SchedulerConfig {
     }
 
 
-//    @Scheduled(cron = "0 30 12 5 * ?") // 매달 5일 오후 12시 30분 결제 확인 시작
-//    public void kokonutPayCheckSchedul() {
-//        try {
-//            log.info("월 사용료 결제 확인 스케줄러 실행");
-//            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH시 mm분 ss초");
-//            JobParameters jobParameters = new JobParametersBuilder()
-//                    .addString("requestDate", LocalDateTime.now().format(formatter))
-//                    .toJobParameters();
-//            jobLauncher.run(kokonutPayCheckJob, jobParameters);
-//        } catch (Exception e) {
-//            log.error("월 사용료 결제 확인 스케줄러 실행 에러");
-//        }
-//    }
-//
-//    @Scheduled(cron = "0 0 2 * * *") // 매일 새벽 2시에 실행 결제오류건 체크 및 인서트
-//    public void kokonutPayErrorSchedul() {
-//        try {
-//            log.info("결제오류건 결제실행 스케줄러 실행");
-//            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH시 mm분 ss초");
-//            JobParameters jobParameters = new JobParametersBuilder()
-//                    .addString("requestDate", LocalDateTime.now().format(formatter))
-//                    .toJobParameters();
-//            jobLauncher.run(kokonutPayErrorJob, jobParameters);
-//        } catch (Exception e) {
-//            log.error("결제오류건 결제실행 실행 에러");
-//        }
-//    }
+    @Scheduled(cron = "0 10 12 5 * ?") // 매달 5일 오후 12시 30분 결제 확인 시작
+    public void kokonutPayCheckSchedul() {
+        try {
+            log.info("월 사용료 결제 확인 스케줄러 실행");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH시 mm분 ss초");
+            JobParameters jobParameters = new JobParametersBuilder()
+                    .addString("requestDate", LocalDateTime.now().format(formatter))
+                    .toJobParameters();
+            jobLauncher.run(kokonutPayCheckJob, jobParameters);
+        } catch (Exception e) {
+            log.error("월 사용료 결제 확인 스케줄러 실행 에러");
+        }
+    }
+
+    @Scheduled(cron = "0 0 2 * * *") // 매일 새벽 2시에 실행 결제오류건 체크 및 인서트
+    public void kokonutPayErrorSchedul() {
+        try {
+            log.info("결제오류건 결제실행 스케줄러 실행");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH시 mm분 ss초");
+            JobParameters jobParameters = new JobParametersBuilder()
+                    .addString("requestDate", LocalDateTime.now().format(formatter))
+                    .toJobParameters();
+            jobLauncher.run(kokonutPayErrorJob, jobParameters);
+        } catch (Exception e) {
+            log.error("결제오류건 결제실행 실행 에러");
+        }
+    }
 
 
 

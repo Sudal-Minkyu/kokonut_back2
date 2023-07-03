@@ -7,7 +7,7 @@ import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.common.realcomponent.Utils;
 import com.app.kokonut.configs.ExcelService;
-import com.app.kokonut.history.dto.*;
+import com.app.kokonut.history.dtos.*;
 import com.app.kokonut.totalDBDownloadHistory.TotalDbDownloadHistoryRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

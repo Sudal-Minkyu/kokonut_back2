@@ -4,6 +4,8 @@ import com.app.kokonut.admin.dtos.*;
 import com.app.kokonut.admin.enums.AuthorityRole;
 import com.app.kokonut.company.company.QCompany;
 import com.app.kokonut.company.companysetting.QCompanySetting;
+import com.app.kokonut.history.QHistory;
+import com.app.kokonut.index.dtos.AdminConnectListSubDto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.JPQLQuery;
@@ -14,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -53,6 +56,7 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
 
         QAdmin admin = QAdmin.admin;
         QCompany company = QCompany.company;
+
         JPQLQuery<AdminCompanyInfoDto> query = from(admin)
                 .innerJoin(company).on(company.companyId.eq(admin.companyId))
                 .where(admin.knEmail.eq(knEmail))
@@ -233,6 +237,24 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
                 ));
 
         return query.fetchOne();
+    }
+
+    // 관리자 접속현황 리스트 호출 함수
+    @Override
+    public List<AdminConnectListSubDto> findByAdminConnectList(Long companyId) {
+
+        QAdmin admin = QAdmin.admin;
+
+        JPQLQuery<AdminConnectListSubDto> query = from(admin)
+                .where(admin.companyId.eq(companyId))
+                .select(Projections.constructor(AdminConnectListSubDto.class,
+                        admin.adminId,
+                        admin.knRoleCode,
+                        admin.knName,
+                        admin.knLastLoginDate
+                ));
+
+        return query.fetch();
     }
 
 }

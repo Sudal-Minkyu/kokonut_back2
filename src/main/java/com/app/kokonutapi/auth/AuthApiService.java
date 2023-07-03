@@ -10,6 +10,9 @@ import com.app.kokonut.common.realcomponent.AESGCMcrypto;
 import com.app.kokonut.common.realcomponent.CommonUtil;
 import com.app.kokonut.common.realcomponent.Utils;
 import com.app.kokonut.company.companydatakey.CompanyDataKeyService;
+import com.app.kokonut.history.extra.apicallhistory.ApiCallHistoryService;
+import com.app.kokonut.history.extra.decrypcounthistory.DecrypCountHistoryService;
+import com.app.kokonut.history.extra.encrypcounthistory.EncrypCountHistoryService;
 import com.app.kokonut.privacyhistory.PrivacyHistoryService;
 import com.app.kokonut.privacyhistory.dtos.PrivacyHistoryCode;
 import com.app.kokonutapi.auth.dtos.AuthApiLoginDto;
@@ -41,13 +44,20 @@ public class AuthApiService {
     private final PrivacyHistoryService privacyHistoryService;
     private final DynamicUserRepositoryCustom dynamicUserRepositoryCustom;
 
+    private final ApiCallHistoryService apiCallHistoryService;
+    private final EncrypCountHistoryService encrypCountHistoryService;
+    private final DecrypCountHistoryService decrypCountHistoryService;
+
     @Autowired
-    public AuthApiService(AdminRepository adminRepository, CompanyDataKeyService companyDataKeyService, KokonutUserService kokonutUserService, PrivacyHistoryService privacyHistoryService, DynamicUserRepositoryCustom dynamicUserRepositoryCustom){
+    public AuthApiService(AdminRepository adminRepository, CompanyDataKeyService companyDataKeyService, KokonutUserService kokonutUserService, PrivacyHistoryService privacyHistoryService, DynamicUserRepositoryCustom dynamicUserRepositoryCustom, ApiCallHistoryService apiCallHistoryService, EncrypCountHistoryService encrypCountHistoryService, DecrypCountHistoryService decrypCountHistoryService){
         this.adminRepository = adminRepository;
         this.companyDataKeyService = companyDataKeyService;
         this.dynamicUserRepositoryCustom = dynamicUserRepositoryCustom;
         this.kokonutUserService = kokonutUserService;
         this.privacyHistoryService = privacyHistoryService;
+        this.apiCallHistoryService = apiCallHistoryService;
+        this.encrypCountHistoryService = encrypCountHistoryService;
+        this.decrypCountHistoryService = decrypCountHistoryService;
     }
 
     // API용 개인정보(고객의 고객) 로그인
@@ -93,6 +103,8 @@ public class AuthApiService {
         AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
         Long adminId = adminCompanyInfoDto.getAdminId();
         String cpCode = adminCompanyInfoDto.getCompanyCode();
+
+        int echCount = 0; // 암호화 카운팅
 
         AwsKmsResultDto awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(cpCode);
 //        log.info("DataKey : "+awsKmsResultDto.getDataKey());
@@ -323,6 +335,7 @@ public class AuthApiService {
                                         Base64.getDecoder().decode(awsKmsResultDto.getIvKey()));
                             }
                             log.info("암호화 데이터 : " + value);
+                            echCount++;
                         }
                         else {
                             log.info("그냥 데이터 : " + value);
@@ -349,6 +362,15 @@ public class AuthApiService {
 
             // 개인정보 생성로그 저장
             privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_01, 2, CommonUtil.publicIp(), email);
+
+            // 암호화 횟수 저장
+            if(echCount > 0) {
+                encrypCountHistoryService.encrypCountHistorySave(cpCode, echCount);
+            }
+
+            // API 호출 로그 저장
+            apiCallHistoryService.apiCallHistorySave(cpCode, "/v3/api/Auth/register");
+
         } else {
             log.error("파라메터 데이터가 없습니다.");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_00.getCode(),ResponseErrorCode.ERROR_CODE_00.getDesc()));

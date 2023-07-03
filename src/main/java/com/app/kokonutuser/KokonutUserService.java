@@ -1,7 +1,6 @@
 package com.app.kokonutuser;
 
 import com.app.kokonut.commonfield.dtos.CommonFieldDto;
-import com.app.kokonut.history.dto.Column;
 import com.app.kokonut.commonfield.CommonFieldRepositoryCustom;
 import com.app.kokonutuser.dtos.*;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +9,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -99,12 +101,12 @@ public class KokonutUserService {
 	 * 기본 테이블의 개인정보 리스트 조회 -> DynamicUserService단에서 쿼리완성후 조회
 	 */
 	public List<Map<String, Object>> selectBasicTableList(String searchQuery) {
-		log.info("selectUserList 호출");
+		log.info("selectBasicTableList 호출");
 
-		log.info("searchQuery : "+searchQuery);
+//		log.info("searchQuery : "+searchQuery);
 
 		List<Map<String, Object>> result = dynamicUserRepositoryCustom.selectUserList(searchQuery);
-		log.info("result : "+result);
+//		log.info("result : "+result);
 
 		if(result == null || result.size() == 0) {
 			log.info("기본 테이블에 개인정보가 존재하지 않습니다.");
@@ -142,6 +144,42 @@ public class KokonutUserService {
 		return result;
 	}
 
+	// 유저테이블의 개인정보 수 조회
+	public int getCountFromTable(String cpCode, String dateType, LocalDate now, LocalDate filterDate) {
+		log.info("selectUserListCount 호출");
+
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("SELECT COUNT(*) FROM `").append(cpCode).append("`");
+		sb.append(" WHERE 1=1");
+
+		// 등록일시 kokonut_REGDATE
+		// 회원가입날짜 kokonut_REGISTER_DATE
+		if(dateType.equals("1")) {
+//			log.info("오늘");
+			sb.append(" AND YEAR(kokonut_REGISTER_DATE) = ").append(now.getYear())
+					.append(" AND MONTH(kokonut_REGISTER_DATE) = ").append(now.getMonthValue())
+					.append(" AND DAY(kokonut_REGISTER_DATE) = ").append(now.getDayOfMonth());
+		} else if(dateType.equals("2")) {
+//			log.info("이번주");
+			LocalDateTime startOfDay = filterDate.atStartOfDay(); // 시작 시간
+			LocalDateTime endOfDay = now.atTime(23, 59, 59); // 끝 시간
+			sb.append(" AND kokonut_REGISTER_DATE BETWEEN '")
+					.append(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(startOfDay))
+					.append("' AND '")
+					.append(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(endOfDay))
+					.append("'");
+		} else {
+//			log.info("이번달");
+			sb.append(" AND YEAR(kokonut_REGISTER_DATE) = ").append(now.getYear())
+					.append(" AND MONTH(kokonut_REGISTER_DATE) = ").append(now.getMonthValue());
+		}
+
+//		log.info("searchQuery : "+sb);
+
+		return dynamicUserRepositoryCustom.getCountFromTable(sb.toString());
+	}
+
 	/**
 	 * 유저테이블의 회원 수 조회
 	 * 기존 코코넛 : int SelectUserListCount
@@ -149,7 +187,7 @@ public class KokonutUserService {
 	public int selectUserListCount(String companyCode) {
 		log.info("selectUserListCount 호출");
 		String searchQuery = "SELECT COUNT(*) FROM `" + companyCode + "` WHERE 1=1";
-		return dynamicUserRepositoryCustom.selectUserListCount(searchQuery);
+		return dynamicUserRepositoryCustom.getCountFromTable(searchQuery);
 	}
 
 	/**

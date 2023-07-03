@@ -59,6 +59,7 @@ public class CompanyDataKeyService {
                 /* 복호화 후 이력저장 */
                 log.info("KMS 복호화 이력 저장 로직 시작");
                 AwsKmsHistory awsKmsHistory = new AwsKmsHistory();
+                awsKmsHistory.setCpCode(cpCode);
                 awsKmsHistory.setAkhType("DEC");
                 awsKmsHistory.setAkhRegdate(LocalDateTime.now());
                 AwsKmsHistory saveAwsKmsHistory =  awsKmsHistoryRepository.save(awsKmsHistory);

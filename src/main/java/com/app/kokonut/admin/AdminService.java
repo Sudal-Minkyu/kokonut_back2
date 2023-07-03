@@ -16,8 +16,8 @@ import com.app.kokonut.company.company.CompanyRepository;
 import com.app.kokonut.company.companydatakey.CompanyDataKeyService;
 import com.app.kokonut.configs.MailSender;
 import com.app.kokonut.history.HistoryService;
-import com.app.kokonut.history.dto.ActivityCode;
-import com.app.kokonut.history.dto.HistoryLoginInfoDto;
+import com.app.kokonut.history.dtos.ActivityCode;
+import com.app.kokonut.history.dtos.HistoryLoginInfoDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -272,7 +272,7 @@ public class AdminService {
     public ResponseEntity<Map<String,Object>> authorityCheck(JwtFilterDto jwtFilterDto) {
         log.info("authorityCheck 호출");
 
-        log.info("jwtFilterDto : "+jwtFilterDto);
+//        log.info("jwtFilterDto : "+jwtFilterDto);
 
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
@@ -282,11 +282,11 @@ public class AdminService {
             log.error("사용하실 수 없는 토큰정보 입니다. 다시 로그인 해주세요.");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO009.getCode(),ResponseErrorCode.KO009.getDesc()));
         } else{
-            log.info("해당 유저의 이메일 : "+email);
+//            log.info("해당 유저의 이메일 : "+email);
 
             AdminInfoDto adminInfoDto = adminRepository.findByAdminInfo(email);
 
-            log.info("해당 유저의 권한 : "+jwtFilterDto.getRole().getDesc());
+//            log.info("해당 유저의 권한 : "+jwtFilterDto.getRole().getDesc());
             data.put("knName",adminInfoDto.getKnName());
             data.put("cpName",adminInfoDto.getCpName());
             data.put("knEmail",email);
@@ -298,7 +298,7 @@ public class AdminService {
             // log.info("nowDate : "+nowDate);
             LocalDate electronicDate = adminInfoDto.getCpElectronicDate();
             // log.info("electronicDate : "+electronicDate);
-            if(adminInfoDto.getCpElectronic() == 2 ) {
+            if(adminInfoDto.getCpElectronic() == 2) {
                 if(electronicDate.isBefore(nowDate)) {
                     // log.info("2이고 1년이 지났음");
                     data.put("electronic", 0);

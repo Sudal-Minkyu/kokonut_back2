@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -42,11 +43,11 @@ public class Provision {
 
     @ApiModelProperty("제공시작 기간")
     @Column(name = "pro_start_date")
-    private LocalDateTime proStartDate;
+    private LocalDate proStartDate;
 
     @ApiModelProperty("제공만료 기간")
     @Column(name = "pro_exp_date")
-    private LocalDateTime proExpDate;
+    private LocalDate proExpDate;
 
     @ApiModelProperty("다운로드 유무 - 0: NO, 1:YES")
     @Column(name = "pro_download_yn")

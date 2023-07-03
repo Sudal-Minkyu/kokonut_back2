@@ -1,4 +1,4 @@
-package com.app.kokonut.history.dto;
+package com.app.kokonut.history.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

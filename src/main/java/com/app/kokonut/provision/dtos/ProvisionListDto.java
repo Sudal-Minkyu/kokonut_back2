@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -28,15 +29,17 @@ public class ProvisionListDto {
 
     private LocalDateTime insert_date; // 만든 날짜
 
-    private LocalDateTime proStartDate; // 제공 시작 기간
+    private LocalDate proStartDate; // 제공 시작 기간
 
-    private LocalDateTime proExpDate; // 제공 만료 기간
+    private LocalDate proExpDate; // 제공 만료 기간
 
     private Integer proDownloadYn;
 
     private Long offerCount;
 
     private Long downloadCount;
+
+    private String test; // "1" : 제공함, "2" : 제공받음
 
     public String getProDownloadYn() {
         if(proDownloadYn == 0) {

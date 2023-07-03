@@ -1,6 +1,6 @@
 package com.app.kokonut.history;
 
-import com.app.kokonut.history.dto.ActivityCode;
+import com.app.kokonut.history.dtos.ActivityCode;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

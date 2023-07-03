@@ -28,6 +28,6 @@ public class ProvisionSaveDto {
 
 	private List<ProvisionEntrySaveDto> provisionEntrySaveDtos; // 제공할 테이블과 선택컬럼
 
-	private List<Integer> piplTargetIdxs; // 제공할 개인정보 idx 리스트
+	private List<String> piplTargetIdxs; // 제공할 개인정보 idx 리스트
 
 }

@@ -19,7 +19,7 @@ import com.app.kokonut.company.companytable.CompanyTableRepository;
 import com.app.kokonut.company.companytable.dtos.CompanyPrivacyTableListDto;
 import com.app.kokonut.company.companytable.dtos.CompanyTableListDto;
 import com.app.kokonut.history.HistoryService;
-import com.app.kokonut.history.dto.ActivityCode;
+import com.app.kokonut.history.dtos.ActivityCode;
 import com.app.kokonutuser.KokonutUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

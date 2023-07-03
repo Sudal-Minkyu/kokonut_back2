@@ -22,10 +22,12 @@ import com.app.kokonut.company.companypaymentinfo.dtos.CompanyPaymentInfoDto;
 import com.app.kokonut.configs.KeyGenerateService;
 import com.app.kokonut.configs.MailSender;
 import com.app.kokonut.history.HistoryService;
-import com.app.kokonut.history.dto.ActivityCode;
+import com.app.kokonut.history.dtos.ActivityCode;
 import com.app.kokonut.payment.dtos.PaymentListDto;
-import com.app.kokonut.payment.dtos.PaymentPayDto;
 import com.app.kokonut.payment.dtos.PaymentReservationResultDto;
+import com.app.kokonut.payment.dtos.PaymentReservationSearchDto;
+import com.app.kokonut.payment.paymenterror.PaymentError;
+import com.app.kokonut.payment.paymenterror.PaymentErrorRepository;
 import com.app.kokonut.payment.paymentprivacycount.PaymentPrivacyCount;
 import com.app.kokonut.payment.paymentprivacycount.PaymentPrivacyCountRepository;
 import com.app.kokonut.payment.paymentprivacycount.dtos.PaymentPrivacyCountDayDto;
@@ -39,7 +41,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -64,6 +65,7 @@ public class PaymentService {
 	private final AdminRepository adminRepository;
 	private final CompanyRepository companyRepository;
 	private final PaymentRepository paymentRepository;
+	private final PaymentErrorRepository paymentErrorRepository;
 	private final CompanyPaymentRepository companyPaymentRepository;
 	private final CompanyPaymentInfoRepository companyPaymentInfoRepository;
 
@@ -73,7 +75,7 @@ public class PaymentService {
 	@Autowired
 	public PaymentService(HistoryService historyService, MailSender mailSender, BootPayService bootPayService, KeyGenerateService keyGenerateService,
 						  AdminRepository adminRepository, CompanyRepository companyRepository, PaymentRepository paymentRepository,
-						  CompanyPaymentRepository companyPaymentRepository, CompanyPaymentInfoRepository companyPaymentInfoRepository,
+						  PaymentErrorRepository paymentErrorRepository, CompanyPaymentRepository companyPaymentRepository, CompanyPaymentInfoRepository companyPaymentInfoRepository,
 						  PaymentPrivacyCountRepository paymentPrivacyCountRepository, DynamicUserRepositoryCustom dynamicUserRepositoryCustom) {
 		this.historyService = historyService;
 		this.mailSender = mailSender;
@@ -82,6 +84,7 @@ public class PaymentService {
 		this.adminRepository = adminRepository;
 		this.companyRepository = companyRepository;
 		this.paymentRepository = paymentRepository;
+		this.paymentErrorRepository = paymentErrorRepository;
 		this.companyPaymentRepository = companyPaymentRepository;
 		this.companyPaymentInfoRepository = companyPaymentInfoRepository;
 		this.paymentPrivacyCountRepository = paymentPrivacyCountRepository;
@@ -90,7 +93,9 @@ public class PaymentService {
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@ 배치에 사용되는 서비스 함수 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+	// 매일 새벽 5시 시작
 	// 일일 개인정보 수 저장
+	@Transactional
 	public void dayPrivacyAdd(LocalDate localDate) {
 		log.info("dayPrivacyAdd 호출");
 
@@ -121,8 +126,9 @@ public class PaymentService {
 		paymentPrivacyCountRepository.saveAll(paymentPrivacyCountList);
 	}
 
-
+	// 매달 첫날(1일) 새벽 12시 시작
 	// 결제 예약걸기
+	@Transactional
 	public void kokonutPay(LocalDate localDate) throws Exception {
 		log.info("kokonutPay 호출");
 
@@ -138,7 +144,7 @@ public class PaymentService {
 //		log.info("lastDayOfLastMonth : "+lastDayOfLastMonth);
 
 		// 결제할 날짜
-		LocalDateTime payDayTime = LocalDateTime.now().plusDays(5).withHour(12).withMinute(0).withSecond(0).withNano(0);
+		LocalDateTime payDayTime = LocalDateTime.now().plusDays(4).withHour(12).withMinute(0).withSecond(0).withNano(0);
 //		log.info("payDayTime : "+payDayTime);
 
 		List<CompanyPaymentReservationListDto> companyPaymentReservationListDtos = companyPaymentRepository.findByPaymentReservationList(localDate);
@@ -160,12 +166,14 @@ public class PaymentService {
 //			log.info("월 평균 개인정보 수 : "+paymentPrivacyCountMonthAverageDto);
 
 			// PaymentPayDto 결제금액 Dto
-			PaymentPayDto paymentPayDto = new PaymentPayDto();
+//			PaymentPayDto paymentPayDto = new PaymentPayDto();
 //			log.info("paymentPayDto : "+paymentPayDto);
 
 			// AWS RDS 클라우드 금액 호출
 
+
 			// AWS S3 금액 호출
+
 
 			// 서비스 금액 호출
 			if(companyPaymentReservationListDto.getCpiPayType().equals("0")) {
@@ -173,8 +181,8 @@ public class PaymentService {
 			}
 //			log.info("결제 할 금액 : "+price);
 
-			String orderId = keyGenerateService.keyGenerate("kn_payment", cpCode, "KokonutSystem");
-//			log.info("orderId : "+orderId);
+			String orderId = keyGenerateService.keyGenerate("kn_payment", cpCode+LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMM")), "KokonutSystem");
+			log.info("orderId : "+orderId);
 
 			PaymentReservationResultDto paymentReservationResultDto = bootPayService.kokonutReservationPayment(
 					orderId, price, "월간 사용료 예약결제", companyPaymentReservationListDto.getCpiBillingKey(), payDayTime);
@@ -182,6 +190,7 @@ public class PaymentService {
 
 			if(paymentReservationResultDto != null) {
 				// 결제 내역 저장
+				payment.setPayOrderid(orderId);
 				payment.setCpCode(cpCode);
 				payment.setPayAmount(price);
 				payment.setPayState("2");
@@ -204,26 +213,124 @@ public class PaymentService {
 
 	}
 
-
+	// 매달 오후 12시 30분 시작
 	// 결제 예약결제 확인
-	public void kokonutCheck(LocalDate localDate) {
+	@Transactional
+	public void kokonutCheck() throws Exception {
 		log.info("kokonutCheck 호출");
 
+		// 결제 예약중 그리고 자동결제인 항목 리스트 호출하기
+		// payReserveId 값을 통해 예약결제 상태를 조회한다.
+		List<Payment> paymentList = paymentRepository.findPaymentByPayStateAndPayMethodOrderByCpCodeDesc("2", "0");
+//		log.info("paymentList : "+paymentList);
 
+		List<Payment> updatePaymentList = new ArrayList<>();
+		List<PaymentError> newPaymentErrorList = new ArrayList<>();
+		PaymentError paymentError;
+		if(paymentList.size() != 0) {
+			for(Payment payment : paymentList) {
+				if(!payment.getPayReserveId().equals("test")) { // 테스트 가데이터는 제외
 
+					String payReserveId = payment.getPayReserveId();
+//					log.info("payReserveId : "+payReserveId);
 
+					PaymentReservationSearchDto paymentReservationSearchDto = bootPayService.kokonutReservationCheck(payReserveId);
+//					log.info("paymentReservationSearchDto : "+paymentReservationSearchDto);
+
+					if(paymentReservationSearchDto != null) {
+						Integer status = paymentReservationSearchDto.getStatus();
+						if(status != 0) {
+							// 결제완료 또는 결제실패할 경우
+							if(status == -1) {
+								payment.setPayState("0");
+
+								paymentError = new PaymentError();
+								paymentError.setPayId(payment.getPayId());
+								paymentError.setPeState("0");
+								paymentError.setPeCount(0);
+								paymentError.setInsert_date(LocalDateTime.now());
+								newPaymentErrorList.add(paymentError);
+
+							} else if(status == 1) {
+								payment.setPayState("1");
+							}
+							payment.setPayReserveStartedDate(paymentReservationSearchDto.getPayReserveStartedDate());
+							payment.setPayReserveFinishedDate(paymentReservationSearchDto.getPayReserveFinishedDate());
+							payment.setPayReceiptid(paymentReservationSearchDto.getPayReceiptid());
+
+							updatePaymentList.add(payment);
+						}
+					}
+				}
+			}
+
+			paymentRepository.saveAll(updatePaymentList);
+			paymentErrorRepository.saveAll(newPaymentErrorList);
+		}
 
 	}
 
-
+	// 매일 새벽 2시 시작
 	// 결제에러건 결제처리
-	public void kokonutPayError(LocalDate localDate) {
+	@Transactional
+	public void kokonutPayError(LocalDate localDate) throws Exception {
 		log.info("kokonutPayError 호출");
-		//
 
+		String cpCode = "";
+		CompanyPaymentSearchDto companyPaymentSearchDto = null;
+		List<Payment> paymentList = paymentRepository.findPaymentByPayStateAndPayMethodOrderByCpCodeDesc("0", "0");
 
+		List<Payment> updatePaymentList = new ArrayList<>();
+		List<PaymentError> updatePaymentErrorList = new ArrayList<>();
+
+		if(paymentList.size() != 0) {
+			for(Payment payment : paymentList) {
+
+				Optional<PaymentError> optionalPaymentError = paymentErrorRepository.findPaymentErrorByPayIdAndPeState(payment.getPayId(), "0");
+				if(optionalPaymentError.isPresent()) {
+
+					if(!Objects.equals(cpCode, payment.getCpCode())) {
+						cpCode = payment.getCpCode();
+						companyPaymentSearchDto = companyPaymentRepository.findByPaymentSearch(cpCode);
+					}
+
+					if(companyPaymentSearchDto != null) {
+						Integer payAmount = payment.getPayAmount();
+						String orderId = keyGenerateService.keyGenerate("kn_payment", cpCode+localDate.format(DateTimeFormatter.ofPattern("yyyyMM")), "KokonutSystem");
+
+						// 결제오류건 결제처리
+						String receiptId = bootPayService.kokonutPayment(companyPaymentSearchDto.getCpiBillingKey(), orderId, payAmount,
+								"결제오류건 재결제 처리", companyPaymentSearchDto.getKnName(), companyPaymentSearchDto.getKnPhoneNumber());
+
+						if(!receiptId.equals("")) {
+							payment.setPayState("1");
+							payment.setPayReceiptid(receiptId);
+							payment.setModify_date(LocalDateTime.now());
+
+							optionalPaymentError.get().setPeState("1");
+						} else {
+							optionalPaymentError.get().setPeCount(optionalPaymentError.get().getPeCount()+1);
+
+							// *숙제*
+							// 메일 알림보내기 -> 결제오류 통보
+
+						}
+						optionalPaymentError.get().setModify_date(LocalDateTime.now());
+
+						updatePaymentList.add(payment);
+						updatePaymentErrorList.add(optionalPaymentError.get());
+					} else {
+						log.error("결제할 빌링키가 존재하지 않습니다. cpCode : "+cpCode);
+					}
+				} else {
+					log.error("결제 오류건 정보없음 payId : "+payment.getPayId());
+				}
+			}
+
+			paymentRepository.saveAll(updatePaymentList);
+			paymentErrorRepository.saveAll(updatePaymentErrorList);
+		}
 	}
-
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -378,6 +485,14 @@ public class PaymentService {
 					activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
 							cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
 
+					LocalDate validStart;
+					if(optionalCompany.get().getCpValidStart() != null) {
+						validStart = optionalCompany.get().getCpValidStart();
+					} else {
+						validStart = LocalDate.now().plusMonths(1);
+						optionalCompany.get().setCpValidStart(validStart);
+					}
+
 					CompanyPayment companyPayment = new CompanyPayment();
 					companyPayment.setCpCode(cpCode);
 					companyPayment.setCpiBillingKey(companyPaymentSaveDto.getCpiBillingKey());
@@ -386,7 +501,7 @@ public class PaymentService {
 					companyPayment.setCpiReceiptId(companyPaymentSaveDto.getCpiReceiptId());
 					companyPayment.setCpiPayType("0"); // 기본 월결제
 					companyPayment.setCpiSubscriptionId(companyPaymentSaveDto.getCpiSubscriptionId());
-					companyPayment.setCpiValidStart(LocalDate.now().plusMonths(1)); // 자동결제 부과 시작일
+					companyPayment.setCpiValidStart(validStart); // 자동결제 부과 시작일
 					companyPayment.setInsert_email(email);
 					companyPayment.setInsert_date(LocalDateTime.now());
 					CompanyPayment companyPaymentSave = companyPaymentRepository.save(companyPayment);
@@ -470,21 +585,21 @@ public class PaymentService {
 			payment.setPayBillingStartDate(paymentPrivacyCountMonthAverageDto.getLowDate());
 			payment.setPayBillingEndDate(paymentPrivacyCountMonthAverageDto.getBigDate());
 			payment.setPayReserveExecuteDate(LocalDateTime.now());
+
+			String orderId = keyGenerateService.keyGenerate("kn_payment", cpCode+LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMM")), "KokonutSystem");
+			payment.setPayOrderid(orderId);
+
 			String billingKey = companyPaymentSearchDto.getCpiBillingKey();
 
-			String orderId = keyGenerateService.keyGenerate("kn_payment", cpCode, "KokonutSystem");
-
 			// 요금정산 처리
-			boolean payResult = bootPayService.kokonutPayment(billingKey, orderId, Integer.parseInt(payAmount),
+			String receiptId = bootPayService.kokonutPayment(billingKey, orderId, Integer.parseInt(payAmount),
 					"요금정산 결제", companyPaymentSearchDto.getKnName(), companyPaymentSearchDto.getKnPhoneNumber());
-
-			if(!payResult) {
+			payment.setPayReceiptid(receiptId);
+			if(receiptId.equals("")) {
 				log.error("요금정산을 실패 했습니다. 코코넛으로 문의해 주시길 바랍니다.");
 
 				payment.setPayState("0");
 				payment.setPayMethod("1");
-				paymentRepository.save(payment);
-
 				historyService.updateHistory(activityHistoryId,
 						cpCode+" - "+activityCode.getDesc()+"시도 실패 이력", "부트페이 내에 요금정산을 실패했습니다.", 1);
 
@@ -494,11 +609,14 @@ public class PaymentService {
 
 				payment.setPayState("1");
 				payment.setPayMethod("1");
-				paymentRepository.save(payment);
+				payment.setPayReceiptid(receiptId);
 
 				historyService.updateHistory(activityHistoryId,
 						cpCode+" - "+activityCode.getDesc()+"시도 성공 이력", "", 1);
 			}
+
+			payment.setModify_date(LocalDateTime.now());
+			paymentRepository.save(payment);
 		}
 
 
@@ -547,11 +665,14 @@ public class PaymentService {
 					} else {
 						log.error("구독해지를 성공 했습니다.");
 
+						optionalCompany.get().setCpiId(null);
 						optionalCompany.get().setCpSubscribe("2");
 						optionalCompany.get().setCpSubscribeDate(LocalDateTime.now());
 						companyRepository.save(optionalCompany.get());
 
 						companyPaymentRepository.delete(optionalCompanyPayment.get());
+						Optional<CompanyPaymentInfo> optionalCompanyPaymentInfo = companyPaymentInfoRepository.findCompanyPaymentInfoByCpiId(optionalCompanyPayment.get().getCpiId());
+						optionalCompanyPaymentInfo.ifPresent(companyPaymentInfoRepository::delete);
 
 						historyService.updateHistory(activityHistoryId,
 								cpCode+" - "+activityCode.getDesc()+"시도 성공 이력", "", 1);

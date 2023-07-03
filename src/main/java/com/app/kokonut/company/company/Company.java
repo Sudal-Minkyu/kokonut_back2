@@ -55,6 +55,10 @@ public class Company {
     @Column(name = "cp_subscribe")
     private String cpSubscribe;
 
+    @ApiModelProperty("'자동결제 부과 시작(빌링테이블 주키의 자동결제 부과 시작일 필드와 같아야함)'")
+    @Column(name = "cp_valid_start")
+    private LocalDate cpValidStart;
+
     @ApiModelProperty("'구독해지 날짜'")
     @Column(name = "cp_subscribe_date")
     private LocalDateTime cpSubscribeDate;

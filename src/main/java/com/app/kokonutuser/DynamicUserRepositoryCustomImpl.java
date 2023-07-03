@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
@@ -104,12 +105,6 @@ public class DynamicUserRepositoryCustomImpl implements DynamicUserRepositoryCus
         return jdbcTemplate.queryForList(searchQuery);
     }
 
-    // 유저테이블 회원 수 조회
-    @Override
-    public int selectUserListCount(String searchQuery) {
-        return jdbcTemplate.queryForObject(searchQuery, Integer.class);
-    }
-
     // 삭제할 유저테이블 단일회원 조회
     @Override
     public List<KokonutRemoveInfoDto> selectUserDataByIdx(String searchQuery) {
@@ -167,6 +162,13 @@ public class DynamicUserRepositoryCustomImpl implements DynamicUserRepositoryCus
                         )
         );
     }
+
+    // 유저테이블 회원 수 조회
+    public int getCountFromTable(String searchQuery) {
+        Integer result = jdbcTemplate.queryForObject(searchQuery, SingleColumnRowMapper.newInstance(Integer.class));
+        return Optional.ofNullable(result).orElse(0);
+    }
+
 
     // 금일부터 한달전까지 속해 있는 유저수 조회
     @Override

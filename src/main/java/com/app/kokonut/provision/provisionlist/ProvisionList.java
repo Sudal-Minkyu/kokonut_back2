@@ -31,8 +31,9 @@ public class ProvisionList {
     @Column(name = "pro_code")
     private String proCode;
 
-    @ApiModelProperty("'제공할 kokonut_IDX 리스트(,) 구분자'")
-    @Column(name = "pipl_target_idxs")
+    @ApiModelProperty("제공할 kokonut_IDX 리스트(,) 구분자")
+    @Lob
+    @Column(columnDefinition = "LONGTEXT", name="pipl_target_idxs")
     private String piplTargetIdxs;
 
     @ApiModelProperty("등록자 email")

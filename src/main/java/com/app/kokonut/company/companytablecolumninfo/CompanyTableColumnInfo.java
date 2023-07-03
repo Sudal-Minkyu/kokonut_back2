@@ -37,7 +37,7 @@ public class CompanyTableColumnInfo {
     @Column(name = "ctci_designation")
     private String ctciDesignation;
 
-    @ApiModelProperty("암호화여부 -> 0:비암호화, 1:암호화, 2:휴대전화번호, 3:이메일 등...")
+    @ApiModelProperty("암호화여부 -> 0:비암호화, 1:암호화")
     @Column(name = "ctci_securiy")
     private String ctciSecuriy;
 

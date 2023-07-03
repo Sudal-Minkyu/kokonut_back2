@@ -10,7 +10,7 @@ import com.app.kokonut.common.realcomponent.AwsS3Util;
 import com.app.kokonut.common.realcomponent.CommonUtil;
 import com.app.kokonut.configs.MailSender;
 import com.app.kokonut.history.HistoryService;
-import com.app.kokonut.history.dto.ActivityCode;
+import com.app.kokonut.history.dtos.ActivityCode;
 import com.app.kokonut.qna.dtos.QnaAnswerSaveDto;
 import com.app.kokonut.qna.dtos.QnaDetailDto;
 import com.app.kokonut.qna.dtos.QnaListDto;

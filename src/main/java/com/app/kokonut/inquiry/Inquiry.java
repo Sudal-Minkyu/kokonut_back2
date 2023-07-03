@@ -43,13 +43,6 @@ public class Inquiry {
     private String iqTitle;
 
     /**
-     * 단체명
-     */
-    @ApiModelProperty("단체명")
-    @Column(name = "iq_group")
-    private String iqGroup;
-
-    /**
      * 분야 - 1 : 스타트업, 2 : 중소기업, 3 : 중견기업/대기업, 4 : 소상공인, 5 : 단체/협회, 6 : 기타
      */
     @ApiModelProperty("분야 - 1 : 스타트업, 2 : 중소기업, 3 : 중견기업/대기업, 4 : 소상공인, 5 : 단체/협회, 6 : 기타")
@@ -73,7 +66,8 @@ public class Inquiry {
     /**
      * 내용
      */
-    @Column(length = 100000, name="iq_contents")
+    @Lob
+    @Column(columnDefinition = "LONGTEXT", name="iq_contents")
     @ApiModelProperty("내용")
     private String iqContents;
 

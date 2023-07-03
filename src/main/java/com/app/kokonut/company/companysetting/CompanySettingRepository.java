@@ -16,6 +16,9 @@ import java.util.Optional;
 @Repository
 public interface CompanySettingRepository extends JpaRepository<CompanySetting, Long>, JpaSpecificationExecutor<CompanySetting>, CompanySettingRepositoryCustom {
 
+    @Query("select a.csId from CompanySetting a where a.cpCode = :cpCode")
+    Long findByCompanySettingCsId(String cpCode);
+
     Optional<CompanySetting> findCompanySettingByCpCode(String cpCode);
 
 }

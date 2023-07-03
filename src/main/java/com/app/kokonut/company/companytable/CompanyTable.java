@@ -42,6 +42,18 @@ public class CompanyTable {
     @Column(name = "ct_add_column_count")
     private Integer ctAddColumnCount;
 
+    @ApiModelProperty("해당 추가한 컬럼 수의 카운트")
+    @Column(name = "ct_add_column_security_count")
+    private Integer ctAddColumnSecurityCount;
+
+    @ApiModelProperty("해당 추가한 컬럼 수의 카운트")
+    @Column(name = "ct_add_column_unique_count")
+    private Integer ctAddColumnUniqueCount;
+
+    @ApiModelProperty("해당 추가한 컬럼 수의 카운트")
+    @Column(name = "ct_add_column_sensitive_count")
+    private Integer ctAddColumnSensitiveCount;
+
     @ApiModelProperty("해당 테이블의 이름 컬럼 유무 - 공백:포함되지않음, 필드명:포함됨")
     @Column(name = "ct_name_status")
     private String ctNameStatus;

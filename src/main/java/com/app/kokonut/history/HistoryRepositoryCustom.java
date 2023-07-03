@@ -1,9 +1,11 @@
 package com.app.kokonut.history;
 
-import com.app.kokonut.history.dto.*;
+import com.app.kokonut.history.dtos.*;
+import com.app.kokonut.index.dtos.HistoryMyConnectListDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -29,4 +31,12 @@ public interface HistoryRepositoryCustom {
     void deleteExpiredHistory(int activityIdx, int month);
 
     HistoryLoginInfoDto findByLoginHistory(String knEmail);
+
+
+
+
+    List<HistoryMyConnectListDto> findByMyConnectList(Long adminId, String cpCode); // 인덱스에 보여줄 나의접속현황 쿼리
+
+    LocalDateTime findByHistoryInsertDate(Long adminId);
+
 }

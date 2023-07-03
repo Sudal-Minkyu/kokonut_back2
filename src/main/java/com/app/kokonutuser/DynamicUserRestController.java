@@ -102,7 +102,7 @@ public class DynamicUserRestController {
 			"3. 컬럼이 존재할경우 해당컬럼과 함께 리스트로 보내준다.")
 	@GetMapping(value = "/tableBasicList")
 	@ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-	public ResponseEntity<Map<String,Object>> tableBasicList() throws IOException {
+	public ResponseEntity<Map<String,Object>> tableBasicList() throws Exception {
 		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
 		return dynamicUserService.tableBasicList(jwtFilterDto);
 	}

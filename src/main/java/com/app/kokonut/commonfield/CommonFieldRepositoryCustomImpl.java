@@ -1,11 +1,8 @@
 package com.app.kokonut.commonfield;
 
 import com.app.kokonut.commonfield.dtos.CommonFieldDto;
-import com.app.kokonut.history.History;
-import com.app.kokonut.history.dto.Column;
 import lombok.extern.slf4j.Slf4j;
 import org.qlrm.mapper.JpaResultMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.stereotype.Repository;
 

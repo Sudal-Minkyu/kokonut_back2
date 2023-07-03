@@ -1,6 +1,7 @@
 package com.app.kokonut.admin;
 
 import com.app.kokonut.admin.dtos.*;
+import com.app.kokonut.index.dtos.AdminConnectListSubDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -31,4 +32,6 @@ public interface AdminRepositoryCustom {
     List<AdminOfferListDto> findByAdminOfferList(Long companyId, String type, String email);
 
     AdminCompanySettingDto findByAdminCompanySetting(String knEmail);
+
+    List<AdminConnectListSubDto> findByAdminConnectList(Long companyId);
 }

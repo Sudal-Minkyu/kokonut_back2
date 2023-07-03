@@ -19,7 +19,7 @@ public class SecurityUtil {
 
     // JWT 토큰을 통해 해당 유저의 이메일을 반환하는 메서드
     public static JwtFilterDto getCurrentJwt() {
-        log.info("SecurityUtil.getCurrentJwt 호출");
+//        log.info("SecurityUtil.getCurrentJwt 호출");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         String desc = authentication.getAuthorities().toString().replaceAll("\\[|\\]", "");;

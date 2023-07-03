@@ -23,7 +23,9 @@ import com.app.kokonut.company.companytablecolumninfo.dtos.CompanyTableColumnInf
 import com.app.kokonut.configs.ExcelService;
 import com.app.kokonut.configs.GoogleOTP;
 import com.app.kokonut.history.HistoryService;
-import com.app.kokonut.history.dto.ActivityCode;
+import com.app.kokonut.history.dtos.ActivityCode;
+import com.app.kokonut.history.extra.decrypcounthistory.DecrypCountHistoryService;
+import com.app.kokonut.history.extra.encrypcounthistory.EncrypCountHistoryService;
 import com.app.kokonut.privacyhistory.PrivacyHistoryService;
 import com.app.kokonut.privacyhistory.dtos.PrivacyHistoryCode;
 import com.app.kokonutdormant.KokonutDormantService;
@@ -32,6 +34,7 @@ import com.app.kokonutdormant.dtos.KokonutDormantFieldInfoDto;
 import com.app.kokonutdormant.dtos.KokonutDormantListDto;
 import com.app.kokonutremove.KokonutRemoveService;
 import com.app.kokonutuser.dtos.*;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +45,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.crypto.SecretKey;
+import javax.persistence.Column;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -83,13 +87,20 @@ public class DynamicUserService {
 	private final CompanyTableRepository companyTableRepository;
 	private final CompanyTableColumnInfoRepository companyTableColumnInfoRepository;
 
+	private final EncrypCountHistoryService encrypCountHistoryService;
+	private final DecrypCountHistoryService decrypCountHistoryService;
+
 	private final DynamicUserRepositoryCustom dynamicUserRepositoryCustom;
 
 	@Autowired
 	public DynamicUserService(PasswordEncoder passwordEncoder, AdminRepository adminRepository,
 							  CompanyRepository companyRepository, GoogleOTP googleOTP, ExcelService excelService,
-							  KokonutUserService kokonutUserService, CompanyDataKeyService companyDataKeyService, KokonutDormantService kokonutDormantService, CompanyService companyService,
-							  HistoryService historyService, PrivacyHistoryService privacyHistoryService, KokonutRemoveService kokonutRemoveService, CompanyTableRepository companyTableRepository, CompanyTableColumnInfoRepository companyTableColumnInfoRepository, DynamicUserRepositoryCustom dynamicUserRepositoryCustom) {
+							  KokonutUserService kokonutUserService, CompanyDataKeyService companyDataKeyService, KokonutDormantService kokonutDormantService,
+							  CompanyService companyService, HistoryService historyService, PrivacyHistoryService privacyHistoryService,
+							  KokonutRemoveService kokonutRemoveService, CompanyTableRepository companyTableRepository,
+							  CompanyTableColumnInfoRepository companyTableColumnInfoRepository,
+							  EncrypCountHistoryService encrypCountHistoryService, DecrypCountHistoryService decrypCountHistoryService,
+							  DynamicUserRepositoryCustom dynamicUserRepositoryCustom) {
 		this.passwordEncoder = passwordEncoder;
 		this.adminRepository = adminRepository;
 		this.companyRepository = companyRepository;
@@ -104,6 +115,8 @@ public class DynamicUserService {
 		this.kokonutRemoveService = kokonutRemoveService;
 		this.companyTableRepository = companyTableRepository;
 		this.companyTableColumnInfoRepository = companyTableColumnInfoRepository;
+		this.encrypCountHistoryService = encrypCountHistoryService;
+		this.decrypCountHistoryService = decrypCountHistoryService;
 		this.dynamicUserRepositoryCustom = dynamicUserRepositoryCustom;
 	}
 
@@ -1533,7 +1546,6 @@ public class DynamicUserService {
 		return ResponseEntity.ok(res.success(data));
 	}
 
-
 	// 테이블의 컬럼조회
 	public ResponseEntity<Map<String, Object>> tableColumnCall(String tableName) {
 		log.info("tableColumnCall 호출");
@@ -1616,6 +1628,15 @@ public class DynamicUserService {
 			Integer tableAddColumnCount = optionalCompanyTable.get().getCtAddColumnCount();
 			log.info("추가된 컬럼수 : "+tableAddColumnCount);
 
+			Integer tableAddColumnSecurityCount = optionalCompanyTable.get().getCtAddColumnSecurityCount();
+			log.info("현재까지 추가된 암호화항목 수 : "+tableAddColumnSecurityCount);
+
+			Integer tableAddColumnUniqueCount = optionalCompanyTable.get().getCtAddColumnUniqueCount();
+			log.info("현재까지 추가된 고유식별정보 항목 수 : "+tableAddColumnUniqueCount);
+
+			Integer tableAddColumnSensitiveCount = optionalCompanyTable.get().getCtAddColumnSensitiveCount();
+			log.info("현재까지 추가된 민감정보 항목 수 : "+tableAddColumnSensitiveCount);
+
 			String ctNameStatus = optionalCompanyTable.get().getCtNameStatus();
 			String ctPhoneStatus = optionalCompanyTable.get().getCtPhoneStatus();
 			String ctGenderStatus = optionalCompanyTable.get().getCtGenderStatus();
@@ -1625,6 +1646,12 @@ public class DynamicUserService {
 			List<KokonutAddColumnListDto> kokonutAddColumnListDtos = kokonutColumnAddDto.getKokonutAddColumnListDtos();
 			// 테이블에 컬럼 추가하기
 			for(KokonutAddColumnListDto kokonutAddColumnListDto : kokonutAddColumnListDtos) {
+				if(kokonutAddColumnListDto.getCategoryName().equals("고유식별정보")) {
+					tableAddColumnUniqueCount++;
+				} else if(kokonutAddColumnListDto.getCategoryName().equals("민감정보")) {
+					tableAddColumnSensitiveCount++;
+				}
+
 				companyTableColumnInfo = new CompanyTableColumnInfo();
 				companyTableColumnInfo.setCtName(tableName);
 				companyTableColumnInfo.setInsert_email(jwtFilterDto.getEmail());
@@ -1676,6 +1703,7 @@ public class DynamicUserService {
 				} else {
 					comment.append(",암호화");
 					companyTableColumnInfo.setCtciSecuriy("1");
+					tableAddColumnSecurityCount++; // 암호화항목 카운팅
 				}
 				comment.append(",수정가능,");
 				comment.append(kokonutAddColumnListDto.getCategoryName());
@@ -1701,6 +1729,9 @@ public class DynamicUserService {
 			optionalCompanyTable.get().setCtGenderStatus(ctGenderStatus);
 			optionalCompanyTable.get().setCtBirthStatus(ctBirthStatus);
 			optionalCompanyTable.get().setCtAddColumnCount(tableAddColumnCount);
+			optionalCompanyTable.get().setCtAddColumnSecurityCount(tableAddColumnSecurityCount);
+			optionalCompanyTable.get().setCtAddColumnUniqueCount(tableAddColumnUniqueCount);
+			optionalCompanyTable.get().setCtAddColumnSensitiveCount(tableAddColumnSensitiveCount);
 			optionalCompanyTable.get().setModify_email(jwtFilterDto.getEmail());
 			optionalCompanyTable.get().setModify_date(LocalDateTime.now());
 			companyTableRepository.save(optionalCompanyTable.get());
@@ -1795,8 +1826,8 @@ public class DynamicUserService {
 	}
 
 	// 기본테이블의 데이터를 조회한다.
-	public ResponseEntity<Map<String, Object>> tableBasicList(JwtFilterDto jwtFilterDto) throws IOException {
-		log.info("tableColumnDelete 호출");
+	public ResponseEntity<Map<String, Object>> tableBasicList(JwtFilterDto jwtFilterDto) throws Exception {
+		log.info("tableBasicList 호출");
 
 		AjaxResponse res = new AjaxResponse();
 		HashMap<String, Object> data = new HashMap<>();
@@ -1804,9 +1835,13 @@ public class DynamicUserService {
 		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(jwtFilterDto.getEmail());
 		String companyCode = adminCompanyInfoDto.getCompanyCode();
 
+		int dchCount = 0; // 복호화 카운팅
+		List<String> headerNames = new ArrayList<>();
 		Optional<CompanyTable> optionalCompanyTable = companyTableRepository.findCompanyTableByCpCodeAndCtDesignation(companyCode, "기본");
 		if(optionalCompanyTable.isPresent()) {
-			log.info("존재하는 테이블");
+//			log.info("존재하는 테이블");
+
+			AwsKmsResultDto awsKmsResultDto = null;
 
 			String ctNameStatus = optionalCompanyTable.get().getCtNameStatus();
 			String ctPhoneStatus = optionalCompanyTable.get().getCtPhoneStatus();
@@ -1829,15 +1864,9 @@ public class DynamicUserService {
 			// RIGHT(kokonut202301001_1_32, 1)) as basicName,
 			// 한글기준 암호화크기 : 첫글자 28, 두글자 32, 세글자 36, 네글자 40, 다섯글자 44
 			if(!ctNameStatus.equals("")) {
-				searchQuery
-						.append(", CONCAT(")
-						.append("LEFT(").append(ctNameStatus).append(", 1),")
-						.append("CASE ")
-						.append("WHEN CHAR_LENGTH(").append(ctNameStatus).append(")-2 <= 36 THEN '*' ")
-						.append("WHEN CHAR_LENGTH(").append(ctNameStatus).append(")-2 <= 40 THEN '**' ")
-						.append("WHEN CHAR_LENGTH(").append(ctNameStatus).append(")-2 <= 44 THEN '***' ")
-						.append("ELSE '****' END, ")
-						.append("RIGHT(").append(ctNameStatus).append(", 1)) as basicName");
+				awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(companyCode);
+				headerNames.add("basicName");
+				searchQuery.append(", ").append(ctNameStatus).append(" as basicName");
 			}
 
 			// CONCAT(LEFT(필드명, 4),'****', SUBSTRING(필드명, CHAR_LENGTH(필드명) - 4)) as basicPhone,
@@ -1848,14 +1877,20 @@ public class DynamicUserService {
 			}
 
 			if(!ctGenderStatus.equals("")) {
+				headerNames.add("basicGender");
 				searchQuery.append(", ").append(ctGenderStatus).append(" as basicGender");
 			}
 
 			if(!ctEmailStatus.equals("")) {
+				if(awsKmsResultDto == null) {
+					awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(companyCode);
+				}
+				headerNames.add("basicEmail");
 				searchQuery.append(", ").append(ctEmailStatus).append(" as basicEmail");
 			}
 
 			if(!ctBirthStatus.equals("")) {
+				headerNames.add("basicBirth");
 				searchQuery.append(", ").append(ctBirthStatus).append(" as basicBirth");
 			}
 
@@ -1863,10 +1898,41 @@ public class DynamicUserService {
 
 			searchQuery.append(optionalCompanyTable.get().getCtName());
 			searchQuery.append(" WHERE 1=1");
-			log.info("searchQuery : "+ searchQuery);
+//			log.info("searchQuery : "+ searchQuery);
 
 			List<Map<String, Object>> basicTableList = kokonutUserService.selectBasicTableList(searchQuery.toString());
-			log.info("basicTableList : "+basicTableList);
+			if(awsKmsResultDto != null) {
+				for(Map<String, Object> map : basicTableList) {
+					for (String headerName : headerNames) {
+//						log.info("headerNames.get(i) : " + headerName);
+
+						Object key = map.get(headerName);
+						if (key != null) {
+
+							String keyValue = String.valueOf(key);
+							String securityResultValue;
+							String decryptValue;
+//							log.info("복호화할 데이터 key : " + key);
+
+							decryptValue = AESGCMcrypto.decrypt(keyValue, awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
+							if (decryptValue.length() == 2) {
+								securityResultValue = decryptValue.charAt(0) + "*";
+							} else {
+								securityResultValue = decryptValue.charAt(0) + Utils.starsForString(decryptValue).substring(2) + decryptValue.substring(decryptValue.length() - 1);
+							}
+							dchCount++;
+							map.put(headerName, securityResultValue);
+						}
+					}
+				}
+			}
+
+			// 복호화 횟수 저장
+			if(dchCount > 0) {
+				decrypCountHistoryService.decrypCountHistorySave(companyCode, dchCount);
+			}
+
+//			log.info("basicTableList : "+basicTableList);
 			data.put("basicTableList",basicTableList);
 		}
 
@@ -1875,7 +1941,7 @@ public class DynamicUserService {
 
 	// 테이블의 데이터 존재여부를 조회한다.
 	public ResponseEntity<Map<String, Object>> tableDataCheck(String tableName) {
-		log.info("tableColumnDelete 호출");
+		log.info("tableDataCheck 호출");
 
 		AjaxResponse res = new AjaxResponse();
 		HashMap<String, Object> data = new HashMap<>();
@@ -1998,6 +2064,8 @@ public class DynamicUserService {
 
 		List<String> headerNames = new ArrayList<>(); // 해더 as 이름리스트
 		List<String> securityWhether = new ArrayList<>(); // 암호화여부
+
+		int dchCount = 0; // 복호화 카운팅
 
 		AwsKmsResultDto awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(cpCode);
 		log.info("DataKey : "+awsKmsResultDto.getDataKey());
@@ -2201,7 +2269,7 @@ public class DynamicUserService {
 								map.put(headerNames.get(i), keyValue);
 							}
 						}
-
+						dchCount++;
 					}
 				}
 			}
@@ -2216,6 +2284,11 @@ public class DynamicUserService {
 
 		// 개인정보 조회로그 저장
 		privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_04, 1, CommonUtil.clientIp(), email);
+
+		// 복호화 횟수 저장
+		if(dchCount > 0) {
+			decrypCountHistoryService.decrypCountHistorySave(cpCode, dchCount);
+		}
 
 		return ResponseEntity.ok(res.success(data));
 	}
@@ -2236,6 +2309,8 @@ public class DynamicUserService {
 
 		List<CompanyTableListDto> companyTableListDtos = companyTableRepository.findByTableList(cpCode);
 		log.info("companyTableListDtos : "+companyTableListDtos);
+
+		int dchCount = 0; // 복호화 카운팅
 
 		AwsKmsResultDto awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(cpCode);
 		log.info("DataKey : "+awsKmsResultDto.getDataKey());
@@ -2335,6 +2410,7 @@ public class DynamicUserService {
 							map.put(securityHeaderName, decryptValue);
 						}
 					}
+					dchCount++;
 				}
 			}
 
@@ -2350,6 +2426,11 @@ public class DynamicUserService {
 
 		// 개인정보 열람로그 저장
 		privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_05, 1, CommonUtil.clientIp(), email);
+
+		// 복호화 횟수 저장
+		if(dchCount > 0) {
+			decrypCountHistoryService.decrypCountHistorySave(cpCode, dchCount);
+		}
 
 		return ResponseEntity.ok(res.success(data));
 	}
