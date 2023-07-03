@@ -36,7 +36,8 @@ public class ProvisionEntry {
     private String pipeTableName;
 
     @ApiModelProperty("제공할 필드코드(,) 구분자")
-    @Column(name = "pipe_table_targets")
+    @Lob
+    @Column(columnDefinition = "LONGTEXT", name="pipe_table_targets")
     private String pipeTableTargets;
 
     @ApiModelProperty("등록자 email")

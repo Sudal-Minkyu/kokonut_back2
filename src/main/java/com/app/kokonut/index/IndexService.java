@@ -438,6 +438,10 @@ public class IndexService {
 			decryptionIndexList.add(decrypCountHistoryCountDtos.get(i).getTotal());
 		}
 
+		apiCallIndexList.add(0);
+		encryptionIndexList.add(0);
+		decryptionIndexList.add(0);
+
 		data.put("apiCallIndexList", apiCallIndexList);
 		data.put("encryptionIndexList", encryptionIndexList);
 		data.put("decryptionIndexList", decryptionIndexList);

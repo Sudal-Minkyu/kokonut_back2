@@ -68,7 +68,6 @@ public class InquiryService {
 		Inquiry inquiry = new Inquiry();
 		inquiry.setIqState(inquirySaveDto.getIqState());
 		inquiry.setIqTitle(inquirySaveDto.getIqTitle());
-		inquiry.setIqGroup(inquirySaveDto.getIqGroup());
 		inquiry.setIqField(inquirySaveDto.getIqField());
 		inquiry.setIqWriter(inquirySaveDto.getIqWriter());
 		inquiry.setIqEmail(inquirySaveDto.getIqEmail());

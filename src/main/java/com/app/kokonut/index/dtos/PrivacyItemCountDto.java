@@ -5,8 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.math.BigInteger;
 
 /**
  * @author Woody
@@ -25,6 +24,8 @@ public class PrivacyItemCountDto {
 
     private BigDecimal sensitiveCount; // 민감정보 항목 수
 
+    private BigInteger totalAddCount; // 추가된 항목 수 총합
+
     public Integer getSecurityCount() {
         return securityCount.intValue();
     }
@@ -35,6 +36,10 @@ public class PrivacyItemCountDto {
 
     public Integer getSensitiveCount() {
         return sensitiveCount.intValue();
+    }
+
+    public Integer getTotalAddCount() {
+        return totalAddCount.intValue();
     }
 
 }

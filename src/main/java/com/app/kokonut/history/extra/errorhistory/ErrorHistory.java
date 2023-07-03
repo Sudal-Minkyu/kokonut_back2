@@ -32,8 +32,9 @@ public class ErrorHistory {
     @Column(name="et_title")
     private String etTitle;
 
+    @Lob
+    @Column(columnDefinition = "LONGTEXT", name="et_msg")
     @ApiModelProperty("에러내용")
-    @Column(length = 100000, name="et_msg")
     private String etMsg;
 
     @ApiModelProperty("회사코드")

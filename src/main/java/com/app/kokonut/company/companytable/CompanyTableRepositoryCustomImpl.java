@@ -36,12 +36,25 @@ public class CompanyTableRepositoryCustomImpl extends QuerydslRepositorySupport 
         StringBuilder sb = new StringBuilder();
 
         sb.append("SELECT \n");
-        sb.append("IFNULL(SUM(cpTable.ct_add_column_security_count), 0) AS securityCount, \n");
-        sb.append("IFNULL(SUM(cpTable.ct_add_column_unique_count), 0) AS uniqueCount, \n");
-        sb.append("IFNULL(SUM(cpTable.ct_add_column_sensitive_count), 0) AS sensitiveCount \n");
-        sb.append("FROM kn_company_table as cpTable \n");
+        sb.append("sumTable.securityCount, sumTable.uniqueCount, sumTable.sensitiveCount, \n");
+        sb.append("infoCount.count AS totalAddCount \n");
+        sb.append("FROM \n");
+        sb.append("(SELECT \n");
+        sb.append("IFNULL(SUM(ct_add_column_security_count), 0) AS securityCount, \n");
+        sb.append("IFNULL(SUM(ct_add_column_unique_count), 0) AS uniqueCount, \n");
+        sb.append("IFNULL(SUM(ct_add_column_sensitive_count), 0) AS sensitiveCount, \n");
+        sb.append("cp_code \n");
+        sb.append("FROM kn_company_table \n");
         sb.append("WHERE cp_code = ?1 \n");
-        sb.append("GROUP BY cpTable.cp_code; \n");
+        sb.append("GROUP BY cp_code) AS sumTable \n");
+        sb.append("JOIN \n");
+        sb.append("(SELECT \n");
+        sb.append("COUNT(ct_name) AS count, \n");
+        sb.append("SUBSTRING(ct_name, 1, 16) AS code \n");
+        sb.append("FROM kn_company_table_column_info \n");
+        sb.append("WHERE ctci_name != 'ID_1_id' \n");
+        sb.append("GROUP BY code) AS infoCount \n");
+        sb.append("ON sumTable.cp_code = infoCount.code; \n");
 
         Query query = em.createNativeQuery(sb.toString());
         query.setParameter(1, cpCode);

@@ -100,7 +100,7 @@ public class ProvisionService {
 
         log.info("provisionSaveDto : " + provisionSaveDto);
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         // 제공 시작기간
         LocalDate proStartDate = LocalDate.parse(provisionSaveDto.getProStartDate(), formatter);
         // 제공 만료기간
@@ -159,6 +159,7 @@ public class ProvisionService {
             }
 
             List<ProvisionEntry> provisionEntries = new ArrayList<>();
+
             // 제공 할 테이블+컬럼 저장 -> 모든 항목일 경우 저장하지 않음
             if(proTargetType == 1) {
                 ProvisionEntry provisionEntry;
@@ -184,31 +185,35 @@ public class ProvisionService {
 
             // 제공할 개인정보의 idx
             ProvisionList provisionList = new ProvisionList();
-            if(provisionSaveDto.getPiplTargetIdxs().size() != 0) {
-                String piplTargetIdxs = provisionSaveDto.getPiplTargetIdxs().stream()
-                        .map(String::valueOf)
-                        .collect(Collectors.joining(","));
-                log.info("piplTargetIdxs : "+piplTargetIdxs);
+            if(proTargetType == 1) {
+                if(provisionSaveDto.getPiplTargetIdxs().size() != 0) {
+                    String piplTargetIdxs = provisionSaveDto.getPiplTargetIdxs().stream()
+                            .map(String::valueOf)
+                            .collect(Collectors.joining(","));
+                    log.info("piplTargetIdxs : "+piplTargetIdxs);
 
-                provisionList.setProCode(saveprovision.getProCode());
-                provisionList.setPiplTargetIdxs(piplTargetIdxs);
-                provisionList.setInsert_email(email);
-                provisionList.setInsert_date(LocalDateTime.now());
-            }else {
-                log.error("제공할 개인정보가 존재하지 않습니다. 제공할 개인정보를 선택해주세요.");
+                    provisionList.setProCode(saveprovision.getProCode());
+                    provisionList.setPiplTargetIdxs(piplTargetIdxs);
+                    provisionList.setInsert_email(email);
+                    provisionList.setInsert_date(LocalDateTime.now());
+                }else {
+                    log.error("제공할 개인정보가 존재하지 않습니다. 제공할 개인정보를 선택해주세요.");
 
-                // 실패이력 업데이트
-                historyService.updateHistory(activityHistoryId,
-                        cpCode+" - "+activityCode.getDesc()+" 실패 이력", "제공할 개인정보를 선택해주세요.", 1);
+                    provisionRepository.delete(saveprovision);
 
-                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO093.getCode(),ResponseErrorCode.KO093.getDesc()));
+                    // 실패이력 업데이트
+                    historyService.updateHistory(activityHistoryId,
+                            cpCode+" - "+activityCode.getDesc()+" 실패 이력", "제공할 개인정보를 선택해주세요.", 1);
+
+                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO093.getCode(),ResponseErrorCode.KO093.getDesc()));
+                }
             }
 
             if(proTargetType == 1 && provisionEntries.size() != 0) {
                 provisionEntryRepository.saveAll(provisionEntries);
+                provisionListRepository.save(provisionList);
             }
             provisionRosterRepository.saveAll(provisionRosters);
-            provisionListRepository.save(provisionList);
 
             // 성공이력 업데이트
             historyService.updateHistory(activityHistoryId,

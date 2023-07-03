@@ -1835,6 +1835,7 @@ public class DynamicUserService {
 		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(jwtFilterDto.getEmail());
 		String companyCode = adminCompanyInfoDto.getCompanyCode();
 
+		int dchCount = 0; // 복호화 카운팅
 		List<String> headerNames = new ArrayList<>();
 		Optional<CompanyTable> optionalCompanyTable = companyTableRepository.findCompanyTableByCpCodeAndCtDesignation(companyCode, "기본");
 		if(optionalCompanyTable.isPresent()) {
@@ -1919,11 +1920,16 @@ public class DynamicUserService {
 							} else {
 								securityResultValue = decryptValue.charAt(0) + Utils.starsForString(decryptValue).substring(2) + decryptValue.substring(decryptValue.length() - 1);
 							}
-
+							dchCount++;
 							map.put(headerName, securityResultValue);
 						}
 					}
 				}
+			}
+
+			// 복호화 횟수 저장
+			if(dchCount > 0) {
+				decrypCountHistoryService.decrypCountHistorySave(companyCode, dchCount);
 			}
 
 //			log.info("basicTableList : "+basicTableList);
