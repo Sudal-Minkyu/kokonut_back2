@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.util.List;
+import java.time.LocalDate;
 
 /**
  * @author Woody
@@ -45,7 +46,7 @@ public class ApiCallHistoryRepositoryCustomImpl extends QuerydslRepositorySuppor
         sb.append("UNION SELECT 21 UNION SELECT 22 UNION SELECT 23) AS hours \n");
         sb.append("LEFT JOIN (SELECT HOUR(insert_date) AS Hour, COUNT(*) AS Count \n");
         sb.append("FROM kn_api_call_history \n");
-        sb.append("WHERE cp_code = ?1 \n");
+        sb.append("WHERE cp_code = ?1 AND DATE(insert_date) = CURDATE() \n");
         sb.append("GROUP BY HOUR(insert_date)) AS temp \n");
         sb.append("ON hours.hour = temp.Hour \n");
         sb.append("ORDER BY hours.hour; \n");

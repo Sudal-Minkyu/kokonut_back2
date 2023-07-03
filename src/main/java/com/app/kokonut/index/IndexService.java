@@ -271,7 +271,7 @@ public class IndexService {
 		if(dateType.equals("")) {
 			dateType = "1";
 		}
-//		log.info("dateType : "+dateType);
+		log.info("dateType : "+dateType);
 
 		ProvisionIndexDto provisionIndexDto = new ProvisionIndexDto();
 
@@ -279,19 +279,23 @@ public class IndexService {
 		LocalDate filterDate;
 
 		if(dateType.equals("2")) {
+			log.info("이번주 조회");
 			// 이번주 일요일-월요일~토요알까지
 			filterDate = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY)); // 이번주 일요일
 //			log.info("이번주 일요일 : " + filterDate);
 		} else if(dateType.equals("3")) {
+			log.info("이번달 조회");
 			// 이번달
 			filterDate = now.withDayOfMonth(1);
 //			log.info("이번달 1일 : " + filterDate);
 		} else {
+			log.info("오늘 조회");
 			dateType = "1";
 			// 오늘
 			filterDate = now;
-//			log.info("오늘 : " + filterDate);
 		}
+		log.info("now : " + now);
+		log.info("filterDate : " + filterDate);
 
 		provisionIndexDto.setFromDate(filterDate);
 		provisionIndexDto.setToDate(now);
@@ -300,8 +304,8 @@ public class IndexService {
 		// 오늘 제공 등록된 내부 외부 건수
 		Long todayInsideCount = todayCount(cpCode, 0, now);
 		Long todayOutsideCount = todayCount(cpCode, 1, now);
-//		log.info("오늘 등록된 내부건수 : " + todayInsideCount);
-//		log.info("오늘 등록된 외부건수 : " + todayOutsideCount);
+		log.info("오늘 등록된 내부건수 : " + todayInsideCount);
+		log.info("오늘 등록된 외부건수 : " + todayOutsideCount);
 
 		provisionIndexDto.setTodayInsideCount(todayInsideCount);
 		provisionIndexDto.setTodayOutsideCount(todayOutsideCount);
@@ -310,8 +314,8 @@ public class IndexService {
 		// 제공날짜의 기준
 		Long offerInsideCount = offerCount(cpCode, 0, dateType, now, filterDate);
 		Long offerOutsideCount = offerCount(cpCode, 1, dateType, now, filterDate);
-//		log.info("제공 가능한 내부건수 : " + offerInsideCount);
-//		log.info("제공 가능한 외부건수 : " + offerOutsideCount);
+		log.info("제공 가능한 내부건수 : " + offerInsideCount);
+		log.info("제공 가능한 외부건수 : " + offerOutsideCount);
 
 		provisionIndexDto.setOfferInsideCount(offerInsideCount);
 		provisionIndexDto.setOfferOutsideCount(offerOutsideCount);
@@ -387,11 +391,11 @@ public class IndexService {
 		privacyIndexDto.setAllCount(allCount);
 //		log.info("전체 회원수 : "+allCount);
 
-		Integer newUserCount = kokonutUserService.getCountFromTable(cpCode+"_1", dateType, now, filterDate);
+		int newUserCount = kokonutUserService.getCountFromTable(cpCode+"_1", dateType, now, filterDate);
 //		log.info("신규 회원수 : "+newUserCount);
 		privacyIndexDto.setNewUserCount(newUserCount);
 
-		Integer leaveUserCount = companyTableLeaveHistoryRepository.findByLeaveHistoryCount(cpCode, dateType, now, filterDate);
+		int leaveUserCount = companyTableLeaveHistoryRepository.findByLeaveHistoryCount(cpCode, dateType, now, filterDate);
 //		log.info("탈퇴수 : "+leaveUserCount);
 		privacyIndexDto.setLeaveUserCount(leaveUserCount);
 

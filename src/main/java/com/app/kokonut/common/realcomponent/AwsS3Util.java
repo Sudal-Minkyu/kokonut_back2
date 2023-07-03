@@ -130,6 +130,11 @@ public class AwsS3Util {
                             .withMethod(HttpMethod.GET)
                             .withExpiration(expiration);
             URL url = s3Client.generatePresignedUrl(generatePresignedUrlRequest);
+
+//            BufferedImage img = ImageIO.read(url);
+//            File file = new File("downloaded.png");
+//            ImageIO.write(img, "png", file);
+
             preSignedURL = url.toString();
             log.info("Pre-Signed URL : " + url);
 

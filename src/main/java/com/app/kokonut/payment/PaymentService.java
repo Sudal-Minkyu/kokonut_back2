@@ -144,7 +144,7 @@ public class PaymentService {
 //		log.info("lastDayOfLastMonth : "+lastDayOfLastMonth);
 
 		// 결제할 날짜
-		LocalDateTime payDayTime = LocalDateTime.now().plusDays(5).withHour(12).withMinute(0).withSecond(0).withNano(0);
+		LocalDateTime payDayTime = LocalDateTime.now().plusDays(4).withHour(12).withMinute(0).withSecond(0).withNano(0);
 //		log.info("payDayTime : "+payDayTime);
 
 		List<CompanyPaymentReservationListDto> companyPaymentReservationListDtos = companyPaymentRepository.findByPaymentReservationList(localDate);

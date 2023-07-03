@@ -42,7 +42,7 @@ public class DecrypCountHistoryRepositoryCustomImpl extends QuerydslRepositorySu
         sb.append("UNION SELECT 21 UNION SELECT 22 UNION SELECT 23) AS hours \n");
         sb.append("LEFT JOIN (SELECT HOUR(insert_date) AS Hour, SUM(dch_count) AS Total \n");
         sb.append("FROM kn_decryp_count_history \n");
-        sb.append("WHERE cp_code = ?1 \n");
+        sb.append("WHERE cp_code = ?1 AND DATE(insert_date) = CURDATE() \n");
         sb.append("GROUP BY HOUR(insert_date)) AS temp \n");
         sb.append("ON hours.hour = temp.Hour \n");
         sb.append("ORDER BY hours.hour; \n");
