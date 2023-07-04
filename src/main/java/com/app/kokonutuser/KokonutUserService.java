@@ -75,26 +75,19 @@ public class KokonutUserService {
 
 	/**
 	 * 아이디 존재 유무 확인
-	 * @param companyCode 테이블 이름
+	 * @param ctName 테이블 이름
 	 * @param id 아이디
 	 * @return 존재하는 경우 true
+	 * 사용중 23.07.04 -> 회원가입시 아이디 중복체크
 	 */
-	public boolean isUserExistId(String companyCode, String id) {
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("companyCode", companyCode);
-		map.put("id", id);
-
-		String searchQuery = "SELECT COUNT(*) FROM `" + companyCode + "` WHERE 1=1 AND `ID`= '"+id+"'";
+	public boolean isUserExistId(String ctName, String id) {
+		log.info("isUserExistId 호출");
+		String searchQuery = "SELECT COUNT(*) FROM `" + ctName + "` WHERE 1=1 AND `ID_1_id`= '"+id+"'";
 //		log.info("searchQuery : "+searchQuery);
 
 		Integer count = dynamicUserRepositoryCustom.selectUserIdCheck(searchQuery);
 
-		if(count > 0) {
-			return true;
-		} else {
-			return false;
-		}
-
+		return count > 0;
 	}
 
 	/**
@@ -452,7 +445,7 @@ public class KokonutUserService {
 					if(state == 1) {
 						query += "`"+ Field +"` bigint(20) NOT NULL";
 					} else {
-						query += "`"+ Field +"` bigint(20) NOT NULL PRIMARY KEY AUTO_INCREMENT";
+						query += "`"+ Field +"` bigint(20) NOT NULL";
 					}
 				} else {
 					query += "`"+ Field +"` "+ Type;
@@ -485,6 +478,8 @@ public class KokonutUserService {
 
 			if(state == 1) {
 				sb.append(", INDEX kokonut_IDX_index (kokonut_IDX)");
+			} else {
+			  	sb.append(", PRIMARY KEY (`kokonut_IDX`), UNIQUE INDEX ID_1_id_unique (ID_1_id)");
 			}
 			sb.append(")");
 			String createQuery = sb.toString();

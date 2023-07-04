@@ -57,4 +57,18 @@ public class HistoryListDto {
         }
     }
 
+    public String getAhActivityDetail() {
+        String detail = ahActivityDetail;
+        int index = detail.indexOf(" - ");
+
+        if (index != -1) {
+            // " - " 문자열이 존재하므로, " - " 이후의 부분 문자열을 반환합니다.
+            return detail.substring(index + 3);
+        } else {
+            // " - " 문자열이 존재하지 않으므로, 전체 문자열을 반환합니다.
+            return detail;
+        }
+    }
+
+
 }
