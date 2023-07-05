@@ -15,8 +15,7 @@ import com.app.kokonut.auth.jwt.dto.AuthRequestDto;
 import com.app.kokonut.auth.jwt.dto.AuthResponseDto;
 import com.app.kokonut.auth.jwt.dto.GoogleOtpGenerateDto;
 import com.app.kokonut.auth.jwt.dto.RedisDao;
-import com.app.kokonut.awskmshistory.AwsKmsHistoryRepository;
-import com.app.kokonut.awskmshistory.dto.AwsKmsResultDto;
+import com.app.kokonut.awsKmsHistory.dto.AwsKmsResultDto;
 import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.common.component.ReqUtils;
@@ -25,7 +24,6 @@ import com.app.kokonut.company.company.Company;
 import com.app.kokonut.company.company.CompanyRepository;
 import com.app.kokonut.company.companydatakey.CompanyDataKey;
 import com.app.kokonut.company.companydatakey.CompanyDataKeyRepository;
-import com.app.kokonut.company.companyfile.CompanyFileRepository;
 import com.app.kokonut.company.companysetting.CompanySetting;
 import com.app.kokonut.company.companysetting.CompanySettingRepository;
 import com.app.kokonut.company.companysetting.dtos.CompanySettingCheckDto;
@@ -42,7 +40,6 @@ import com.app.kokonut.history.dtos.ActivityCode;
 import com.app.kokonutuser.KokonutUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -79,17 +76,10 @@ import java.util.regex.Pattern;
 @Service
 public class AuthService {
 
-    @Value("${kokonut.aws.s3.businessS3Folder}")
-    private String businessS3Folder;
-
-    @Value("${kokonut.aws.s3.url}")
-    private String AWSURL;
-
     private final AdminService adminService;
     private final HistoryService historyService;
     private final KokonutUserService kokonutUserService;
 
-    private final AwsS3Util awsS3Util;
     private final AwsKmsUtil awsKmsUtil;
     private final WhoisUtil whoisUtil;
     private final KeyGenerateService keyGenerateService;
@@ -98,12 +88,9 @@ public class AuthService {
     private final CompanyRepository companyRepository;
     private final CompanyDataKeyRepository companyDataKeyRepository;
     private final CompanyTableRepository companyTableRepository;
-    private final CompanyFileRepository companyFileRepository;
     private final CompanyTableColumnInfoRepository companyTableColumnInfoRepository;
     private final CompanySettingRepository companySettingRepository;
     private final CompanySettingAccessIPRepository companySettingAccessIPRepository;
-
-    private final AwsKmsHistoryRepository awsKmsHistoryRepository;
 
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
@@ -117,16 +104,17 @@ public class AuthService {
 
     @Autowired
     public AuthService(AdminService adminService, HistoryService historyService,
-                       KokonutUserService kokonutUserService, AwsS3Util awsS3Util, AdminRepository adminRepository,
+                       KokonutUserService kokonutUserService, AdminRepository adminRepository,
                        AwsKmsUtil awsKmsUtil, WhoisUtil whoisUtil, KeyGenerateService keyGenerateService, CompanyRepository companyRepository,
-                       CompanyDataKeyRepository companyDataKeyRepository, CompanyTableRepository companyTableRepository, CompanyFileRepository companyFileRepository,
-                       CompanyTableColumnInfoRepository companyTableColumnInfoRepository, CompanySettingRepository companySettingRepository, CompanySettingAccessIPRepository companySettingAccessIPRepository, AwsKmsHistoryRepository awsKmsHistoryRepository, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider,
+                       CompanyDataKeyRepository companyDataKeyRepository, CompanyTableRepository companyTableRepository,
+                       CompanyTableColumnInfoRepository companyTableColumnInfoRepository,
+                       CompanySettingRepository companySettingRepository, CompanySettingAccessIPRepository companySettingAccessIPRepository,
+                       PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider,
                        AuthenticationManagerBuilder authenticationManagerBuilder,
                        RedisDao redisDao, GoogleOTP googleOTP, MailSender mailSender) {
         this.adminService = adminService;
         this.historyService = historyService;
         this.kokonutUserService = kokonutUserService;
-        this.awsS3Util = awsS3Util;
         this.adminRepository = adminRepository;
         this.awsKmsUtil = awsKmsUtil;
         this.whoisUtil = whoisUtil;
@@ -134,11 +122,9 @@ public class AuthService {
         this.companyRepository = companyRepository;
         this.companyDataKeyRepository = companyDataKeyRepository;
         this.companyTableRepository = companyTableRepository;
-        this.companyFileRepository = companyFileRepository;
         this.companyTableColumnInfoRepository = companyTableColumnInfoRepository;
         this.companySettingRepository = companySettingRepository;
         this.companySettingAccessIPRepository = companySettingAccessIPRepository;
-        this.awsKmsHistoryRepository = awsKmsHistoryRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
         this.authenticationManagerBuilder = authenticationManagerBuilder;
@@ -497,9 +483,9 @@ public class AuthService {
         companyTable.setCtBirthStatus("");
         companyTable.setCtGenderStatus("");
         companyTable.setCtEmailStatus("");
-        companyTable.setCtAddColumnSecurityCount(1);
-        companyTable.setCtAddColumnUniqueCount(1);
-        companyTable.setCtAddColumnSensitiveCount(1);
+        companyTable.setCtAddColumnSecurityCount(0);
+        companyTable.setCtAddColumnUniqueCount(0);
+        companyTable.setCtAddColumnSensitiveCount(0);
         companyTable.setInsert_email(kokonutSignUp.getKnEmail());
         companyTable.setInsert_date(LocalDateTime.now());
 
@@ -523,7 +509,7 @@ public class AuthService {
         companyTableRepository.save(companyTable);
 
         boolean result = kokonutUserService.createTableKokonutUser(ctName, 0);
-//        log.warn("result : "+result);
+        log.info("result : "+result);
         if(result) {
             // 기본컬럼 아이디 저장(1_id)
             CompanyTableColumnInfo companyTableColumnInfo = new CompanyTableColumnInfo();

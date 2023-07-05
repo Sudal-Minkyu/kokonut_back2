@@ -304,8 +304,8 @@ public class IndexService {
 		// 오늘 제공 등록된 내부 외부 건수
 		Long todayInsideCount = todayCount(cpCode, 0, now);
 		Long todayOutsideCount = todayCount(cpCode, 1, now);
-		log.info("오늘 등록된 내부건수 : " + todayInsideCount);
-		log.info("오늘 등록된 외부건수 : " + todayOutsideCount);
+//		log.info("오늘 등록된 내부건수 : " + todayInsideCount);
+//		log.info("오늘 등록된 외부건수 : " + todayOutsideCount);
 
 		provisionIndexDto.setTodayInsideCount(todayInsideCount);
 		provisionIndexDto.setTodayOutsideCount(todayOutsideCount);

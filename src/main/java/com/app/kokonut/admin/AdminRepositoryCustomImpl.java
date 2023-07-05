@@ -4,7 +4,6 @@ import com.app.kokonut.admin.dtos.*;
 import com.app.kokonut.admin.enums.AuthorityRole;
 import com.app.kokonut.company.company.QCompany;
 import com.app.kokonut.company.companysetting.QCompanySetting;
-import com.app.kokonut.history.QHistory;
 import com.app.kokonut.index.dtos.AdminConnectListSubDto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
@@ -16,7 +15,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -111,7 +109,9 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
                         admin.knName,
                         company.cpName,
                         admin.knPhoneNumber,
-                        company.cpElectronic,
+                        new CaseBuilder()
+                                .when(company.cpElectronic.isNull()).then(0)
+                                .otherwise(company.cpElectronic),
                         company.cpElectronicDate,
 
                         new CaseBuilder()

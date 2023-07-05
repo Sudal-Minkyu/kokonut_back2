@@ -21,12 +21,14 @@ import com.app.kokonut.company.companytable.dtos.CompanyTableListDto;
 import com.app.kokonut.history.HistoryService;
 import com.app.kokonut.history.dtos.ActivityCode;
 import com.app.kokonutuser.KokonutUserService;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.Column;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -304,6 +306,11 @@ public class CompanyItemService {
             companyTable.setCtNameStatus("");
             companyTable.setCtPhoneStatus("");
             companyTable.setCtBirthStatus("");
+            companyTable.setCtGenderStatus("");
+            companyTable.setCtEmailStatus("");
+            companyTable.setCtAddColumnSecurityCount(0);
+            companyTable.setCtAddColumnUniqueCount(0);
+            companyTable.setCtAddColumnSensitiveCount(0);
             companyTable.setCtGenderStatus("");
             companyTable.setCtEmailStatus("");
             companyTable.setInsert_email(jwtFilterDto.getEmail());

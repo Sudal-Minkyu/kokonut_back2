@@ -2,7 +2,6 @@ package com.app.kokonut.history.service;
 
 import com.app.kokonut.history.HistoryRepository;
 import com.app.kokonut.history.HistoryService;
-import com.app.kokonut.history.dto.ActivityCode;
 import com.app.kokonut.admin.AdminRepository;
 import com.app.kokonut.company.company.CompanyRepository;
 import org.junit.jupiter.api.DisplayName;
