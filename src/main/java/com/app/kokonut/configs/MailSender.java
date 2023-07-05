@@ -1,10 +1,8 @@
 package com.app.kokonut.configs;
 
 
-import com.app.kokonut.email.emailhistory.EmailHistoryRepository;
-import com.app.kokonut.email.emailhistory.EmailHistory;
-import com.app.kokonut.emailcontacthistory.EmailContactHistory;
-import com.app.kokonut.emailcontacthistory.EmailContactHistoryRepository;
+import com.app.kokonut.emailcontacthistory.ContactEmailHistory;
+import com.app.kokonut.emailcontacthistory.ContactEmailHistoryRepository;
 import com.app.kokonut.keydata.KeyDataService;
 import com.app.kokonut.navercloud.NaverCloudPlatformService;
 import com.app.kokonut.navercloud.dto.AttachFile;
@@ -38,15 +36,15 @@ public class MailSender {
 	@Value("${kokonut.otp.hostUrl}")
 	public String myHost; // otp_url
 
-	private final  NaverCloudPlatformService naverCloudPlatformService;
-	private final EmailContactHistoryRepository emailContactHistoryRepository;
+	private final NaverCloudPlatformService naverCloudPlatformService;
+	private final ContactEmailHistoryRepository contactEmailHistoryRepository;
 
 	@Autowired
-	public MailSender(KeyDataService keyDataService, NaverCloudPlatformService naverCloudPlatformService, EmailContactHistoryRepository emailContactHistoryRepository) {
+	public MailSender(KeyDataService keyDataService, NaverCloudPlatformService naverCloudPlatformService, ContactEmailHistoryRepository contactEmailHistoryRepository) {
 //		KeyDataMAILDto keyDataMAILDto = keyDataService.mail_key();
 //		this.frontServerDomainIp = keyDataMAILDto.getFRONTSERVERDOMAINIP();
 		this.naverCloudPlatformService = naverCloudPlatformService;
-		this.emailContactHistoryRepository = emailContactHistoryRepository;
+		this.contactEmailHistoryRepository = contactEmailHistoryRepository;
 //		this.mailHost = keyDataMAILDto.getMAILHOST();
 //		this.myHost = keyDataMAILDto.getOTPURL();
 	}
@@ -100,15 +98,15 @@ public class MailSender {
 		if(result) {
 			log.info("### 네이버 클라우드 플랫폼 서비스 sendMail 성공");
 			log.info("### 이메일 발송 내역 저장");
-			EmailContactHistory emailContactHistory = new EmailContactHistory();
-			emailContactHistory.setEchFrom(fromEmail);
-			emailContactHistory.setEchFromName(fromName);
-			emailContactHistory.setEchTo(toEmail);
-			emailContactHistory.setEchToName(toName);
-			emailContactHistory.setEchTitle(title);
-			emailContactHistory.setEchContents(contents);
-			emailContactHistory.setInsert_date(LocalDateTime.now());
-			emailContactHistoryRepository.save(emailContactHistory);
+			ContactEmailHistory contactEmailHistory = new ContactEmailHistory();
+			contactEmailHistory.setEchFrom(fromEmail);
+			contactEmailHistory.setEchFromName(fromName);
+			contactEmailHistory.setEchTo(toEmail);
+			contactEmailHistory.setEchToName(toName);
+			contactEmailHistory.setEchTitle(title);
+			contactEmailHistory.setEchContents(contents);
+			contactEmailHistory.setInsert_date(LocalDateTime.now());
+			contactEmailHistoryRepository.save(contactEmailHistory);
 			log.info("### 이메일 발송 내역 저장 성공");
 		}else {
 			log.error("### 네이버 클라우드 플랫폼 서비스 sendMail 실패");

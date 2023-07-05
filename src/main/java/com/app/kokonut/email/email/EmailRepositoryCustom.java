@@ -6,8 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 /**
- * @author joy
- * Date : 2022-12-19
+ * @author Woody
+ * Date : 2023-07-05
  * Time :
  * Remark : Email Sql 쿼리호출
  */

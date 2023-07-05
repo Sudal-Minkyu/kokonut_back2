@@ -99,6 +99,15 @@ public class CompanySettingRestController {
         return companySettingService.apiKeyIpDelete(accessIpDeleteDto, jwtFilterDto);
     }
 
+    @PostMapping("/emailSendItemSetting")
+    @ApiOperation(value = "이메일발송 항목지정", notes = "")
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token", required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    public ResponseEntity<Map<String,Object>> emailSendItemSetting(@RequestParam(value="csEmailTableSetting", defaultValue = "") String csEmailTableSetting,
+                                                           @RequestParam(value="csEmailCodeSetting", defaultValue = "") String csEmailCodeSetting) throws IOException {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return companySettingService.emailSendItemSetting(csEmailTableSetting, csEmailCodeSetting, jwtFilterDto);
+    }
+
 //  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 

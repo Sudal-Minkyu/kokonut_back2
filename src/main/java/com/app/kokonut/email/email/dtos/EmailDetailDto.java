@@ -5,20 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
-/**
- * @author Joy
- * Date : 2022-12-19
- * Time :
- * Remark : Email 단일조회 Dto, Email 전송 저장용 Dto
- */
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class EmailDetailDto {
 
-    // email 테이블
     @ApiModelProperty("보내는 관리자 키(시스템 관리자 고정)")
     private Long emSenderAdminId;
 

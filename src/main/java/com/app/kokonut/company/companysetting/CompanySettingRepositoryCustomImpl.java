@@ -3,6 +3,7 @@ package com.app.kokonut.company.companysetting;
 import com.app.kokonut.company.companysetting.dtos.CompanySettingCheckDto;
 import com.app.kokonut.company.companysetting.dtos.CompanySettingInfoDto;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.JPQLQuery;
 import org.qlrm.mapper.JpaResultMapper;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
@@ -38,7 +39,13 @@ public class CompanySettingRepositoryCustomImpl extends QuerydslRepositorySuppor
                         companySetting.csPasswordChangeSetting,
                         companySetting.csPasswordErrorCountSetting,
                         companySetting.csAutoLogoutSetting,
-                        companySetting.csLongDisconnectionSetting
+                        companySetting.csLongDisconnectionSetting,
+                        new CaseBuilder()
+                                .when(companySetting.csEmailTableSetting.isNotNull()).then(companySetting.csEmailTableSetting)
+                                .otherwise(""),
+                        new CaseBuilder()
+                                .when(companySetting.csEmailCodeSetting.isNotNull()).then(companySetting.csEmailCodeSetting)
+                                .otherwise("")
                 ));
 
         return query.fetchOne();

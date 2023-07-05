@@ -1,7 +1,7 @@
 package com.app.kokonut.auth.jwt;
 
 import com.app.kokonut.admin.enums.AuthorityRole;
-import com.app.kokonut.apiKey.dtos.ApiKeyInfoDto;
+import com.app.kokonut.apikey.dtos.ApiKeyInfoDto;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;

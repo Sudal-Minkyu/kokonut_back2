@@ -35,6 +35,8 @@ public class AdminInfoDto {
 
     private String billingCheck; // 빌링키등록 체크
 
+    private String emailSendSettingState; // 이메일발송 셋팅 여부
+
     public long getCsPasswordChangeSetting() {
         return Long.parseLong(csPasswordChangeSetting);
     }
