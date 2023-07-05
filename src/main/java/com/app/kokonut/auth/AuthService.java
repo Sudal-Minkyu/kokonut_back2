@@ -15,7 +15,7 @@ import com.app.kokonut.auth.jwt.dto.AuthRequestDto;
 import com.app.kokonut.auth.jwt.dto.AuthResponseDto;
 import com.app.kokonut.auth.jwt.dto.GoogleOtpGenerateDto;
 import com.app.kokonut.auth.jwt.dto.RedisDao;
-import com.app.kokonut.awsKmsHistory.dto.AwsKmsResultDto;
+import com.app.kokonut.awskmshistory.dto.AwsKmsResultDto;
 import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.common.component.ReqUtils;
