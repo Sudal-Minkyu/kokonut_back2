@@ -390,8 +390,8 @@ public class CompanySettingService {
     public ResponseEntity<Map<String, Object>> emailSendItemSetting(String csEmailTableSetting, String csEmailCodeSetting, JwtFilterDto jwtFilterDto) throws IOException {
         log.info("emailSendItemSetting 호출");
 
-        log.info("csEmailTableSetting : "+csEmailTableSetting);
-        log.info("csEmailCodeSetting : "+csEmailCodeSetting);
+//        log.info("csEmailTableSetting : "+csEmailTableSetting);
+//        log.info("csEmailCodeSetting : "+csEmailCodeSetting);
 
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
@@ -400,33 +400,29 @@ public class CompanySettingService {
         Long adminId = adminCompanyInfoDto.getAdminId();
         String cpCode = adminCompanyInfoDto.getCompanyCode();
 
-        // 이메일발송 항목지정 등록 코드
-        ActivityCode activityCode = ActivityCode.AC_59_1;
-
-        // 이메일발송 항목지정 수정 코드
-        ActivityCode activityCode2 = ActivityCode.AC_59_2;
+        ActivityCode activityCode;
 
         Optional<CompanySetting> optionalCompanySetting = companySettingRepository.findCompanySettingByCpCode(cpCode);
         if(optionalCompanySetting.isPresent()) {
 
+            if(optionalCompanySetting.get().getCsEmailTableSetting() != null && optionalCompanySetting.get().getCsEmailCodeSetting() != null) {
+                // 이메일발송 항목지정 등록 코드
+                activityCode = ActivityCode.AC_59_1;
+            } else {
+                // 이메일발송 항목지정 수정 코드
+                activityCode = ActivityCode.AC_59_2;
+            }
+
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
                     cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", CommonUtil.clientIp(), CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
 
-//            if(!companySettingAccessIPRepository.existsCompanySettingAccessIPByCsIdAndCsipIp(optionalCompanySetting.get().getCsId(), csipIp)) {
-//                CompanySettingAccessIP companySettingAccessIP = new CompanySettingAccessIP();
-//                companySettingAccessIP.setCsId(optionalCompanySetting.get().getCsId());
-//                companySettingAccessIP.setCsipIp(csipIp);
-//                companySettingAccessIP.setCsipRemarks(csipRemarks);
-//                companySettingAccessIP.setInsert_email(jwtFilterDto.getEmail());
-//                companySettingAccessIP.setInsert_date(LocalDateTime.now());
-//                companySettingAccessIPRepository.save(companySettingAccessIP);
-//            } else {
-//                log.error("이미 등록된 허용IP 입니다.");
-//                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO101.getCode(),ResponseErrorCode.KO101.getDesc()));
-//            }
+            optionalCompanySetting.get().setCsEmailTableSetting(csEmailTableSetting);
+            optionalCompanySetting.get().setCsEmailCodeSetting(csEmailCodeSetting);
+            companySettingRepository.save(optionalCompanySetting.get());
 
             historyService.updateHistory(activityHistoryId,
                     cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+
         }
 
         return ResponseEntity.ok(res.success(data));
