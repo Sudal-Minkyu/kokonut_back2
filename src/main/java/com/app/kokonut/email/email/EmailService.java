@@ -63,10 +63,7 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
-    /**
-     * 이메일 목록 조회
-     * @param pageable 페이징 처리를 위한 정보
-     */
+    // 이메일 목록 조회
     public ResponseEntity<Map<String,Object>> emailList(String email, String searchText, String stime, String emailType, Pageable pageable){
         log.info("emailList 호출");
 
@@ -76,9 +73,9 @@ public class EmailService {
         log.info("emailType : "+emailType);
 
         AjaxResponse res = new AjaxResponse();
-        Page<EmailListDto> emailListDtos = emailRepository.findByEmailPage(pageable);
+//        Page<EmailListDto> emailListDtos = emailRepository.findByEmailPage(pageable);
 
-        return ResponseEntity.ok(res.ResponseEntityPage(emailListDtos));
+        return null;
     }
 
     /**
@@ -123,8 +120,8 @@ public class EmailService {
         }else if(("G").equals(receiverType)){
             Long emailGroupIdx = emailDetailDto.getEgId();
             EmailGroupAdminInfoDto emailGroupAdminInfoDto;
-            emailGroupAdminInfoDto = emailGroupRepository.findEmailGroupAdminInfoByIdx(emailGroupIdx);
-            adminIdList = emailGroupAdminInfoDto.getEgAdminIdList();
+//            emailGroupAdminInfoDto = emailGroupRepository.findEmailGroupAdminInfoByIdx(emailGroupIdx);
+//            adminIdList = emailGroupAdminInfoDto.getEgAdminIdList();
         }else{
             log.error("### 받는사람 타입(I:개별,G:그룹)을 알 수 없습니다. :" + receiverType);
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO040.getCode(), ResponseErrorCode.KO040.getDesc()));
@@ -160,15 +157,9 @@ public class EmailService {
         Email reciveEmail = new Email();
 
         emailDetailDto.setEmContents(originContents);
-        reciveEmail.setEmSenderAdminId(emailDetailDto.getEmSenderAdminId());
         reciveEmail.setEmReceiverType(emailDetailDto.getEmReceiverType());
         reciveEmail.setEmTitle(emailDetailDto.getEmTitle());
         reciveEmail.setEmContents(emailDetailDto.getEmContents());
-
-        // 조건에 따른 분기 처리
-        if("I".equals(emailDetailDto.getEmReceiverType()) && emailDetailDto.getEmReceiverAdminIdList() != null) {
-            reciveEmail.setEmReceiverAdminIdList(emailDetailDto.getEmReceiverAdminIdList());
-        }
 
         // 조건에 따른 분기 처리
         if("G".equals(emailDetailDto.getEmReceiverType()) && emailDetailDto.getEgId() != null) {
@@ -221,8 +212,8 @@ public class EmailService {
                     // 그룹 선택으로 메일을 발송한 경우
                     Long emailGroupIdx = emailDetailDto.getEgId();
                     // 메일 그룹 조회 쿼리 동작
-                    EmailGroupAdminInfoDto emailGroupAdminInfoDto = emailGroupRepository.findEmailGroupAdminInfoByIdx(emailGroupIdx);
-                    adminIdList = emailGroupAdminInfoDto.getEgAdminIdList();
+//                    EmailGroupAdminInfoDto emailGroupAdminInfoDto = emailGroupRepository.findEmailGroupAdminInfoByIdx(emailGroupIdx);
+//                    adminIdList = emailGroupAdminInfoDto.getEgAdminIdList();
                 }else{
                     log.error("### 받는사람 타입(I:개별,G:그룹)을 알 수 없습니다. :" + receiverType);
                     return ResponseEntity.ok(res.fail(ResponseErrorCode.KO040.getCode(), ResponseErrorCode.KO040.getDesc()));
@@ -261,65 +252,65 @@ public class EmailService {
      * 이메일 발송 대상 목록 조회하기
      * @param pageable 페이징 처리를 위한 정보
      */
-    public ResponseEntity<Map<String, Object>> emailTargetGroupList(Pageable pageable) {
-        log.info("### emailTargetGroupList 호출");
-        /*
-         * 그룹명 : 미식플랫폼 00 관리자
-         * 설 명 : 미식플랫폼 00의 관리자 그룹
-         * 관리자 Idx : 2, 4, 5 ...
-         * 이메일 : a001@00.oo.com, a002@00.oo.com, a003@00.oo.com
-         *
-         * findEmailGroupDatils()를 조회한다
-         * 해당 결과에서 가져온 관리자 인덱스를 가지고 관리자 이메일을 조회한다.
-         * EmailGroup Entity 클래스를 가지는 List에 각 값을 넣어서 던져준다.
-         */
-
-        AjaxResponse res = new AjaxResponse();
-
-        EmailGroup emailGroup = new EmailGroup(); // TEMP
-        List<EmailGroupListDto> resultDto = emailGroupRepository.findEmailGroupDetails();
-
-        List<EmailGroup> resultList = new ArrayList<>();
-        for(int i = 0; i<resultDto.size(); i++){
-            emailGroup.setEgId(resultDto.get(i).getEgId());
-            emailGroup.setEgName(resultDto.get(i).getEgName());
-            emailGroup.setEgDesc(resultDto.get(i).getEgDesc());
-            emailGroup.setEgAdminIdList(resultDto.get(i).getEgAdminIdList());
-
-            String adminIds = resultDto.get(i).getEgAdminIdList();
-            String adminIdList[] = adminIds.split(",");
-
-            List<String> emailList = new ArrayList<>();
-            for (String adminId : adminIdList) {
-                String adminEmail = adminRepository.findByKnEmailInfo(Long.parseLong(adminId)).getKnEmail();
-                emailList.add(adminEmail); // a001@00.oo.com, a002@00.oo.com, a003@00.oo.com
-            }
-            StringBuilder adminEmailList = new StringBuilder();
-            for(int j = 0; j < emailList.size(); j++){
-                adminEmailList.append(emailList.get(j));
-                if(j == emailList.size()-1){
-                    // 마지막
-                    adminEmailList.append("");
-                }else {
-                    adminEmailList.append(",");
-                }
-            }
-            String stAdminEmailList = adminEmailList.toString();
-            emailGroup.setAdminEmailList(stAdminEmailList);
-            resultList.add(emailGroup);
-            log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ");
-            log.info(">>>> idx: "+resultList.get(i).getEgId());
-            log.info(">>>> name: "+resultList.get(i).getEgName());
-            log.info(">>>> Desc: "+resultList.get(i).getEgDesc());
-            log.info(">>>> adminId: "+resultList.get(i).getEgAdminIdList());
-            log.info(">>>> adminEmail: "+resultList.get(i).getAdminEmailList());
-            log.info("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ");
-        }
-        
-
-        Page resultPage = new PageImpl<>(resultList, pageable, resultList.size());
-        log.info("결과 List size : "+resultList.size());
-
-    return ResponseEntity.ok(res.ResponseEntityPage(resultPage));
-    }
+//    public ResponseEntity<Map<String, Object>> emailTargetGroupList(Pageable pageable) {
+//        log.info("### emailTargetGroupList 호출");
+//        /*
+//         * 그룹명 : 미식플랫폼 00 관리자
+//         * 설 명 : 미식플랫폼 00의 관리자 그룹
+//         * 관리자 Idx : 2, 4, 5 ...
+//         * 이메일 : a001@00.oo.com, a002@00.oo.com, a003@00.oo.com
+//         *
+//         * findEmailGroupDatils()를 조회한다
+//         * 해당 결과에서 가져온 관리자 인덱스를 가지고 관리자 이메일을 조회한다.
+//         * EmailGroup Entity 클래스를 가지는 List에 각 값을 넣어서 던져준다.
+//         */
+//
+//        AjaxResponse res = new AjaxResponse();
+//
+//        EmailGroup emailGroup = new EmailGroup(); // TEMP
+//        List<EmailGroupListDto> resultDto = emailGroupRepository.findEmailGroupDetails();
+//
+//        List<EmailGroup> resultList = new ArrayList<>();
+//        for(int i = 0; i<resultDto.size(); i++){
+//            emailGroup.setEgId(resultDto.get(i).getEgId());
+//            emailGroup.setEgName(resultDto.get(i).getEgName());
+//            emailGroup.setEgDesc(resultDto.get(i).getEgDesc());
+//            emailGroup.setEgAdminIdList(resultDto.get(i).getEgAdminIdList());
+//
+//            String adminIds = resultDto.get(i).getEgAdminIdList();
+//            String adminIdList[] = adminIds.split(",");
+//
+//            List<String> emailList = new ArrayList<>();
+//            for (String adminId : adminIdList) {
+//                String adminEmail = adminRepository.findByKnEmailInfo(Long.parseLong(adminId)).getKnEmail();
+//                emailList.add(adminEmail); // a001@00.oo.com, a002@00.oo.com, a003@00.oo.com
+//            }
+//            StringBuilder adminEmailList = new StringBuilder();
+//            for(int j = 0; j < emailList.size(); j++){
+//                adminEmailList.append(emailList.get(j));
+//                if(j == emailList.size()-1){
+//                    // 마지막
+//                    adminEmailList.append("");
+//                }else {
+//                    adminEmailList.append(",");
+//                }
+//            }
+//            String stAdminEmailList = adminEmailList.toString();
+//            emailGroup.setAdminEmailList(stAdminEmailList);
+//            resultList.add(emailGroup);
+//            log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ");
+//            log.info(">>>> idx: "+resultList.get(i).getEgId());
+//            log.info(">>>> name: "+resultList.get(i).getEgName());
+//            log.info(">>>> Desc: "+resultList.get(i).getEgDesc());
+//            log.info(">>>> adminId: "+resultList.get(i).getEgAdminIdList());
+//            log.info(">>>> adminEmail: "+resultList.get(i).getAdminEmailList());
+//            log.info("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ");
+//        }
+//
+//
+//        Page resultPage = new PageImpl<>(resultList, pageable, resultList.size());
+//        log.info("결과 List size : "+resultList.size());
+//
+//    return ResponseEntity.ok(res.ResponseEntityPage(resultPage));
+//    }
 }

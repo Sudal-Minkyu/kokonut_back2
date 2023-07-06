@@ -1,7 +1,7 @@
 package com.app.kokonut.configs;
 
-import com.app.kokonut.apiKey.ApiKeyService;
-import com.app.kokonut.apiKey.dtos.ApiKeyInfoDto;
+import com.app.kokonut.apikey.ApiKeyService;
+import com.app.kokonut.apikey.dtos.ApiKeyInfoDto;
 import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.common.realcomponent.CommonUtil;
 import lombok.extern.slf4j.Slf4j;

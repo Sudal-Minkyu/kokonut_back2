@@ -16,14 +16,14 @@ import java.util.Map;
 @RestController
 @RequestMapping("/v2/api/Email")
 public class EmailRestController {
-    // 기존 코코넛 SystemEmailController 컨트롤러 리팩토링
-    // 기존 url : /system/email , 변경 url : /api/Email
+
     private final EmailService emailService;
 
     @Autowired
     public EmailRestController(EmailService emailService) {
         this.emailService = emailService;
     }
+
     @ApiOperation(value="이메일 목록 조회", notes="" +
             "1. 토큰과 페이지 처리를 위한 값을 받는다." +
             "2. 발송한 메일 목록을 조회한다.")
@@ -58,16 +58,17 @@ public class EmailRestController {
         return emailService.sendEmailDetail(emId);
     }
 
-    @ApiOperation(value="이메일 발송 대상 조회", notes="" +
-            "1. 토큰과 페이지 처리를 위한 값을 받는다." +
-            "2. 메일 발송 대상 목록을 조회한다.")
-    @GetMapping("/emailTargetGroupList") // -> 기존의 코코넛 호출 메서드명 : selectEmailTargetPopup
-    @ApiImplicitParams({
-            @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-    })
-    public ResponseEntity<Map<String,Object>> emailTargetGroupList(Pageable pageable) {
-        return emailService.emailTargetGroupList(pageable);
-    }
+//    @ApiOperation(value="이메일 발송 대상 조회", notes="" +
+//            "1. 토큰과 페이지 처리를 위한 값을 받는다." +
+//            "2. 메일 발송 대상 목록을 조회한다.")
+//    @GetMapping("/emailTargetGroupList") // -> 기존의 코코넛 호출 메서드명 : selectEmailTargetPopup
+//    @ApiImplicitParams({
+//            @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+//    })
+//    public ResponseEntity<Map<String,Object>> emailTargetGroupList(Pageable pageable) {
+//        return emailService.emailTargetGroupList(pageable);
+//    }
+
     // 기존 코코넛 컨트롤러
     // 이동 mappingValue : /emailManagement, view : /System/Email/EmailManagementUI
     // 로직 mappingValue : /getEmail

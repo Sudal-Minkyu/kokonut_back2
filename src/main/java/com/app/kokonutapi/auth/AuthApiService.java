@@ -3,7 +3,7 @@ package com.app.kokonutapi.auth;
 import com.app.kokonut.admin.AdminRepository;
 import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
-import com.app.kokonut.awsKmsHistory.dto.AwsKmsResultDto;
+import com.app.kokonut.awskmshistory.dto.AwsKmsResultDto;
 import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.common.realcomponent.AESGCMcrypto;
@@ -267,8 +267,17 @@ public class AuthApiService {
 
                     searchQuery.append("VALUES ('").append(kokonutIdx).append("', NOW(), NOW(), ");
                     for(int i=0; i<groupValues.size(); i++) {
+                        String key = String.valueOf(groupValues.get(i).getKey());
                         String value = String.valueOf(groupValues.get(i).getValue());
-
+                        if(key.equals("1_id")) {
+                            // 아이디일 경우 중복체크를 한다.
+                            boolean result = kokonutUserService.isUserExistId(saveTable, value);
+                            if(result) {
+                               // result가 true일 경우 존재한다고 판단
+                                log.error("이미 사용중인 아이디입니다.");
+                                return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_10.getCode(),ResponseErrorCode.ERROR_CODE_10.getDesc()));
+                            }
+                        }
                         if (encrypts.get(i).equals("암호화")) {
 
                             // 이름은 통으로 암호화로 수정 -> 2023.06.09

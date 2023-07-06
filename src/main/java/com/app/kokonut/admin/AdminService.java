@@ -4,7 +4,7 @@ import com.app.kokonut.admin.dtos.*;
 import com.app.kokonut.admin.enums.AuthorityRole;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import com.app.kokonut.auth.jwt.dto.RedisDao;
-import com.app.kokonut.awsKmsHistory.dto.AwsKmsResultDto;
+import com.app.kokonut.awskmshistory.dto.AwsKmsResultDto;
 import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.common.realcomponent.AESGCMcrypto;
@@ -298,6 +298,7 @@ public class AdminService {
             // log.info("nowDate : "+nowDate);
             LocalDate electronicDate = adminInfoDto.getCpElectronicDate();
             // log.info("electronicDate : "+electronicDate);
+
             if(adminInfoDto.getCpElectronic() == 2) {
                 if(electronicDate.isBefore(nowDate)) {
                     // log.info("2이고 1년이 지났음");
@@ -322,6 +323,8 @@ public class AdminService {
             }
 
             data.put("paymentBillingCheck",adminInfoDto.getBillingCheck()); // "1"이면 등록됨, "0" 이면 등록되지않음(팝업창 안내)
+
+            data.put("emailSendSettingState",adminInfoDto.getEmailSendSettingState()); // "1"이면 이메일발송 셋팅함, "0" 이면 이메일발송 셋팅하지않음
 
         }
 

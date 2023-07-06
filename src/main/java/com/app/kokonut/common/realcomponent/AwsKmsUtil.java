@@ -9,7 +9,7 @@ import com.amazonaws.services.kms.model.DataKeySpec;
 import com.amazonaws.services.kms.model.DecryptRequest;
 import com.amazonaws.services.kms.model.GenerateDataKeyRequest;
 import com.amazonaws.services.kms.model.GenerateDataKeyResult;
-import com.app.kokonut.awsKmsHistory.dto.AwsKmsResultDto;
+import com.app.kokonut.awskmshistory.dto.AwsKmsResultDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

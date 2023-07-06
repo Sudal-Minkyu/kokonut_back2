@@ -385,4 +385,48 @@ public class CompanySettingService {
 
         return ResponseEntity.ok(res.success(data));
     }
+
+    // 이메일발송 항목지정
+    public ResponseEntity<Map<String, Object>> emailSendItemSetting(String csEmailTableSetting, String csEmailCodeSetting, JwtFilterDto jwtFilterDto) throws IOException {
+        log.info("emailSendItemSetting 호출");
+
+//        log.info("csEmailTableSetting : "+csEmailTableSetting);
+//        log.info("csEmailCodeSetting : "+csEmailCodeSetting);
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+        AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(jwtFilterDto.getEmail());
+        Long adminId = adminCompanyInfoDto.getAdminId();
+        String cpCode = adminCompanyInfoDto.getCompanyCode();
+
+        ActivityCode activityCode;
+
+        Optional<CompanySetting> optionalCompanySetting = companySettingRepository.findCompanySettingByCpCode(cpCode);
+        if(optionalCompanySetting.isPresent()) {
+
+            if(optionalCompanySetting.get().getCsEmailTableSetting() != null && optionalCompanySetting.get().getCsEmailCodeSetting() != null) {
+                // 이메일발송 항목지정 등록 코드
+                activityCode = ActivityCode.AC_59_1;
+            } else {
+                // 이메일발송 항목지정 수정 코드
+                activityCode = ActivityCode.AC_59_2;
+            }
+
+            Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
+                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", CommonUtil.clientIp(), CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
+
+            optionalCompanySetting.get().setCsEmailTableSetting(csEmailTableSetting);
+            optionalCompanySetting.get().setCsEmailCodeSetting(csEmailCodeSetting);
+            companySettingRepository.save(optionalCompanySetting.get());
+
+            historyService.updateHistory(activityHistoryId,
+                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+
+        }
+
+        return ResponseEntity.ok(res.success(data));
+    }
+
+
 }

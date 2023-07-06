@@ -32,6 +32,9 @@ public class AuthApiRestController {
         this.authApiService = authApiService;
     }
 
+    // 아이디 중복확인 API
+
+
     @PostMapping("/login")
     @ApiOperation(value="API용 개인정보(고객의 고객) 로그인", notes="" +
             "1. 아이디와 비밀번호를 받는다.<br/>" +

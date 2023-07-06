@@ -1,8 +1,11 @@
 package com.app.kokonut.company.companysetting.dtos;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import javax.persistence.Column;
 
 /**
  * @author Woody
@@ -28,5 +31,9 @@ public class CompanySettingInfoDto {
     private String csAutoLogoutSetting; // 자동 로그아웃 시간(30: 30분, 60: 60분, 90: 90분, 120: 120분) 기본값 : 5
 
     private String csLongDisconnectionSetting; // 장기 미접속 접근제한(0: 제한없음, 1: 1개월, 3: 3개월, 6: 6개월) 기본값 : 0
+
+    private String csEmailTableSetting; // 이메일발송 지정 테이블
+
+    private String csEmailCodeSetting; // 이메일발송 지정코드
 
 }

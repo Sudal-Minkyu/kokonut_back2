@@ -1,14 +1,13 @@
 package com.app.kokonut.company.companydatakey;
 
-import com.app.kokonut.awsKmsHistory.AwsKmsHistory;
-import com.app.kokonut.awsKmsHistory.AwsKmsHistoryRepository;
-import com.app.kokonut.awsKmsHistory.dto.AwsKmsResultDto;
+import com.app.kokonut.awskmshistory.AwsKmsHistory;
+import com.app.kokonut.awskmshistory.AwsKmsHistoryRepository;
+import com.app.kokonut.awskmshistory.dto.AwsKmsResultDto;
 import com.app.kokonut.common.realcomponent.AwsKmsUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.SecretKey;
 import java.time.LocalDateTime;
 import java.util.Optional;
 

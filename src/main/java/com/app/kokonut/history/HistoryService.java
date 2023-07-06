@@ -8,7 +8,6 @@ import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.common.realcomponent.Utils;
 import com.app.kokonut.configs.ExcelService;
 import com.app.kokonut.history.dtos.*;
-import com.app.kokonut.totalDBDownloadHistory.TotalDbDownloadHistoryRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -35,15 +34,13 @@ public class HistoryService {
     private final HistoryRepository historyRepository;
 
     private final ExcelService excelService;
-    private final TotalDbDownloadHistoryRepository downloadHistoryRepository;
 
     @Autowired
     public HistoryService(AdminRepository adminRepository, HistoryRepository historyRepository,
-                          ExcelService excelService, TotalDbDownloadHistoryRepository downloadHistoryRepository) {
+                          ExcelService excelService) {
         this.adminRepository = adminRepository;
         this.historyRepository = historyRepository;
         this.excelService = excelService;
-        this.downloadHistoryRepository = downloadHistoryRepository;
     }
 
     // Column 리스트 조회

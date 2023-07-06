@@ -22,75 +22,41 @@ public class Email {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long emId;
 
-    /**
-     * 보내는 관리자 키(시스템 관리자 고정)
-     */
-    @ApiModelProperty("보내는 관리자 키(시스템 관리자 고정)")
-    @Column(name = "em_sender_admin_id", nullable = false)
-    private Long emSenderAdminId;
-
-    /**
-     * 받는사람 타입(I:개별,G:그룹)
-     */
-    @ApiModelProperty("받는사람 타입(I:개별,G:그룹)")
-    @Column(name = "em_receiver_type", nullable = false)
-    private String emReceiverType;
-
-    /**
-     * 받는 관리자 키(문자열, 구분자: ',')
-     */
-    @Column(name = "em_receiver_admin_id_list")
-    @ApiModelProperty("받는 관리자 키(문자열, 구분자: ',')")
-    private String emReceiverAdminIdList;
-
-    /**
-     * 받는 그룹 키
-     */
-    @ApiModelProperty("받는 그룹 키")
+    @ApiModelProperty("이메일 그룹 주키")
     @Column(name = "eg_id")
     private Long egId;
 
-    /**
-     * 제목
-     */
+    @ApiModelProperty("발송타입(1 : 전체발송, 2 : 선택발송)")
+    @Column(name = "em_receiver_type")
+    private String emReceiverType;
+
+    @ApiModelProperty("발송목적(1:주요공지, 2:광고/홍보, 3:기타)")
+    @Column(name = "em_type")
+    private String emType;
+
+    @ApiModelProperty("기타일 경우 해당 내용")
+    @Column(name = "em_etc")
+    private String emEtc;
+
+    @ApiModelProperty("발신자 이메일")
+    @Column(name = "em_email_send")
+    private String emEmailSend;
+
     @ApiModelProperty("제목")
-    @Column(name = "em_title", nullable = false)
+    @Column(name = "em_title")
     private String emTitle;
 
-    /**
-     * 내용
-     */
     @ApiModelProperty("내용")
-    @Column(name = "em_contents", nullable = false)
+    @Lob
+    @Column(columnDefinition = "LONGTEXT", name="em_contents")
     private String emContents;
 
-    /**
-     * 등록자 email
-     */
-    @ApiModelProperty("등록자 email")
+    @ApiModelProperty("발송자 email")
     @Column(name = "insert_email", nullable = false)
     private String insert_email;
 
-    /**
-     * 등록 날짜
-     */
-    @ApiModelProperty("등록 날짜")
+    @ApiModelProperty("발송 날짜")
     @Column(name = "insert_date", nullable = false)
     private LocalDateTime insert_date;
-
-    /**
-     * 수정자 이름
-     */
-    @ApiModelProperty("수정자 email")
-    @Column(name = "modify_email")
-    private String modify_email;
-
-    /**
-     * 수정 날짜
-     */
-    @ApiModelProperty("수정 날짜")
-    @Column(name = "modify_date")
-    private LocalDateTime modify_date;
-
 
 }

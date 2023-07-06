@@ -1,6 +1,5 @@
 package com.app.kokonut.admin;
 
-import com.app.kokonut.admin.enums.AuthorityRole;
 import com.app.kokonut.auth.jwt.SecurityUtil;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import io.swagger.annotations.ApiImplicitParam;
@@ -127,9 +126,7 @@ public class AdminRestController {
 
     // 시스템관리자 호출
     @GetMapping("/systemTest")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name ="authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
-    })
+    @ApiImplicitParam(name ="authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> systemTest() {
         log.info("ROLE_SYSTEM TEST");
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
@@ -138,9 +135,7 @@ public class AdminRestController {
 
     // 대표관리자 호출
     @GetMapping("/masterTest")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name ="authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
-    })
+    @ApiImplicitParam(name ="authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> masterTest() {
         log.info("ROLE_MASTER TEST");
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
@@ -149,9 +144,7 @@ public class AdminRestController {
 
     // 최고관리자 호출
     @GetMapping("/adminTest")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
-    })
+    @ApiImplicitParam(name ="authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> adminTest() {
         log.info("ROLE_ADMIN TEST");
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
@@ -160,9 +153,7 @@ public class AdminRestController {
 
     // 일반관리자 호출
     @GetMapping("/userTest")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
-    })
+    @ApiImplicitParam(name ="authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> userTest() {
         log.info("ROLE_USER TEST");
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
@@ -171,9 +162,7 @@ public class AdminRestController {
 
     // 게스트 호출
     @GetMapping("/guestTest")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
-    })
+    @ApiImplicitParam(name ="authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> guestTest() {
         log.info("ROLE_GUEST TEST");
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
