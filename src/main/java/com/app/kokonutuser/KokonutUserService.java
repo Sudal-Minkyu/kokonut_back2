@@ -139,7 +139,7 @@ public class KokonutUserService {
 
 	// 유저테이블의 개인정보 수 조회
 	public int getCountFromTable(String cpCode, String dateType, LocalDate now, LocalDate filterDate) {
-		log.info("selectUserListCount 호출");
+		log.info("getCountFromTable 호출");
 
 		StringBuilder sb = new StringBuilder();
 
@@ -168,7 +168,7 @@ public class KokonutUserService {
 					.append(" AND MONTH(kokonut_REGISTER_DATE) = ").append(now.getMonthValue());
 		}
 
-//		log.info("searchQuery : "+sb);
+		log.info("searchQuery : "+sb);
 
 		return dynamicUserRepositoryCustom.getCountFromTable(sb.toString());
 	}
@@ -189,7 +189,7 @@ public class KokonutUserService {
 	 * 기존 코코넛 : int SelectUserDataByIdx
 	 */
 	public List<KokonutRemoveInfoDto> selectUserDataByIdx(String companyCode, Integer idx) {
-		log.info("selectUserListCount 호출");
+		log.info("selectUserDataByIdx 호출");
 		String searchQuery = "SELECT IDX, ID, REGDATE FROM `" + companyCode + "` WHERE `IDX`="+idx;
 //		log.info("searchQuery : "+searchQuery);
 		return dynamicUserRepositoryCustom.selectUserDataByIdx(searchQuery);

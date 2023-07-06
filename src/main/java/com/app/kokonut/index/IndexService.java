@@ -129,7 +129,7 @@ public class IndexService {
 
 		Long csId = companySettingRepository.findByCompanySettingCsId(cpCode);
 		List<HistoryMyConnectListDto> historyMyConnectListDtos = historyRepository.findByMyConnectList(adminId, cpCode);
-		if(historyMyConnectListDtos.size() != 0) {
+		if (!historyMyConnectListDtos.isEmpty()) {
 			for(HistoryMyConnectListDto historyMyConnectListDto : historyMyConnectListDtos) {
 				if(historyMyConnectListDto.getCsipRemarks().equals("0")) {
 					historyMyConnectListDto.setCsipRemarks("");
