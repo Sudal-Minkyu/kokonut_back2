@@ -63,22 +63,28 @@ public class AuthApiService {
     // API용 개인정보(고객의 고객) 로그인
     public ResponseEntity<Map<String, Object>> apiLogin(AuthApiLoginDto authApiLoginDto, JwtFilterDto jwtFilterDto) {
         log.info("apiLogin 호출");
+
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
+
         log.info("authApiLoginDto : "+authApiLoginDto);
         String email = jwtFilterDto.getEmail();
+
         AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
 //        Long adminId = adminCompanyInfoDto.getAdminId();
         String companyCode = adminCompanyInfoDto.getCompanyCode();
 //        log.info("adminId : "+adminId);
 //        log.info("companyCode : "+companyCode);
         String basicTable = companyCode+"_1";
+
         if(authApiLoginDto.getKokonutId() == null) {
             return ResponseEntity.ok(res.apifail("KOKONUT_01", "아이디를 입력해주세요."));
         }
+
         String result = kokonutUserService.passwordConfirm(basicTable, authApiLoginDto.getKokonutId(), authApiLoginDto.getKokonutPw());
         log.info("result : "+result);
         data.put("IDX", result);
+
         if(result.equals("none")) {
             return ResponseEntity.ok(res.apifail("KOKONUT_03", "입력한 비밀번호가 맞지 않습니다."));
         } else if(result.equals("")) {
@@ -86,6 +92,7 @@ public class AuthApiService {
         } else {
             return ResponseEntity.ok(res.apisuccess(data));
         }
+
     }
 
     // API용 개인정보(고객의 개인정보) 회원가입

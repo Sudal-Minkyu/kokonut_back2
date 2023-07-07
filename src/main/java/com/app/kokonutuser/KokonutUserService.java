@@ -149,7 +149,7 @@ public class KokonutUserService {
 		// 등록일시 kokonut_REGDATE
 		// 회원가입날짜 kokonut_REGISTER_DATE
 		if(dateType.equals("1")) {
-//			log.info("오늘");
+//			log.info("오늘");C
 			sb.append(" AND YEAR(kokonut_REGISTER_DATE) = ").append(now.getYear())
 					.append(" AND MONTH(kokonut_REGISTER_DATE) = ").append(now.getMonthValue())
 					.append(" AND DAY(kokonut_REGISTER_DATE) = ").append(now.getDayOfMonth());

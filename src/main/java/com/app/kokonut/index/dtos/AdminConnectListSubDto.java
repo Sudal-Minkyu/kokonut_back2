@@ -19,6 +19,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class AdminConnectListSubDto {
 
+    private AuthorityRole  roleCode; // 권한코드
+
     private Long adminId;
 
     private AuthorityRole roleName; // 권한명
@@ -29,6 +31,10 @@ public class AdminConnectListSubDto {
 
     public String getRoleName() {
         return roleName.getDesc();
+    }
+
+    public String getRoleCode() {
+        return roleCode.getCode();
     }
 
 }

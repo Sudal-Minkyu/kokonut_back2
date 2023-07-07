@@ -15,10 +15,12 @@ public class KokonutSearchDto {
 
     private int limitNum; // 페이징갯수
 
-    private List<String> searchTables; // 조회하는 테이블번호
+//    private List<String> searchTables; // 조회하는 테이블번호
 
     private List<String> searchCodes; // 조회할 컬럼 고유코드
 
     private List<String> searchTexts; // 조회할 텍스트
+
+    private List<String> searchTypes; // 검색 타입(AND, OR)조건 - 최대4개
 
 }
