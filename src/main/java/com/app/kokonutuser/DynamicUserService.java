@@ -2006,9 +2006,9 @@ public class DynamicUserService {
 
 	}
 
-	// 개인정보 검색(두번째 신버전)
+	// 개인정보 검색(신버전)
 	public ResponseEntity<Map<String, Object>> privacyUserSearch(KokonutSearchDto kokonutSearchDto, JwtFilterDto jwtFilterDto) throws Exception {
-		log.info("privacyUserSearch 두번째 신버전 호출");
+		log.info("privacyUserSearch 신버전 호출");
 
 		AjaxResponse res = new AjaxResponse();
 		HashMap<String, Object> data = new HashMap<>();
@@ -2064,6 +2064,7 @@ public class DynamicUserService {
 
 		List<String> headerNames = new ArrayList<>(); // 해더 as 이름리스트
 		List<String> securityWhether = new ArrayList<>(); // 암호화여부
+		List<String> securityName = new ArrayList<>(); // 암호화된 데이터 이름리스트
 
 		boolean isWhereQueryNotEmpty = false; // where조건 변수
 
@@ -2071,8 +2072,8 @@ public class DynamicUserService {
 		int dchCount = 0; // 복호화 카운팅
 
 		AwsKmsResultDto awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(cpCode);
-		log.info("DataKey : "+awsKmsResultDto.getDataKey());
-		log.info("IV : "+awsKmsResultDto.getIvKey());
+//		log.info("DataKey : "+awsKmsResultDto.getDataKey());
+//		log.info("IV : "+awsKmsResultDto.getIvKey());
 //		AESGCMcrypto.encrypt(value.getBytes(StandardCharsets.UTF_8), awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey()));
 //		AESGCMcrypto.decrypt(testData, awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey();
 
@@ -2113,38 +2114,77 @@ public class DynamicUserService {
 
 						if(companyTableColumnInfoCheck.getCtciSecuriy().equals("1")) {
 
-							if(value.length() > 1) {
-								// 암호화항목의 문자열길이가 "1" 이상일 경우 정확한 암호화검색으로 인식함
-								// 그 이하일 경우 맨앞과 뒤의 값을 비교하여 찾는다.
-								if(!companyTableColumnInfoCheck.getCtciDesignation().equals("휴대전화번호")) {
-
-									if(companyTableColumnInfoCheck.getCtciDesignation().equals("이름")) {
-										if (value.length() == 2) {
-											value = value.charAt(0) + COLUMN_SEP_TYPE + AESGCMcrypto.encrypt(value.substring(1,2).getBytes(StandardCharsets.UTF_8),
-													awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey()));
-										} else {
-											value = value.charAt(0) + COLUMN_SEP_TYPE + AESGCMcrypto.encrypt(value.substring(1,value.length() - 1).getBytes(StandardCharsets.UTF_8),
-													awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey())) + COLUMN_SEP_TYPE +value.substring(value.length() - 1);
-										}
-									} else if(companyTableColumnInfoCheck.getCtciDesignation().equals("이메일주소")) {
-										String[] emailAddress = value.split("@");
-										if(emailAddress.length != 2) {
-											log.error("이메일주소 형식과 맞지 않습니다. 다시 한번 확인해주시길 바랍니다. 보내신 이메일주소 : " + value);
-											return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_09.getCode(),
-													ResponseErrorCode.ERROR_CODE_09.getDesc() + " 보내신 이메일주소 : " + value));
-										} else {
-											value = AESGCMcrypto.encrypt(emailAddress[0].getBytes(StandardCharsets.UTF_8),
-													awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey())) +COLUMN_SEP_TYPE+"@" +emailAddress[1];
-										}
-									}else {
-										value = AESGCMcrypto.encrypt(value.getBytes(StandardCharsets.UTF_8),
+							// 1. 검색항목이 "이름" 일 경우
+							if(companyTableColumnInfoCheck.getCtciDesignation().equals("이름")) {
+								if(value.length() > 1) {
+									if (value.length() == 2) {
+										value = value.charAt(0) + COLUMN_SEP_TYPE + AESGCMcrypto.encrypt(value.substring(1,2).getBytes(StandardCharsets.UTF_8),
 												awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey()));
+									} else {
+										value = value.charAt(0) + COLUMN_SEP_TYPE + AESGCMcrypto.encrypt(value.substring(1,value.length() - 1).getBytes(StandardCharsets.UTF_8),
+												awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey())) + COLUMN_SEP_TYPE +value.substring(value.length() - 1);
+									}
+
+									echCount++;
+								}
+							}
+
+							// 2. 검색항목이 "이메일주소" 일 경우
+							else if(companyTableColumnInfoCheck.getCtciDesignation().equals("이메일주소")) {
+								String[] valueSplit = value.split("@"); // "@" 단위로 끊음
+
+								// @로 끊었을때 길이가 2이상일때 이메일을 풀로 검색했다는걸로 인지함
+								// 그게아니면 도메인을 통한 검색으로 인지함
+								if(valueSplit.length >= 2) {
+									boolean emailCheck = Utils.isValidEmail(value);
+									if(emailCheck) {
+										value = AESGCMcrypto.encrypt(valueSplit[0].getBytes(StandardCharsets.UTF_8),
+												awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey())) +COLUMN_SEP_TYPE+"@" +valueSplit[1];
+
+										echCount++;
+									} else {
+										log.error("이메일주소 형식과 맞지 않습니다. 다시 한번 확인해주시길 바랍니다. 보내신 이메일주소 : " + value);
+										return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_09.getCode(),
+												ResponseErrorCode.ERROR_CODE_09.getDesc() + " 보내신 이메일주소 : " + value));
 									}
 								}
+							}
+
+							// 3. 검색항목이 "휴대전화번호" 또는 "연락처" 일 경우
+							else if(companyTableColumnInfoCheck.getCtciDesignation().equals("휴대전화번호") || companyTableColumnInfoCheck.getCtciDesignation().equals("연락처")) {
+								log.info("휴대전화번호 또는 연락처 또는 여권번호 검색 -> 뒷자리 4글자");
+							}
+
+							// 4. 검색항목이 "주민등록번호" 또는 "거소신고번호" 또는 "외국인등록번호" 일 경우
+							else if(companyTableColumnInfoCheck.getCtciDesignation().equals("주민등록번호") || companyTableColumnInfoCheck.getCtciDesignation().equals("거소신고번호")
+									|| companyTableColumnInfoCheck.getCtciDesignation().equals("외국인등록번호") || companyTableColumnInfoCheck.getCtciDesignation().equals("운전면허번호")) {
+								log.info("주민등록번호 또는 거소신고번호 또는 외국인등록번호 검색 -> 앞자리 6글자조회 또는 풀입력");
+								if(value.length() > 6) {
+									value = value.charAt(5) + COLUMN_SEP_TYPE + AESGCMcrypto.encrypt(value.substring(6,value.length() - 1).getBytes(StandardCharsets.UTF_8),
+											awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey()));
+									echCount++;
+								}
+							}
+
+							// 5. 검색항목이 "여권번호" 일 경우
+							else if(companyTableColumnInfoCheck.getCtciDesignation().equals("여권번호")) {
+								log.info("여권번호 검색 -> 앞자리 4글자 또는 풀입력 조회");
+								if(value.length() > 4) {
+									value = value.charAt(3) + COLUMN_SEP_TYPE + AESGCMcrypto.encrypt(value.substring(4,value.length() - 1).getBytes(StandardCharsets.UTF_8),
+											awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey()));
+									echCount++;
+								}
+							}
+
+							else {
+								// 모두 아닐경우 형식없는 암호화항목 또는 커스텀암호화항목으로 인지
+								value = AESGCMcrypto.encrypt(value.getBytes(StandardCharsets.UTF_8),
+										awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey()));
 
 								echCount++;
 							}
 
+							securityName.add(companyTableColumnInfoCheck.getCtciDesignation());
 							securityWhether.add("1");
 						} else {
 							securityWhether.add("0");
@@ -2195,511 +2235,127 @@ public class DynamicUserService {
 
 		}
 
+		// 검색 쿼리호출
+		List<Map<String, Object>> privacyList = dynamicUserRepositoryCustom.privacyListPagedData(resultQuery +" LIMIT "+kokonutSearchDto.getLimitNum()+" OFFSET "+offset);
+		log.info("privacyList : "+privacyList);
+
+		// 검색 쿼리의 총합호출
+		int totalCount = dynamicUserRepositoryCustom.privacyListTotal("SELECT COUNT(*) FROM ("+ resultQuery +") as totalCount");
+		log.info("totalCount : "+totalCount);
+
+		log.info("headerNames : "+headerNames); // 상단헤더 내용들
+
+		for(Map<String, Object> map : privacyList) {
+
+			log.info("수정전 map : "+map);
+			for(int i=0; i<headerNames.size(); i++) {
+
+				int trigger = 0;
+				log.info("headerNames.get(i) : "+headerNames.get(i));
+
+				Object key = map.get(headerNames.get(i));
+				if(key != null) {
+					if(!String.valueOf(key).equals("없음")) { // 벨류값이 Null(없음)일 경우 제외
+						log.info("암호화 여부 체크시작");
+
+						String keyValue = String.valueOf(key);
+						log.info("데이터베이스 실제값 keyValue : "+keyValue);
+
+						if(securityWhether.get(i).equals("1")) {
+
+							log.info("암호화항목명 : "+securityName.get(i));
+
+							String[] value = String.valueOf(key).split("\\|\\|__\\|\\|");
+							log.info("구분자단위로 끊은 값 value : "+ Arrays.toString(value));
+
+							String securityResultValue = null; // 복호화된 데이터의 마스킹처리
+							String decryptValue;
+
+							// "이름" 항목을 조회시 3자리이상은 무조건 맨앞+'*'+맨뒤로 표시
+							if(securityName.get(i).equals("이름")) {
+								if (value.length == 1) {
+									// 이름이 1글자일 경우
+									securityResultValue = "*";
+								}
+								else if (value.length == 2) {
+									// 이름이 2글자일경우
+									securityResultValue = value[0] + "*";
+								} else {
+									// 그 외 모든이름 공통
+									securityResultValue = value[0]+"*"+value[2];
+								}
+								trigger = 1;
+							}
+
+							// "이메일주소" 항목 조회 아이디(3분의2형태만 보여줌)@도메인
+							if(securityName.get(i).equals("이메일주소")) {
+								decryptValue = AESGCMcrypto.decrypt(value[0], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
+
+								int firstEmailLen = decryptValue.length();
+								int firstEmailLenVal = (firstEmailLen*2)/3;
+
+								securityResultValue = decryptValue.substring(0, firstEmailLenVal) + "*".repeat(Math.max(0, firstEmailLen - firstEmailLenVal + 1))+"@"+value[1];
+								dchCount++;
+								trigger = 1;
+							}
+
+							// "휴대전화번호" 또는 "연락처" 항목 조회
+							if(securityName.get(i).equals("휴대전화번호") || securityName.get(i).equals("연락처")) {
+								securityResultValue = value[0]+"****"+value[2];
+								trigger = 1;
+							}
+
+							// "주민등록번호" 또는 "거소신고번호" 또는 "외국인등록번호" 항목 조회
+							if(securityName.get(i).equals("주민등록번호") || securityName.get(i).equals("거소신고번호") || securityName.get(i).equals("외국인등록번호")) {
+								securityResultValue = value[0]+"-*******";
+								trigger = 1;
+							}
+
+							// "여권번호" 또는 "운전면허번호" 항목 조회
+							if(securityName.get(i).equals("여권번호") || securityName.get(i).equals("운전면허번호")) {
+								securityResultValue = value[0]+"******";
+								trigger = 1;
+							}
+
+							if(trigger == 0) {
+								// 전체암호화 일 경우
+								log.info("구분자가 없는 암호화");
+								decryptValue = AESGCMcrypto.decrypt(value[0], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
+								securityResultValue = decryptValue.charAt(0) + Utils.starsForString(decryptValue) + decryptValue.substring(decryptValue.length() - 1);
+							}
+
+							log.info("value : "+ Arrays.toString(value));
+							log.info("securityResultValue : "+ securityResultValue);
+
+							map.put(headerNames.get(i), securityResultValue);
+						}
+					}
+				}
+			}
+		}
+
+		for(Map<String, Object> map : privacyList) {
+			log.info("수정된 map : "+map);
+		}
+
+		data.put("privacyList", privacyList);
+		data.put("totalCount", totalCount);
+
+		// 개인정보 조회로그 저장
+		privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_04, 1, CommonUtil.clientIp(), email);
+
+		// 암호화 횟수 저장
+		if(echCount > 0) {
+			encrypCountHistoryService.encrypCountHistorySave(cpCode, echCount);
+		}
+
+		// 복호화 횟수 저장
+		if(dchCount > 0) {
+			decrypCountHistoryService.decrypCountHistorySave(cpCode, dchCount);
+		}
+
 		return ResponseEntity.ok(res.success(data));
 	}
-
-
-////			Map<String, Integer> nameCountMap = new HashMap<>();
-//
-////			List<String> allKeys = new ArrayList<>(result.keySet());
-//			int resultSize = allKeys.size();
-//			for (int currentKeyIndex = 0; currentKeyIndex < resultSize; currentKeyIndex++) {
-//				String key = allKeys.get(currentKeyIndex);
-//				log.info("테이블 일련번호 : " + key);
-//
-//				String asName = Utils.getAlphabetStr(5);
-//				List<Map<String, String>> list = result.get(key);
-//				log.info("list : " + list);
-//
-//				int size = list.size();
-//				joinQuery.append("LEFT JOIN kokonut20").append(key).append(" ").append(asName).append(" ON ").append("kokonut.kokonut_IDX = ").append(asName).append(".kokonut_IDX ");
-//
-//				for (int i = 0; i < size; i++) {
-//					Map<String, String> map = list.get(i);
-//					log.info("map.keySet() : " + map.keySet());
-//
-//					for (String code : map.keySet()) {
-//						CompanyTableColumnInfoCheck companyTableColumnInfoCheck = companyTableColumnInfoRepository.findByCheck("kokonut20"+key, code);
-//						if(companyTableColumnInfoCheck == null) {
-//							log.error("존재하지 않은 고유코드 입니다. 고유코드를 확인 해주세요. 고유코드 : "+code);
-//							return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_04.getCode(),ResponseErrorCode.ERROR_CODE_04.getDesc()+" 고유코드 : "+code));
-//						} else {
-//							String designation = companyTableColumnInfoCheck.getCtDesignation()+HEADER_SEP_TYPE+companyTableColumnInfoCheck.getCtciDesignation();
-////							Integer count = nameCountMap.get(designation);
-////							if (count == null) {
-////								count = 0;
-////							}
-////							nameCountMap.put(designation, count + 1);
-//
-//							// 구분자 : HEADER_SEP_TYPE
-//							String uniqueDesignation = designation + HEADER_SEP_TYPE + code;
-//
-//							String value = map.get(code);
-//							if(companyTableColumnInfoCheck.getCtciSecuriy().equals("1")) {
-//								if(!companyTableColumnInfoCheck.getCtciDesignation().equals("휴대전화번호")) {
-//
-//									if(companyTableColumnInfoCheck.getCtciDesignation().equals("이름")) {
-//										if (value.length() == 2) {
-//											value = value.charAt(0) + "-" + AESGCMcrypto.encrypt(value.substring(1,2).getBytes(StandardCharsets.UTF_8),
-//													awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey()));
-//										} else {
-//											value = value.charAt(0) + "-" + AESGCMcrypto.encrypt(value.substring(1,value.length() - 1).getBytes(StandardCharsets.UTF_8),
-//													awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey())) + "-" +value.substring(value.length() - 1);
-//										}
-//									} else if(companyTableColumnInfoCheck.getCtciDesignation().equals("이메일주소")) {
-//										String[] emailAddress = value.split("@");
-//										if(emailAddress.length != 2) {
-//											log.error("이메일주소 형식과 맞지 않습니다. 다시 한번 확인해주시길 바랍니다. 보내신 이메일주소 : " + value);
-//											return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_09.getCode(),
-//													ResponseErrorCode.ERROR_CODE_09.getDesc() + " 보내신 이메일주소 : " + value));
-//										} else {
-//											value = AESGCMcrypto.encrypt(emailAddress[0].getBytes(StandardCharsets.UTF_8),
-//													awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey())) + "-@" +emailAddress[1];
-//										}
-//									}else {
-//										value = AESGCMcrypto.encrypt(value.getBytes(StandardCharsets.UTF_8),
-//												awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey()));
-//									}
-//								}
-//								map.put(code, value);
-//								securityWhether.add("1");
-//							} else {
-//								securityWhether.add("0");
-//							}
-//
-//							headerNames.add(uniqueDesignation);
-//
-//							boolean isLastKey = currentKeyIndex == resultSize - 1;
-//							boolean isLastMapInList = i == size - 1;
-//
-//							String as = ", '없음') as ";
-//							String[] codeName = code.split("_");
-//
-//							selectQuery.append("COALESCE(");
-//							if(!codeName[0].equals("1")) {
-//								as = " SEPARATOR '"+COLUMN_SEP_TYPE+"'), '없음')  as ";
-//								selectQuery.append("GROUP_CONCAT(");
-//							}
-//
-//							if (isLastKey && isLastMapInList) {
-//								selectQuery.append(asName).append(".").append(companyTableColumnInfoCheck.getCtciName()).append(as).append("'").append(uniqueDesignation).append("'").append(" ");
-//								whereQuery.append(asName).append(".").append(companyTableColumnInfoCheck.getCtciName()).append(" LIKE '%").append(value).append("%' ");
-//							} else {
-//								selectQuery.append(asName).append(".").append(companyTableColumnInfoCheck.getCtciName()).append(as).append("'").append(uniqueDesignation).append("'").append(", ");
-//								whereQuery.append(asName).append(".").append(companyTableColumnInfoCheck.getCtciName()).append(" LIKE '%").append(value).append("%' AND ");
-//							}
-//						}
-//						log.info("companyTableColumnInfoCheck : "+companyTableColumnInfoCheck);
-//						log.info("고유코드: " + code + ", 텍스트: " + map.get(code));
-//					}
-//				}
-//			}
-//
-//			log.info("selectQuery : "+selectQuery);
-//			log.info("joinQuery : "+joinQuery);
-//			log.info("whereQuery : "+whereQuery);
-//
-//			resultQuery.append(selectQuery).append("FROM ").append(cpCode).append("_1 as kokonut ").append(joinQuery).append(whereQuery);
-//
-//			resultQuery.append("GROUP BY kokonut.kokonut_IDX");
-//			log.info("resultQuery : "+resultQuery);
-//		}
-//
-//		List<Map<String, Object>> privacyList = dynamicUserRepositoryCustom.privacyListPagedData(resultQuery +" LIMIT "+kokonutSearchDto.getLimitNum()+" OFFSET "+offset);
-//		log.info("privacyList : "+privacyList);
-//		int totalCount = dynamicUserRepositoryCustom.privacyListTotal("SELECT COUNT(*) FROM ("+ resultQuery +") as totalCount");
-//		log.info("totalCount : "+totalCount);
-//
-//
-//		log.info("headerNames : "+headerNames);
-//		for(Map<String, Object> map : privacyList) {
-//
-//			log.info("수정전 map : "+map);
-//			for(int i=0; i<headerNames.size(); i++) {
-//				log.info("headerNames.get(i) : "+headerNames.get(i));
-//
-//				Object key = map.get(headerNames.get(i));
-//				if(key != null) {
-//					if(!String.valueOf(key).equals("없음")) { // 벨류값이 Null(없음)일 경우 제외
-//						log.info("암호화 여부 체크시작");
-//
-//						// 일대다일 경우 (||__||)의 대한 데이터 처리하기
-//						String keyValue = String.valueOf(key);
-//						String[] manyColumn = keyValue.split("\\|\\|__\\|\\|");
-//						int trigger = 0;
-//
-//						if(manyColumn.length >= 2) {
-//							trigger = 1;
-//							keyValue = manyColumn[0];
-//						}
-//
-//						if(securityWhether.get(i).equals("1")) {
-//							String[] value = keyValue.split("-");
-//							String securityResultValue = null; // 복호화된 데이터의 마스킹처리
-//							String decryptValue;
-//							if(value.length >= 2) {
-//								log.info("'-' 구분자로 들어간 암호화");
-//								if(String.valueOf(headerNames.get(i)).contains("%%__%%휴대전화번호%%__%%")) {
-//									log.info("휴대전화번호 암호화");
-//									decryptValue = AESGCMcrypto.decrypt(value[1], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
-//									securityResultValue = value[0] + Utils.starsForString(decryptValue) + value[2];
-//								}
-////								else {
-////									// 이메일주소 암호화 일 경우
-////									decryptValue = AESGCMcrypto.decrypt(value[0], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
-////									securityResultValue = decryptValue.charAt(0) + Utils.starsForString(decryptValue).substring(2)  + decryptValue.substring(decryptValue.length() - 1)+value[1];
-////								}
-//							} else {
-//								if(String.valueOf(headerNames.get(i)).contains("%%__%%이름%%__%%")) {
-//									decryptValue = AESGCMcrypto.decrypt(value[0], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
-//									if(decryptValue.length() == 2) {
-//										securityResultValue = decryptValue.charAt(0) + "*";
-//									} else {
-//										securityResultValue = decryptValue.charAt(0) + Utils.starsForString(decryptValue).substring(2) + decryptValue.substring(decryptValue.length() - 1);
-//									}
-//								} else {
-//									// 전체암호화 일 경우
-//									log.info("구분자가 없는 암호화");
-//									decryptValue = AESGCMcrypto.decrypt(value[0], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
-//									securityResultValue = decryptValue.charAt(0) + Utils.starsForString(decryptValue) + decryptValue.substring(decryptValue.length() - 1);
-//								}
-//							}
-//							log.info("value : "+ Arrays.toString(value));
-//							log.info("securityResultValue : "+ securityResultValue);
-//							if(trigger == 1) {
-//								securityResultValue = securityResultValue+" 외("+(manyColumn.length - 1)+")건";
-//							}
-//							map.put(headerNames.get(i), securityResultValue);
-//						}
-//						else {
-//							if(trigger == 1) {
-//								map.put(headerNames.get(i), keyValue+" 외("+(manyColumn.length - 1)+")건");
-//							} else {
-//								map.put(headerNames.get(i), keyValue);
-//							}
-//						}
-//						dchCount++;
-//					}
-//				}
-//			}
-//		}
-//
-//		for(Map<String, Object> map : privacyList) {
-//			log.info("수정된 map : "+map);
-//		}
-//
-//		data.put("privacyList", privacyList);
-//		data.put("totalCount", totalCount);
-
-//		// 개인정보 조회로그 저장
-//		privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_04, 1, CommonUtil.clientIp(), email);
-//
-//		// 복호화 횟수 저장
-//		if(dchCount > 0) {
-//			decrypCountHistoryService.decrypCountHistorySave(cpCode, dchCount);
-//		}
-
-//		return ResponseEntity.ok(res.success(data));
-//	}
-
-//	// 개인정보 검색(구버전)
-//	public ResponseEntity<Map<String, Object>> privacyUserSearch2(KokonutSearchDto kokonutSearchDto, JwtFilterDto jwtFilterDto) throws Exception {
-//		log.info("privacyUserSearch 호출");
-//
-//		AjaxResponse res = new AjaxResponse();
-//		HashMap<String, Object> data = new HashMap<>();
-//
-//		List<String> searchTables = kokonutSearchDto.getSearchTables();
-//		List<String> searchCodes = kokonutSearchDto.getSearchCodes();
-//		List<String> searchTexts = kokonutSearchDto.getSearchTexts();
-//		List<String> searchTypes = kokonutSearchDto.getSearchTypes();
-//		searchTypes.add("");
-//
-//		int offset = (kokonutSearchDto.getPageNum() - 1) * 10;
-//
-//		if(searchTables.size() == 0 || searchCodes.size() == 0 || searchTexts.size() == 0) {
-//			log.error("조회하실 파라메터가 존재하지 않습니다. 보내시는 파라메터 값을 추가해주세요.");
-//			return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_08.getCode(),ResponseErrorCode.ERROR_CODE_08.getDesc()));
-//		}
-//
-//		log.info("페이지번호 : "+kokonutSearchDto.getPageNum());
-//		log.info("searchTables : "+searchTables);
-//		log.info("searchCodes : "+searchCodes);
-//		log.info("searchTexts : "+searchTexts);
-//		log.info("searchTypes : "+searchTypes);
-//
-//		// 코드중복 검사
-//		Set<String> duplicates = searchCodes.stream()
-//				.filter(i -> Collections.frequency(searchCodes, i) > 1)
-//				.collect(Collectors.toSet());
-//
-//		if(!duplicates.isEmpty()) {
-//			log.error("중복되는 고유코드가 존재합니다. 중복되지 않도록 고유코드를 보내주세요. 고유코드 : "+duplicates);
-//			return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_06.getCode(),ResponseErrorCode.ERROR_CODE_06.getDesc()+" 고유코드 : "+duplicates));
-//		}
-//
-//		Map<String, List<Map<String, String>>> result = new HashMap<>();
-//
-//		String email = jwtFilterDto.getEmail();
-//		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
-//		long adminId = adminCompanyInfoDto.getAdminId();
-//		String cpCode = adminCompanyInfoDto.getCompanyCode();
-//
-//		for (int i = 0; i < searchTables.size(); i++) {
-//
-//			String table = searchTables.get(i).split("_")[0] + "_" + searchCodes.get(i).split("_")[0];
-//			String code = searchCodes.get(i);
-//			String text = searchTexts.get(i);
-//
-//			Map<String, String> codeTextMap = new HashMap<>();
-//			codeTextMap.put(code, text);
-//
-//			if (!result.containsKey(table)) {
-//				result.put(table, new ArrayList<>());
-//			}
-//
-//			result.get(table).add(codeTextMap);
-//		}
-//
-//		log.info("정렬 result : "+result);
-//
-//		StringBuilder resultQuery = new StringBuilder();
-//
-//		StringBuilder selectQuery = new StringBuilder(); // 셀렉트 쿼리문
-//		StringBuilder joinQuery = new StringBuilder(); // 조인 쿼리문
-//		StringBuilder whereQuery = new StringBuilder(); // 조건 쿼리문
-//
-//		List<String> headerNames = new ArrayList<>(); // 해더 as 이름리스트
-//		List<String> securityWhether = new ArrayList<>(); // 암호화여부
-//
-//		int dchCount = 0; // 복호화 카운팅
-//
-//		AwsKmsResultDto awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(cpCode);
-//		log.info("DataKey : "+awsKmsResultDto.getDataKey());
-//		log.info("IV : "+awsKmsResultDto.getIvKey());
-////		AESGCMcrypto.encrypt(value.getBytes(StandardCharsets.UTF_8), awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey()));
-////		AESGCMcrypto.decrypt(testData, awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey();
-//
-//		if(searchTables.size() != searchCodes.size() && searchCodes.size() != searchTexts.size()) {
-//			log.error("조회하고자 하는 파라메터 값이 일정하지 않습니다. 보내시는 파라메터 값을 다시 한번 확인해주세요.");
-//			return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_07.getCode(),ResponseErrorCode.ERROR_CODE_07.getDesc()));
-//		} else {
-//
-//			// 쿼리 기본셋팅
-//			resultQuery.append("SELECT ");
-//
-//			// 셀렉트 기본셋팅
-//			selectQuery.append(
-//					"kokonut.kokonut_IDX  as kokonut_IDX, " +
-////							"DATE_FORMAT(kokonut.kokonut_REGISTER_DATE, '%Y-%m-%d %H시 %i분') as 회원가입일시, " +
-//							"DATE_FORMAT(kokonut.kokonut_REGISTER_DATE, '%Y-%m-%d %H시') as 회원가입일시, " +
-//							"COALESCE(DATE_FORMAT(kokonut.kokonut_LAST_LOGIN_DATE, '%Y-%m-%d %H시'), '없음') as 마지막로그인일시, ");
-//
-//			whereQuery.append("WHERE ");
-//
-////			Map<String, Integer> nameCountMap = new HashMap<>();
-//
-//			List<String> allKeys = new ArrayList<>(result.keySet());
-//			int resultSize = allKeys.size();
-//			for (int currentKeyIndex = 0; currentKeyIndex < resultSize; currentKeyIndex++) {
-//				String key = allKeys.get(currentKeyIndex);
-//				log.info("테이블 일련번호 : " + key);
-//
-//				String asName = Utils.getAlphabetStr(5);
-//				List<Map<String, String>> list = result.get(key);
-//				log.info("list : " + list);
-//
-//				int size = list.size();
-//				joinQuery.append("LEFT JOIN kokonut20").append(key).append(" ").append(asName).append(" ON ").append("kokonut.kokonut_IDX = ").append(asName).append(".kokonut_IDX ");
-//
-//				for (int i = 0; i < size; i++) {
-//					Map<String, String> map = list.get(i);
-//					log.info("map.keySet() : " + map.keySet());
-//
-//					for (String code : map.keySet()) {
-//						CompanyTableColumnInfoCheck companyTableColumnInfoCheck = companyTableColumnInfoRepository.findByCheck("kokonut20"+key, code);
-//						if(companyTableColumnInfoCheck == null) {
-//							log.error("존재하지 않은 고유코드 입니다. 고유코드를 확인 해주세요. 고유코드 : "+code);
-//							return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_04.getCode(),ResponseErrorCode.ERROR_CODE_04.getDesc()+" 고유코드 : "+code));
-//						} else {
-//							String designation = companyTableColumnInfoCheck.getCtDesignation()+HEADER_SEP_TYPE+companyTableColumnInfoCheck.getCtciDesignation();
-////							Integer count = nameCountMap.get(designation);
-////							if (count == null) {
-////								count = 0;
-////							}
-////							nameCountMap.put(designation, count + 1);
-//
-//							// 구분자 : HEADER_SEP_TYPE
-//							String uniqueDesignation = designation + HEADER_SEP_TYPE + code;
-//
-//							String value = map.get(code);
-//							if(companyTableColumnInfoCheck.getCtciSecuriy().equals("1")) {
-//								if(!companyTableColumnInfoCheck.getCtciDesignation().equals("휴대전화번호")) {
-//
-////									if(companyTableColumnInfoCheck.getCtciDesignation().equals("이름")) {
-////										if (value.length() == 2) {
-////											value = value.charAt(0) + "-" + AESGCMcrypto.encrypt(value.substring(1,2).getBytes(StandardCharsets.UTF_8),
-////													awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey()));
-////										} else {
-////											value = value.charAt(0) + "-" + AESGCMcrypto.encrypt(value.substring(1,value.length() - 1).getBytes(StandardCharsets.UTF_8),
-////													awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey())) + "-" +value.substring(value.length() - 1);
-////										}
-////									} else if(companyTableColumnInfoCheck.getCtciDesignation().equals("이메일주소")) {
-////										String[] emailAddress = value.split("@");
-////										if(emailAddress.length != 2) {
-////											log.error("이메일주소 형식과 맞지 않습니다. 다시 한번 확인해주시길 바랍니다. 보내신 이메일주소 : " + value);
-////											return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_09.getCode(),
-////													ResponseErrorCode.ERROR_CODE_09.getDesc() + " 보내신 이메일주소 : " + value));
-////										} else {
-////											value = AESGCMcrypto.encrypt(emailAddress[0].getBytes(StandardCharsets.UTF_8),
-////													awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey())) + "-@" +emailAddress[1];
-////										}
-////									}else {
-//									value = AESGCMcrypto.encrypt(value.getBytes(StandardCharsets.UTF_8),
-//											awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey()));
-////									}
-//								}
-//								map.put(code, value);
-//								securityWhether.add("1");
-//							} else {
-//								securityWhether.add("0");
-//							}
-//
-//							headerNames.add(uniqueDesignation);
-//
-//							boolean isLastKey = currentKeyIndex == resultSize - 1;
-//							boolean isLastMapInList = i == size - 1;
-//
-//							String as = ", '없음') as ";
-//							String[] codeName = code.split("_");
-//
-//							selectQuery.append("COALESCE(");
-//							if(!codeName[0].equals("1")) {
-//								as = " SEPARATOR '"+COLUMN_SEP_TYPE+"'), '없음')  as ";
-//								selectQuery.append("GROUP_CONCAT(");
-//							}
-//
-//							if (isLastKey && isLastMapInList) {
-//								selectQuery.append(asName).append(".").append(companyTableColumnInfoCheck.getCtciName()).append(as).append("'").append(uniqueDesignation).append("'").append(" ");
-//								whereQuery.append(asName).append(".").append(companyTableColumnInfoCheck.getCtciName()).append(" LIKE '%").append(value).append("%' ");
-//							} else {
-//								selectQuery.append(asName).append(".").append(companyTableColumnInfoCheck.getCtciName()).append(as).append("'").append(uniqueDesignation).append("'").append(", ");
-//								whereQuery.append(asName).append(".").append(companyTableColumnInfoCheck.getCtciName()).append(" LIKE '%").append(value).append("%' AND ");
-//							}
-//						}
-//						log.info("companyTableColumnInfoCheck : "+companyTableColumnInfoCheck);
-//						log.info("고유코드: " + code + ", 텍스트: " + map.get(code));
-//					}
-//				}
-//			}
-//
-//			log.info("selectQuery : "+selectQuery);
-//			log.info("joinQuery : "+joinQuery);
-//			log.info("whereQuery : "+whereQuery);
-//
-//			resultQuery.append(selectQuery).append("FROM ").append(cpCode).append("_1 as kokonut ").append(joinQuery).append(whereQuery);
-//
-//			resultQuery.append("GROUP BY kokonut.kokonut_IDX");
-//			log.info("resultQuery : "+resultQuery);
-//		}
-//
-//		List<Map<String, Object>> privacyList = dynamicUserRepositoryCustom.privacyListPagedData(resultQuery +" LIMIT "+kokonutSearchDto.getLimitNum()+" OFFSET "+offset);
-//		log.info("privacyList : "+privacyList);
-//		int totalCount = dynamicUserRepositoryCustom.privacyListTotal("SELECT COUNT(*) FROM ("+ resultQuery +") as totalCount");
-//		log.info("totalCount : "+totalCount);
-//
-//
-//		log.info("headerNames : "+headerNames);
-//		for(Map<String, Object> map : privacyList) {
-//
-//			log.info("수정전 map : "+map);
-//			for(int i=0; i<headerNames.size(); i++) {
-//				log.info("headerNames.get(i) : "+headerNames.get(i));
-//
-//				Object key = map.get(headerNames.get(i));
-//				if(key != null) {
-//					if(!String.valueOf(key).equals("없음")) { // 벨류값이 Null(없음)일 경우 제외
-//						log.info("암호화 여부 체크시작");
-//
-//						// 일대다일 경우 (||__||)의 대한 데이터 처리하기
-//						String keyValue = String.valueOf(key);
-//						String[] manyColumn = keyValue.split("\\|\\|__\\|\\|");
-//						int trigger = 0;
-//
-//						if(manyColumn.length >= 2) {
-//							trigger = 1;
-//							keyValue = manyColumn[0];
-//						}
-//
-//						if(securityWhether.get(i).equals("1")) {
-//							String[] value = keyValue.split("-");
-//							String securityResultValue = null; // 복호화된 데이터의 마스킹처리
-//							String decryptValue;
-//							if(value.length >= 2) {
-//								log.info("'-' 구분자로 들어간 암호화");
-//								if(String.valueOf(headerNames.get(i)).contains("%%__%%휴대전화번호%%__%%")) {
-//									log.info("휴대전화번호 암호화");
-//									decryptValue = AESGCMcrypto.decrypt(value[1], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
-//									securityResultValue = value[0] + Utils.starsForString(decryptValue) + value[2];
-//								}
-////								else {
-////									// 이메일주소 암호화 일 경우
-////									decryptValue = AESGCMcrypto.decrypt(value[0], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
-////									securityResultValue = decryptValue.charAt(0) + Utils.starsForString(decryptValue).substring(2)  + decryptValue.substring(decryptValue.length() - 1)+value[1];
-////								}
-//							} else {
-//								if(String.valueOf(headerNames.get(i)).contains("%%__%%이름%%__%%")) {
-//									decryptValue = AESGCMcrypto.decrypt(value[0], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
-//									if(decryptValue.length() == 2) {
-//										securityResultValue = decryptValue.charAt(0) + "*";
-//									} else {
-//										securityResultValue = decryptValue.charAt(0) + Utils.starsForString(decryptValue).substring(2) + decryptValue.substring(decryptValue.length() - 1);
-//									}
-//								} else {
-//									// 전체암호화 일 경우
-//									log.info("구분자가 없는 암호화");
-//									decryptValue = AESGCMcrypto.decrypt(value[0], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
-//									securityResultValue = decryptValue.charAt(0) + Utils.starsForString(decryptValue) + decryptValue.substring(decryptValue.length() - 1);
-//								}
-//							}
-//							log.info("value : "+ Arrays.toString(value));
-//							log.info("securityResultValue : "+ securityResultValue);
-//							if(trigger == 1) {
-//								securityResultValue = securityResultValue+" 외("+(manyColumn.length - 1)+")건";
-//							}
-//							map.put(headerNames.get(i), securityResultValue);
-//						}
-//						else {
-//							if(trigger == 1) {
-//								map.put(headerNames.get(i), keyValue+" 외("+(manyColumn.length - 1)+")건");
-//							} else {
-//								map.put(headerNames.get(i), keyValue);
-//							}
-//						}
-//						dchCount++;
-//					}
-//				}
-//			}
-//		}
-//
-//		for(Map<String, Object> map : privacyList) {
-//			log.info("수정된 map : "+map);
-//		}
-//
-//		data.put("privacyList", privacyList);
-//		data.put("totalCount", totalCount);
-//
-//		// 개인정보 조회로그 저장
-//		privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_04, 1, CommonUtil.clientIp(), email);
-//
-//		// 복호화 횟수 저장
-//		if(dchCount > 0) {
-//			decrypCountHistoryService.decrypCountHistorySave(cpCode, dchCount);
-//		}
-//
-//		return ResponseEntity.ok(res.success(data));
-//	}
-
 
 	// 개인정보 열람
 	public ResponseEntity<Map<String, Object>> privacyUserOpen(String idx, JwtFilterDto jwtFilterDto) throws Exception {
