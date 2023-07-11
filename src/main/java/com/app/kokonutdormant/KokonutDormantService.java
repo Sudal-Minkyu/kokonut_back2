@@ -89,7 +89,7 @@ public class KokonutDormantService {
 
 	// 휴면테이블의 회원 한명 조회
 	public List<KokonutRemoveInfoDto> selectDormantDataByIdx(String companyCode, Integer idx) {
-		log.info("selectUserListCount 호출");
+		log.info("selectDormantDataByIdx 호출");
 		String searchQuery = "SELECT IDX, ID FROM `" + companyCode + "` WHERE `IDX`="+idx;
 //		log.info("searchQuery : "+searchQuery);
 		return dynamicDormantRepositoryCustom.selectDormantDataByIdx(searchQuery);

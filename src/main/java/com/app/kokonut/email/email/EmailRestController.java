@@ -58,6 +58,19 @@ public class EmailRestController {
         return emailService.sendEmailDetail(emId);
     }
 
+    @ApiOperation(value="발송할 이메일 리스트호출", notes="")
+    @GetMapping("/sendEmailList")
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    public ResponseEntity<Map<String,Object>> sendEmailList() throws Exception {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return emailService.sendEmailList(jwtFilterDto);
+    }
+
+
+
+
+
+
 //    @ApiOperation(value="이메일 발송 대상 조회", notes="" +
 //            "1. 토큰과 페이지 처리를 위한 값을 받는다." +
 //            "2. 메일 발송 대상 목록을 조회한다.")

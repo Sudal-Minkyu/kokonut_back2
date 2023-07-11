@@ -20,4 +20,6 @@ public interface CompanyTableRepository extends JpaRepository<CompanyTable, Long
 
     Optional<CompanyTable> findCompanyTableByCpCodeAndCtDesignation(String cpCode, String ctDesignation);
 
+    Optional<CompanyTable> findCompanyTableByCpCodeAndCtName(String cpCode, String ctName);
+
 }

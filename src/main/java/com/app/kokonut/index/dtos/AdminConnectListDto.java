@@ -16,6 +16,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AdminConnectListDto {
 
+    private String  roleCode; // 권한코드
+
     private String connectState; // 0 : "미접속중", 1 : "접속중"
 
     private String  roleName; // 권한명

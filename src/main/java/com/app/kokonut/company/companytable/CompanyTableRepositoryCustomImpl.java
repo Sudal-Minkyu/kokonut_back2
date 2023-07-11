@@ -2,7 +2,6 @@ package com.app.kokonut.company.companytable;
 
 import com.app.kokonut.company.companytable.dtos.CompanyPrivacyTableListDto;
 import com.app.kokonut.company.companytable.dtos.CompanyTableListDto;
-import com.app.kokonut.index.dtos.EncrypCountHistoryCountDto;
 import com.app.kokonut.index.dtos.PrivacyItemCountDto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPQLQuery;
@@ -59,7 +58,8 @@ public class CompanyTableRepositoryCustomImpl extends QuerydslRepositorySupport 
         Query query = em.createNativeQuery(sb.toString());
         query.setParameter(1, cpCode);
 
-        return jpaResultMapper.uniqueResult(query, PrivacyItemCountDto.class);
+        List<PrivacyItemCountDto> results = jpaResultMapper.list(query, PrivacyItemCountDto.class);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override

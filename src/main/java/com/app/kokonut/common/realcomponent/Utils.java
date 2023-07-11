@@ -266,4 +266,14 @@ public class Utils {
 		return price;
 	}
 
+	// 이메일 체크 정규식 함수 - true일 경우 준수함, false일 경우 준수하지 않음
+	public static boolean isValidEmail(String email) {
+		String emailRegex = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$";
+
+		Pattern pattern = Pattern.compile(emailRegex, Pattern.CASE_INSENSITIVE);
+		Matcher matcher = pattern.matcher(email);
+
+		return matcher.find();
+	}
+
 }

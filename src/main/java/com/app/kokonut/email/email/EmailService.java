@@ -1,39 +1,36 @@
 package com.app.kokonut.email.email;
 
 import com.app.kokonut.admin.Admin;
-
 import com.app.kokonut.admin.AdminRepository;
+import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
 import com.app.kokonut.admin.dtos.AdminEmailInfoDto;
-import com.app.kokonut.email.email.dtos.EmailDetailDto;
-import com.app.kokonut.email.email.dtos.EmailListDto;
-
-import com.app.kokonut.email.emailgroup.EmailGroupRepository;
-
-import com.app.kokonut.email.emailgroup.dtos.EmailGroupAdminInfoDto;
-import com.app.kokonut.email.emailgroup.dtos.EmailGroupListDto;
-import com.app.kokonut.email.emailgroup.EmailGroup;
-import com.app.kokonut.configs.MailSender;
+import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
+import com.app.kokonut.awskmshistory.dto.AwsKmsResultDto;
 import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.ResponseErrorCode;
-
 import com.app.kokonut.common.component.ReqUtils;
-
+import com.app.kokonut.common.realcomponent.AESGCMcrypto;
+import com.app.kokonut.common.realcomponent.Utils;
+import com.app.kokonut.company.companysetting.CompanySettingRepository;
+import com.app.kokonut.company.companysetting.dtos.CompanySettingEmailDto;
+import com.app.kokonut.company.companytable.CompanyTable;
+import com.app.kokonut.company.companytable.CompanyTableRepository;
+import com.app.kokonut.configs.MailSender;
+import com.app.kokonut.email.email.dtos.EmailDetailDto;
+import com.app.kokonut.email.emailgroup.EmailGroupRepository;
+import com.app.kokonut.email.emailgroup.dtos.EmailGroupAdminInfoDto;
 import com.app.kokonut.keydata.KeyDataService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
-
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Woody
@@ -52,15 +49,20 @@ public class EmailService {
     private final EmailRepository emailRepository;
     private final MailSender mailSender;
 
+    private final CompanyTableRepository companyTableRepository;
+    private final CompanySettingRepository companySettingRepository;
+
     @Autowired
     public EmailService(KeyDataService keyDataService, EmailRepository emailRepository,
                         AdminRepository adminRepository,
-                        EmailGroupRepository emailGroupRepository, MailSender mailSender) {
+                        EmailGroupRepository emailGroupRepository, MailSender mailSender, CompanyTableRepository companyTableRepository, CompanySettingRepository companySettingRepository) {
 //        this.hostUrl = keyDataService.findByKeyValue("otp_url");
         this.emailRepository = emailRepository;
         this.adminRepository = adminRepository;
         this.emailGroupRepository = emailGroupRepository;
         this.mailSender = mailSender;
+        this.companyTableRepository = companyTableRepository;
+        this.companySettingRepository = companySettingRepository;
     }
 
     // 이메일 목록 조회
@@ -248,11 +250,146 @@ public class EmailService {
         }
     }
 
+    // 발송할 이메일 리스트호출
+    public ResponseEntity<Map<String, Object>> sendEmailList(JwtFilterDto jwtFilterDto) throws Exception {
+        log.info("sendEmailList 호출");
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+        String email = jwtFilterDto.getEmail();
+
+        AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+        String cpCode = adminCompanyInfoDto.getCompanyCode();
+
+        CompanySettingEmailDto companySettingEmailDto = companySettingRepository.findByCompanySettingEmail(cpCode);
+
+//        if(companySettingEmailDto != null) {
+//            String table = "kokonut20"+companySettingEmailDto.getCsEmailTableSetting();
+//            String code = companySettingEmailDto.getCsEmailCodeSetting();
+//
+//            log.info("지정한 테이블 : "+ table);
+//            log.info("지정한 코드 : "+ code);
+//
+//            int dchCount = 0; // 복호화 카운팅
+//            List<String> headerNames = new ArrayList<>();
+//            Optional<CompanyTable> optionalCompanyTable = companyTableRepository.findCompanyTableByCpCodeAndCtName(cpCode, table);
+//            if(optionalCompanyTable.isPresent()) {
+//    			log.info("존재하는 테이블");
+//
+//                AwsKmsResultDto awsKmsResultDto = null;
+//
+//                String ctNameStatus = optionalCompanyTable.get().getCtNameStatus();
+//                String ctPhoneStatus = optionalCompanyTable.get().getCtPhoneStatus();
+//                String ctGenderStatus = optionalCompanyTable.get().getCtGenderStatus();
+//                String ctEmailStatus = optionalCompanyTable.get().getCtEmailStatus();
+//                String ctBirthStatus = optionalCompanyTable.get().getCtBirthStatus();
+//
+//                StringBuilder searchQuery = new StringBuilder();
+//                searchQuery.append("SELECT ");
+//                searchQuery.append("kokonut_IDX, ID_1_id as ID, " +
+//                        "DATE_FORMAT(kokonut_REGISTER_DATE, '%Y.%m.%d') as kokonut_REGISTER_DATE, " +
+//                        "DATE_FORMAT(kokonut_LAST_LOGIN_DATE, '%Y.%m.%d') as kokonut_LAST_LOGIN_DATE");
+//
+//                // CONCAT(
+//                // LEFT(kokonut202301001_1_32, 1),
+//                // CASE WHEN CHAR_LENGTH(kokonut202301001_1_32)-2 <= 36 THEN '*'
+//                // WHEN CHAR_LENGTH(kokonut202301001_1_32)-2 <= 40 THEN '**'
+//                // WHEN CHAR_LENGTH(kokonut202301001_1_32)-2 <= 44 THEN '***'
+//                // ELSE '****' END,
+//                // RIGHT(kokonut202301001_1_32, 1)) as basicName,
+//                // 한글기준 암호화크기 : 첫글자 28, 두글자 32, 세글자 36, 네글자 40, 다섯글자 44
+//                if(!ctNameStatus.equals("")) {
+//                    awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(companyCode);
+//                    headerNames.add("basicName");
+//                    searchQuery.append(", ").append(ctNameStatus).append(" as basicName");
+//                }
+//
+//                // CONCAT(LEFT(필드명, 4),'****', SUBSTRING(필드명, CHAR_LENGTH(필드명) - 4)) as basicPhone,
+//                if(!ctPhoneStatus.equals("")) {
+//                    searchQuery
+//                            .append(", CONCAT(LEFT(").append(ctPhoneStatus).append(", 4),'****',")
+//                            .append("SUBSTRING(").append(ctPhoneStatus).append(", CHAR_LENGTH(").append(ctPhoneStatus).append(")-4)) as basicPhone");
+//                }
+//
+//                if(!ctGenderStatus.equals("")) {
+//                    headerNames.add("basicGender");
+//                    searchQuery.append(", ").append(ctGenderStatus).append(" as basicGender");
+//                }
+//
+//                if(!ctEmailStatus.equals("")) {
+//                    if(awsKmsResultDto == null) {
+//                        awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(companyCode);
+//                    }
+//                    headerNames.add("basicEmail");
+//                    searchQuery.append(", ").append(ctEmailStatus).append(" as basicEmail");
+//                }
+//
+//                if(!ctBirthStatus.equals("")) {
+//                    headerNames.add("basicBirth");
+//                    searchQuery.append(", ").append(ctBirthStatus).append(" as basicBirth");
+//                }
+//
+//                searchQuery.append(" FROM ");
+//
+//                searchQuery.append(optionalCompanyTable.get().getCtName());
+//                searchQuery.append(" WHERE 1=1");
+////			log.info("searchQuery : "+ searchQuery);
+//
+//                List<Map<String, Object>> basicTableList = kokonutUserService.selectBasicTableList(searchQuery.toString());
+//                if(awsKmsResultDto != null) {
+//                    for(Map<String, Object> map : basicTableList) {
+//                        for (String headerName : headerNames) {
+////						log.info("headerNames.get(i) : " + headerName);
+//
+//                            Object key = map.get(headerName);
+//                            if (key != null) {
+//
+//                                String keyValue = String.valueOf(key);
+//                                String securityResultValue;
+//                                String decryptValue;
+////							log.info("복호화할 데이터 key : " + key);
+//
+//                                decryptValue = AESGCMcrypto.decrypt(keyValue, awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
+//                                if (decryptValue.length() == 2) {
+//                                    securityResultValue = decryptValue.charAt(0) + "*";
+//                                } else {
+//                                    securityResultValue = decryptValue.charAt(0) + Utils.starsForString(decryptValue).substring(2) + decryptValue.substring(decryptValue.length() - 1);
+//                                }
+//                                dchCount++;
+//                                map.put(headerName, securityResultValue);
+//                            }
+//                        }
+//                    }
+//                }
+//
+//                // 복호화 횟수 저장
+//                if(dchCount > 0) {
+//                    decrypCountHistoryService.decrypCountHistorySave(companyCode, dchCount);
+//                }
+//
+//
+//        }
+
+
+
+
+
+
+//        data.put("myConnectList", historyMyConnectListDtos);
+
+        return ResponseEntity.ok(res.success(data));
+
+    }
+
+
+
+
     /**
      * 이메일 발송 대상 목록 조회하기
      * @param pageable 페이징 처리를 위한 정보
      */
-//    public ResponseEntity<Map<String, Object>> emailTargetGroupList(Pageable pageable) {
+    //    public ResponseEntity<Map<String, Object>> emailTargetGroupList(Pageable pageable) {
 //        log.info("### emailTargetGroupList 호출");
 //        /*
 //         * 그룹명 : 미식플랫폼 00 관리자
@@ -313,4 +450,11 @@ public class EmailService {
 //
 //    return ResponseEntity.ok(res.ResponseEntityPage(resultPage));
 //    }
+
+
+
+
+
+
+
 }

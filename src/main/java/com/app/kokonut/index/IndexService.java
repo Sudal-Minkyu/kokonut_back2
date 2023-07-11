@@ -129,7 +129,7 @@ public class IndexService {
 
 		Long csId = companySettingRepository.findByCompanySettingCsId(cpCode);
 		List<HistoryMyConnectListDto> historyMyConnectListDtos = historyRepository.findByMyConnectList(adminId, cpCode);
-		if(historyMyConnectListDtos.size() != 0) {
+		if (!historyMyConnectListDtos.isEmpty()) {
 			for(HistoryMyConnectListDto historyMyConnectListDto : historyMyConnectListDtos) {
 				if(historyMyConnectListDto.getCsipRemarks().equals("0")) {
 					historyMyConnectListDto.setCsipRemarks("");
@@ -172,8 +172,8 @@ public class IndexService {
 			adminConnectListDto = new AdminConnectListDto();
 
 			adminConnectListDto.setKnName(adminConnectListSubDto.getKnName());
+			adminConnectListDto.setRoleCode(adminConnectListSubDto.getRoleCode());
 			adminConnectListDto.setRoleName(adminConnectListSubDto.getRoleName());
-
 			// 최근접속일시
 			if (adminConnectListSubDto.getKnLastLoginDate() != null) {
 //				log.info("현재날짜 있음 : "+now);

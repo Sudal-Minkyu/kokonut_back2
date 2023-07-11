@@ -59,11 +59,7 @@ public class AuthApiRestController {
     @ApiImplicitParam(name ="ApiKey", value="API Key",required = true, dataTypeClass = String.class, paramType = "header")
     public ResponseEntity<Map<String,Object>> apiRegister(@RequestBody HashMap<String, Object> paramMap, HttpServletRequest request) throws Exception {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwtOrApiKey(request);
-        if(jwtFilterDto == null) {
-            return null;
-        } else {
-            return authApiService.apiRegister(paramMap, jwtFilterDto);
-        }
+        return authApiService.apiRegister(paramMap, jwtFilterDto);
     }
 
 

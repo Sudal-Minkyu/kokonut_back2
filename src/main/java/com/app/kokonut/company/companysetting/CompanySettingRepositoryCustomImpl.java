@@ -1,6 +1,7 @@
 package com.app.kokonut.company.companysetting;
 
 import com.app.kokonut.company.companysetting.dtos.CompanySettingCheckDto;
+import com.app.kokonut.company.companysetting.dtos.CompanySettingEmailDto;
 import com.app.kokonut.company.companysetting.dtos.CompanySettingInfoDto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
@@ -63,6 +64,21 @@ public class CompanySettingRepositoryCustomImpl extends QuerydslRepositorySuppor
                         companySetting.csOverseasBlockSetting,
                         companySetting.csAccessSetting,
                         companySetting.csPasswordErrorCountSetting
+                ));
+
+        return query.fetchOne();
+    }
+
+    @Override
+    public CompanySettingEmailDto findByCompanySettingEmail(String cpCode) {
+
+        QCompanySetting companySetting = QCompanySetting.companySetting;
+
+        JPQLQuery<CompanySettingEmailDto> query = from(companySetting)
+                .where(companySetting.cpCode.eq(cpCode))
+                .select(Projections.constructor(CompanySettingEmailDto.class,
+                        companySetting.csEmailTableSetting,
+                        companySetting.csEmailCodeSetting
                 ));
 
         return query.fetchOne();

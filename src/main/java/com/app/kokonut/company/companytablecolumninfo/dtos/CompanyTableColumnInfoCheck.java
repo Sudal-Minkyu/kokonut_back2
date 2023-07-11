@@ -9,12 +9,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CompanyTableColumnInfoCheck {
 
-    private String ctDesignation;
+    private String ctDesignation; // 테이블명
 
-    private String ctciName;
+    private String ctciName; // 필드명
 
-    private String ctciDesignation;
+    private String ctciDesignation; // 필드명칭
 
-    private String ctciSecuriy;
+    private String ctciSecuriy; // 암호화여부 -> 0:비암호화, 1:암호화
 
 }

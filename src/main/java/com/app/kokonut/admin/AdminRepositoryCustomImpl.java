@@ -251,6 +251,7 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
         JPQLQuery<AdminConnectListSubDto> query = from(admin)
                 .where(admin.companyId.eq(companyId))
                 .select(Projections.constructor(AdminConnectListSubDto.class,
+                        admin.knRoleCode,
                         admin.adminId,
                         admin.knRoleCode,
                         admin.knName,
