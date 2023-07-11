@@ -13,8 +13,6 @@ import java.util.List;
 @Data
 public class KokonutColumnAddDto {
 
-    private String tableName; // 추가할 테이블명
-
     private List<KokonutAddColumnListDto> kokonutAddColumnListDtos;
 
 }

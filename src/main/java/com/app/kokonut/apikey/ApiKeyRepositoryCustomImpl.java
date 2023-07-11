@@ -86,11 +86,7 @@ public class ApiKeyRepositoryCustomImpl extends QuerydslRepositorySupport implem
                 .innerJoin(admin).on(admin.adminId.eq(apiKey.adminId))
                 .innerJoin(company).on(company.companyId.eq(apiKey.companyId))
                 .where(apiKey.akKey.eq(akKey)
-                        .and(apiKey.akAgreeIp1.eq(ip))
-                        .or(apiKey.akAgreeIp2.eq(ip))
-                        .or(apiKey.akAgreeIp3.eq(ip))
-                        .or(apiKey.akAgreeIp4.eq(ip))
-                        .or(apiKey.akAgreeIp5.eq(ip)))
+                        .and(apiKey.akAgreeIp1.eq(ip).or(apiKey.akAgreeIp2.eq(ip).or(apiKey.akAgreeIp3.eq(ip).or(apiKey.akAgreeIp4.eq(ip).or(apiKey.akAgreeIp5.eq(ip)))))))
                 .select(Projections.constructor(ApiKeyInfoDto.class,
                         admin.knEmail,
                         apiKey.akUseYn

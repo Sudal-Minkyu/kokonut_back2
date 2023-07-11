@@ -65,20 +65,17 @@ public class DynamicUserRestController {
 
 //  @@@@@@@@@@@@@@@@@@@@@@@@@ 개인정보 항목관리 사용 API @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-	// 테이블의 컬럼조회
+	// 기본 테이블의 컬럼조회
 	@GetMapping(value = "/tableColumnCall")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
-	})
-	public ResponseEntity<Map<String,Object>> tableColumnCall(@RequestParam(name="tableName", defaultValue = "") String tableName) {
-		return dynamicUserService.tableColumnCall(tableName);
+	@ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+	public ResponseEntity<Map<String,Object>> tableColumnCall() {
+		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+		return dynamicUserService.tableColumnCall(jwtFilterDto);
 	}
 
 	// 컬럼추가 버튼(오른쪽에 추가)
 	@PostMapping(value = "/tableColumnAdd")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
-	})
+	@ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
 	public ResponseEntity<Map<String, Object>> tableColumnAdd(@RequestBody KokonutColumnAddDto kokonutColumnAddDto) throws IOException {
 		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
 		return dynamicUserService.tableColumnAdd(kokonutColumnAddDto, jwtFilterDto);
@@ -125,7 +122,8 @@ public class DynamicUserRestController {
 	@GetMapping(value = "/searchColumnCall")
 	@ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
 	public ResponseEntity<Map<String,Object>> searchColumnCall(@RequestParam(name="tableName", defaultValue = "") String tableName) {
-		return dynamicUserService.searchColumnCall("kokonut20"+tableName);
+		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+		return dynamicUserService.searchColumnCall(jwtFilterDto);
 	}
 
 	// 개인정보 검색
