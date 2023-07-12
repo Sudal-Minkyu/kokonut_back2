@@ -63,7 +63,7 @@ public class EmailRestController {
     }
 
     @ApiOperation(value="발송할 이메일 리스트호출", notes="")
-    @GetMapping("/sendEmailList")
+    @PostMapping("/sendEmailList")
     @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> sendEmailList(@RequestBody KokonutSearchDto kokonutSearchDto) throws Exception {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
