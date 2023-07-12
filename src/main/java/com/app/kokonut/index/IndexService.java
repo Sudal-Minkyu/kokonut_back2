@@ -464,8 +464,18 @@ public class IndexService {
 		String cpCode = adminCompanyInfoDto.getCompanyCode();
 
 		PrivacyItemCountDto privacyItemCountDto = companyTableRepository.findByPrivacyItemSum(cpCode);
+		if(privacyItemCountDto == null) {
+			privacyItemCountDto = new PrivacyItemCountDto(
+					BigDecimal.valueOf(0),
+					BigDecimal.valueOf(0),
+					BigDecimal.valueOf(0),
+					BigInteger.valueOf(0)
+			);
+		}
+
 		data.put("privacyItemCount", privacyItemCountDto);
 		return ResponseEntity.ok(res.success(data));
+
 	}
 
 
