@@ -144,6 +144,7 @@ public enum ResponseErrorCode {
     ERROR_CODE_09("ERROR_CODE_09", "이메일주소 형식과 맞지 않습니다. 다시 한번 확인해주시길 바랍니다."),
     ERROR_CODE_10("ERROR_CODE_10", "이미 사용중인 아이디입니다."),
     ERROR_CODE_11("ERROR_CODE_11", "형식과 맞지 않습니다. (-)를 제외하여 보내주시길 바랍니다."),
+    ERROR_CODE_12("ERROR_CODE_12", "이메일항목으로 지정한 값이 없습니다. 환경설정에서 이메일발송할 항목을 선택 후 다시 시도해주시길 바랍니다."),
 
     ERROR_CODE_96("ERROR_CODE_96", "헤더에 APIKey가 존재하지 않습니다. APIKey를 담아 보내주세요."), // 400
     ERROR_CODE_97("ERROR_CODE_97", "호출하신 APIKey는 존재하지 않은 APIKey 입니다. APIKey관리 페이지에서 APIKey를 확인해주세요."), // 404

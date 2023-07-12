@@ -124,7 +124,7 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
                                 .when(company.cpSubscribe.eq("2")).then("2")
                                 .otherwise("0"),
                         new CaseBuilder()
-                                .when(companySetting.csEmailTableSetting.isNotNull().and(companySetting.csEmailCodeSetting.isNotNull())).then("1")
+                                .when(companySetting.csEmailCodeSetting.isNotNull()).then("1")
                                 .otherwise("0")
                 ));
 

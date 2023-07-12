@@ -33,6 +33,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -462,9 +464,18 @@ public class IndexService {
 		String cpCode = adminCompanyInfoDto.getCompanyCode();
 
 		PrivacyItemCountDto privacyItemCountDto = companyTableRepository.findByPrivacyItemSum(cpCode);
-		data.put("privacyItemCount", privacyItemCountDto);
+		if(privacyItemCountDto == null) {
+			privacyItemCountDto = new PrivacyItemCountDto(
+					BigDecimal.valueOf(0),
+					BigDecimal.valueOf(0),
+					BigDecimal.valueOf(0),
+					BigInteger.valueOf(0)
+			);
+		}
 
+		data.put("privacyItemCount", privacyItemCountDto);
 		return ResponseEntity.ok(res.success(data));
+
 	}
 
 

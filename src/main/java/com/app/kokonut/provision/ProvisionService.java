@@ -163,24 +163,24 @@ public class ProvisionService {
             // 제공 할 테이블+컬럼 저장 -> 모든 항목일 경우 저장하지 않음
             if(proTargetType == 1) {
                 ProvisionEntry provisionEntry;
-                List<ProvisionEntrySaveDto> provisionEntrySaveDtos = provisionSaveDto.getProvisionEntrySaveDtos();
+                ProvisionEntrySaveDto provisionEntrySaveDtos = provisionSaveDto.getProvisionEntrySaveDtos();
                 log.info("provisionEntrySaveDtos : "+provisionEntrySaveDtos);
-                for(ProvisionEntrySaveDto provisionEntrySaveDto : provisionEntrySaveDtos) {
-                    if(provisionEntrySaveDto.getPipeTableTargets().size() != 0) {
+//                for(ProvisionEntrySaveDto provisionEntrySaveDto : provisionEntrySaveDtos) {
+                    if(provisionEntrySaveDtos.getPipeTableTargets().size() != 0) {
                         provisionEntry = new ProvisionEntry();
                         provisionEntry.setProCode(saveprovision.getProCode());
                         provisionEntry.setInsert_email(email);
                         provisionEntry.setInsert_date(LocalDateTime.now());
 
-                        provisionEntry.setPipeTableName(provisionEntrySaveDto.getPipeTableName());
+                        provisionEntry.setPipeTableName(cpCode+"_1");
 
-                        String pipeTableTargets = String.join(",", provisionEntrySaveDto.getPipeTableTargets());
+                        String pipeTableTargets = String.join(",", provisionEntrySaveDtos.getPipeTableTargets());
                         log.info("pipeTableTargets : "+pipeTableTargets);
                         provisionEntry.setPipeTableTargets(pipeTableTargets);
 
                         provisionEntries.add(provisionEntry);
                     }
-                }
+//                }
             }
 
             // 제공할 개인정보의 idx

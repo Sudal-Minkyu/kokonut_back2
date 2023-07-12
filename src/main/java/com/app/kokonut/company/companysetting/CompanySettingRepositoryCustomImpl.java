@@ -42,9 +42,6 @@ public class CompanySettingRepositoryCustomImpl extends QuerydslRepositorySuppor
                         companySetting.csAutoLogoutSetting,
                         companySetting.csLongDisconnectionSetting,
                         new CaseBuilder()
-                                .when(companySetting.csEmailTableSetting.isNotNull()).then(companySetting.csEmailTableSetting)
-                                .otherwise(""),
-                        new CaseBuilder()
                                 .when(companySetting.csEmailCodeSetting.isNotNull()).then(companySetting.csEmailCodeSetting)
                                 .otherwise("")
                 ));
@@ -77,8 +74,9 @@ public class CompanySettingRepositoryCustomImpl extends QuerydslRepositorySuppor
         JPQLQuery<CompanySettingEmailDto> query = from(companySetting)
                 .where(companySetting.cpCode.eq(cpCode))
                 .select(Projections.constructor(CompanySettingEmailDto.class,
-                        companySetting.csEmailTableSetting,
-                        companySetting.csEmailCodeSetting
+                        new CaseBuilder()
+                                .when(companySetting.csEmailCodeSetting.isNotNull()).then(companySetting.csEmailCodeSetting)
+                                .otherwise("")
                 ));
 
         return query.fetchOne();

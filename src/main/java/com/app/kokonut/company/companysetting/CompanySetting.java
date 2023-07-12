@@ -49,10 +49,6 @@ public class CompanySetting {
     @Column(name = "cs_long_disconnection_setting")
     private String csLongDisconnectionSetting;
 
-    @ApiModelProperty("이메일발송 지정 테이블('kokonut20' 제외)")
-    @Column(name = "cs_email_table_setting")
-    private String csEmailTableSetting;
-
     @ApiModelProperty("이메일발송 지정코드")
     @Column(name = "cs_email_code_setting")
     private String csEmailCodeSetting;
