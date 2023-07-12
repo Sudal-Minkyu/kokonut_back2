@@ -2024,7 +2024,7 @@ public class DynamicUserService {
 		String cpCode = adminCompanyInfoDto.getCompanyCode();
 
 		// 이메일지정 고유코드
-		CompanySettingEmailDto companySettingEmailDto;
+		CompanySettingEmailDto companySettingEmailDto = null;
 
 		// 이메일 회원선택인지 먼저 체크한다.
 		if(searchType.equals("2")) {

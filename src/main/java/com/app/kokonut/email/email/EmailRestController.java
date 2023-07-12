@@ -3,6 +3,8 @@ package com.app.kokonut.email.email;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import com.app.kokonut.auth.jwt.SecurityUtil;
 import com.app.kokonut.email.email.dtos.EmailDetailDto;
+import com.app.kokonutuser.DynamicUserService;
+import com.app.kokonutuser.dtos.KokonutSearchDto;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -18,10 +20,12 @@ import java.util.Map;
 public class EmailRestController {
 
     private final EmailService emailService;
+    private final DynamicUserService dynamicUserService;
 
     @Autowired
-    public EmailRestController(EmailService emailService) {
+    public EmailRestController(EmailService emailService, DynamicUserService dynamicUserService) {
         this.emailService = emailService;
+        this.dynamicUserService = dynamicUserService;
     }
 
     @ApiOperation(value="이메일 목록 조회", notes="" +
@@ -61,9 +65,9 @@ public class EmailRestController {
     @ApiOperation(value="발송할 이메일 리스트호출", notes="")
     @GetMapping("/sendEmailList")
     @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-    public ResponseEntity<Map<String,Object>> sendEmailList() throws Exception {
+    public ResponseEntity<Map<String,Object>> sendEmailList(@RequestBody KokonutSearchDto kokonutSearchDto) throws Exception {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
-        return emailService.sendEmailList(jwtFilterDto);
+        return dynamicUserService.privacyUserSearch(kokonutSearchDto,"2",jwtFilterDto);
     }
 
 
