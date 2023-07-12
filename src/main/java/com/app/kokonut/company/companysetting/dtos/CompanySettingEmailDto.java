@@ -15,8 +15,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CompanySettingEmailDto {
 
-    private String csEmailTableSetting; // 이메일발송 지정 테이블
-
     private String csEmailCodeSetting; // 이메일발송 지정코드
 
 }

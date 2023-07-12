@@ -13,6 +13,8 @@ import com.app.kokonut.common.realcomponent.Utils;
 import com.app.kokonut.company.company.CompanyRepository;
 import com.app.kokonut.company.company.CompanyService;
 import com.app.kokonut.company.companydatakey.CompanyDataKeyService;
+import com.app.kokonut.company.companysetting.CompanySettingRepository;
+import com.app.kokonut.company.companysetting.dtos.CompanySettingEmailDto;
 import com.app.kokonut.company.companytable.CompanyTable;
 import com.app.kokonut.company.companytable.CompanyTableRepository;
 import com.app.kokonut.company.companytable.dtos.CompanyTableListDto;
@@ -78,6 +80,7 @@ public class DynamicUserService {
 	private final HistoryService historyService;
 	private final PrivacyHistoryService privacyHistoryService;
 	private final CompanyDataKeyService companyDataKeyService;
+	private final CompanySettingRepository companySettingRepository;
 
 	private final KokonutDormantService kokonutDormantService;
 	private final KokonutRemoveService kokonutRemoveService;
@@ -95,7 +98,7 @@ public class DynamicUserService {
 							  CompanyRepository companyRepository, GoogleOTP googleOTP, ExcelService excelService,
 							  KokonutUserService kokonutUserService, CompanyDataKeyService companyDataKeyService, KokonutDormantService kokonutDormantService,
 							  CompanyService companyService, HistoryService historyService, PrivacyHistoryService privacyHistoryService,
-							  KokonutRemoveService kokonutRemoveService, CompanyTableRepository companyTableRepository,
+							  CompanySettingRepository companySettingRepository, KokonutRemoveService kokonutRemoveService, CompanyTableRepository companyTableRepository,
 							  CompanyTableColumnInfoRepository companyTableColumnInfoRepository,
 							  EncrypCountHistoryService encrypCountHistoryService, DecrypCountHistoryService decrypCountHistoryService,
 							  DynamicUserRepositoryCustom dynamicUserRepositoryCustom) {
@@ -110,6 +113,7 @@ public class DynamicUserService {
 		this.companyService = companyService;
 		this.historyService = historyService;
 		this.privacyHistoryService = privacyHistoryService;
+		this.companySettingRepository = companySettingRepository;
 		this.kokonutRemoveService = kokonutRemoveService;
 		this.companyTableRepository = companyTableRepository;
 		this.companyTableColumnInfoRepository = companyTableColumnInfoRepository;
@@ -2007,11 +2011,30 @@ public class DynamicUserService {
 	}
 
 	// 개인정보 검색(신버전)
-	public ResponseEntity<Map<String, Object>> privacyUserSearch(KokonutSearchDto kokonutSearchDto, JwtFilterDto jwtFilterDto) throws Exception {
+	public ResponseEntity<Map<String, Object>> privacyUserSearch(KokonutSearchDto kokonutSearchDto, String searchType, JwtFilterDto jwtFilterDto) throws Exception {
 		log.info("privacyUserSearch 신버전 호출");
 
 		AjaxResponse res = new AjaxResponse();
 		HashMap<String, Object> data = new HashMap<>();
+
+		String email = jwtFilterDto.getEmail();
+
+		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+		long adminId = adminCompanyInfoDto.getAdminId();
+		String cpCode = adminCompanyInfoDto.getCompanyCode();
+
+		// 이메일지정 고유코드
+		CompanySettingEmailDto companySettingEmailDto;
+
+		// 이메일 회원선택인지 먼저 체크한다.
+		if(searchType.equals("2")) {
+			companySettingEmailDto = companySettingRepository.findByCompanySettingEmail(cpCode);
+
+			if(companySettingEmailDto.getCsEmailCodeSetting().equals("")) {
+				log.error("이메일 항목으로 지정한 값이 없습니다. 환경설정에서 이메일발송할 항목을 선택 후 다시 시도해주시길 바랍니다.");
+				return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_12.getCode(),ResponseErrorCode.ERROR_CODE_12.getDesc()));
+			}
+		}
 
 		List<String> searchCodes = kokonutSearchDto.getSearchCodes();
 		List<String> searchTexts = kokonutSearchDto.getSearchTexts();
@@ -2038,12 +2061,6 @@ public class DynamicUserService {
 		}
 
 		List<Map<String, String>> result = new ArrayList<>();
-
-		String email = jwtFilterDto.getEmail();
-
-		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
-		long adminId = adminCompanyInfoDto.getAdminId();
-		String cpCode = adminCompanyInfoDto.getCompanyCode();
 
 		for (int i = 0; i < searchCodes.size(); i++) {
 			String code = searchCodes.get(i);

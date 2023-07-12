@@ -134,7 +134,7 @@ public class DynamicUserRestController {
 	@ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
 	public ResponseEntity<Map<String,Object>> privacyUserSearch(@RequestBody KokonutSearchDto kokonutSearchDto) throws Exception {
 		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
-		return dynamicUserService.privacyUserSearch(kokonutSearchDto, jwtFilterDto);
+		return dynamicUserService.privacyUserSearch(kokonutSearchDto, "1", jwtFilterDto); // "1"일 경우 일반 개인정보검색, "2"일 경우 이메일선택검색
 	}
 
 	// 개인정보 열람

@@ -387,10 +387,9 @@ public class CompanySettingService {
     }
 
     // 이메일발송 항목지정
-    public ResponseEntity<Map<String, Object>> emailSendItemSetting(String csEmailTableSetting, String csEmailCodeSetting, JwtFilterDto jwtFilterDto) throws IOException {
+    public ResponseEntity<Map<String, Object>> emailSendItemSetting(String csEmailCodeSetting, JwtFilterDto jwtFilterDto) throws IOException {
         log.info("emailSendItemSetting 호출");
 
-//        log.info("csEmailTableSetting : "+csEmailTableSetting);
 //        log.info("csEmailCodeSetting : "+csEmailCodeSetting);
 
         AjaxResponse res = new AjaxResponse();
@@ -405,7 +404,7 @@ public class CompanySettingService {
         Optional<CompanySetting> optionalCompanySetting = companySettingRepository.findCompanySettingByCpCode(cpCode);
         if(optionalCompanySetting.isPresent()) {
 
-            if(optionalCompanySetting.get().getCsEmailTableSetting() != null && optionalCompanySetting.get().getCsEmailCodeSetting() != null) {
+            if(optionalCompanySetting.get().getCsEmailCodeSetting() != null) {
                 // 이메일발송 항목지정 등록 코드
                 activityCode = ActivityCode.AC_59_1;
             } else {
@@ -416,7 +415,6 @@ public class CompanySettingService {
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
                     cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", CommonUtil.clientIp(), CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
 
-            optionalCompanySetting.get().setCsEmailTableSetting(csEmailTableSetting);
             optionalCompanySetting.get().setCsEmailCodeSetting(csEmailCodeSetting);
             companySettingRepository.save(optionalCompanySetting.get());
 

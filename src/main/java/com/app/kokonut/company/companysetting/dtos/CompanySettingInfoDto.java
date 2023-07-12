@@ -32,8 +32,6 @@ public class CompanySettingInfoDto {
 
     private String csLongDisconnectionSetting; // 장기 미접속 접근제한(0: 제한없음, 1: 1개월, 3: 3개월, 6: 6개월) 기본값 : 0
 
-    private String csEmailTableSetting; // 이메일발송 지정 테이블
-
     private String csEmailCodeSetting; // 이메일발송 지정코드
 
 }

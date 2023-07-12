@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 public class ProvisionEntrySaveDto {
 
-    private String pipeTableName; // 제공할 테이블명
+//    private String pipeTableName; // 제공할 테이블명
 
     private List<String> pipeTableTargets; // 제공할 필드코드(,) 구분자
 
