@@ -5,21 +5,24 @@ import com.app.kokonut.admin.AdminRepository;
 import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
 import com.app.kokonut.admin.dtos.AdminEmailInfoDto;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
-import com.app.kokonut.awskmshistory.dto.AwsKmsResultDto;
 import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.common.component.ReqUtils;
-import com.app.kokonut.common.realcomponent.AESGCMcrypto;
+import com.app.kokonut.common.realcomponent.CommonUtil;
 import com.app.kokonut.common.realcomponent.Utils;
 import com.app.kokonut.company.companysetting.CompanySettingRepository;
 import com.app.kokonut.company.companysetting.dtos.CompanySettingEmailDto;
-import com.app.kokonut.company.companytable.CompanyTable;
 import com.app.kokonut.company.companytable.CompanyTableRepository;
 import com.app.kokonut.configs.MailSender;
 import com.app.kokonut.email.email.dtos.EmailDetailDto;
-import com.app.kokonut.email.emailgroup.EmailGroupRepository;
-import com.app.kokonut.email.emailgroup.dtos.EmailGroupAdminInfoDto;
+import com.app.kokonut.email.email.dtos.EmailSendDto;
+import com.app.kokonut.email.emailsendgroup.EmailGroupRepository;
+import com.app.kokonut.email.emailsendgroup.dtos.EmailGroupAdminInfoDto;
+import com.app.kokonut.history.HistoryService;
+import com.app.kokonut.history.dtos.ActivityCode;
 import com.app.kokonut.keydata.KeyDataService;
+import com.app.kokonutuser.KokonutUserService;
+import com.app.kokonutuser.dtos.use.KokonutUserEmailFieldDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,7 +31,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -44,6 +52,9 @@ public class EmailService {
     @Value("${kokonut.otp.hostUrl}")
     private String hostUrl; // otp_url
 
+    private final HistoryService historyService;
+    private final KokonutUserService kokonutUserService;
+
     private final EmailGroupRepository emailGroupRepository;
     private final AdminRepository adminRepository;
     private final EmailRepository emailRepository;
@@ -53,9 +64,11 @@ public class EmailService {
     private final CompanySettingRepository companySettingRepository;
 
     @Autowired
-    public EmailService(KeyDataService keyDataService, EmailRepository emailRepository,
+    public EmailService(KeyDataService keyDataService, HistoryService historyService, KokonutUserService kokonutUserService, EmailRepository emailRepository,
                         AdminRepository adminRepository,
                         EmailGroupRepository emailGroupRepository, MailSender mailSender, CompanyTableRepository companyTableRepository, CompanySettingRepository companySettingRepository) {
+        this.historyService = historyService;
+        this.kokonutUserService = kokonutUserService;
 //        this.hostUrl = keyDataService.findByKeyValue("otp_url");
         this.emailRepository = emailRepository;
         this.adminRepository = adminRepository;
@@ -86,7 +99,7 @@ public class EmailService {
      * @param emailDetailDto 이메일 내용
      */
     @Transactional
-    public ResponseEntity<Map<String,Object>> sendEmail(String email, EmailDetailDto emailDetailDto){
+    public ResponseEntity<Map<String,Object>> sendEmail2(String email, EmailDetailDto emailDetailDto){
         log.info("### sendEmail 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -250,139 +263,91 @@ public class EmailService {
         }
     }
 
-    // 발송할 이메일 리스트호출
-    public ResponseEntity<Map<String, Object>> sendEmailList(JwtFilterDto jwtFilterDto) throws Exception {
-        log.info("sendEmailList 호출");
+    // 이메일발송 호출
+    public ResponseEntity<Map<String, Object>> sendEmail(EmailSendDto emailSendDto, JwtFilterDto jwtFilterDto) throws IOException {
+        log.info("sendEmail 호출");
 
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
 
+        log.info("emailSendDto : "+emailSendDto);
+
+        List<String> fileNames = new ArrayList<>();
+        if(emailSendDto.getMultipartFiles() != null) {
+            for (MultipartFile file : emailSendDto.getMultipartFiles()) {
+                if (file.isEmpty()) {
+                    continue;
+                }
+                try {
+                    byte[] bytes = file.getBytes();
+                    Path path = Paths.get(Objects.requireNonNull(file.getOriginalFilename()));
+                    Files.write(path, bytes);
+                    fileNames.add(file.getOriginalFilename());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        log.info("업로드할 파일들 : "+fileNames);
+
         String email = jwtFilterDto.getEmail();
 
         AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+        Long adminId = adminCompanyInfoDto.getAdminId();
         String cpCode = adminCompanyInfoDto.getCompanyCode();
 
+        // 테스트용 이메일리스트 변수
+        List<String> testEmail = new ArrayList<>();
+        testEmail.add("I!@9RTP!!Qyay1ja9cRF");
+        testEmail.add("13GSs9SfZGe#uT!ANOxy");
+        emailSendDto.setEmailSendChoseList(testEmail);
+
+        // 이메일지정 고유코드
         CompanySettingEmailDto companySettingEmailDto = companySettingRepository.findByCompanySettingEmail(cpCode);
 
-//        if(companySettingEmailDto != null) {
-//            String table = "kokonut20"+companySettingEmailDto.getCsEmailTableSetting();
-//            String code = companySettingEmailDto.getCsEmailCodeSetting();
-//
-//            log.info("지정한 테이블 : "+ table);
-//            log.info("지정한 코드 : "+ code);
-//
-//            int dchCount = 0; // 복호화 카운팅
-//            List<String> headerNames = new ArrayList<>();
-//            Optional<CompanyTable> optionalCompanyTable = companyTableRepository.findCompanyTableByCpCodeAndCtName(cpCode, table);
-//            if(optionalCompanyTable.isPresent()) {
-//    			log.info("존재하는 테이블");
-//
-//                AwsKmsResultDto awsKmsResultDto = null;
-//
-//                String ctNameStatus = optionalCompanyTable.get().getCtNameStatus();
-//                String ctPhoneStatus = optionalCompanyTable.get().getCtPhoneStatus();
-//                String ctGenderStatus = optionalCompanyTable.get().getCtGenderStatus();
-//                String ctEmailStatus = optionalCompanyTable.get().getCtEmailStatus();
-//                String ctBirthStatus = optionalCompanyTable.get().getCtBirthStatus();
-//
-//                StringBuilder searchQuery = new StringBuilder();
-//                searchQuery.append("SELECT ");
-//                searchQuery.append("kokonut_IDX, ID_1_id as ID, " +
-//                        "DATE_FORMAT(kokonut_REGISTER_DATE, '%Y.%m.%d') as kokonut_REGISTER_DATE, " +
-//                        "DATE_FORMAT(kokonut_LAST_LOGIN_DATE, '%Y.%m.%d') as kokonut_LAST_LOGIN_DATE");
-//
-//                // CONCAT(
-//                // LEFT(kokonut202301001_1_32, 1),
-//                // CASE WHEN CHAR_LENGTH(kokonut202301001_1_32)-2 <= 36 THEN '*'
-//                // WHEN CHAR_LENGTH(kokonut202301001_1_32)-2 <= 40 THEN '**'
-//                // WHEN CHAR_LENGTH(kokonut202301001_1_32)-2 <= 44 THEN '***'
-//                // ELSE '****' END,
-//                // RIGHT(kokonut202301001_1_32, 1)) as basicName,
-//                // 한글기준 암호화크기 : 첫글자 28, 두글자 32, 세글자 36, 네글자 40, 다섯글자 44
-//                if(!ctNameStatus.equals("")) {
-//                    awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(companyCode);
-//                    headerNames.add("basicName");
-//                    searchQuery.append(", ").append(ctNameStatus).append(" as basicName");
-//                }
-//
-//                // CONCAT(LEFT(필드명, 4),'****', SUBSTRING(필드명, CHAR_LENGTH(필드명) - 4)) as basicPhone,
-//                if(!ctPhoneStatus.equals("")) {
-//                    searchQuery
-//                            .append(", CONCAT(LEFT(").append(ctPhoneStatus).append(", 4),'****',")
-//                            .append("SUBSTRING(").append(ctPhoneStatus).append(", CHAR_LENGTH(").append(ctPhoneStatus).append(")-4)) as basicPhone");
-//                }
-//
-//                if(!ctGenderStatus.equals("")) {
-//                    headerNames.add("basicGender");
-//                    searchQuery.append(", ").append(ctGenderStatus).append(" as basicGender");
-//                }
-//
-//                if(!ctEmailStatus.equals("")) {
-//                    if(awsKmsResultDto == null) {
-//                        awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(companyCode);
-//                    }
-//                    headerNames.add("basicEmail");
-//                    searchQuery.append(", ").append(ctEmailStatus).append(" as basicEmail");
-//                }
-//
-//                if(!ctBirthStatus.equals("")) {
-//                    headerNames.add("basicBirth");
-//                    searchQuery.append(", ").append(ctBirthStatus).append(" as basicBirth");
-//                }
-//
-//                searchQuery.append(" FROM ");
-//
-//                searchQuery.append(optionalCompanyTable.get().getCtName());
-//                searchQuery.append(" WHERE 1=1");
-////			log.info("searchQuery : "+ searchQuery);
-//
-//                List<Map<String, Object>> basicTableList = kokonutUserService.selectBasicTableList(searchQuery.toString());
-//                if(awsKmsResultDto != null) {
-//                    for(Map<String, Object> map : basicTableList) {
-//                        for (String headerName : headerNames) {
-////						log.info("headerNames.get(i) : " + headerName);
-//
-//                            Object key = map.get(headerName);
-//                            if (key != null) {
-//
-//                                String keyValue = String.valueOf(key);
-//                                String securityResultValue;
-//                                String decryptValue;
-////							log.info("복호화할 데이터 key : " + key);
-//
-//                                decryptValue = AESGCMcrypto.decrypt(keyValue, awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
-//                                if (decryptValue.length() == 2) {
-//                                    securityResultValue = decryptValue.charAt(0) + "*";
-//                                } else {
-//                                    securityResultValue = decryptValue.charAt(0) + Utils.starsForString(decryptValue).substring(2) + decryptValue.substring(decryptValue.length() - 1);
-//                                }
-//                                dchCount++;
-//                                map.put(headerName, securityResultValue);
-//                            }
-//                        }
-//                    }
-//                }
-//
-//                // 복호화 횟수 저장
-//                if(dchCount > 0) {
-//                    decrypCountHistoryService.decrypCountHistorySave(companyCode, dchCount);
-//                }
-//
-//
-//        }
+        if(companySettingEmailDto.getCsEmailCodeSetting().equals("")) {
+            log.error("이메일 항목으로 지정한 값이 없습니다. 환경설정에서 이메일발송할 항목을 선택 후 다시 시도해주시길 바랍니다.");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_12.getCode(),ResponseErrorCode.ERROR_CODE_12.getDesc()));
+        } else {
+
+            List<KokonutUserEmailFieldDto> kokonutUserEmailFieldDtos = kokonutUserService.emailFieldList(cpCode, companySettingEmailDto.getCsEmailCodeSetting(), emailSendDto.getEmReceiverType(), emailSendDto.getEmailSendChoseList());
+//            log.info("kokonutUserEmailFieldDtos : "+kokonutUserEmailFieldDtos);
+
+            for (KokonutUserEmailFieldDto kokonutUserEmailFieldDto : kokonutUserEmailFieldDtos) {
+                log.info("emailField : "+kokonutUserEmailFieldDto.getEmailField());
+
+                String decrypEmail = ""; // 복호화한 이메일
+                boolean emailCheck = Utils.isValidEmail(decrypEmail);
+                
+
+            }
+
+
+
+        }
+
+
+        // 이메일발송 코드
+        ActivityCode activityCode = ActivityCode.AC_59_3;
+
+        // 활동이력 저장 -> 비정상 모드
+        String ip = CommonUtil.clientIp();
+
+//        Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
+//                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
 
 
 
 
 
 
-//        data.put("myConnectList", historyMyConnectListDtos);
+
+//        historyService.updateHistory(activityHistoryId,
+//                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+
 
         return ResponseEntity.ok(res.success(data));
-
     }
-
-
 
 
     /**

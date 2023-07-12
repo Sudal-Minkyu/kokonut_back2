@@ -1,6 +1,7 @@
 package com.app.kokonutuser;
 
 import com.app.kokonutuser.dtos.*;
+import com.app.kokonutuser.dtos.use.KokonutUserEmailFieldDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -219,6 +220,18 @@ public class DynamicUserRepositoryCustomImpl implements DynamicUserRepositoryCus
                         new KokonutUserFieldCheckDto(
                                 rs.getString("TABLE_NAME"),
                                 rs.getString("COLUMN_NAME")
+                        )
+        );
+    }
+
+    // 이메일발송할 대상 리스트 호출
+    @Override
+    public List<KokonutUserEmailFieldDto> emailFieldList(String emailField, String searchQuery) {
+        return jdbcTemplate.query(
+                searchQuery,
+                (rs, rowNum) ->
+                        new KokonutUserEmailFieldDto(
+                                rs.getObject(emailField)
                         )
         );
     }

@@ -1,4 +1,4 @@
-package com.app.kokonut.email.emailgroup;
+package com.app.kokonut.email.emailsendgroup;
 
 public interface EmailGroupRepositoryCustom {
 

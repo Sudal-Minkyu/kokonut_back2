@@ -2,7 +2,7 @@ package com.app.kokonut.email.email;
 
 import com.app.kokonut.email.email.dtos.EmailDetailDto;
 import com.app.kokonut.email.email.dtos.EmailListDto;
-import com.app.kokonut.email.emailgroup.QEmailGroup;
+import com.app.kokonut.email.emailsendgroup.QEmailSendGroup;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPQLQuery;
 import org.qlrm.mapper.JpaResultMapper;
@@ -36,10 +36,10 @@ public class EmailRepositoryCustomImpl extends QuerydslRepositorySupport impleme
     public Page<EmailListDto> findByEmailPage(Pageable pageable) {
 
         QEmail email  = QEmail.email;
-        QEmailGroup emailGroup  = QEmailGroup.emailGroup;
+        QEmailSendGroup emailSendGroup  = QEmailSendGroup.emailSendGroup;
 
         JPQLQuery<EmailListDto> query = from(email)
-                .leftJoin(emailGroup).on(emailGroup.egId.eq(email.egId))
+                .leftJoin(emailSendGroup).on(emailSendGroup.egId.eq(email.egId))
                 .select(Projections.constructor(EmailListDto.class,
                         email.emId,
                         email.egId,

@@ -1,4 +1,4 @@
-package com.app.kokonut.email.emailgroup;
+package com.app.kokonut.email.emailsendgroup;
 
 import lombok.extern.slf4j.Slf4j;
 import org.qlrm.mapper.JpaResultMapper;
@@ -14,7 +14,7 @@ public class EmailGroupRepositoryCustomImpl extends QuerydslRepositorySupport im
     JpaResultMapper jpaResultMapper;
 
     public EmailGroupRepositoryCustomImpl() {
-        super(EmailGroup.class);
+        super(EmailSendGroup.class);
     }
 
 }

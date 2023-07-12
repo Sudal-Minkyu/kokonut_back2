@@ -1,4 +1,4 @@
-package com.app.kokonut.email.emailgroup.dtos;
+package com.app.kokonut.email.emailsendgroup.dtos;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -8,17 +8,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class EmailGroupListDto {
-
-    @ApiModelProperty("키")
-    private Long egId;
+public class EmailGroupAdminInfoDto {
 
     @ApiModelProperty("관리자 키(문자열, 구분자: ',')")
     private String egAdminIdList;
 
-    @ApiModelProperty("그룹명")
-    private String egName;
-
-    @ApiModelProperty("그룹설명")
-    private String egDesc;
 }

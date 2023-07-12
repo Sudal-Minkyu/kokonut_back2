@@ -1,4 +1,4 @@
-package com.app.kokonut.email.emailgroup;
+package com.app.kokonut.email.emailsendgroup;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -13,8 +13,8 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(of = "egId")
 @Data
 @NoArgsConstructor
-@Table(name="kn_email_group")
-public class EmailGroup {
+@Table(name="kn_email_send_group")
+public class EmailSendGroup {
 
     @Id
     @ApiModelProperty("주키")
@@ -23,7 +23,8 @@ public class EmailGroup {
     private Long egId;
 
     @ApiModelProperty("관리자 키(문자열, 구분자: ',')")
-    @Column(name = "eg_kokonut_IDX_list", nullable = false)
+    @Lob
+    @Column(columnDefinition = "LONGTEXT", name="eg_kokonut_IDX_list")
     private String egKokonutIDXList;
 
     @ApiModelProperty("등록자 email")

@@ -3,6 +3,7 @@ package com.app.kokonutuser;
 import com.app.kokonut.commonfield.dtos.CommonFieldDto;
 import com.app.kokonut.commonfield.CommonFieldRepositoryCustom;
 import com.app.kokonutuser.dtos.*;
+import com.app.kokonutuser.dtos.use.KokonutUserEmailFieldDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Woody
@@ -268,6 +270,35 @@ public class KokonutUserService {
 		log.info("searchQuery : "+searchQuery);
 		return dynamicUserRepositoryCustom.getTableDataCheck(searchQuery);
 	}
+
+	// 이메일 발송명단 호출
+	public List<KokonutUserEmailFieldDto> emailFieldList(String cpCode, String csEmailCodeSetting, String emReceiverType, List<String> emailSendChoseList) {
+		log.info("emailFieldList 호출");
+
+		String ctName = cpCode+"_1";
+		String emailField = cpCode+"_"+csEmailCodeSetting;
+
+//		log.info("ctName : "+ctName);
+//		log.info("csEmailCodeSetting : "+csEmailCodeSetting);
+//		log.info("emReceiverType : "+emReceiverType);
+//		log.info("emailSendChoseList : "+emailSendChoseList);
+
+		StringBuilder searchQuery = new StringBuilder();
+		searchQuery.append("SELECT ").append(emailField).append(" FROM ").append(ctName)
+				.append(" WHERE ").append(emailField).append(" IS NOT NULL AND ").append(emailField).append(" != '' "); // 값이 null 또는 공백인건 제외한다.
+
+		if(emReceiverType.equals("2")) {
+			String joinedEmailSendChoseList = emailSendChoseList.stream()
+					.map(s -> "'" + s + "'")
+					.collect(Collectors.joining(", "));
+			searchQuery.append(" AND kokonut_IDX IN (").append(joinedEmailSendChoseList).append(")");
+		}
+
+		log.info("searchQuery : "+searchQuery);
+
+		return dynamicUserRepositoryCustom.emailFieldList(emailField, String.valueOf(searchQuery));
+	}
+
 
 	// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 

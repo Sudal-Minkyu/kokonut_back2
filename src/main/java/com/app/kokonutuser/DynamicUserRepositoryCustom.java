@@ -1,6 +1,7 @@
 package com.app.kokonutuser;
 
 import com.app.kokonutuser.dtos.*;
+import com.app.kokonutuser.dtos.use.KokonutUserEmailFieldDto;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -56,4 +57,6 @@ public interface DynamicUserRepositoryCustom {
     String selectUserColumnComment(String searchQuery); // 유저테이블의 필드명을 통해 Comment 조회
 
     List<KokonutUserFieldCheckDto> selectUserTableNameAndFieldName(String searchQuery); // 개인정보 테이블의 필드명을 통해 테이블명, 필드명 조회 -> 삭제하기위해 조회하는 메서드
+
+    List<KokonutUserEmailFieldDto> emailFieldList(String emailField, String searchQuery);
 }
