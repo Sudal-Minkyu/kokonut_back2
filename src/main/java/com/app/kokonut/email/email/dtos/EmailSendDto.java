@@ -27,9 +27,9 @@ public class EmailSendDto {
 
     private String emEmailSend; // 발신자 이메일
 
-    private String emTitle; // 발신자 이메일
+    private String emTitle; // 제목
 
-    private String emContents; // 발신자 이메일
+    private String emContents; // 내용
 
     private List<MultipartFile> multipartFiles; // 첨부파일 목록 -> 20MB미만일 경우만
 
