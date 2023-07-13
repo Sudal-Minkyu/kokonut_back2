@@ -63,6 +63,79 @@ public class MailSender {
 		return sendMail(toEmail, toName, mailHost, "kokonut", title, contents, null);
 	}
 
+	// 리뉴얼 이메일발송
+	// fromEmail : 발송자 이메일
+	// toCompanyName : 발송한 회사명
+	// toEmailList : 받는 이메일 리스트
+	// title : 제목
+	// contents : 내용
+	// attachFiles : 파일리스트
+	@Transactional
+	public boolean newSendMail(String fromEmail, String toCompanyName, List<String> toEmailList, String title, String contents, List<AttachFile> attachFiles) {
+		log.info("newSendMail 호출");
+
+		boolean result = false;
+
+		if(!toEmailList.isEmpty()) {
+
+			// 수신자 정보 세팅
+			List<RecipientForRequest> recipients = new ArrayList<>();
+
+			// 받는사람 정보
+			RecipientForRequest recipient;
+
+			for(String toEmail : toEmailList) {
+				log.info("보낼이메일 : "+toEmail);
+
+				recipient = new RecipientForRequest();
+				recipient.setType("R");
+				recipient.setAddress(toEmail);
+				recipients.add(recipient);
+			}
+
+			log.info("이메일 수신자 정보 recipients : "+recipients);
+
+			// 발신자 정보 세팅
+			NCloudPlatformMailRequest req = new NCloudPlatformMailRequest();
+			req.setSenderAddress(fromEmail);
+			req.setSenderName(toCompanyName);
+			req.setTitle(title);
+			req.setBody(contents);
+			req.setRecipients(recipients);
+			req.setUnsubscribeMessage("광고 수신 문구");
+//			req.setIndividual(true); // 개인별 발송 혹은 일반 발송 여부
+			req.setAdvertising(false); // 광고메일 여부
+
+			if(attachFiles != null) {
+				req.setAttachFiles(attachFiles);
+			}
+
+			log.info("### 네이버 클라우드 플랫폼 서비스 sendMail 시작");
+			result = naverCloudPlatformService.sendMail(req);
+			log.info("result : "+result);
+
+//			if(result) {
+//				log.info("### 네이버 클라우드 플랫폼 서비스 sendMail 성공");
+//				log.info("### 이메일 발송 내역 저장");
+//				ContactEmailHistory contactEmailHistory = new ContactEmailHistory();
+//				contactEmailHistory.setEchFrom(fromEmail);
+//				contactEmailHistory.setEchFromName(fromName);
+//				contactEmailHistory.setEchTo(toEmail);
+//				contactEmailHistory.setEchToName(toName);
+//				contactEmailHistory.setEchTitle(title);
+//				contactEmailHistory.setEchContents(contents);
+//				contactEmailHistory.setInsert_date(LocalDateTime.now());
+//				contactEmailHistoryRepository.save(contactEmailHistory);
+//				log.info("### 이메일 발송 내역 저장 성공");
+//			}else {
+//				log.error("### 네이버 클라우드 플랫폼 서비스 sendMail 실패");
+//			}
+
+		}
+
+		return result;
+	}
+
 	@Transactional
 	public boolean sendMail(String fromEmail, String fromName, String toEmail, String toName, String title, String contents, List<AttachFile> attachFiles) {
 		log.info("### MailSender.sendMail 시작");
@@ -127,7 +200,10 @@ public class MailSender {
 	}
 
 	public String getHTML5(HashMap<String, String> callTemplate) throws IOException {
+
 		String htmlURL = frontServerDomainIp+"/src/template/mail/"+callTemplate.get("template")+".html";
+		log.info("htmlURL : "+htmlURL);
+
 		URL url = new URL(htmlURL);
 		URLConnection conn = url.openConnection();
 		InputStream is = conn.getInputStream();
@@ -138,4 +214,5 @@ public class MailSender {
 		}
 		return renaderdHtml;
 	}
+
 }

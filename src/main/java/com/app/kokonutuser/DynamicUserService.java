@@ -1990,7 +1990,7 @@ public class DynamicUserService {
 					String commentName = commentText[0];
 					String commentCheck = commentText[3];
 					String commentSecurity = commentText[1];
-					log.info("commentText : "+ Arrays.toString(commentText));
+//					log.info("commentText : "+ Arrays.toString(commentText));
 
 					// 카테고리가 파일이면 제외
 					if(commentText.length == 6 && (!commentCheck.equals("파일") && !commentName.equals("비밀번호"))) {
@@ -2182,8 +2182,8 @@ public class DynamicUserService {
 										echCount++;
 									} else {
 										log.error("이메일주소 형식과 맞지 않습니다. 다시 한번 확인해주시길 바랍니다. 보내신 이메일주소 : " + value);
-										return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_09.getCode(),
-												ResponseErrorCode.ERROR_CODE_09.getDesc() + " 보내신 이메일주소 : " + value));
+										return ResponseEntity.ok(res.fail(ResponseErrorCode.KO104.getCode(),
+												ResponseErrorCode.KO104.getDesc() + " 다시 한번 확인해주시길 바랍니다. 보내신 이메일주소 : " + value));
 									}
 								}
 							}

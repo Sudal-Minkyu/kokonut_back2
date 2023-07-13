@@ -1,5 +1,6 @@
 package com.app.kokonut.company.companysetting;
 
+import com.app.kokonut.company.company.QCompany;
 import com.app.kokonut.company.companysetting.dtos.CompanySettingCheckDto;
 import com.app.kokonut.company.companysetting.dtos.CompanySettingEmailDto;
 import com.app.kokonut.company.companysetting.dtos.CompanySettingInfoDto;
@@ -70,10 +71,13 @@ public class CompanySettingRepositoryCustomImpl extends QuerydslRepositorySuppor
     public CompanySettingEmailDto findByCompanySettingEmail(String cpCode) {
 
         QCompanySetting companySetting = QCompanySetting.companySetting;
+        QCompany company = QCompany.company;
 
         JPQLQuery<CompanySettingEmailDto> query = from(companySetting)
                 .where(companySetting.cpCode.eq(cpCode))
+                .innerJoin(company).on(company.cpCode.eq(companySetting.cpCode))
                 .select(Projections.constructor(CompanySettingEmailDto.class,
+                        company.cpName,
                         new CaseBuilder()
                                 .when(companySetting.csEmailCodeSetting.isNotNull()).then(companySetting.csEmailCodeSetting)
                                 .otherwise("")

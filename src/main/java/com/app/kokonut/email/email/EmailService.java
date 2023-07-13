@@ -25,6 +25,7 @@ import com.app.kokonut.history.HistoryService;
 import com.app.kokonut.history.dtos.ActivityCode;
 import com.app.kokonut.history.extra.decrypcounthistory.DecrypCountHistoryService;
 import com.app.kokonut.keydata.KeyDataService;
+import com.app.kokonut.navercloud.dto.AttachFile;
 import com.app.kokonutuser.KokonutUserService;
 import com.app.kokonutuser.dtos.use.KokonutUserEmailFieldDto;
 import lombok.extern.slf4j.Slf4j;
@@ -278,8 +279,17 @@ public class EmailService {
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
 
+        if(!Utils.isValidEmail(emailSendDto.getEmEmailSend())) {
+            log.error("이메일주소 형식과 맞지 않습니다. 발송자 이메일을 확인해주시길 바랍니다. 입력 이메일 : "+emailSendDto.getEmEmailSend());
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO104.getCode(),ResponseErrorCode.KO104.getDesc() +" " +
+                    "발송자 이메일을 확인해주시길 바랍니다. 입력 이메일 : "+emailSendDto.getEmEmailSend()));
+        }
+
         log.info("emailSendDto : "+emailSendDto);
 
+        List<AttachFile> attachFiles = null;
+
+        // 첨부파일 용량이 20MB가 넘는지 체크
         List<String> fileNames = new ArrayList<>();
         if(emailSendDto.getMultipartFiles() != null) {
             for (MultipartFile file : emailSendDto.getMultipartFiles()) {
@@ -306,7 +316,7 @@ public class EmailService {
         String ctName = cpCode+"_1";
 
         // 테스트용 이메일리스트 변수
-        List<String> testEmail = new ArrayList<>();
+        List<String> testEmail = new ArrayList<>(); //  emailSendDto.getEmailSendChoseList()
         testEmail.add("nG$8c3KNCi!4qb8xQq@k");
         testEmail.add("V79sGR#HaNTICOyuw%MH");
         testEmail.add("W5KGwCG!GgSP5XLk47yD");
@@ -324,6 +334,8 @@ public class EmailService {
             AwsKmsResultDto awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(cpCode);
 //            log.info("DataKey : "+awsKmsResultDto.getDataKey());
 //            log.info("IV : "+awsKmsResultDto.getIvKey());
+
+            String toCompanyName = companySettingEmailDto.getCpName();
 
             List<String> sendEmailList = new ArrayList<>();
 
@@ -408,8 +420,6 @@ public class EmailService {
                 }
             }
 
-            log.info("sendEmailList : "+sendEmailList);
-
             // 이메일발송 코드
             ActivityCode activityCode = ActivityCode.AC_59_3;
 
@@ -419,9 +429,59 @@ public class EmailService {
 //            Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
 //        cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
 
+            log.info("sendEmailList : "+sendEmailList);
 
+            // 이메일 전송작업시작
 
+            String emTitle = ReqUtils.filter(emailSendDto.getEmTitle());
+            log.info("emTitle : "+emTitle);
 
+            // 이메일DB에 저장할 내용
+            String emContents = ReqUtils.filter(emailSendDto.getEmContents()); // ReqUtils.filter 처리 <p> -- > &lt;p&gt;, html 태그를 DB에 저장하기 위해 이스케이프문자로 치환
+            log.info("emContents : "+emContents);
+
+            String contents = ReqUtils.unFilter(emailSendDto.getEmContents()); // &lt;br&gt;이메일내용 --> <br>이메일내용, html 화면에 뿌리기 위해 특수문자를 치환
+            log.info("contents : "+contents);
+
+            HashMap<String, String> callTemplate = new HashMap<>();
+            callTemplate.put("template", "MailTemplate");
+            callTemplate.put("title", "메일전송 템플릿 테스트");
+            callTemplate.put("content", contents);
+
+            String contentsTemplate = mailSender.getHTML5(callTemplate);
+            log.info("contentsTemplate : "+contentsTemplate);
+
+            List<String> testSendEmail = new ArrayList<>(); // sendEmailList
+            testSendEmail.add("woody@kokonut.me");
+            testSendEmail.add("gkstls2006@naver.com");
+
+            // List<AttachFile> attachFiles
+            boolean emailSendResult = mailSender.newSendMail(emailSendDto.getEmEmailSend(), toCompanyName, testSendEmail, emTitle, contentsTemplate, attachFiles);
+//            log.info("emailSendResult : "+emailSendResult);
+
+            if(emailSendResult) {
+                Email saveEmail = new Email();
+                saveEmail.setEmTitle(emTitle);
+                saveEmail.setEmContents(emContents);
+                saveEmail.setEmType(emailSendDto.getEmType());
+                if(emailSendDto.getEmType().equals("2")) {
+                    saveEmail.setEmReservationDate(emailSendDto.getEmReservationDate());
+                    saveEmail.setEmState("2");
+                }
+                saveEmail.setEmPurpose(emailSendDto.getEmPurpose());
+                if(emailSendDto.getEmPurpose().equals("3")) {
+                    saveEmail.setEmEtc(emailSendDto.getEmEtc());
+                }
+                saveEmail.setEmReceiverType(emailSendDto.getEmReceiverType());
+                saveEmail.setEmEmailSend(emailSendDto.getEmEmailSend());
+                saveEmail.setEmState("1");
+
+                saveEmail.setInsert_email(email);
+                saveEmail.setInsert_date(LocalDateTime.now());
+
+                Email saveSuccessEmail = emailRepository.save(saveEmail);
+
+            }
 
 
 
@@ -430,9 +490,9 @@ public class EmailService {
 
 
             // 복호화 횟수 저장
-            if(dchCount > 0) {
-                decrypCountHistoryService.decrypCountHistorySave(cpCode, dchCount);
-            }
+//            if(dchCount > 0) {
+//                decrypCountHistoryService.decrypCountHistorySave(cpCode, dchCount);
+//            }
 
         }
 
