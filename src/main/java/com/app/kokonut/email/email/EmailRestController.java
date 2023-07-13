@@ -78,7 +78,7 @@ public class EmailRestController {
     @ApiOperation(value="이메일발송 호출", notes="")
     @PostMapping("/sendEmail")
     @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-    public ResponseEntity<Map<String,Object>> sendEmail(@ModelAttribute EmailSendDto emailSendDto) throws IOException {
+    public ResponseEntity<Map<String,Object>> sendEmail(@ModelAttribute EmailSendDto emailSendDto) throws Exception {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return emailService.sendEmail(emailSendDto, jwtFilterDto);
     }

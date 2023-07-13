@@ -58,5 +58,8 @@ public interface DynamicUserRepositoryCustom {
 
     List<KokonutUserFieldCheckDto> selectUserTableNameAndFieldName(String searchQuery); // 개인정보 테이블의 필드명을 통해 테이블명, 필드명 조회 -> 삭제하기위해 조회하는 메서드
 
-    List<KokonutUserEmailFieldDto> emailFieldList(String emailField, String searchQuery);
+    List<KokonutUserEmailFieldDto> emailFieldList(String emailField, String searchQuery); // 이메일발송할 대상 리스트 호출
+
+    String getColumnComment(String searchQuery, String tableName, String columnName); // 필드의 코멘트값 가져오기
+
 }

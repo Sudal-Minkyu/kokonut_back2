@@ -5,13 +5,14 @@ import com.app.kokonutuser.dtos.use.KokonutUserEmailFieldDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.stereotype.Repository;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author Woody
@@ -234,6 +235,10 @@ public class DynamicUserRepositoryCustomImpl implements DynamicUserRepositoryCus
                                 rs.getObject(emailField)
                         )
         );
+    }
+
+    public String getColumnComment(String searchQuery, String tableName, String columnName) {
+        return jdbcTemplate.queryForObject(searchQuery, (rs, rowNum) -> rs.getString("COLUMN_COMMENT"), tableName, columnName);
     }
 
 }

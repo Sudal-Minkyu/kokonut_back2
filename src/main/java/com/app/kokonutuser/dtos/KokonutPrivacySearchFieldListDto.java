@@ -17,4 +17,6 @@ public class KokonutPrivacySearchFieldListDto {
 
     private String fieldCode; // 코드네임
 
+    private boolean isEmailAvailable; // 이메일항목 지정여부
+
 }

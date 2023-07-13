@@ -285,13 +285,13 @@ public class KokonutUserService {
 
 		StringBuilder searchQuery = new StringBuilder();
 		searchQuery.append("SELECT ").append(emailField).append(" FROM ").append(ctName)
-				.append(" WHERE ").append(emailField).append(" IS NOT NULL AND ").append(emailField).append(" != '' "); // 값이 null 또는 공백인건 제외한다.
+				.append(" WHERE ").append(emailField).append(" IS NOT NULL AND ").append(emailField).append(" != ''"); // 값이 null 또는 공백인건 제외한다.
 
 		if(emReceiverType.equals("2")) {
 			String joinedEmailSendChoseList = emailSendChoseList.stream()
 					.map(s -> "'" + s + "'")
 					.collect(Collectors.joining(", "));
-			searchQuery.append(" AND kokonut_IDX IN (").append(joinedEmailSendChoseList).append(")");
+			searchQuery.append("AND kokonut_IDX IN (").append(joinedEmailSendChoseList).append(")");
 		}
 
 		log.info("searchQuery : "+searchQuery);
@@ -299,6 +299,12 @@ public class KokonutUserService {
 		return dynamicUserRepositoryCustom.emailFieldList(emailField, String.valueOf(searchQuery));
 	}
 
+	// 이메일 발송명단 호출
+	public String getColumnComment(String tableName, String columnName) {
+		log.info("getColumnComment 호출");
+		String searchQuery = "SELECT COLUMN_COMMENT FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? AND COLUMN_NAME = ?";
+		return dynamicUserRepositoryCustom.getColumnComment(searchQuery, tableName, columnName);
+	}
 
 	// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
