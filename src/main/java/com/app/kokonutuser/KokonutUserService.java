@@ -272,11 +272,8 @@ public class KokonutUserService {
 	}
 
 	// 이메일 발송명단 호출
-	public List<KokonutUserEmailFieldDto> emailFieldList(String cpCode, String csEmailCodeSetting, String emReceiverType, List<String> emailSendChoseList) {
+	public List<KokonutUserEmailFieldDto> emailFieldList(String ctName, String fieldName, String emReceiverType, List<String> emailSendChoseList) {
 		log.info("emailFieldList 호출");
-
-		String ctName = cpCode+"_1";
-		String emailField = cpCode+"_"+csEmailCodeSetting;
 
 //		log.info("ctName : "+ctName);
 //		log.info("csEmailCodeSetting : "+csEmailCodeSetting);
@@ -284,8 +281,8 @@ public class KokonutUserService {
 //		log.info("emailSendChoseList : "+emailSendChoseList);
 
 		StringBuilder searchQuery = new StringBuilder();
-		searchQuery.append("SELECT ").append(emailField).append(" FROM ").append(ctName)
-				.append(" WHERE ").append(emailField).append(" IS NOT NULL AND ").append(emailField).append(" != ''"); // 값이 null 또는 공백인건 제외한다.
+		searchQuery.append("SELECT ").append(fieldName).append(" FROM ").append(ctName)
+				.append(" WHERE ").append(fieldName).append(" IS NOT NULL AND ").append(fieldName).append(" != ''"); // 값이 null 또는 공백인건 제외한다.
 
 		if(emReceiverType.equals("2")) {
 			String joinedEmailSendChoseList = emailSendChoseList.stream()
@@ -296,7 +293,7 @@ public class KokonutUserService {
 
 		log.info("searchQuery : "+searchQuery);
 
-		return dynamicUserRepositoryCustom.emailFieldList(emailField, String.valueOf(searchQuery));
+		return dynamicUserRepositoryCustom.emailFieldList(fieldName, String.valueOf(searchQuery));
 	}
 
 	// 이메일 발송명단 호출

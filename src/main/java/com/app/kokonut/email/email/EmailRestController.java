@@ -33,28 +33,15 @@ public class EmailRestController {
         this.dynamicUserService = dynamicUserService;
     }
 
-    @ApiOperation(value="이메일 목록 조회", notes="" +
-            "1. 토큰과 페이지 처리를 위한 값을 받는다." +
-            "2. 발송한 메일 목록을 조회한다.")
-    @GetMapping(value = "/emailList") // -> 기존의 코코넛 호출 메서드명 : getEmail
-    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-    public ResponseEntity<Map<String,Object>> emailList(@RequestParam(value="searchText", defaultValue = "") String searchText,
-                                                        @RequestParam(value="stime", defaultValue = "") String stime,
-                                                        @RequestParam(value="emailType", defaultValue = "") String emailType,
-                                                        Pageable pageable) {
-        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
-         return emailService.emailList(jwtFilterDto.getEmail(), searchText, stime, emailType, pageable);
-    }
-
-    @ApiOperation(value="이메일 보내기", notes="" +
-            "1. 이메일을 전송한다.")
-    @PostMapping("/sendEmail2")
-    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-    public ResponseEntity<Map<String,Object>> sendEmail2(@RequestBody EmailDetailDto emailDetailDto) {
-        // 접속한 사용자 이메일
-        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
-        return emailService.sendEmail2(jwtFilterDto.getEmail(), emailDetailDto);
-    }
+//    @ApiOperation(value="이메일 보내기", notes="" +
+//            "1. 이메일을 전송한다.")
+//    @PostMapping("/sendEmail2")
+//    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+//    public ResponseEntity<Map<String,Object>> sendEmail2(@RequestBody EmailDetailDto emailDetailDto) {
+//        // 접속한 사용자 이메일
+//        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+//        return emailService.sendEmail2(jwtFilterDto.getEmail(), emailDetailDto);
+//    }
 
     @ApiOperation(value="이메일 상세보기", notes="" +
             "1. 조회하고자 하는 이메일 id 값을 받는다." +
@@ -75,12 +62,25 @@ public class EmailRestController {
         return dynamicUserService.privacyUserSearch(kokonutSearchDto,"2",jwtFilterDto);
     }
 
-    @ApiOperation(value="이메일발송 호출", notes="")
-    @PostMapping("/sendEmail")
+    @ApiOperation(value="이메일 목록 조회", notes="" +
+            "1. 토큰과 페이지 처리를 위한 값을 받는다." +
+            "2. 발송한 메일 목록을 조회한다.")
+    @GetMapping(value = "/emailList") // -> 기존의 코코넛 호출 메서드명 : getEmail
     @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-    public ResponseEntity<Map<String,Object>> sendEmail(@ModelAttribute EmailSendDto emailSendDto) throws Exception {
+    public ResponseEntity<Map<String,Object>> emailList(@RequestParam(value="searchText", defaultValue = "") String searchText,
+                                                        @RequestParam(value="stime", defaultValue = "") String stime,
+                                                        @RequestParam(value="emPurpose", defaultValue = "") String emPurpose,
+                                                        Pageable pageable) throws IOException {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
-        return emailService.sendEmail(emailSendDto, jwtFilterDto);
+        return emailService.emailList(jwtFilterDto, searchText, stime, emPurpose, pageable);
+    }
+
+    @ApiOperation(value="이메일발송 호출", notes="")
+    @PostMapping("/sendEmailService")
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    public ResponseEntity<Map<String,Object>> sendEmailService(@ModelAttribute EmailSendDto emailSendDto) throws Exception {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return emailService.sendEmailService(emailSendDto, jwtFilterDto);
     }
 
 //    @ApiOperation(value="이메일 발송 대상 조회", notes="" +

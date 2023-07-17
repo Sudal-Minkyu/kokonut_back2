@@ -1,4 +1,4 @@
-package com.app.kokonut.provision.dtos;
+package com.app.kokonut.email.email.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,24 +8,20 @@ import java.time.LocalDateTime;
 
 /**
  * @author Woody
- * Date : 2023-05-10
+ * Date : 2023-07-17
  * Time :
- * Remark : Policy 리스트 검색 데이터 Dto
+ * Remark : 이메일발송 리스트 검색 데이터 Dto
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProvisionSearchDto {
+public class EmailSearchDto {
 
     private LocalDateTime stimeStart;
     private LocalDateTime stimeEnd;
 
-    private Long adminId;
     private String cpCode;
-
     private String searchText;
 
-    private String filterDownload;
-    private String filterState;
-
+    private String emPurpose;
 }

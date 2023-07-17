@@ -415,6 +415,10 @@ public class CompanySettingService {
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
                     cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", CommonUtil.clientIp(), CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
 
+            if (csEmailCodeSetting.equals("")) {
+                csEmailCodeSetting = null;
+            }
+
             optionalCompanySetting.get().setCsEmailCodeSetting(csEmailCodeSetting);
             companySettingRepository.save(optionalCompanySetting.get());
 

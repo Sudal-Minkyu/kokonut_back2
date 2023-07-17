@@ -504,8 +504,8 @@ public class AdminService {
                     "</a>";
             log.info("toEmail" + userEmail + ", toName" + "코코넛");
 
-            boolean mailSenderResult = mailSender.sendMail(userEmail, "", title, contents);
-            if(mailSenderResult) {
+            String mailSenderResult = mailSender.sendMail(userEmail, "", title, contents);
+            if(mailSenderResult != null) {
                 log.info("### 메일전송 성공했습니다. reciver Email : "+ userEmail);
 
                 // 인증번호 레디스에 담기

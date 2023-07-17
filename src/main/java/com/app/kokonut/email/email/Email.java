@@ -22,9 +22,9 @@ public class Email {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long emId;
 
-    @ApiModelProperty("이메일 그룹 주키")
-    @Column(name = "eg_id")
-    private Long egId;
+    @ApiModelProperty("회사코드")
+    @Column(name = "cp_code")
+    private String cpCode;
 
     @ApiModelProperty("발송타입(1 : 일반발송, 2 : 예약발송)")
     @Column(name = "em_type")
@@ -59,9 +59,25 @@ public class Email {
     @Column(columnDefinition = "LONGTEXT", name="em_contents")
     private String emContents;
 
-    @ApiModelProperty("메일상태(1:미발송, 2:발송대기중, 3:발송중, 4:발송완료)")
+    @ApiModelProperty("메일상태(1: 발송중, 2: 발송예약중, 3: 일부실패, 4: 발송실패, 5: 발송완료, 6: 발송취소)")
     @Column(name = "em_state")
     private String emState;
+
+    @ApiModelProperty("이메일전송 고유 requestId 값")
+    @Column(name = "em_request_id")
+    private String emRequestId;
+
+    @ApiModelProperty("이메일발송 전체건수")
+    @Column(name = "em_send_all_count")
+    private Integer emSendAllCount;
+
+    @ApiModelProperty("이메일발송 성공건수")
+    @Column(name = "em_send_suc_count")
+    private Integer emSendSucCount;
+
+    @ApiModelProperty("이메일발송 실패건수")
+    @Column(name = "em_send_fail_count")
+    private Integer emSendFailCount;
 
     @ApiModelProperty("발송자 email")
     @Column(name = "insert_email", nullable = false)

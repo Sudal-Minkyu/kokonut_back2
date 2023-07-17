@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -15,7 +16,7 @@ public class EmailSendDto {
 
     private String emType; // 발송타입(1 : 일반발송, 2 : 예약발송)
 
-    private LocalDateTime emReservationDate; // 예약발송일 경우 발송시간
+    private Long emReservationDate; // 예약발송일 경우 발송시간
 
     private String emPurpose; // 발송목적(1:주요공지, 2:광고/홍보, 3:기타)
 

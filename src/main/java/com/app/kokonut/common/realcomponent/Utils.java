@@ -11,6 +11,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -274,6 +278,21 @@ public class Utils {
 		Matcher matcher = pattern.matcher(email);
 
 		return matcher.find();
+	}
+
+	// 파일 인코딩 MultipartFile -> File 변환
+	public static File convertMultipartFileToFile(MultipartFile multipartFile) throws IOException {
+		log.info("첨부파일 인코딩 convertMultipartFileToFile 호출");
+
+		// 임시 파일 생성
+		Path tempDir = Files.createTempDirectory("");
+		String encodedFilename = URLEncoder.encode(Objects.requireNonNull(multipartFile.getOriginalFilename()), StandardCharsets.UTF_8);
+		File tempFile = tempDir.resolve(encodedFilename).toFile();
+
+		// MultipartFile 내용을 임시 파일에 쓰기
+		multipartFile.transferTo(tempFile);
+
+		return tempFile;
 	}
 
 }

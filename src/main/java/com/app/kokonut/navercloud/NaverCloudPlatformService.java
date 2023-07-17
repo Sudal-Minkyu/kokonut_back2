@@ -1,12 +1,22 @@
 package com.app.kokonut.navercloud;
 
 import com.app.kokonut.common.realcomponent.Converter;
+import com.app.kokonut.common.realcomponent.Utils;
 import com.app.kokonut.keydata.KeyDataService;
+import com.app.kokonut.navercloud.dto.NCloudPlatformMailFileRequest;
 import com.app.kokonut.navercloud.dto.NCloudPlatformMailRequest;
 import com.app.kokonut.navercloud.dto.NaverCloudPlatformResultDto;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.content.ContentBody;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,10 +30,25 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
 
 @Slf4j
 @Service
@@ -502,10 +527,10 @@ public class NaverCloudPlatformService {
 
 
     // 이메일용 메서드
-    public boolean sendMail(NCloudPlatformMailRequest request) {
+    public String sendMail(NCloudPlatformMailRequest request) {
         log.info("sendMail 호출");
 
-        boolean isSuccess = false;
+        String requestId = null;
 
         final String URL = "https://mail.apigw.ntruss.com/api/v1/mails";
 
@@ -549,10 +574,12 @@ public class NaverCloudPlatformService {
 
             log.info("code: {}, data: {}", code, data);
 
+            JSONObject jsonObj = new JSONObject(data);
+            requestId = jsonObj.getString("requestId");
+            log.info("requestId : " + requestId);
+
             br.close();
             conn.disconnect();
-
-            isSuccess = true;
         }
         catch (Exception e) {
             log.error("예외처리 : "+e);
@@ -560,14 +587,74 @@ public class NaverCloudPlatformService {
             log.error("예외 발생 : "+e.getMessage());
         }
 
-        return isSuccess;
+        return requestId;
     }
 
+    // 이메일용 메서드
+    public String fileMail(MultipartFile multipartFile) {
+        log.info("fileMail 호출");
+
+        String result = null;
+
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+
+        // HttpPost 객체 생성
+        HttpPost httpPost = new HttpPost("https://mail.apigw.ntruss.com/api/v1/files");
+
+        try {
+            // MultipartFile을 java.io.File로 변환
+            File file = Utils.convertMultipartFileToFile(multipartFile);
+
+            long currentTime = System.currentTimeMillis();
+            String currentTimeStr = Long.toString(currentTime);
+            String signature = makeSignature(currentTimeStr, "/api/v1/files");
+//            log.info("signature : "+signature);
+
+            // 파일을 이용해 FileBody 객체 생성
+            FileBody fileBody = new FileBody(file, ContentType.DEFAULT_BINARY);
+
+            // MultipartEntityBuilder를 이용해 HttpEntity 객체 생성
+            HttpEntity entity = MultipartEntityBuilder.create() // 자동으로 "Content-Type","multipart/form-data"이 주입됨
+                    .addPart("fileList", fileBody)
+                    .build();
+
+            // HttpPost 객체에 HttpEntity 설정
+            httpPost.setEntity(entity);
+
+            // 필요한 헤더 추가
+//            httpPost.setHeader("accept", "application/json");
+//            httpPost.setHeader("Content-Type", "multipart/form-data");
+            httpPost.setHeader("x-ncp-iam-access-key", accessKey);
+            httpPost.setHeader("x-ncp-apigw-timestamp", currentTimeStr);
+            httpPost.setHeader("x-ncp-apigw-signature-v2", signature);
+            log.info("httpPost : " + httpPost);
+
+            // POST 요청 실행
+            try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
+                // 응답 처리
+                String responseString = EntityUtils.toString(response.getEntity());
+                JSONObject jsonObject = new JSONObject(responseString);
+                JSONArray filesArray = jsonObject.getJSONArray("files");
+                result = filesArray.getJSONObject(0).getString("fileId");
+                log.info("File ID : " + result);
+            }
+
+        }
+
+        catch (Exception e) {
+            log.error("예외처리 : "+e);
+            log.error("예외처리 메세지 : "+e.getMessage());
+            log.error("예외 발생 : "+e.getMessage());
+        }
+
+        return result;
+    }
+
+    // 시그네처 생성 함수
     public String makeSignature(String timestamp, String url) {
         String space = " ";  // 공백
         String newLine = "\n";  // 줄바꿈
         String method = "POST";  // HTTP 메소드
-//	    String url = "/api/v1/mails";  // 도메인을 제외한 "/" 아래 전체 url (쿼리스트링 포함)
 
         String encodeBase64String = "";
 
