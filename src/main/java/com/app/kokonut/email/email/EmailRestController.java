@@ -75,6 +75,14 @@ public class EmailRestController {
         return emailService.emailList(jwtFilterDto, searchText, stime, emPurpose, pageable);
     }
 
+    @ApiOperation(value="이메일 발송 예약 취소", notes="")
+    @PostMapping(value = "/emailReservedCancel")
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    public ResponseEntity<Map<String,Object>> emailReservedCancel(@RequestParam(value="emId", defaultValue = "") Long emId) throws IOException {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return emailService.emailReservedCancel(emId, jwtFilterDto);
+    }
+
     @ApiOperation(value="이메일발송 호출", notes="")
     @PostMapping("/sendEmailService")
     @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")

@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-
 @Slf4j
 @Configuration
 @Component
@@ -28,18 +27,24 @@ public class SchedulerConfig {
     private final Job kokonutPayJob; // 월 사용료 결제예약 함수 Job
     private final Job kokonutPayCheckJob; // 월 사용료 결제 확인 함수 Job
     private final Job kokonutPayErrorJob; // 결제에러건 결제 함수 Job
+    private final Job kokonutSendEmailUpdateJob; // 이메일발송건 업데이트 함수 Job
+    private final Job kokonutReservationEmailSendJob; // 이메일 예약발송건 발송시작 함수 Job
 
     @Autowired
     public SchedulerConfig(JobLauncher jobLauncher,
                            @Qualifier(JOB_NAME+"dayPrivacyAddJob") Job dayPrivacyAddJob,
                            @Qualifier(JOB_NAME+"kokonutPayJob") Job kokonutPayJob,
                            @Qualifier(JOB_NAME+"kokonutPayCheckJob") Job kokonutPayCheckJob,
-                           @Qualifier(JOB_NAME+"kokonutPayErrorJob") Job kokonutPayErrorJob) {
+                           @Qualifier(JOB_NAME+"kokonutPayErrorJob") Job kokonutPayErrorJob,
+                           @Qualifier(JOB_NAME+"kokonutSendEmailUpdateJob") Job kokonutSendEmailUpdateJob,
+                           @Qualifier(JOB_NAME+"kokonutReservationEmailSendJob") Job kokonutReservationEmailSendJob) {
         this.jobLauncher = jobLauncher;
         this.dayPrivacyAddJob = dayPrivacyAddJob;
         this.kokonutPayJob = kokonutPayJob;
         this.kokonutPayCheckJob = kokonutPayCheckJob;
         this.kokonutPayErrorJob = kokonutPayErrorJob;
+        this.kokonutSendEmailUpdateJob = kokonutSendEmailUpdateJob;
+        this.kokonutReservationEmailSendJob = kokonutReservationEmailSendJob;
     }
 
     @Scheduled(cron = "0 0 5 * * *") // 매일 새벽 5시에 실행
@@ -99,7 +104,33 @@ public class SchedulerConfig {
         }
     }
 
+    @Scheduled(cron = "0 */5 * * * *") // 매일 5분마다 실행 이메일발송건 업데이트
+    public void kokonutSendEmailUpdateSchedul() {
+        try {
+            log.info("이메일발송건 업데이트 스케줄러 실행");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH시 mm분 ss초");
+            JobParameters jobParameters = new JobParametersBuilder()
+                    .addString("requestDate", LocalDateTime.now().format(formatter))
+                    .toJobParameters();
+            jobLauncher.run(kokonutSendEmailUpdateJob, jobParameters);
+        } catch (Exception e) {
+            log.error("이메일발송건 업데이트 실행 에러");
+        }
+    }
 
+//    @Scheduled(fixedRate = 5000, initialDelay = 1)
+    public void kokonutReservationEmailSendSchedul() {
+        try {
+            log.info("이메일 예약발송건 발송시작 스케줄러 실행");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH시 mm분 ss초");
+            JobParameters jobParameters = new JobParametersBuilder()
+                    .addString("requestDate", LocalDateTime.now().format(formatter))
+                    .toJobParameters();
+            jobLauncher.run(kokonutReservationEmailSendJob, jobParameters);
+        } catch (Exception e) {
+            log.error("이메일 예약발송건 발송시작 실행 에러");
+        }
+    }
 
 //    @Scheduled(cron = "0 0 6 L * *") // 매달 새벽 6시에 실행
 //    @Scheduled(cron = "0 19 19 * * *") // 매일 오후 5시 50분

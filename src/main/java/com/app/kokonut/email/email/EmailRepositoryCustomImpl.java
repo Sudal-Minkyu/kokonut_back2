@@ -1,23 +1,11 @@
 package com.app.kokonut.email.email;
 
 import com.app.kokonut.admin.QAdmin;
-import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import com.app.kokonut.email.email.dtos.EmailDetailDto;
 import com.app.kokonut.email.email.dtos.EmailListDto;
 import com.app.kokonut.email.email.dtos.EmailSearchDto;
-import com.app.kokonut.provision.QProvision;
-import com.app.kokonut.provision.dtos.ProvisionListDto;
-import com.app.kokonut.provision.dtos.ProvisionSearchDto;
-import com.app.kokonut.provision.provisiondownloadhistory.QProvisionDownloadHistory;
-import com.app.kokonut.provision.provisionroster.QProvisionRoster;
-import com.app.kokonut.qna.QQna;
-import com.app.kokonut.qna.dtos.QnaListDto;
-import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import org.qlrm.mapper.JpaResultMapper;
 import org.springframework.data.domain.Page;
@@ -26,8 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -62,15 +48,17 @@ public class EmailRepositoryCustomImpl extends QuerydslRepositorySupport impleme
                 .innerJoin(admin).on(admin.knEmail.eq(email.insert_email))
                 .select(Projections.constructor(EmailListDto.class,
                         email.emPurpose,
-                        email.emEtc,
-                        email.emRequestId,
+                        new CaseBuilder()
+                                .when(email.emEtc.isNull()).then("")
+                                .otherwise(email.emEtc),
+                        email.emTitle,
                         email.emState,
                         email.emSendAllCount,
                         email.emSendSucCount,
                         email.emSendFailCount,
                         admin.knName,
-                        email.emSendAllCount,
-                        email.emSendSucCount,
+                        email.insert_email,
+                        email.emEmailSend,
                         new CaseBuilder()
                                 .when(email.emReservationDate.isNull()).then(email.insert_date)
                                 .otherwise(email.emReservationDate)

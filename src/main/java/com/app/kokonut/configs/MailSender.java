@@ -1,6 +1,7 @@
 package com.app.kokonut.configs;
 
 
+import com.app.kokonut.email.email.dtos.EmailCheckDto;
 import com.app.kokonut.emailcontacthistory.ContactEmailHistory;
 import com.app.kokonut.emailcontacthistory.ContactEmailHistoryRepository;
 import com.app.kokonut.keydata.KeyDataService;
@@ -73,7 +74,6 @@ public class MailSender {
 	// title : 제목
 	// contents : 내용
 	// attachFiles : 파일리스트
-	@Transactional
 	public String newSendMail(String fromEmail, String toCompanyName, List<String> toEmailList, String title, String contents, Long reservationTime,  List<MultipartFile> multipartFiles) throws IOException {
 		log.info("newSendMail 호출");
 
@@ -119,16 +119,23 @@ public class MailSender {
 				for(MultipartFile multipartFile : multipartFiles) {
 					fileIdList.add(naverCloudPlatformService.fileMail(multipartFile));
 				}
-				log.info("fileIdList : "+fileIdList);
+//				log.info("fileIdList : "+fileIdList);
 				req.setAttachFileIds(fileIdList);
 			}
 
 			log.info("### 네이버 클라우드 플랫폼 서비스 sendMail 시작");
 			requestId = naverCloudPlatformService.sendMail(req);
-			log.info("requestId : "+requestId);
+//			log.info("requestId : "+requestId);
 		}
 
 		return requestId;
+	}
+
+	// 발송된 이메일 상태 체크호출
+	public EmailCheckDto sendEmailCheck(String requestId) throws Exception {
+		log.info("sendEmailCheck 호출");
+
+		return naverCloudPlatformService.sendEmailCheck(requestId);
 	}
 
 	@Transactional

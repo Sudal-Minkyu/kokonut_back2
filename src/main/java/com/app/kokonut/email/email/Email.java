@@ -87,4 +87,12 @@ public class Email {
     @Column(name = "insert_date", nullable = false)
     private LocalDateTime insert_date;
 
+    @ApiModelProperty("수정자 email")
+    @Column(name = "modify_email")
+    private String modify_email;
+
+    @ApiModelProperty("수정 날짜")
+    @Column(name = "modify_date")
+    private LocalDateTime modify_date;
+
 }
