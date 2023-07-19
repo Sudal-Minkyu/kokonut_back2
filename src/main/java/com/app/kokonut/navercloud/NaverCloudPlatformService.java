@@ -710,4 +710,54 @@ public class NaverCloudPlatformService {
         return encodeBase64String;
     }
 
+    // 코코넛 API호출 API 테스트용
+    public boolean kokonutApiHocul() {
+        boolean result = false;
+
+        String url = "http://localhost:8050/v3/api/Auth/hoculPostTest";
+        log.info("url : "+url);
+
+        try {
+            URL apiurl = new URL(url);
+
+            HttpURLConnection conn = (HttpURLConnection) apiurl.openConnection();
+//            conn.setRequestMethod("GET");
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("content-type", "application/json");
+            conn.setRequestProperty("x-api-key", "23f553a39c61554401216602c089a8f9");
+            conn.setUseCaches(false);
+            conn.setDoOutput(false);
+            conn.setDoInput(true);
+
+            // 응답 데이터 얻기
+            BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder();
+
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+
+            String code = String.valueOf(conn.getResponseCode());
+            String data = sb.toString();
+
+            br.close();
+            conn.disconnect();
+
+            log.info("code: {}, data: {}", code, data);
+
+            if(code.equals("200")) {
+                result = true;
+            }
+
+        }
+        catch (Exception e) {
+            log.error("예외처리 : "+e);
+            log.error("예외처리 메세지 : "+e.getMessage());
+            log.error("예외 발생 : "+e.getMessage());
+        }
+
+        return result;
+    }
+
 }

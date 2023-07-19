@@ -24,7 +24,7 @@ public class KokonutApiInterceptor implements AsyncHandlerInterceptor {
 
 	private static final String BEARER_TYPE = "Authorization";
 
-	private static final String APIKEY_TYPE = "ApiKey";
+	private static final String APIKEY_TYPE = "x-api-key";
 
 	@Autowired
 	private ApiKeyService apiKeyService;

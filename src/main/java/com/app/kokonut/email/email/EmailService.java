@@ -164,26 +164,28 @@ public class EmailService {
         for(Email email : emailList) {
 
             String requestId = email.getEmRequestId();
-//            log.info("requestId : "+requestId);
+            if(requestId != null || !requestId.equals("")) {
+//                log.info("requestId : "+requestId);
 
-            EmailCheckDto emailCheckDto = mailSender.sendEmailCheck(requestId);
-//            log.info("emailCheckDto : "+emailCheckDto);
+                EmailCheckDto emailCheckDto = mailSender.sendEmailCheck(requestId);
+//                log.info("emailCheckDto : "+emailCheckDto);
 
-            if(emailCheckDto != null) {
-                if(emailCheckDto.getFailCount() == emailCheckDto.getRequestCount()) {
-                    // 발송실패
-                    email.setEmState("4");
-                } else if(emailCheckDto.getFailCount() > 0){
-                    // 일부실패
-                    email.setEmState("3");
-                } else {
-                    // 발송성공
-                    email.setEmState("5");
+                if(emailCheckDto != null) {
+                    if(emailCheckDto.getFailCount() == emailCheckDto.getRequestCount()) {
+                        // 발송실패
+                        email.setEmState("4");
+                    } else if(emailCheckDto.getFailCount() > 0){
+                        // 일부실패
+                        email.setEmState("3");
+                    } else {
+                        // 발송성공
+                        email.setEmState("5");
+                    }
+                    email.setEmSendAllCount(emailCheckDto.getRequestCount());
+                    email.setEmSendSucCount(emailCheckDto.getSentCount());
+                    email.setEmSendFailCount(emailCheckDto.getFailCount());
+                    updateEmailList.add(email);
                 }
-                email.setEmSendAllCount(emailCheckDto.getRequestCount());
-                email.setEmSendSucCount(emailCheckDto.getSentCount());
-                email.setEmSendFailCount(emailCheckDto.getFailCount());
-                updateEmailList.add(email);
             }
         }
 

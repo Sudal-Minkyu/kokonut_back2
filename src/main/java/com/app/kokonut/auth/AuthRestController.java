@@ -5,6 +5,7 @@ import com.app.kokonut.auth.dtos.AdminGoogleOTPDto;
 import com.app.kokonut.auth.dtos.AdminPasswordChangeDto;
 import com.app.kokonut.auth.jwt.dto.AuthRequestDto;
 import com.app.kokonut.common.AjaxResponse;
+import com.app.kokonut.navercloud.NaverCloudPlatformService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,9 +34,26 @@ public class AuthRestController {
 
     private final AuthService authService;
 
+    private final NaverCloudPlatformService naverCloudPlatformService;
+
     @Autowired
-    public AuthRestController(AuthService authService){
+    public AuthRestController(AuthService authService, NaverCloudPlatformService naverCloudPlatformService){
         this.authService = authService;
+        this.naverCloudPlatformService = naverCloudPlatformService;
+    }
+
+    @ApiOperation(value = "코코넛 API호출 API 테스트용")
+    @PostMapping(value = "/kokonutApiHocul")
+    public ResponseEntity<Map<String,Object>> kokonutApiHocul(HttpServletRequest request, HttpServletResponse response) {
+        log.info("kokonutApiHocul 호출");
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+        boolean result = naverCloudPlatformService.kokonutApiHocul();
+        log.info("result : "+result);
+
+        return ResponseEntity.ok(res.success(data));
     }
 
     @ApiOperation(value = "부트페이 웹훅 호출용 테스트 API")
