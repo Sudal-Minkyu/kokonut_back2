@@ -167,7 +167,7 @@ public class BatchConfig {
     }
     //@@@@@@@@@@@@@@@@@
 
-    // 이메일 예약발송건 발송시작 @@
+    // 이메일 예약발송건 발송시작 @@ -> 사용안함 23.07.20
     @Bean(JOB_NAME+"kokonutReservationEmailSendJob")
     public Job kokonutReservationEmailSendJob() {
         return jobBuilderFactory.get("kokonutReservationEmailSendJob")
