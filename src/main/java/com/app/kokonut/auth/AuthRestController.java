@@ -1,5 +1,6 @@
 package com.app.kokonut.auth;
 
+import com.app.kokonut.alimtalk.AlimtalkService;
 import com.app.kokonut.auth.dtos.AdminCreateDto;
 import com.app.kokonut.auth.dtos.AdminGoogleOTPDto;
 import com.app.kokonut.auth.dtos.AdminPasswordChangeDto;
@@ -33,43 +34,9 @@ import java.util.Map;
 public class AuthRestController {
 
     private final AuthService authService;
-
-    private final NaverCloudPlatformService naverCloudPlatformService;
-
     @Autowired
-    public AuthRestController(AuthService authService, NaverCloudPlatformService naverCloudPlatformService){
+    public AuthRestController(AuthService authService){
         this.authService = authService;
-        this.naverCloudPlatformService = naverCloudPlatformService;
-    }
-
-    @ApiOperation(value = "코코넛 API호출 API 테스트용")
-    @PostMapping(value = "/kokonutApiHocul")
-    public ResponseEntity<Map<String,Object>> kokonutApiHocul(HttpServletRequest request, HttpServletResponse response) {
-        log.info("kokonutApiHocul 호출");
-
-        AjaxResponse res = new AjaxResponse();
-        HashMap<String, Object> data = new HashMap<>();
-
-        boolean result = naverCloudPlatformService.kokonutApiHocul();
-        log.info("result : "+result);
-
-        return ResponseEntity.ok(res.success(data));
-    }
-
-    @ApiOperation(value = "부트페이 웹훅 호출용 테스트 API")
-    @PostMapping(value = "/bootPayWebhookCallBack")
-    public ResponseEntity<Map<String,Object>> bootPayWebhookCallBack(@RequestBody HashMap<String,Object> paramMap,
-                                                                     HttpServletRequest request, HttpServletResponse response) {
-        log.info("bootPayWebhookCallBack 호출");
-
-        AjaxResponse res = new AjaxResponse();
-        HashMap<String, Object> data = new HashMap<>();
-
-        log.info("paramMap : "+paramMap);
-        log.info("request : "+request);
-        log.info("response : "+response);
-
-        return ResponseEntity.ok(res.success(data));
     }
 
     // 이메일 가입존재 여부(비밀번호찾기 사용)

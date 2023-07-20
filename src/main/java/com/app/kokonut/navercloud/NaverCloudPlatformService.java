@@ -542,7 +542,6 @@ public class NaverCloudPlatformService {
         catch (Exception e) {
             log.error("예외처리 : "+e);
 			log.error("예외처리 메세지 : "+e.getMessage());
-            log.error("예외 발생 : "+e.getMessage());
         }
 
         return requestId;
@@ -603,7 +602,6 @@ public class NaverCloudPlatformService {
         catch (Exception e) {
             log.error("예외처리 : "+e);
             log.error("예외처리 메세지 : "+e.getMessage());
-            log.error("예외 발생 : "+e.getMessage());
         }
 
         return result;
@@ -673,7 +671,6 @@ public class NaverCloudPlatformService {
         catch (Exception e) {
             log.error("예외처리 : "+e);
             log.error("예외처리 메세지 : "+e.getMessage());
-            log.error("예외 발생 : "+e.getMessage());
         }
 
         return emailCheckDto;
@@ -704,7 +701,6 @@ public class NaverCloudPlatformService {
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             log.error("예외처리 : "+e);
 			log.error("예외처리 메세지 : "+e.getMessage());
-            log.error("예외 발생 : "+e.getMessage());
         }
 
         return encodeBase64String;
@@ -754,7 +750,6 @@ public class NaverCloudPlatformService {
         catch (Exception e) {
             log.error("예외처리 : "+e);
             log.error("예외처리 메세지 : "+e.getMessage());
-            log.error("예외 발생 : "+e.getMessage());
         }
 
         return result;

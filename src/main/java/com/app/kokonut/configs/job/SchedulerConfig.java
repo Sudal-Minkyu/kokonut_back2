@@ -109,7 +109,7 @@ public class SchedulerConfig {
         }
     }
 
-    @Scheduled(cron = "0 */5 * * * *") // 매일 5분마다 실행 이메일발송건 업데이트
+//    @Scheduled(cron = "0 */5 * * * *") // 매일 5분마다 실행 이메일발송건 업데이트
 //    @Scheduled(fixedRate = 5000, initialDelay = 1)
     public void kokonutSendEmailUpdateSchedul() {
         try {
