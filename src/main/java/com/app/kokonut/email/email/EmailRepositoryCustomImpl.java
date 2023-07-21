@@ -4,6 +4,7 @@ import com.app.kokonut.admin.QAdmin;
 import com.app.kokonut.email.email.dtos.EmailDetailDto;
 import com.app.kokonut.email.email.dtos.EmailListDto;
 import com.app.kokonut.email.email.dtos.EmailSearchDto;
+import com.app.kokonut.provision.QProvision;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.JPQLQuery;
@@ -14,6 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -88,4 +91,36 @@ public class EmailRepositoryCustomImpl extends QuerydslRepositorySupport impleme
 
         return query.fetchOne();
     }
+
+    public Long sendCount(String cpCode, String emState, String dateType, LocalDate now, LocalDate filterDate) {
+
+        QEmail email = QEmail.email;
+
+        LocalDateTime nowTime = now.atStartOfDay();
+        LocalDateTime filterTime = filterDate.atStartOfDay();
+
+        JPQLQuery<Long> query = from(email)
+                .where(email.emState.eq(emState).and(email.cpCode.eq(cpCode)))
+                .select(Projections.constructor(Long.class,
+                        email.count()
+                ));
+
+        if(dateType.equals("1")) {
+            // 오늘조회
+            query.where(email.insert_date.goe(filterTime).or(email.insert_date.loe(filterTime)));
+        }else if(dateType.equals("2")) {
+            // 이번주 조회
+            query.where(email.insert_date.loe(filterTime).and(email.insert_date.goe(nowTime))); // 날짜 사이값 정의 filterDate < now
+        } else {
+            // 이번달 조회
+            query.where(
+                    email.insert_date.year().eq(filterDate.getYear()).and(email.insert_date.month().eq(filterDate.getMonthValue()))
+                            .or(email.insert_date.year().eq(filterDate.getYear()).and(email.insert_date.month().eq(filterDate.getMonthValue())))
+                            .or(email.insert_date.loe(filterTime).and(email.insert_date.goe(filterTime)))
+            );
+        }
+
+        return query.fetchOne();
+    }
+
 }

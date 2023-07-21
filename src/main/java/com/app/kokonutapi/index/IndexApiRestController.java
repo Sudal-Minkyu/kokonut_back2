@@ -1,6 +1,5 @@
 package com.app.kokonutapi.index;
 
-import com.app.kokonut.admin.enums.AuthorityRole;
 import com.app.kokonut.auth.jwt.SecurityUtil;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import com.app.kokonut.index.IndexService;
@@ -9,7 +8,10 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -48,14 +50,35 @@ public class IndexApiRestController {
         return indexService.endeCount(jwtFilterDto);
     }
 
-    
+    @ApiOperation(value="개인정보 항목(암호화 항목, 고유식별정보 항목, 민감정보 항목)의 추가 카운팅 수 데이터를 가져온다.", notes="")
+    @GetMapping(value = "/privacyItemCount")
+    @ApiImplicitParam(name ="x-api-key", required = true, dataTypeClass = String.class, paramType = "header")
+    public ResponseEntity<Map<String,Object>> privacyItemCount(HttpServletRequest request) {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwtOrApiKey(request);
+        return indexService.privacyItemCount(jwtFilterDto);
+    }
 
-//    @ApiOperation(value="개인정보 항목(암호화 항목, 고유식별정보 항목, 민감정보 항목)의 추가 카운팅 수 데이터를 가져온다.", notes="")
-//    @GetMapping(value = "/privacyItemCount")
-//    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-//    public ResponseEntity<Map<String,Object>> privacyItemCount() {
-//        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
-//        return indexService.privacyItemCount(jwtFilterDto);
-//    }
+    @ApiOperation(value="개인정보 제공의 금일 건수와 데이트타입의 따라 건수를 가져온다.", notes="")
+    @GetMapping(value = "/provisionCount")
+    @ApiImplicitParam(name ="x-api-key", required = true, dataTypeClass = String.class, paramType = "header")
+    public ResponseEntity<Map<String,Object>> provisionCount(@RequestParam(value="dateType", defaultValue = "1") String dateType,
+                                                                  HttpServletRequest request) {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwtOrApiKey(request);
+        return indexService.provisionIndexCount(dateType, jwtFilterDto);
+    }
+
+    @ApiOperation(value="이메일 발송 완료 및 예약 건수를 가져온다.", notes="")
+    @GetMapping(value = "/emailSendCount")
+    @ApiImplicitParam(name ="x-api-key", required = true, dataTypeClass = String.class, paramType = "header")
+    public ResponseEntity<Map<String,Object>> emailSendCount(@RequestParam(value="dateType", defaultValue = "1") String dateType,
+                                                             HttpServletRequest request) {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwtOrApiKey(request);
+        return indexService.emailSendCount(dateType, jwtFilterDto);
+    }
+
+
+
+
+
 
 }

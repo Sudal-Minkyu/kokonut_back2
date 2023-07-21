@@ -3,6 +3,8 @@ package com.app.kokonut.index;
 import com.app.kokonut.admin.AdminRepository;
 import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
 import com.app.kokonut.company.companytable.CompanyTableRepository;
+import com.app.kokonut.email.email.EmailRepository;
+import com.app.kokonut.email.email.dtos.EmailSendCountDto;
 import com.app.kokonut.history.extra.apicallhistory.ApiCallHistoryRepository;
 import com.app.kokonut.index.dtos.ApiCallHistoryCountDto;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
@@ -72,6 +74,7 @@ public class IndexService {
 	private final HistoryRepository historyRepository;
 	private final PaymentPrivacyCountRepository paymentPrivacyCountRepository;
 	private final DynamicUserRepositoryCustom dynamicUserRepositoryCustom;
+	private final EmailRepository emailRepository;
 
 	private final ApiCallHistoryRepository apiCallHistoryRepository;
 	private final EncrypCountHistoryRepository encrypCountHistoryRepository;
@@ -89,7 +92,8 @@ public class IndexService {
 						CompanyPaymentInfoRepository companyPaymentInfoRepository,
 						CompanyTableLeaveHistoryRepository companyTableLeaveHistoryRepository, HistoryRepository historyRepository,
 						PaymentPrivacyCountRepository paymentPrivacyCountRepository, DynamicUserRepositoryCustom dynamicUserRepositoryCustom,
-						ApiCallHistoryRepository apiCallHistoryRepository, EncrypCountHistoryRepository encrypCountHistoryRepository, DecrypCountHistoryRepository decrypCountHistoryRepository,
+						EmailRepository emailRepository, ApiCallHistoryRepository apiCallHistoryRepository,
+						EncrypCountHistoryRepository encrypCountHistoryRepository, DecrypCountHistoryRepository decrypCountHistoryRepository,
 						KokonutUserService kokonutUserService, CompanyTableRepository companyTableRepository) {
 		this.historyService = historyService;
 		this.mailSender = mailSender;
@@ -109,6 +113,7 @@ public class IndexService {
 		this.historyRepository = historyRepository;
 		this.paymentPrivacyCountRepository = paymentPrivacyCountRepository;
 		this.dynamicUserRepositoryCustom = dynamicUserRepositoryCustom;
+		this.emailRepository = emailRepository;
 		this.apiCallHistoryRepository = apiCallHistoryRepository;
 		this.encrypCountHistoryRepository = encrypCountHistoryRepository;
 		this.decrypCountHistoryRepository = decrypCountHistoryRepository;
@@ -316,8 +321,8 @@ public class IndexService {
 		// 제공날짜의 기준
 		Long offerInsideCount = offerCount(cpCode, 0, dateType, now, filterDate);
 		Long offerOutsideCount = offerCount(cpCode, 1, dateType, now, filterDate);
-		log.info("제공 가능한 내부건수 : " + offerInsideCount);
-		log.info("제공 가능한 외부건수 : " + offerOutsideCount);
+//		log.info("제공 가능한 내부건수 : " + offerInsideCount);
+//		log.info("제공 가능한 외부건수 : " + offerOutsideCount);
 
 		provisionIndexDto.setOfferInsideCount(offerInsideCount);
 		provisionIndexDto.setOfferOutsideCount(offerOutsideCount);
@@ -531,22 +536,97 @@ public class IndexService {
 
 	}
 
+	// 7. 요금정보를 가져온다. (dateType - "1" : "이번달", "2" : "저번달")
+	public ResponseEntity<Map<String, Object>> peymentInfo(String dateType, JwtFilterDto jwtFilterDto) {
+		log.info("peymentInfo 호출");
+
+		AjaxResponse res = new AjaxResponse();
+		HashMap<String, Object> data = new HashMap<>();
+
+		String email = jwtFilterDto.getEmail();
+
+		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+		String cpCode = adminCompanyInfoDto.getCompanyCode();
+
+		if(dateType.equals("")) {
+			dateType = "1";
+		}
+//		log.info("dateType : "+dateType);
+
+//		PrivacyIndexDto privacyIndexDto = new PrivacyIndexDto();
+
+		LocalDate now = LocalDate.now();
+		LocalDate filterDate;
+
+		if(dateType.equals("2")) {
+			// 저번달
+			filterDate = now.withDayOfMonth(2);
+		}
+		else {
+			dateType = "1";
+			// 이번달
+			filterDate = now.withDayOfMonth(1);
+		}
+		log.info("filterDate : "+filterDate);
+
+		// 코코넛서비스 요금정보
+
+		// AWS 사용데이터 요금정보
+
+		// 이메일 요금정보
 
 
+		return ResponseEntity.ok(res.success(data));
+	}
 
+	// 8. 이메일 발송 완료 및 예약 건수를 가져온다.
+	public ResponseEntity<Map<String, Object>> emailSendCount(String dateType, JwtFilterDto jwtFilterDto) {
+		log.info("emailSendCount 호출");
 
+		AjaxResponse res = new AjaxResponse();
+		HashMap<String, Object> data = new HashMap<>();
 
+		String email = jwtFilterDto.getEmail();
 
+		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+		String cpCode = adminCompanyInfoDto.getCompanyCode();
 
+		if(dateType.equals("")) {
+			dateType = "1";
+		}
+//		log.info("dateType : "+dateType);
 
+		EmailSendCountDto emailSendCountDto = new EmailSendCountDto();
 
+		LocalDate now = LocalDate.now();
+		LocalDate filterDate;
 
+		if(dateType.equals("2")) {
+			// 이번주 일요일-월요일~토요알까지
+			filterDate = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY)); // 이번주 일요일
+//			log.info("이번주 일요일 : " + filterDate);
+		} else if(dateType.equals("3")) {
+			// 이번달
+			filterDate = now.withDayOfMonth(1);
+//			log.info("이번달 1일 : " + filterDate);
+		} else {
+			// 오늘
+			filterDate = now;
+//			log.info("오늘 : " + filterDate);
+		}
 
+		Long completeCount = emailRepository.sendCount(cpCode, "2", dateType, now, filterDate); // 발송완료 건수
+		Long reservationCount = emailRepository.sendCount(cpCode, "5", dateType, now, filterDate); // 발송예약 건수
+		log.info("발송완료 건수 : "+completeCount);
+		log.info("발송예약 건수 : "+reservationCount);
 
+		emailSendCountDto.setCompleteCount(completeCount);
+		emailSendCountDto.setReservationCount(reservationCount);
 
+		data.put("emailSendCountDto", emailSendCountDto);
 
-
-
+		return ResponseEntity.ok(res.success(data));
+	}
 
 
 

@@ -6,6 +6,8 @@ import com.app.kokonut.email.email.dtos.EmailSearchDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDate;
+
 /**
  * @author Woody
  * Date : 2023-07-05
@@ -17,5 +19,7 @@ public interface EmailRepositoryCustom {
     Page<EmailListDto> findByEmailPage(EmailSearchDto emailSearchDto, Pageable pageable);
 
     EmailDetailDto findEmailByIdx(Long emId);
+
+    Long sendCount(String cpCode, String emState, String dateType, LocalDate now, LocalDate filterDate);
 
 }
