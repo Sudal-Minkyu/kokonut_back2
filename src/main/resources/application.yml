@@ -106,3 +106,11 @@ kokonut:
   #kisa
   whois:
     secretKey: ${KOKONUT_WHOIS_KEY}
+
+  #해피톡 알림톡
+  happytalk:
+    userId: ${KOKONUT_HAPPYTALK_USERID}
+    alimHost: ${KOKONUT_HAPPYTALK_ALIMHOST}
+    bizHost: ${KOKONUT_HAPPYTALK_BIZHOST}
+    testAccessKey: ${KOKONUT_HAPPYTALK_TESTACCESSKEY}
+

@@ -451,6 +451,59 @@ public class IndexService {
 		return ResponseEntity.ok(res.success(data));
 	}
 
+	// 금일 API 호출수를 호출한다. -> API 사용
+	public ResponseEntity<Map<String, Object>> apiCount(JwtFilterDto jwtFilterDto) {
+		log.info("apiCount 호출");
+
+		AjaxResponse res = new AjaxResponse();
+		HashMap<String, Object> data = new HashMap<>();
+
+		String email = jwtFilterDto.getEmail();
+
+		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+		String cpCode = adminCompanyInfoDto.getCompanyCode();
+
+		List<ApiCallHistoryCountDto> apiCallHistoryCountDtos = apiCallHistoryRepository.findTodayApiCountList(cpCode);
+
+		int count = 0;
+		for(ApiCallHistoryCountDto apiCallHistoryCountDto : apiCallHistoryCountDtos) {
+			count += apiCallHistoryCountDto.getCount();
+		}
+
+		data.put("count", count);
+
+		return ResponseEntity.ok(res.success(data));
+	}
+
+	// 금일 암호화, 복호화 수를 호출한다. -> API 사용
+	public ResponseEntity<Map<String, Object>> endeCount(JwtFilterDto jwtFilterDto) {
+		log.info("endeCount 호출");
+
+		AjaxResponse res = new AjaxResponse();
+		HashMap<String, Object> data = new HashMap<>();
+
+		String email = jwtFilterDto.getEmail();
+
+		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+		String cpCode = adminCompanyInfoDto.getCompanyCode();
+
+		int encount = 0;
+		int decount = 0;
+
+		List<EncrypCountHistoryCountDto> encrypCountHistoryCountDtos = encrypCountHistoryRepository.findTodayEncrypCountList(cpCode);;
+		List<DecrypCountHistoryCountDto> decrypCountHistoryCountDtos = decrypCountHistoryRepository.findTodayDecrypCountList(cpCode);;
+		for(int i=0; i<24; i++) {
+			encount += encrypCountHistoryCountDtos.get(i).getTotal();
+			decount += decrypCountHistoryCountDtos.get(i).getTotal();
+		}
+
+		data.put("encount", encount);
+		data.put("decount", decount);
+
+		return ResponseEntity.ok(res.success(data));
+	}
+
+
 	// 6. 개인정보 항목(암호화 항목, 고유식별정보 항목, 민감정보 항목)의 추가 카운팅 수 데이터
 	public ResponseEntity<Map<String, Object>> privacyItemCount(JwtFilterDto jwtFilterDto) {
 		log.info("privacyItemCount 호출");

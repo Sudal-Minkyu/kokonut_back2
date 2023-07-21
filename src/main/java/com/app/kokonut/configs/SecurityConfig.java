@@ -37,7 +37,7 @@ public class SecurityConfig {
             .antMatchers(
                 // 필터 제외항목 API : JWT, ApiKey 모두 불필요한 API
                 "/favicon*", "/swagger*/**", "/v2/api-docs", "/webjars/**",
-                "/v1/api/**"
+                "/v1/api/Auth/**", "/v1/api/Test/**"
                 // 임시 제외항목 API : JWT, ApiKey 모두 필요한 API
 //                "/v2/api/**"
             );
@@ -61,8 +61,7 @@ public class SecurityConfig {
             .authorizeRequests()
 
             // 권한 : 없음
-            .antMatchers("/v3/api/Auth/login","/v3/api/Auth/register", "/v3/api/Auth/hoculGetTest", "/v3/api/Auth/hoculPostTest"
-                    ,"/v3/api/PersonalInfoProvision/list", "/v3/api/History/activityList").permitAll()
+            .antMatchers("/v3/api/**").permitAll()
 
             // 권한 : 권한(코코넛직원:ROLE_SYSTEM, 대표관리자:ROLE_MASTER, 최고관리자:ROLE_ADMIN, 일반관리자:ROLE_USER, 게스트:ROLE_GUEST)
             // 권한에 따라 요청허용
