@@ -2284,7 +2284,11 @@ public class DynamicUserService {
 		}
 
 		// 검색 쿼리호출
-		List<Map<String, Object>> privacyList = dynamicUserRepositoryCustom.privacyListPagedData(resultQuery +" LIMIT "+kokonutSearchDto.getLimitNum()+" OFFSET "+offset);
+		if(kokonutSearchDto.getLimitNum() > 0) {
+			resultQuery.append(" LIMIT ").append(kokonutSearchDto.getLimitNum()).append(" OFFSET ").append(offset);
+		}
+
+		List<Map<String, Object>> privacyList = dynamicUserRepositoryCustom.privacyListPagedData(String.valueOf(resultQuery));
 		log.info("privacyList : "+privacyList);
 
 		// 검색 쿼리의 총합호출
