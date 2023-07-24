@@ -275,6 +275,7 @@ public class EmailService {
 
         // 첨부파일 용량이 20MB가 넘는지 체크
         long totalSize = 0; // 총 파일 크기를 위한 변수
+        final long TEN_MB = 10 * 1024 * 1024; // 10MB를 바이트 단위로 변환
         final long TWENTY_MB = 20 * 1024 * 1024; // 20MB를 바이트 단위로 변환
         if(emailSendDto.getMultipartFiles() != null && emailSendDto.getMultipartFiles().size() != 0) {
             multipartFiles = emailSendDto.getMultipartFiles();
@@ -284,12 +285,17 @@ public class EmailService {
                 }
                 try {
                     byte[] bytes = multipartFile.getBytes();
-                    totalSize += bytes.length; // 파일 크기를 더함
+                    if(bytes.length > TEN_MB) {
+                        log.error("하나의 파일에 용량이 10MB가 넘습니다. 10MB가 넘지 않도록 해주시길 바랍니다.");
+                        return ResponseEntity.ok(res.fail(ResponseErrorCode.KO109.getCode(),ResponseErrorCode.KO109.getDesc()));
+                    } else {
+                        totalSize += bytes.length; // 파일 크기를 더함
 
-                    // 총 파일 크기가 20MB를 초과하면 예외를 발생시킴
-                    if (totalSize > TWENTY_MB) {
-                        log.error("첨부파일 용량이 20MB가 넘습니다. 20MB가 넘지 않도록 해주시길 바랍니다.");
-                        return ResponseEntity.ok(res.fail(ResponseErrorCode.KO105.getCode(),ResponseErrorCode.KO105.getDesc()));
+                        // 총 파일 크기가 20MB를 초과하면 예외를 발생시킴
+                        if (totalSize > TWENTY_MB) {
+                            log.error("첨부파일 용량이 20MB가 넘습니다. 20MB가 넘지 않도록 해주시길 바랍니다.");
+                            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO106.getCode(),ResponseErrorCode.KO106.getDesc()));
+                        }
                     }
                 } catch (IOException e) {
                     log.error("예외처리 : "+ e);
@@ -309,9 +315,8 @@ public class EmailService {
 
         // 테스트용 이메일리스트 변수
 //        List<String> testEmail = new ArrayList<>(); //  emailSendDto.getEmailSendChoseList()
-//        testEmail.add("nG$8c3KNCi!4qb8xQq@k");
-//        testEmail.add("V79sGR#HaNTICOyuw%MH");
-//        testEmail.add("W5KGwCG!GgSP5XLk47yD");
+//        testEmail.add("13GSs9SfZGe#uT!ANOxy");
+//        testEmail.add("I!@9RTP!!Qyay1ja9cRF");
 //        emailSendDto.setEmailSendChoseList(testEmail);
 
         // 이메일지정 고유코드
@@ -442,7 +447,7 @@ public class EmailService {
             log.info("contents : "+contents);
 
             HashMap<String, String> callTemplate = new HashMap<>();
-            callTemplate.put("template", "MailTemplate");
+            callTemplate.put("template", "MailTemplateOld"); // 고객용 템플릿 MailTemplateOld, 코코넛용 템플릿 MailTemplate
             callTemplate.put("title", emTitle);
             callTemplate.put("content", contents);
 

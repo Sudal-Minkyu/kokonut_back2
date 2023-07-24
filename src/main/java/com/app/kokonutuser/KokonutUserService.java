@@ -288,7 +288,7 @@ public class KokonutUserService {
 			String joinedEmailSendChoseList = emailSendChoseList.stream()
 					.map(s -> "'" + s + "'")
 					.collect(Collectors.joining(", "));
-			searchQuery.append("AND kokonut_IDX IN (").append(joinedEmailSendChoseList).append(")");
+			searchQuery.append(" AND kokonut_IDX IN (").append(joinedEmailSendChoseList).append(")");
 		}
 
 		log.info("searchQuery : "+searchQuery);

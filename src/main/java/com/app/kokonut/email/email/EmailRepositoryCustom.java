@@ -20,6 +20,8 @@ public interface EmailRepositoryCustom {
 
     EmailDetailDto findEmailByIdx(Long emId);
 
-    Long sendCount(String cpCode, String emState, String dateType, LocalDate now, LocalDate filterDate);
+    Long sendCount(String cpCode, String emType, String dateType, LocalDate now, LocalDate filterDate);
+
+    Integer emailSendReceptionCount(String cpCode, String emType, String dateType, LocalDate now, LocalDate filterDate);
 
 }

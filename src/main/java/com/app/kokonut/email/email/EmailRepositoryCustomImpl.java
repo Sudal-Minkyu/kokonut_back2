@@ -4,8 +4,8 @@ import com.app.kokonut.admin.QAdmin;
 import com.app.kokonut.email.email.dtos.EmailDetailDto;
 import com.app.kokonut.email.email.dtos.EmailListDto;
 import com.app.kokonut.email.email.dtos.EmailSearchDto;
-import com.app.kokonut.provision.QProvision;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.JPQLQuery;
 import org.qlrm.mapper.JpaResultMapper;
@@ -92,15 +92,25 @@ public class EmailRepositoryCustomImpl extends QuerydslRepositorySupport impleme
         return query.fetchOne();
     }
 
-    public Long sendCount(String cpCode, String emState, String dateType, LocalDate now, LocalDate filterDate) {
+    // 발송건수 호출
+    public Long sendCount(String cpCode, String emType, String dateType, LocalDate now, LocalDate filterDate) {
 
         QEmail email = QEmail.email;
 
         LocalDateTime nowTime = now.atStartOfDay();
         LocalDateTime filterTime = filterDate.atStartOfDay();
 
+        BooleanExpression dateCondition;
+
+        if(emType.equals("1")) {
+            dateCondition = email.emState.eq("5");
+        } else {
+            dateCondition = email.emType.eq(emType).and(email.emState.eq("2"));
+        }
+
         JPQLQuery<Long> query = from(email)
-                .where(email.emState.eq(emState).and(email.cpCode.eq(cpCode)))
+                .where(email.cpCode.eq(cpCode))
+                .where(dateCondition)
                 .select(Projections.constructor(Long.class,
                         email.count()
                 ));
@@ -121,6 +131,54 @@ public class EmailRepositoryCustomImpl extends QuerydslRepositorySupport impleme
         }
 
         return query.fetchOne();
+    }
+
+    public Integer emailSendReceptionCount(String cpCode, String emType, String dateType, LocalDate now, LocalDate filterDate) {
+
+        QEmail email = QEmail.email;
+
+        LocalDateTime nowTime = now.atStartOfDay();
+        LocalDateTime filterTime = filterDate.atStartOfDay();
+
+        BooleanExpression dateCondition;
+
+        if(emType.equals("1")) {
+            if(dateType.equals("1")) {
+                // 오늘조회
+                dateCondition = email.insert_date.goe(filterTime).or(email.insert_date.loe(filterTime));
+            }else if(dateType.equals("2")) {
+                // 이번주 조회
+                dateCondition = email.insert_date.loe(filterTime).and(email.insert_date.goe(nowTime));
+            } else {
+                // 이번달 조회
+                dateCondition = email.insert_date.year().eq(filterDate.getYear()).and(email.insert_date.month().eq(filterDate.getMonthValue()));
+            }
+        } else {
+            if(dateType.equals("1")) {
+                // 오늘조회
+                dateCondition = email.emReservationDate.goe(filterTime).or(email.emReservationDate.loe(filterTime));
+            }else if(dateType.equals("2")) {
+                // 이번주 조회
+                dateCondition = email.emReservationDate.loe(filterTime).and(email.emReservationDate.goe(nowTime));
+            } else {
+                // 이번달 조회
+                dateCondition = email.emReservationDate.year().eq(filterDate.getYear()).and(email.emReservationDate.month().eq(filterDate.getMonthValue()));
+            }
+        }
+
+        Integer query = from(email)
+                .select(email.emSendAllCount.sum())
+                .where(email.cpCode.eq(cpCode),
+                        email.emState.eq("3").or(email.emState.eq("4").or( email.emState.eq("5"))),
+                        dateCondition,
+                        email.emType.eq(emType))
+                .fetchOne();
+
+        if (query == null) {
+            query = 0;
+        }
+
+        return query;
     }
 
 }

@@ -67,13 +67,13 @@ public class IndexApiRestController {
         return indexService.provisionIndexCount(dateType, jwtFilterDto);
     }
 
-    @ApiOperation(value="이메일 발송 완료 및 예약 건수를 가져온다.", notes="")
-    @GetMapping(value = "/emailSendCount")
+    @ApiOperation(value="이메일 발송 완료 및 예약 건수 + 수신건수와 청구금액을 가져온다.", notes="")
+    @GetMapping(value = "/emailSendInfo")
     @ApiImplicitParam(name ="x-api-key", required = true, dataTypeClass = String.class, paramType = "header")
-    public ResponseEntity<Map<String,Object>> emailSendCount(@RequestParam(value="dateType", defaultValue = "1") String dateType,
+    public ResponseEntity<Map<String,Object>> emailSendInfo(@RequestParam(value="dateType", defaultValue = "1") String dateType,
                                                              HttpServletRequest request) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwtOrApiKey(request);
-        return indexService.emailSendCount(dateType, jwtFilterDto);
+        return indexService.emailSendInfo(dateType, jwtFilterDto);
     }
 
 

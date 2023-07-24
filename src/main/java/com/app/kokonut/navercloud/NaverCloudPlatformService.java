@@ -532,7 +532,7 @@ public class NaverCloudPlatformService {
 
             log.info("code: {}, data: {}", code, data);
 
-            if(code.equals("200")) {
+            if(code.equals("201")) {
                 JSONObject jsonObj = new JSONObject(data);
                 requestId = jsonObj.getString("requestId");
                 log.info("requestId : " + requestId);
@@ -614,7 +614,7 @@ public class NaverCloudPlatformService {
         EmailCheckDto emailCheckDto = null;
 
         String url = "https://mail.apigw.ntruss.com/api/v1/mails/requests/"+requestId+"/status";
-//        log.info("url : "+url);
+        log.info("url : "+url);
 
         try {
             URL apiurl = new URL(url);
@@ -649,7 +649,7 @@ public class NaverCloudPlatformService {
             br.close();
             conn.disconnect();
 
-//            log.info("code: {}, data: {}", code, data);
+            log.info("code: {}, data: {}", code, data);
 
             if(code.equals("200")) {
                 emailCheckDto = new EmailCheckDto();

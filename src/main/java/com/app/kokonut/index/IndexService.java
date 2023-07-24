@@ -5,6 +5,7 @@ import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
 import com.app.kokonut.company.companytable.CompanyTableRepository;
 import com.app.kokonut.email.email.EmailRepository;
 import com.app.kokonut.email.email.dtos.EmailSendCountDto;
+import com.app.kokonut.email.email.dtos.EmailSendInfoDto;
 import com.app.kokonut.history.extra.apicallhistory.ApiCallHistoryRepository;
 import com.app.kokonut.index.dtos.ApiCallHistoryCountDto;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
@@ -456,7 +457,7 @@ public class IndexService {
 		return ResponseEntity.ok(res.success(data));
 	}
 
-	// 금일 API 호출수를 호출한다. -> API 사용
+	// - 금일 API 호출수를 호출한다. -> Kokonut API 사용
 	public ResponseEntity<Map<String, Object>> apiCount(JwtFilterDto jwtFilterDto) {
 		log.info("apiCount 호출");
 
@@ -480,7 +481,7 @@ public class IndexService {
 		return ResponseEntity.ok(res.success(data));
 	}
 
-	// 금일 암호화, 복호화 수를 호출한다. -> API 사용
+	// - 금일 암호화, 복호화 수를 호출한다. -> Kokonut API 사용
 	public ResponseEntity<Map<String, Object>> endeCount(JwtFilterDto jwtFilterDto) {
 		log.info("endeCount 호출");
 
@@ -507,7 +508,6 @@ public class IndexService {
 
 		return ResponseEntity.ok(res.success(data));
 	}
-
 
 	// 6. 개인정보 항목(암호화 항목, 고유식별정보 항목, 민감정보 항목)의 추가 카운팅 수 데이터
 	public ResponseEntity<Map<String, Object>> privacyItemCount(JwtFilterDto jwtFilterDto) {
@@ -615,8 +615,8 @@ public class IndexService {
 //			log.info("오늘 : " + filterDate);
 		}
 
-		Long completeCount = emailRepository.sendCount(cpCode, "2", dateType, now, filterDate); // 발송완료 건수
-		Long reservationCount = emailRepository.sendCount(cpCode, "5", dateType, now, filterDate); // 발송예약 건수
+		Long completeCount = sendCount(cpCode, "1", dateType, now, filterDate); // 발송완료 건수
+		Long reservationCount = sendCount(cpCode, "2", dateType, now, filterDate); // 발송예약 건수
 		log.info("발송완료 건수 : "+completeCount);
 		log.info("발송예약 건수 : "+reservationCount);
 
@@ -627,6 +627,79 @@ public class IndexService {
 
 		return ResponseEntity.ok(res.success(data));
 	}
+
+	// 발송건수 호출 함수
+	public Long sendCount(String cpCode, String emType, String dateType, LocalDate now, LocalDate filterDate) {
+		return emailRepository.sendCount(cpCode, emType, dateType, now, filterDate);
+	}
+
+	// 수신자수 호출 함수
+	public Integer emailSendReceptionCount(String cpCode, String emType, String dateType, LocalDate now, LocalDate filterDate) {
+		return emailRepository.emailSendReceptionCount(cpCode, emType, dateType, now, filterDate);
+	}
+
+	// - 이메일 현황정보를 호출한다. -> Kokonut Kokonut API 사용
+	public ResponseEntity<Map<String, Object>> emailSendInfo(String dateType, JwtFilterDto jwtFilterDto) {
+		log.info("emailSendInfo 호출");
+
+		AjaxResponse res = new AjaxResponse();
+		HashMap<String, Object> data = new HashMap<>();
+
+		String email = jwtFilterDto.getEmail();
+
+		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+		String cpCode = adminCompanyInfoDto.getCompanyCode();
+
+		if(dateType.equals("")) {
+			dateType = "1";
+		}
+//		log.info("dateType : "+dateType);
+
+		EmailSendInfoDto emailSendInfoDto = new EmailSendInfoDto();
+
+		LocalDate now = LocalDate.now();
+		LocalDate filterDate;
+
+		if(dateType.equals("2")) {
+			// 이번주 일요일-월요일~토요알까지
+			filterDate = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY)); // 이번주 일요일
+//			log.info("이번주 일요일 : " + filterDate);
+		} else if(dateType.equals("3")) {
+			// 이번달
+			filterDate = now.withDayOfMonth(1);
+//			log.info("이번달 1일 : " + filterDate);
+		} else {
+			// 오늘
+			filterDate = now;
+//			log.info("오늘 : " + filterDate);
+		}
+
+		Long completeCount = sendCount(cpCode, "1", dateType, now, filterDate); // 발송완료 건수
+		Long reservationCount = sendCount(cpCode, "2", dateType, now, filterDate); // 발송예약 건수
+		log.info("발송완료 건수 : "+completeCount);
+		log.info("발송예약 건수 : "+reservationCount);
+
+		// 수신건수 + 금액
+		Integer complete = emailSendReceptionCount(cpCode,"1", dateType, now, filterDate);
+		Integer reservation = emailSendReceptionCount(cpCode,"2", dateType, now, filterDate);
+
+		int receptionCount = complete + reservation;
+		Integer sendAmount = (int) (Math.floor(receptionCount * 0.5 / 10) * 10);
+		log.info("수신건수 : "+receptionCount);
+		log.info("청구금액 : "+receptionCount*0.5);
+
+		emailSendInfoDto.setCompleteCount(Integer.parseInt(String.valueOf(completeCount)));
+		emailSendInfoDto.setReservationCount(Integer.parseInt(String.valueOf(reservationCount)));
+		emailSendInfoDto.setReceptionCount(receptionCount);
+		emailSendInfoDto.setSendAmount(sendAmount);
+
+		data.put("emailSendInfoDto", emailSendInfoDto);
+
+		return ResponseEntity.ok(res.success(data));
+	}
+
+
+
 
 
 

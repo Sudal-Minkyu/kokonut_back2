@@ -110,7 +110,10 @@ public class SchedulerConfig {
     }
 
 //    @Scheduled(cron = "0 */5 * * * *") // 매일 5분마다 실행 이메일발송건 업데이트
+//    @Scheduled(cron = "0 0/3 * * * ?") // 매일 3분마다 실행 이메일발송건 업데이트
+//    @Scheduled(cron = "0 * * * * ?")
 //    @Scheduled(fixedRate = 5000, initialDelay = 1)
+    @Scheduled(cron = "0 0 * * * ?") // 매일 1시간마다 실행 이메일발송건 업데이트
     public void kokonutSendEmailUpdateSchedul() {
         try {
             log.info("이메일발송건 업데이트 스케줄러 실행");
@@ -123,7 +126,6 @@ public class SchedulerConfig {
             log.error("예외 : "+e);
             log.error("예외내용 : "+e.getMessage());
             log.error("이메일발송건 업데이트 실행 에러");
-
         }
     }
 
