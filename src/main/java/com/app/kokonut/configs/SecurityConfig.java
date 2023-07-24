@@ -36,8 +36,8 @@ public class SecurityConfig {
         return web -> web.ignoring()
             .antMatchers(
                 // 필터 제외항목 API : JWT, ApiKey 모두 불필요한 API
-                "/favicon*", "/swagger*/**", "/v2/api-docs", "/webjars/**",
-                "/v1/api/Auth/**", "/v1/api/Test/**"
+                "/favicon", "/swagger*/**", "/v2/api-docs", "/webjars/**",
+                "/v1/api/Auth/**", "/v1/api/NiceId/**", "/v1/api/Test/**"
                 // 임시 제외항목 API : JWT, ApiKey 모두 필요한 API
 //                "/v2/api/**"
             );
@@ -76,7 +76,7 @@ public class SecurityConfig {
 
             .antMatchers("/v2/api/Admin/userTest", "/v2/api/Admin/create", "/v2/api/ApiKey/**", "/v2/api/Admin/**", "/v2/api/History/**", "/v2/api/Email/**",
                     "/v2/api/Company/addCategoryList", "/v2/api/DynamicUser/tableColumnCall", "/v2/api/DynamicUser/tableBasicList",
-                    "/v2/api/Policy/policyList", "/v2/api/Policy/policyDetail/**", "/v2/api/Provision/**", "/v2/api/PrivacyHistory/**", "/v2/api/Index/**")
+                    "/v2/api/Policy/policyList", "/v2/api/Policy/policyDetail/**", "/v2/api/Provision/**", "/v2/api/PrivacyHistory/**", "/v2/api/Index/**", "/v2/api/ThirdParty/**")
                 .hasAnyAuthority(AuthorityRole.ROLE_USER.getDesc(), AuthorityRole.ROLE_ADMIN.getDesc(), AuthorityRole.ROLE_MASTER.getDesc(), AuthorityRole.ROLE_SYSTEM.getDesc())
 
             .antMatchers("/v2/api/Error/**", "/v2/api/Admin/guestTest", "/v2/api/Provision/provisionList", "/v2/api/Provision/provisionDetail/**")

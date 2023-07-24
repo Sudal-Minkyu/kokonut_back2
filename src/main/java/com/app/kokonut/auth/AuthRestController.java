@@ -1,12 +1,9 @@
 package com.app.kokonut.auth;
 
-import com.app.kokonut.alimtalk.AlimtalkService;
 import com.app.kokonut.auth.dtos.AdminCreateDto;
 import com.app.kokonut.auth.dtos.AdminGoogleOTPDto;
 import com.app.kokonut.auth.dtos.AdminPasswordChangeDto;
 import com.app.kokonut.auth.jwt.dto.AuthRequestDto;
-import com.app.kokonut.common.AjaxResponse;
-import com.app.kokonut.navercloud.NaverCloudPlatformService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 
 /**

@@ -156,11 +156,13 @@ public class AuthService {
             if(csPasswordErrorCountSetting <= knPwdErrorCount && !roleCode.equals("ROLE_SYSTEM")) {
                 log.error("로그인 오류 횟수제한 이메일 : "+knEmail);
                 // -> 로그인불가처리 - 관리자가 비밀번호 재설정을 눌러줄 방법밖에 없음(왕관관리자는 코코넛에게 문의)
-                if(roleCode.equals("ROLE_MASTER")) {
-                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO096.getCode(),"비밀번호를 "+knPwdErrorCount+"회 틀리셨습니다. contact@kokonut.me로 문의 바랍니다."));
-                } else {
+                if(!roleCode.equals("ROLE_MASTER") && !roleCode.equals("ROLE_ADMIN")) {
                     return ResponseEntity.ok(res.fail(ResponseErrorCode.KO095.getCode(),"비밀번호를 "+knPwdErrorCount+"회 틀리셨습니다. 관리자에게 비밀번호변경을 요청 바랍니다."));
+//                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO096.getCode(),"비밀번호를 "+knPwdErrorCount+"회 틀리셨습니다. contact@kokonut.me로 문의 바랍니다."));
                 }
+//                else {
+//                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO095.getCode(),"비밀번호를 "+knPwdErrorCount+"회 틀리셨습니다. 관리자에게 비밀번호변경을 요청 바랍니다."));
+//                }
             }
         }
 
@@ -330,13 +332,13 @@ public class AuthService {
         String contents = ReqUtils.unFilter("임시비밀번호 : "+tempPassword);
 
         // 템플릿 호출을 위한 데이터 세팅
-//        HashMap<String, String> callTemplate = new HashMap<>();
-//        callTemplate.put("template", "MailTemplate");
-//        callTemplate.put("title", "인증번호 알림");
-//        callTemplate.put("content", contents);
+        HashMap<String, String> callTemplate = new HashMap<>();
+        callTemplate.put("template", "KokonutMailTemplate");
+        callTemplate.put("title", "인증번호 알림");
+        callTemplate.put("content", contents);
 
         // 템플릿 TODO 템플릿 디자인 추가되면 수정
-//        contents = mailSender.getHTML5(callTemplate);
+        contents = mailSender.getHTML5(callTemplate);
         String reciverName = "kokonut";
 
         String mailSenderResult = mailSender.sendMail(knEmail, reciverName, title, contents);
@@ -676,11 +678,11 @@ public class AuthService {
                                 historyService.updateHistory(activityHistoryId,
                                         companyCode+" - "+activityCode.getDesc()+" 시도 이력", "로그인 오류횟수 초과로 인한 로그인실패", 0);
 
-                                if(roleCode.equals("ROLE_MASTER")) {
+                                if(roleCode.equals("ROLE_MASTER") || roleCode.equals("ROLE_ADMIN")) {
 //                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO096.getCode(),"비밀번호를 "+knPwdErrorCount+"회 틀리셨습니다. contact@kokonut.me로 문의바랍니다."+"(최대횟수 : "+csPasswordErrorCountSetting+"회)"));
-                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO096.getCode(),"비밀번호를 "+knPwdErrorCount+"회 틀리셨습니다. contact@kokonut.me로 문의 바랍니다."));
+                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO096.getCode(),"비밀번호를 "+knPwdErrorCount+"회 틀리셨습니다. 비밀번호 찾기를 진행해주시길 바랍니다."));
                                 } else {
-                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO095.getCode(),"비밀번호를 "+knPwdErrorCount+"회 틀리셨습니다. 관리자에게 비밀번호변경을 요청 바랍니다."));
+                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO095.getCode(),"비밀번호를 "+knPwdErrorCount+"회 틀리셨습니다. 최고관리자에게 비밀번호변경을 요청 바랍니다."));
                                 }
                             }
 
