@@ -1,24 +1,24 @@
 package com.app.kokonut.configs;
 
+import com.app.kokonut.common.AjaxResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFDataFormat;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import static org.apache.poi.ss.usermodel.FillPatternType.SOLID_FOREGROUND;
 
@@ -247,5 +247,58 @@ public class ExcelService {
 	            }
 	        }
 	    }
+	}
+
+	// 데이터를 받아 엑셀파일로서 변환하여 반환
+	public ResponseEntity<Map<String, Object>> createExcelFile(String fileName, String sheetName, List<Map<String, Object>> dataList) throws IOException {
+		AjaxResponse res = new AjaxResponse();
+		log.info("createExcelFile 호출");
+		if (sheetName == null || sheetName.trim().isEmpty()) {
+			sheetName = "";
+		}
+
+		XSSFWorkbook workbook = new XSSFWorkbook();
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+		try {
+			Sheet sheet = workbook.createSheet(sheetName);
+
+			// Header
+			Row headerRow = sheet.createRow(0);
+			int cellIdx = 0;
+			for (String columnName : dataList.get(0).keySet()) {
+				Cell cell = headerRow.createCell(cellIdx++);
+				cell.setCellValue(columnName);
+			}
+
+			// Body
+			int rowIdx = 1;
+			for (Map<String, Object> data : dataList) {
+				Row row = sheet.createRow(rowIdx++);
+				cellIdx = 0;
+				for (Object value : data.values()) {
+					Cell cell = row.createCell(cellIdx++);
+					if (value != null) {
+						cell.setCellValue(value.toString());
+					}
+				}
+			}
+
+			// Resize all columns to fit the content size
+			for (int i = 0; i < dataList.get(0).size(); i++) {
+				sheet.autoSizeColumn(i);
+			}
+			workbook.write(out);
+
+			HashMap<String, Object> data = new HashMap<>();
+			data.put("fileData", Base64.getEncoder().encodeToString(out.toByteArray()));
+			data.put("fileName", fileName);
+			return ResponseEntity.ok(res.success(data));
+		} catch (Exception e) {
+			throw new RuntimeException("엑셀을 데이터로 변환중 에러", e);
+		} finally {
+			workbook.close();
+			out.close();
+		}
 	}
 }

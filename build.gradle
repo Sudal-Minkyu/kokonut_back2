@@ -59,8 +59,8 @@ dependencies {
 	implementation group: 'io.springfox', name: 'springfox-boot-starter', version: '3.0.0' // Swagger 쓰기위함
 	implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: '3.0.0' // Swagger 쓰기위함
 
-	implementation group: 'org.apache.poi', name: 'poi', version: '5.2.2' // Excel Read 쓰기위함
-	implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '5.2.2' // Swagger Read 쓰기위함
+	implementation group: 'org.apache.poi', name: 'poi', version: '5.2.3' // Excel Read 쓰기위함
+	implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '5.2.3' // Swagger Read 쓰기위함
 
 	implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.2' // JWT 쓰기위함
 	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.2' // JWT 쓰기위함
