@@ -105,7 +105,7 @@ public class ProvisionRestController {
     @ApiImplicitParams({
             @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = false, dataTypeClass = String.class, paramType = "header", example = ""),
     })
-    @ApiOperation(value = "개인정보제공 다운로드 리스트 조회 API", notes = "" +
+    @ApiOperation(value = "개인정보 엑셀 다운로드 API", notes = "" +
             "")
     public ResponseEntity<Map<String, Object>> provisionDownloadExcel() throws  IOException {
         List<Map<String, Object>> dataList = new ArrayList<>();
