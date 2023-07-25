@@ -71,6 +71,10 @@ public class EmailRepositoryCustomImpl extends QuerydslRepositorySupport impleme
             query.where(admin.knName.like("%"+ emailSearchDto.getSearchText() +"%").or(admin.knEmail.like("%"+ emailSearchDto.getSearchText() +"%")));
         }
 
+        if(!emailSearchDto.getEmPurpose().equals("")) {
+            query.where(email.emPurpose.eq(emailSearchDto.getEmPurpose()));
+        }
+
         final List<EmailListDto> emailListDtos = Objects.requireNonNull(getQuerydsl()).applyPagination(pageable, query).fetch();
         return new PageImpl<>(emailListDtos, pageable, query.fetchCount());
     }
