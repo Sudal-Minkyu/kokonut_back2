@@ -21,8 +21,6 @@ public class EmailListDto {
     // 7. 이메일발송 실패건수 : emSendFailCount
     // 8. 발송날짜 : send_date : emState 값이 발송예약중 일경우 예약취소버튼 추가 -> emId 파라메터로 하는 예약취소API호출
 
-    private Long emId;
-
     private String emPurpose; // 발송목적(1:주요공지, 2:광고/홍보, 3:기타)
 
     private String emEtc; // 기타일 경우 해당 내용
