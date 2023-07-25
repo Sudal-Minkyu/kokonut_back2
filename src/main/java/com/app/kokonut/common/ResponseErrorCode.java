@@ -142,7 +142,8 @@ public enum ResponseErrorCode {
     KO110("KO110", "알림톡으로 전송항목 파라메터 타입을 보내주시길 바랍니다.('1': 받을번호, '2':카톡아이디)"),
     KO111("KO111", "알림톡으로 전송하실 항목의 고유코드를 보내주시길 바랍니다."),
 
-    ERROR_CODE_00("ERROR_CODE_00", "파라메터 데이터가 없습니다."),
+    ERROR_CODE_API("ERROR_CODE_API", "API 내용"),
+    ERROR_CODE_00("ERROR_CODE_00", "파라미터 데이터가 없습니다."),
     ERROR_CODE_01("ERROR_CODE_01", "지정되지 않은 값입니다. 고유코드를 확인해주시고 메뉴얼대로 호출해주시길 바랍니다."),
     ERROR_CODE_02("ERROR_CODE_02", "존재하지 않은 테이블입니다. 존재하는 고유코드인지 확인해주세요."),
     ERROR_CODE_03("ERROR_CODE_03", "필수항목을 넣지 않거나, 중복전송을 하셨습니다. '1_id'와'1_pw' 는 하나씩만 보내주시길 바랍니다."),
@@ -154,6 +155,7 @@ public enum ResponseErrorCode {
     ERROR_CODE_09("ERROR_CODE_09", "이메일주소 형식과 맞지 않습니다. 다시 한번 확인해주시길 바랍니다."),
     ERROR_CODE_10("ERROR_CODE_10", "이미 사용중인 아이디입니다."),
     ERROR_CODE_11("ERROR_CODE_11", "형식과 맞지 않습니다. (-)를 제외하여 보내주시길 바랍니다."),
+    ERROR_CODE_12("ERROR_CODE_12", "필수 파라메터가 존재하지 않습니다."),
 
     ERROR_CODE_96("ERROR_CODE_96", "헤더에 APIKey가 존재하지 않습니다. APIKey를 담아 보내주세요."), // 400
     ERROR_CODE_97("ERROR_CODE_97", "호출하신 APIKey는 존재하지 않은 APIKey 입니다. APIKey관리 페이지에서 APIKey를 확인해주세요."), // 404

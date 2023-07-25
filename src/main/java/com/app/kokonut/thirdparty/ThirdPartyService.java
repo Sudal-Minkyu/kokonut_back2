@@ -2,12 +2,17 @@ package com.app.kokonut.thirdparty;
 
 import com.app.kokonut.admin.AdminRepository;
 import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
+import com.app.kokonut.alimtalk.AlimtalkService;
+import com.app.kokonut.alimtalk.dtos.AlimtalkTemplateInfoDto;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
+import com.app.kokonut.awskmshistory.dto.AwsKmsResultDto;
 import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.common.realcomponent.CommonUtil;
+import com.app.kokonut.company.companydatakey.CompanyDataKeyService;
 import com.app.kokonut.history.HistoryService;
 import com.app.kokonut.history.dtos.ActivityCode;
+import com.app.kokonut.history.extra.encrypcounthistory.EncrypCountHistoryService;
 import com.app.kokonut.thirdparty.bizm.ThirdPartyBizm;
 import com.app.kokonut.thirdparty.bizm.ThirdPartyBizmRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -18,9 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * @author Woody
@@ -35,15 +38,23 @@ public class ThirdPartyService {
 	private final ThirdPartyRepository thirdPartyRepository;
 	private final ThirdPartyBizmRepository thirdPartyBizmRepository;
 	private final AdminRepository adminRepository;
+
 	private final HistoryService historyService;
+	private final AlimtalkService alimtalkService;
+	private final EncrypCountHistoryService encrypCountHistoryService;
+	private final CompanyDataKeyService companyDataKeyService;
 
 	@Autowired
 	public ThirdPartyService(ThirdPartyRepository thirdPartyRepository, ThirdPartyBizmRepository thirdPartyBizmRepository,
-							 AdminRepository adminRepository, HistoryService historyService) {
+							 AdminRepository adminRepository, HistoryService historyService, AlimtalkService alimtalkService,
+							 EncrypCountHistoryService encrypCountHistoryService, CompanyDataKeyService companyDataKeyService) {
 		this.thirdPartyRepository = thirdPartyRepository;
 		this.thirdPartyBizmRepository = thirdPartyBizmRepository;
 		this.adminRepository = adminRepository;
 		this.historyService = historyService;
+		this.alimtalkService = alimtalkService;
+		this.encrypCountHistoryService = encrypCountHistoryService;
+		this.companyDataKeyService = companyDataKeyService;
 	}
 
 	// 비즈엠 서드파티 셋팅 -> settingType - "1" : receiver_num, "2" : app_user_id
@@ -149,7 +160,96 @@ public class ThirdPartyService {
 
 	// 알림톡전송 코코넛API 호출 -> Kokonut Kokonut API 사용
 	public ResponseEntity<Map<String, Object>> alimTalkSend(HashMap<String, Object> paramMap, JwtFilterDto jwtFilterDto) {
-		return null;
+		log.info("alimTalkSend 호출");
+
+		AjaxResponse res = new AjaxResponse();
+		HashMap<String, Object> data = new HashMap<>();
+
+		String email = jwtFilterDto.getEmail();
+
+		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+		Long adminId = adminCompanyInfoDto.getAdminId();
+		String cpCode = adminCompanyInfoDto.getCompanyCode();
+
+		log.info("paramMap : "+paramMap);
+
+		if(paramMap != null) {
+			int dchCount = 0; // 복호화 카운팅
+
+//			AwsKmsResultDto awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(cpCode);
+
+			try {
+				String profileKey = (String)paramMap.get("profileKey");
+				String templateCode = (String)paramMap.get("templateCode");
+				String sendType = (String)paramMap.get("sendType");
+
+				if(sendType.equals("SELECT")) {
+					List<String> userlist = (List<String>) paramMap.get("kokonut_IDX_List");
+					log.info("userlist : "+userlist);
+				}
+			} catch (NullPointerException e) {
+				log.error("필수 파라메터가 존재하지 않습니다.");
+				return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_12.getCode(),ResponseErrorCode.ERROR_CODE_12.getDesc()));
+			}
+
+			// 템플릿 컨텐츠부터 가져온다.
+			AlimtalkTemplateInfoDto alimtalkTemplateInfoDto = alimtalkService.alimtalkTemplateInfo((String)paramMap.get("profileKey"), (String)paramMap.get("templateCode"));
+			log.info("alimtalkTemplateInfoDto : "+alimtalkTemplateInfoDto);
+
+			if(alimtalkTemplateInfoDto.getResult().equals("success")) {
+
+				String profileKey = (String)paramMap.get("profileKey");
+				String templateCode = (String)paramMap.get("templateCode");
+				String sendType = (String)paramMap.get("sendType");
+
+				log.info("profileKey : "+profileKey);
+				log.info("templateCode : "+templateCode);
+				log.info("sendType : "+sendType);
+
+				// 알림톡전송하기
+				if(sendType.equals("SELECT")) {
+
+				}
+
+
+
+
+
+
+
+				// 복호화 횟수 저장
+				if(dchCount > 0) {
+					encrypCountHistoryService.encrypCountHistorySave(cpCode, dchCount);
+				}
+
+
+
+			} else if (alimtalkTemplateInfoDto.getResult().equals("fail")) {
+				log.error("비즈엠 API 호출에러 : "+alimtalkTemplateInfoDto.getResultMessage() + " 호출 이메일 : "+email);
+				return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_API.getCode(),alimtalkTemplateInfoDto.getResultMessage()));
+			} else {
+				log.error("서버에러 발생");
+			}
+
+		} else {
+			log.error("파라미터 데이터가 없습니다.");
+			return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_00.getCode(),ResponseErrorCode.ERROR_CODE_00.getDesc()));
+		}
+
+		return ResponseEntity.ok(res.success(data));
 	}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }

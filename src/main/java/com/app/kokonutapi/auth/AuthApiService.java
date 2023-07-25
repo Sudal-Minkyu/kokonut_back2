@@ -427,7 +427,7 @@ public class AuthApiService {
             data.put("kokonut_IDX",kokonutIdx); // kokonut_IDX 리턴
 
         } else {
-            log.error("파라메터 데이터가 없습니다.");
+            log.error("파라미터 데이터가 없습니다.");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_00.getCode(),ResponseErrorCode.ERROR_CODE_00.getDesc()));
         }
 

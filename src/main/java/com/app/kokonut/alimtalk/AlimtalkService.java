@@ -1,5 +1,6 @@
 package com.app.kokonut.alimtalk;
 
+import com.app.kokonut.alimtalk.dtos.AlimtalkTemplateInfoDto;
 import com.app.kokonut.common.realcomponent.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
@@ -14,6 +15,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -160,8 +163,10 @@ public class AlimtalkService {
     }
 
     // 템플릿 정보 가져오기
-    public String alimtalkTemplateInfo(String profileKey, String templateCode) {
+    public AlimtalkTemplateInfoDto alimtalkTemplateInfo(String profileKey, String templateCode) {
         log.info("alimtalkTemplateInfo 호출");
+
+        AlimtalkTemplateInfoDto alimtalkTemplateInfoDto = new AlimtalkTemplateInfoDto();
 
         try {
             // URL 설정
@@ -204,14 +209,19 @@ public class AlimtalkService {
 
             if (responseCode == 200) {
                 String resultCode = data.getString("code");
-                JSONObject resultData = data.getJSONObject("data");
+
+                alimtalkTemplateInfoDto.setResult(resultCode);
 
                 if(resultCode.equals("success")) {
+                    JSONObject resultData = data.getJSONObject("data");
+
                     log.info("템플릿 정보 가져오기 성공");
-                    log.info("resultData : "+resultData);
+//                    log.info("resultData : "+resultData);
 
                     String templateContent = resultData.getString("templateContent");
-                    log.info("템플릿 내용 templateContent : "+templateContent);
+//                    log.info("템플릿 내용 templateContent : "+templateContent);
+
+                    List<String> variableList = new ArrayList<>();
 
                     // 정규 표현식 패턴 생성
                     Pattern pattern = Pattern.compile("#\\{([^}]*)}");
@@ -221,28 +231,34 @@ public class AlimtalkService {
 
                     // 매치하는 부분 찾기
                     while (matcher.find()) {
-                        log.info("괄호내용 : "+matcher.group(1));
+//                        log.info("괄호내용 : "+matcher.group(1));
+                        variableList.add(matcher.group(1));
                     }
 
-                    return "Success";
+                    alimtalkTemplateInfoDto.setVariableList(variableList);
+                    alimtalkTemplateInfoDto.setResultMessage(templateContent);
+
                 }else {
                     log.info("템플릿 정보 가져오기 실패");
+                    alimtalkTemplateInfoDto.setResultMessage(data.getString("message"));
                 }
 
             }else {
                 log.info("템플릿 정보 가져오기 실패");
+                alimtalkTemplateInfoDto.setResult("fail");
+                alimtalkTemplateInfoDto.setResultMessage("템플릿 정보를 가져올 수 없습니다.");
             }
         } catch (Exception e) {
             log.error("예외처리 : "+e);
             log.error("예외처리 메세지 : "+e.getMessage());
         }
 
-        return "Failure";
+        return alimtalkTemplateInfoDto;
     }
 
 
     // 알림톡 전송
-    public String alimtalkSend(String profileKey) {
+    public String alimtalkSend(String profileKey, String templateCode, String message) {
         log.info("alimtalkSend 호출");
 
         String url = alimHost + "/v2/" + profileKey + "/sendMessage";
@@ -263,11 +279,11 @@ public class AlimtalkService {
             // JSON 을 활용한 body data 생성
             JSONObject bodyJson = new JSONObject();
             bodyJson.put("profile_key", profileKey);
-            bodyJson.put("msgid", "코코넛_알림톡_테스트_" + Utils.getRamdomStr(5));
+            bodyJson.put("msgid", "알림톡전송_" + Utils.getRamdomStr(5));
             bodyJson.put("message_type", "AT");
-            bodyJson.put("template_code", "kokonut_templete01");
-            bodyJson.put("message", "민규님 안녕하세요. 코코넛에 가입해주셔서 감사합니다.");
-            bodyJson.put("receiver_num", "01020450716");
+            bodyJson.put("template_code", templateCode);
+            bodyJson.put("message", message);
+            bodyJson.put("receiver_num", "01064396533");
             bodyJson.put("reserved_time", "00000000000000");
 
             // JSON 객체를 배열에 추가

@@ -1,6 +1,7 @@
 package com.app.kokonut.test;
 
 import com.app.kokonut.alimtalk.AlimtalkService;
+import com.app.kokonut.alimtalk.dtos.AlimtalkTemplateInfoDto;
 import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.navercloud.NaverCloudPlatformService;
 import io.swagger.annotations.ApiOperation;
@@ -95,7 +96,7 @@ public class TestRestController {
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
 
-        String result = alimtalkService.alimtalkTemplateInfo(profileKey, templateCode);
+        AlimtalkTemplateInfoDto result = alimtalkService.alimtalkTemplateInfo(profileKey, templateCode);
         log.info("result : "+result);
 
         return ResponseEntity.ok(res.success(data));
@@ -103,11 +104,13 @@ public class TestRestController {
 
     @ApiOperation(value = "비즈엠 알림톡전송 API 테스트용")
     @PostMapping(value = "/alimtalkApiHocul")
-    public ResponseEntity<Map<String,Object>> alimtalkApiHocul(@RequestParam(value="profileKey", defaultValue = "") String profileKey) {
+    public ResponseEntity<Map<String,Object>> alimtalkApiHocul(@RequestParam(value="profileKey", defaultValue = "") String profileKey,
+                                                               @RequestParam(value="templateCode", defaultValue = "") String templateCode,
+                                                               @RequestParam(value="message", defaultValue = "") String message) {
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
 
-        String result = alimtalkService.alimtalkSend(profileKey);
+        String result = alimtalkService.alimtalkSend(profileKey, templateCode, message);
         log.info("result : "+result);
 
         return ResponseEntity.ok(res.success(data));
