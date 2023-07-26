@@ -54,7 +54,7 @@ public class IndexRestController {
     @ApiOperation(value="인덱스페이지에 표출할 개인정보 제공 건수를 가져온다.", notes="")
     @GetMapping(value = "/provisionIndexCount")
     @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-    public ResponseEntity<Map<String,Object>> privacyOfferCount(@RequestParam(value="dateType", defaultValue = "") String dateType) {
+    public ResponseEntity<Map<String,Object>> provisionIndexCount(@RequestParam(value="dateType", defaultValue = "1") String dateType) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         if(!jwtFilterDto.getRole().equals(AuthorityRole.ROLE_SYSTEM)) {
             return indexService.provisionIndexCount(dateType, jwtFilterDto);
@@ -67,7 +67,7 @@ public class IndexRestController {
     @ApiOperation(value="인덱스페이지에 표출할 개인정보 수를 가져온다.", notes="")
     @GetMapping(value = "/privacyIndexCount")
     @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-    public ResponseEntity<Map<String,Object>> privacyCount(@RequestParam(value="dateType", defaultValue = "") String dateType) {
+    public ResponseEntity<Map<String,Object>> privacyCount(@RequestParam(value="dateType", defaultValue = "1") String dateType) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         if(!jwtFilterDto.getRole().equals(AuthorityRole.ROLE_SYSTEM)) {
             return indexService.privacyIndexCount(dateType, jwtFilterDto);
@@ -93,10 +93,29 @@ public class IndexRestController {
         return indexService.privacyItemCount(jwtFilterDto);
     }
 
+    @ApiOperation(value="요금정보를 가져온다.", notes="")
+    @GetMapping(value = "/peymentInfo")
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    public ResponseEntity<Map<String,Object>> peymentInfo(@RequestParam(value="dateType", defaultValue = "1") String dateType) {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return indexService.peymentInfo(dateType, jwtFilterDto);
+    }
+
+    @ApiOperation(value="이메일 발송 완료 및 예약 건수를 가져온다.", notes="")
+    @GetMapping(value = "/emailSendCount")
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    public ResponseEntity<Map<String,Object>> emailSendCount(@RequestParam(value="dateType", defaultValue = "1") String dateType) {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return indexService.emailSendCount(dateType, jwtFilterDto);
+    }
+
     // 서드파티 연동 현황 - 기업
 
     // 구독관리 관련 - 기업 (디폴트값 이번달)
 
     // 이메일발송 현황 건수 데이터 - 기업 (디폴트 오늘)
+
+
+
 
 }

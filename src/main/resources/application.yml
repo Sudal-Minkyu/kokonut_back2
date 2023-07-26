@@ -40,7 +40,13 @@ spring:
       repositories:
         enabled: false
 
-spring.batch.job.names: ${job.name:NONE}
+  batch.job.names: ${job.name:NONE}
+
+  servlet:
+    multipart:
+      max-file-size: 21MB
+      max-request-size: 21MB
+
 
 #Custom
 kokonut:
@@ -111,3 +117,11 @@ kokonut:
   #kisa
   whois:
     secretKey: ${KOKONUT_WHOIS_KEY}
+
+  #해피톡 알림톡
+  happytalk:
+    userId: ${KOKONUT_HAPPYTALK_USERID}
+    alimHost: ${KOKONUT_HAPPYTALK_ALIMHOST}
+    bizHost: ${KOKONUT_HAPPYTALK_BIZHOST}
+    testAccessKey: ${KOKONUT_HAPPYTALK_TESTACCESSKEY}
+

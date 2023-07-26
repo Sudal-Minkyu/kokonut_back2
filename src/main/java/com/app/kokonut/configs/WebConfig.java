@@ -79,7 +79,7 @@ public class WebConfig implements WebMvcConfigurer {
         registry
                 .addMapping("/*/api/**")
                 .allowedOriginPatterns(frontServerDomainIp)
-                .allowedHeaders("Authorization", "Content-type", "ApiKey", "keyBufferSto", "ivSto")
+                .allowedHeaders("Authorization", "Content-type", "x-api-key", "keyBufferSto", "ivSto")
                 .exposedHeaders("Authorization")
                 .allowedMethods(HttpMethod.GET.name(), HttpMethod.POST.name())
                 .allowCredentials(true)

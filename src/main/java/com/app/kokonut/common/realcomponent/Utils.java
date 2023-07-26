@@ -5,12 +5,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.crypto.SecretKey;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -274,6 +278,55 @@ public class Utils {
 		Matcher matcher = pattern.matcher(email);
 
 		return matcher.find();
+	}
+
+	// 파일 인코딩 MultipartFile -> File 변환
+	public static File convertMultipartFileToFile(MultipartFile multipartFile) throws IOException {
+		log.info("첨부파일 인코딩 convertMultipartFileToFile 호출");
+
+		// 임시 파일 생성
+		Path tempDir = Files.createTempDirectory("");
+		String encodedFilename = URLEncoder.encode(Objects.requireNonNull(multipartFile.getOriginalFilename()), StandardCharsets.UTF_8);
+		File tempFile = tempDir.resolve(encodedFilename).toFile();
+
+		// MultipartFile 내용을 임시 파일에 쓰기
+		multipartFile.transferTo(tempFile);
+
+		return tempFile;
+	}
+
+	// 개인정보 암호화 데이터 복호화처리 함수
+	public static String decrypResult(String securityName, String securityValue, SecretKey secretKey, String ivKey) throws Exception {
+		String[] value = String.valueOf(securityValue).split("\\|\\|__\\|\\|"); // "||__||" 단위로 끊음
+		String decryptValue = ""; // 복호화된 데이터
+
+		if (value.length == 1) {
+
+			log.info("구분자가 없는 암호화");
+			decryptValue = AESGCMcrypto.decrypt(value[0], secretKey, ivKey);
+		} else {
+
+			log.info("||__|| 구분자로 들어간 암호화");
+
+			if (securityName.equals("이름")) {
+				if (value.length == 2) {
+					// 이름이 2글자일경우
+					decryptValue = value[0] + AESGCMcrypto.decrypt(value[1], secretKey, ivKey);
+				} else {
+					// 그 외 모든이름 공통
+					decryptValue = value[0] + AESGCMcrypto.decrypt(value[1], secretKey, ivKey) + value[2];
+				}
+			} else if (securityName.equals("이메일주소") || securityName.equals("운전면허번호") || securityName.equals("여권번호")) {
+				decryptValue = AESGCMcrypto.decrypt(value[0], secretKey, ivKey) + value[1];
+			} else if (securityName.equals("휴대전화번호") || securityName.equals("연락처")) {
+				decryptValue = value[0] + AESGCMcrypto.decrypt(value[1], secretKey, ivKey) + value[2];
+				;
+			} else if (securityName.equals("주민등록번호") || securityName.equals("거소신고번호") || securityName.equals("외국인등록번호")) {
+				decryptValue = value[0] + AESGCMcrypto.decrypt(value[1], secretKey, ivKey);
+			}
+		}
+
+		return decryptValue;
 	}
 
 }

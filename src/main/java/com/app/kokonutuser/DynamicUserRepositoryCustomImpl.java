@@ -1,16 +1,19 @@
 package com.app.kokonutuser;
 
 import com.app.kokonutuser.dtos.*;
+import com.app.kokonutuser.dtos.use.KokonutUserAlimTalkFieldDto;
+import com.app.kokonutuser.dtos.use.KokonutUserEmailFieldDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.stereotype.Repository;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author Woody
@@ -219,6 +222,42 @@ public class DynamicUserRepositoryCustomImpl implements DynamicUserRepositoryCus
                         new KokonutUserFieldCheckDto(
                                 rs.getString("TABLE_NAME"),
                                 rs.getString("COLUMN_NAME")
+                        )
+        );
+    }
+
+    // 이메일발송할 대상 리스트 호출
+    @Override
+    public List<KokonutUserEmailFieldDto> emailFieldList(String emailField, String searchQuery) {
+        return jdbcTemplate.query(
+                searchQuery,
+                (rs, rowNum) ->
+                        new KokonutUserEmailFieldDto(
+                                rs.getObject(emailField)
+                        )
+        );
+    }
+
+    public String getColumnComment(String searchQuery, String tableName, String columnName) {
+        return jdbcTemplate.queryForObject(searchQuery, (rs, rowNum) -> rs.getString("COLUMN_COMMENT"), tableName, columnName);
+    }
+
+    // 필드의 존재유무 호출
+    public Long getFieldCheck(String ctName, String fieldName) {
+        String searchQuery = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '"+ctName+"' AND "+"COLUMN_NAME = '"+fieldName+"'";
+        log.info("searchQuery : "+searchQuery);
+        return jdbcTemplate.queryForObject(searchQuery, Long.class);
+    }
+
+    // 알림톡 발송 대상 리스트 호출
+    @Override
+    public List<KokonutUserAlimTalkFieldDto> selectUserAlimTalkList(String receiverNum, String appUserId, String searchQuery) {
+        return jdbcTemplate.query(
+                searchQuery,
+                (rs, rowNum) ->
+                        new KokonutUserAlimTalkFieldDto(
+                                receiverNum.isEmpty() ? null : rs.getObject(receiverNum),
+                                appUserId.isEmpty() ? null : rs.getObject(appUserId)
                         )
         );
     }

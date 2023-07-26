@@ -36,13 +36,13 @@ public class NCloudPlatformMailRequest {
 	boolean individual = true;							//개인별 발송 or 일반 발송여부 default: true;
 	boolean advertising;								//광고메일여부
 //	Object parameters;									//Map 형태의 Object
-//	Long reservationUtc;								//예약발송일시, reservateionUtc 값 우선
-//	List<String> attachFileds;							//첨부파일 ID 목록
+	Long reservationUtc;								//예약발송일시, reservateionUtc 값 우선
+	List<String> attachFileIds;							//첨부파일 ID 목록
 	List<RecipientForRequest> recipients;				//*수신자 목록, recipientGroupFilter 값이 입력되지 않으면 필수
 //	List<RecipientGroupFilter> recipientGroupFilter;	//수신자 그룹 조합 발송 조건
 	boolean useBasicUnsubscribeMsg = false;				//광고 메일의 경우 기본 수신 거부 문구 사용 여부
 	String unsubscribeMessage;							//*사용자 정의 수신 거부 문구, 수신 거부 문구는 기본적으로 body의 끝에 추가되며 본문의 원하는 위치에 #{UNSUBSCRIBE_MESSAGE}를 추가하면 해당 태그의 위치에 수신거부 문구가 들어가게 됨
-	List<AttachFile> attachFiles; // 첨부파일 목록
+//	List<AttachFile> attachFiles; // 첨부파일 목록
 
 	public String getSenderAddress() {
 		return senderAddress;

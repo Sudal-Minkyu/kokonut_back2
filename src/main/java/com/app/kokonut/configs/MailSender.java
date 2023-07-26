@@ -1,11 +1,13 @@
 package com.app.kokonut.configs;
 
 
+import com.app.kokonut.email.email.dtos.EmailCheckDto;
 import com.app.kokonut.emailcontacthistory.ContactEmailHistory;
 import com.app.kokonut.emailcontacthistory.ContactEmailHistoryRepository;
 import com.app.kokonut.keydata.KeyDataService;
 import com.app.kokonut.navercloud.NaverCloudPlatformService;
 import com.app.kokonut.navercloud.dto.AttachFile;
+import com.app.kokonut.navercloud.dto.NCloudPlatformMailFileRequest;
 import com.app.kokonut.navercloud.dto.NCloudPlatformMailRequest;
 import com.app.kokonut.navercloud.dto.RecipientForRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
@@ -50,22 +54,96 @@ public class MailSender {
 	}
 
 	// 이메일발송 발송함수
-	public boolean sendEmail(String toEmail, String toName, String title, String contents, List<AttachFile> attachFiles) {
-		return sendMail(toEmail, toName, toEmail, "", title, contents, attachFiles);
+	public String sendEmail(String toEmail, String toName, String title, String contents, List<AttachFile> attachFiles) {
+		return sendMail(toEmail, toName, toEmail, "", title, contents);
 	}
 
-	public boolean sendMail(String toEmail, String toName, String title, String contents) {
-		return sendMail(mailHost, "kokonut", toEmail, toName, title, contents, null);
+	public String sendMail(String toEmail, String toName, String title, String contents) {
+		return sendMail(mailHost, "kokonut", toEmail, toName, title, contents);
 	}
 
 	// 기존 코코넛 inquiryController에서 사용 중, 해당 기능 아직 리팩토링 전. 추후 변경 예정.
-	public boolean inquirySendMail(String toEmail, String toName, String title, String contents) {
-		return sendMail(toEmail, toName, mailHost, "kokonut", title, contents, null);
+	public String inquirySendMail(String toEmail, String toName, String title, String contents) {
+		return sendMail(toEmail, toName, mailHost, "kokonut", title, contents);
+	}
+
+	// 리뉴얼 이메일발송
+	// fromEmail : 발송자 이메일
+	// toCompanyName : 발송한 회사명
+	// toEmailList : 받는 이메일 리스트
+	// title : 제목
+	// contents : 내용
+	// attachFiles : 파일리스트
+	public String newSendMail(String fromEmail, String toCompanyName, List<String> toEmailList, String title, String contents, Long reservationTime,  List<MultipartFile> multipartFiles) throws IOException {
+		log.info("newSendMail 호출");
+
+		String requestId = null;
+
+		if(!toEmailList.isEmpty()) {
+
+			// 수신자 정보 세팅
+			List<RecipientForRequest> recipients = new ArrayList<>();
+
+			// 받는사람 정보
+			RecipientForRequest recipient;
+
+			for(String toEmail : toEmailList) {
+				log.info("보낼이메일 : "+toEmail);
+
+				recipient = new RecipientForRequest();
+				recipient.setType("R");
+				recipient.setAddress(toEmail);
+				recipients.add(recipient);
+			}
+
+			log.info("이메일 수신자 정보 recipients : "+recipients);
+
+			// 발신자 정보 세팅
+			NCloudPlatformMailRequest req = new NCloudPlatformMailRequest();
+			req.setSenderAddress(fromEmail);
+			req.setSenderName(toCompanyName);
+			req.setTitle(title);
+			req.setBody(contents);
+			req.setRecipients(recipients);
+			req.setUnsubscribeMessage("광고 수신 문구");
+//			req.setIndividual(true); // 개인별 발송 혹은 일반 발송 여부
+			req.setAdvertising(false); // 광고메일 여부
+
+			if(reservationTime != null) {
+				req.setReservationUtc(reservationTime);
+			}
+
+//			log.info("multipartFiles : "+multipartFiles);
+			List<String> fileIdList = new ArrayList<>();
+			if(multipartFiles != null) {
+				for(MultipartFile multipartFile : multipartFiles) {
+					fileIdList.add(naverCloudPlatformService.fileMail(multipartFile));
+				}
+//				log.info("fileIdList : "+fileIdList);
+				req.setAttachFileIds(fileIdList);
+			}
+
+			log.info("### 네이버 클라우드 플랫폼 서비스 sendMail 시작");
+			requestId = naverCloudPlatformService.sendMail(req);
+//			log.info("requestId : "+requestId);
+		}
+
+		return requestId;
+	}
+
+	// 발송된 이메일 상태 체크호출
+	public EmailCheckDto sendEmailCheck(String requestId) throws Exception {
+		log.info("sendEmailCheck 호출");
+
+		return naverCloudPlatformService.sendEmailCheck(requestId);
 	}
 
 	@Transactional
-	public boolean sendMail(String fromEmail, String fromName, String toEmail, String toName, String title, String contents, List<AttachFile> attachFiles) {
+	public String sendMail(String fromEmail, String fromName, String toEmail, String toName, String title, String contents) {
 		log.info("### MailSender.sendMail 시작");
+
+		String result = null;
+
 		// 수신자 정보 세팅
 		List<RecipientForRequest> recipients = new ArrayList<>();
 		RecipientForRequest recipient = new RecipientForRequest();
@@ -89,13 +167,10 @@ public class MailSender {
 		req.setIndividual(true);
 		req.setAdvertising(false); // 광고메일 여부
 
-		if(attachFiles != null) {
-			req.setAttachFiles(attachFiles);
-		}
-
 		log.info("### 네이버 클라우드 플랫폼 서비스 sendMail 시작");
-		boolean result = naverCloudPlatformService.sendMail(req);
-		if(result) {
+		result = naverCloudPlatformService.sendMail(req);
+
+		if(result != null) {
 			log.info("### 네이버 클라우드 플랫폼 서비스 sendMail 성공");
 			log.info("### 이메일 발송 내역 저장");
 			ContactEmailHistory contactEmailHistory = new ContactEmailHistory();
@@ -111,6 +186,7 @@ public class MailSender {
 		}else {
 			log.error("### 네이버 클라우드 플랫폼 서비스 sendMail 실패");
 		}
+
 		return result;
 	}
 
@@ -127,7 +203,11 @@ public class MailSender {
 	}
 
 	public String getHTML5(HashMap<String, String> callTemplate) throws IOException {
+
 		String htmlURL = frontServerDomainIp+"/src/template/mail/"+callTemplate.get("template")+".html";
+		// htmlURL -> http://127.0.0.1:5173/src/template/mail/MailTemplate.html
+		log.info("htmlURL : "+htmlURL);
+
 		URL url = new URL(htmlURL);
 		URLConnection conn = url.openConnection();
 		InputStream is = conn.getInputStream();
@@ -138,4 +218,5 @@ public class MailSender {
 		}
 		return renaderdHtml;
 	}
+
 }

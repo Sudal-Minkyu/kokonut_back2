@@ -121,7 +121,7 @@ public class DynamicUserRestController {
 	// 검색할 컬럼리스트 조회(파일 관련 컬럼은 제외)
 	@GetMapping(value = "/searchColumnCall")
 	@ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-	public ResponseEntity<Map<String,Object>> searchColumnCall(@RequestParam(name="tableName", defaultValue = "") String tableName) {
+	public ResponseEntity<Map<String,Object>> searchColumnCall() {
 		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
 		return dynamicUserService.searchColumnCall(jwtFilterDto);
 	}

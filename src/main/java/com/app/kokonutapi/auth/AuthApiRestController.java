@@ -2,6 +2,7 @@ package com.app.kokonutapi.auth;
 
 import com.app.kokonut.auth.jwt.SecurityUtil;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
+import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonutapi.auth.dtos.AuthApiLoginDto;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -40,7 +41,7 @@ public class AuthApiRestController {
             "1. 아이디와 비밀번호를 받는다.<br/>" +
             "2. 해당 개인정보의 아이디와 비밀번호를 확인한다.<br/>" +
             "3. 로그인 성공시 200을 보낸다.")
-    @ApiImplicitParam(name ="ApiKey", value="API Key",required = true, dataTypeClass = String.class, paramType = "header")
+    @ApiImplicitParam(name ="x-api-key", required = true, dataTypeClass = String.class, paramType = "header")
     public ResponseEntity<Map<String,Object>> apiLogin(@RequestBody AuthApiLoginDto authApiLoginDto, HttpServletRequest request) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwtOrApiKey(request);
         if(jwtFilterDto == null) {
@@ -56,14 +57,43 @@ public class AuthApiRestController {
             "2. 해당 키를 통해 컬럼값을 조회하고 해당 값을 인서트할 쿼리문에 추가한다." +
             "3. 로그인 성공시 200을 보낸다.")
     @PostMapping("/register")
-    @ApiImplicitParam(name ="ApiKey", value="API Key",required = true, dataTypeClass = String.class, paramType = "header")
+    @ApiImplicitParam(name ="x-api-key", required = true, dataTypeClass = String.class, paramType = "header")
     public ResponseEntity<Map<String,Object>> apiRegister(@RequestBody HashMap<String, Object> paramMap, HttpServletRequest request) throws Exception {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwtOrApiKey(request);
         return authApiService.apiRegister(paramMap, jwtFilterDto);
     }
 
+    @ApiOperation(value="GET 호출테스트하기", notes="")
+    @GetMapping("/hoculGetTest")
+    @ApiImplicitParam(name ="x-api-key", required = true, dataTypeClass = String.class, paramType = "header")
+    public ResponseEntity<Map<String,Object>> hoculGetTest(HttpServletRequest request) {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwtOrApiKey(request);
 
+        log.info("hoculGetTest 호출 성공");
 
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+        data.put("데이터","성공1");
+
+        return ResponseEntity.ok(res.success(data));
+    }
+
+    @ApiOperation(value="POST 호출테스트하기", notes="")
+    @PostMapping("/hoculPostTest")
+    @ApiImplicitParam(name ="x-api-key", required = true, dataTypeClass = String.class, paramType = "header")
+    public ResponseEntity<Map<String,Object>> hoculPostTest(HttpServletRequest request) {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwtOrApiKey(request);
+
+        log.info("hoculPostTest 호출 성공");
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+        data.put("데이터","성공2");
+
+        return ResponseEntity.ok(res.success(data));
+    }
 
 
 }

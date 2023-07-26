@@ -28,7 +28,7 @@ public class ProvisionIndexDto {
 
     private Long offerInsideCount; // 하단에 표시해줄 내부제공 건수
 
-    private Long offerOutsideCount; // 상단에 표시해줄 내부제공 건수
+    private Long offerOutsideCount; // 하단에 표시해줄 내부제공 건수
 
     public String getFromDate() {
         return DateTimeFormatter.ofPattern("yy. MM. dd").format(fromDate);

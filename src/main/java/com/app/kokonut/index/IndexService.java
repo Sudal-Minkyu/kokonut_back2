@@ -3,6 +3,9 @@ package com.app.kokonut.index;
 import com.app.kokonut.admin.AdminRepository;
 import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
 import com.app.kokonut.company.companytable.CompanyTableRepository;
+import com.app.kokonut.email.email.EmailRepository;
+import com.app.kokonut.email.email.dtos.EmailSendCountDto;
+import com.app.kokonut.email.email.dtos.EmailSendInfoDto;
 import com.app.kokonut.history.extra.apicallhistory.ApiCallHistoryRepository;
 import com.app.kokonut.index.dtos.ApiCallHistoryCountDto;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
@@ -72,6 +75,7 @@ public class IndexService {
 	private final HistoryRepository historyRepository;
 	private final PaymentPrivacyCountRepository paymentPrivacyCountRepository;
 	private final DynamicUserRepositoryCustom dynamicUserRepositoryCustom;
+	private final EmailRepository emailRepository;
 
 	private final ApiCallHistoryRepository apiCallHistoryRepository;
 	private final EncrypCountHistoryRepository encrypCountHistoryRepository;
@@ -89,7 +93,8 @@ public class IndexService {
 						CompanyPaymentInfoRepository companyPaymentInfoRepository,
 						CompanyTableLeaveHistoryRepository companyTableLeaveHistoryRepository, HistoryRepository historyRepository,
 						PaymentPrivacyCountRepository paymentPrivacyCountRepository, DynamicUserRepositoryCustom dynamicUserRepositoryCustom,
-						ApiCallHistoryRepository apiCallHistoryRepository, EncrypCountHistoryRepository encrypCountHistoryRepository, DecrypCountHistoryRepository decrypCountHistoryRepository,
+						EmailRepository emailRepository, ApiCallHistoryRepository apiCallHistoryRepository,
+						EncrypCountHistoryRepository encrypCountHistoryRepository, DecrypCountHistoryRepository decrypCountHistoryRepository,
 						KokonutUserService kokonutUserService, CompanyTableRepository companyTableRepository) {
 		this.historyService = historyService;
 		this.mailSender = mailSender;
@@ -109,6 +114,7 @@ public class IndexService {
 		this.historyRepository = historyRepository;
 		this.paymentPrivacyCountRepository = paymentPrivacyCountRepository;
 		this.dynamicUserRepositoryCustom = dynamicUserRepositoryCustom;
+		this.emailRepository = emailRepository;
 		this.apiCallHistoryRepository = apiCallHistoryRepository;
 		this.encrypCountHistoryRepository = encrypCountHistoryRepository;
 		this.decrypCountHistoryRepository = decrypCountHistoryRepository;
@@ -316,8 +322,8 @@ public class IndexService {
 		// 제공날짜의 기준
 		Long offerInsideCount = offerCount(cpCode, 0, dateType, now, filterDate);
 		Long offerOutsideCount = offerCount(cpCode, 1, dateType, now, filterDate);
-		log.info("제공 가능한 내부건수 : " + offerInsideCount);
-		log.info("제공 가능한 외부건수 : " + offerOutsideCount);
+//		log.info("제공 가능한 내부건수 : " + offerInsideCount);
+//		log.info("제공 가능한 외부건수 : " + offerOutsideCount);
 
 		provisionIndexDto.setOfferInsideCount(offerInsideCount);
 		provisionIndexDto.setOfferOutsideCount(offerOutsideCount);
@@ -451,6 +457,58 @@ public class IndexService {
 		return ResponseEntity.ok(res.success(data));
 	}
 
+	// - 금일 API 호출수를 호출한다. -> Kokonut API 사용
+	public ResponseEntity<Map<String, Object>> apiCount(JwtFilterDto jwtFilterDto) {
+		log.info("apiCount 호출");
+
+		AjaxResponse res = new AjaxResponse();
+		HashMap<String, Object> data = new HashMap<>();
+
+		String email = jwtFilterDto.getEmail();
+
+		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+		String cpCode = adminCompanyInfoDto.getCompanyCode();
+
+		List<ApiCallHistoryCountDto> apiCallHistoryCountDtos = apiCallHistoryRepository.findTodayApiCountList(cpCode);
+
+		int count = 0;
+		for(ApiCallHistoryCountDto apiCallHistoryCountDto : apiCallHistoryCountDtos) {
+			count += apiCallHistoryCountDto.getCount();
+		}
+
+		data.put("count", count);
+
+		return ResponseEntity.ok(res.success(data));
+	}
+
+	// - 금일 암호화, 복호화 수를 호출한다. -> Kokonut API 사용
+	public ResponseEntity<Map<String, Object>> endeCount(JwtFilterDto jwtFilterDto) {
+		log.info("endeCount 호출");
+
+		AjaxResponse res = new AjaxResponse();
+		HashMap<String, Object> data = new HashMap<>();
+
+		String email = jwtFilterDto.getEmail();
+
+		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+		String cpCode = adminCompanyInfoDto.getCompanyCode();
+
+		int encount = 0;
+		int decount = 0;
+
+		List<EncrypCountHistoryCountDto> encrypCountHistoryCountDtos = encrypCountHistoryRepository.findTodayEncrypCountList(cpCode);;
+		List<DecrypCountHistoryCountDto> decrypCountHistoryCountDtos = decrypCountHistoryRepository.findTodayDecrypCountList(cpCode);;
+		for(int i=0; i<24; i++) {
+			encount += encrypCountHistoryCountDtos.get(i).getTotal();
+			decount += decrypCountHistoryCountDtos.get(i).getTotal();
+		}
+
+		data.put("encount", encount);
+		data.put("decount", decount);
+
+		return ResponseEntity.ok(res.success(data));
+	}
+
 	// 6. 개인정보 항목(암호화 항목, 고유식별정보 항목, 민감정보 항목)의 추가 카운팅 수 데이터
 	public ResponseEntity<Map<String, Object>> privacyItemCount(JwtFilterDto jwtFilterDto) {
 		log.info("privacyItemCount 호출");
@@ -478,19 +536,167 @@ public class IndexService {
 
 	}
 
+	// 7. 요금정보를 가져온다. (dateType - "1" : "이번달", "2" : "저번달")
+	public ResponseEntity<Map<String, Object>> peymentInfo(String dateType, JwtFilterDto jwtFilterDto) {
+		log.info("peymentInfo 호출");
+
+		AjaxResponse res = new AjaxResponse();
+		HashMap<String, Object> data = new HashMap<>();
+
+		String email = jwtFilterDto.getEmail();
+
+		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+		String cpCode = adminCompanyInfoDto.getCompanyCode();
+
+		if(dateType.equals("")) {
+			dateType = "1";
+		}
+//		log.info("dateType : "+dateType);
+
+//		PrivacyIndexDto privacyIndexDto = new PrivacyIndexDto();
+
+		LocalDate now = LocalDate.now();
+		LocalDate filterDate;
+
+		if(dateType.equals("2")) {
+			// 저번달
+			filterDate = now.withDayOfMonth(2);
+		}
+		else {
+			dateType = "1";
+			// 이번달
+			filterDate = now.withDayOfMonth(1);
+		}
+		log.info("filterDate : "+filterDate);
+
+		// 코코넛서비스 요금정보
+
+		// AWS 사용데이터 요금정보
+
+		// 이메일 요금정보
 
 
+		return ResponseEntity.ok(res.success(data));
+	}
 
+	// 8. 이메일 발송 완료 및 예약 건수를 가져온다.
+	public ResponseEntity<Map<String, Object>> emailSendCount(String dateType, JwtFilterDto jwtFilterDto) {
+		log.info("emailSendCount 호출");
 
+		AjaxResponse res = new AjaxResponse();
+		HashMap<String, Object> data = new HashMap<>();
 
+		String email = jwtFilterDto.getEmail();
 
+		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+		String cpCode = adminCompanyInfoDto.getCompanyCode();
 
+		if(dateType.equals("")) {
+			dateType = "1";
+		}
+//		log.info("dateType : "+dateType);
 
+		EmailSendCountDto emailSendCountDto = new EmailSendCountDto();
 
+		LocalDate now = LocalDate.now();
+		LocalDate filterDate;
 
+		if(dateType.equals("2")) {
+			// 이번주 일요일-월요일~토요알까지
+			filterDate = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY)); // 이번주 일요일
+//			log.info("이번주 일요일 : " + filterDate);
+		} else if(dateType.equals("3")) {
+			// 이번달
+			filterDate = now.withDayOfMonth(1);
+//			log.info("이번달 1일 : " + filterDate);
+		} else {
+			// 오늘
+			filterDate = now;
+//			log.info("오늘 : " + filterDate);
+		}
 
+		Long completeCount = sendCount(cpCode, "1", dateType, now, filterDate); // 발송완료 건수
+		Long reservationCount = sendCount(cpCode, "2", dateType, now, filterDate); // 발송예약 건수
+		log.info("발송완료 건수 : "+completeCount);
+		log.info("발송예약 건수 : "+reservationCount);
 
+		emailSendCountDto.setCompleteCount(completeCount);
+		emailSendCountDto.setReservationCount(reservationCount);
 
+		data.put("emailSendCountDto", emailSendCountDto);
+
+		return ResponseEntity.ok(res.success(data));
+	}
+
+	// 발송건수 호출 함수
+	public Long sendCount(String cpCode, String emType, String dateType, LocalDate now, LocalDate filterDate) {
+		return emailRepository.sendCount(cpCode, emType, dateType, now, filterDate);
+	}
+
+	// 수신자수 호출 함수
+	public Integer emailSendReceptionCount(String cpCode, String emType, String dateType, LocalDate now, LocalDate filterDate) {
+		return emailRepository.emailSendReceptionCount(cpCode, emType, dateType, now, filterDate);
+	}
+
+	// - 이메일 현황정보를 호출한다. -> Kokonut Kokonut API 사용
+	public ResponseEntity<Map<String, Object>> emailSendInfo(String dateType, JwtFilterDto jwtFilterDto) {
+		log.info("emailSendInfo 호출");
+
+		AjaxResponse res = new AjaxResponse();
+		HashMap<String, Object> data = new HashMap<>();
+
+		String email = jwtFilterDto.getEmail();
+
+		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+		String cpCode = adminCompanyInfoDto.getCompanyCode();
+
+		if(dateType.equals("")) {
+			dateType = "1";
+		}
+//		log.info("dateType : "+dateType);
+
+		EmailSendInfoDto emailSendInfoDto = new EmailSendInfoDto();
+
+		LocalDate now = LocalDate.now();
+		LocalDate filterDate;
+
+		if(dateType.equals("2")) {
+			// 이번주 일요일-월요일~토요알까지
+			filterDate = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY)); // 이번주 일요일
+//			log.info("이번주 일요일 : " + filterDate);
+		} else if(dateType.equals("3")) {
+			// 이번달
+			filterDate = now.withDayOfMonth(1);
+//			log.info("이번달 1일 : " + filterDate);
+		} else {
+			// 오늘
+			filterDate = now;
+//			log.info("오늘 : " + filterDate);
+		}
+
+		Long completeCount = sendCount(cpCode, "1", dateType, now, filterDate); // 발송완료 건수
+		Long reservationCount = sendCount(cpCode, "2", dateType, now, filterDate); // 발송예약 건수
+		log.info("발송완료 건수 : "+completeCount);
+		log.info("발송예약 건수 : "+reservationCount);
+
+		// 수신건수 + 금액
+		Integer complete = emailSendReceptionCount(cpCode,"1", dateType, now, filterDate);
+		Integer reservation = emailSendReceptionCount(cpCode,"2", dateType, now, filterDate);
+
+		int receptionCount = complete + reservation;
+		Integer sendAmount = (int) (Math.floor(receptionCount * 0.5 / 10) * 10);
+		log.info("수신건수 : "+receptionCount);
+		log.info("청구금액 : "+receptionCount*0.5);
+
+		emailSendInfoDto.setCompleteCount(Integer.parseInt(String.valueOf(completeCount)));
+		emailSendInfoDto.setReservationCount(Integer.parseInt(String.valueOf(reservationCount)));
+		emailSendInfoDto.setReceptionCount(receptionCount);
+		emailSendInfoDto.setSendAmount(sendAmount);
+
+		data.put("emailSendInfoDto", emailSendInfoDto);
+
+		return ResponseEntity.ok(res.success(data));
+	}
 
 
 

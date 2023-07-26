@@ -1987,11 +1987,20 @@ public class DynamicUserService {
 				String comment = kokonutUserFieldDto.getComment();
 				if (comment != null) {
 					String[] commentText = comment.split(",");
-					log.info("commentText : "+ Arrays.toString(commentText));
+					String commentName = commentText[0];
+					String commentCheck = commentText[3];
+					String commentSecurity = commentText[1];
+//					log.info("commentText : "+ Arrays.toString(commentText));
 
 					// 카테고리가 파일이면 제외
-					if(commentText.length == 6 && (!commentText[3].equals("파일") && !commentText[0].equals("비밀번호"))) {
-						if (commentText[1].equals("암호화")) {
+					if(commentText.length == 6 && (!commentCheck.equals("파일") && !commentName.equals("비밀번호"))) {
+						// 기본항목 : 아이디 or 전자상거래법의 이메일주소 or 추가항목만 이메일발송항목으로 지정할 수 있음. - 2023.07.13
+						if(commentCheck.equals("기본항목") || commentCheck.equals("전자상거래법") && commentName.equals("이메일주소") || commentCheck.equals("추가항목")) {
+							kokonutPrivacySearchFieldListDto.setEmailAvailable(true);
+						} else {
+							kokonutPrivacySearchFieldListDto.setEmailAvailable(false);
+						}
+						if (commentSecurity.equals("암호화")) {
 							kokonutPrivacySearchFieldListDto.setFieldSecrity(1);
 						} else {
 							kokonutPrivacySearchFieldListDto.setFieldSecrity(0);
@@ -2035,7 +2044,7 @@ public class DynamicUserService {
 
 			if(companySettingEmailDto.getCsEmailCodeSetting().equals("")) {
 				log.error("이메일 항목으로 지정한 값이 없습니다. 환경설정에서 이메일발송할 항목을 선택 후 다시 시도해주시길 바랍니다.");
-				return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_12.getCode(),ResponseErrorCode.ERROR_CODE_12.getDesc()));
+				return ResponseEntity.ok(res.fail(ResponseErrorCode.KO102.getCode(),ResponseErrorCode.KO102.getDesc()));
 			} else {
 				searchCodes.add(0, companySettingEmailDto.getCsEmailCodeSetting());
 				searchTexts.add("");
@@ -2103,7 +2112,8 @@ public class DynamicUserService {
 		if(searchCodes.size() != searchTexts.size()) {
 			log.error("조회하고자 하는 파라메터 값이 일정하지 않습니다. 보내시는 파라메터 값을 다시 한번 확인해주세요.");
 			return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_07.getCode(),ResponseErrorCode.ERROR_CODE_07.getDesc()));
-		} else {
+		}
+		else {
 
 			String ctName = cpCode+"_1";
 
@@ -2172,8 +2182,8 @@ public class DynamicUserService {
 										echCount++;
 									} else {
 										log.error("이메일주소 형식과 맞지 않습니다. 다시 한번 확인해주시길 바랍니다. 보내신 이메일주소 : " + value);
-										return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_09.getCode(),
-												ResponseErrorCode.ERROR_CODE_09.getDesc() + " 보내신 이메일주소 : " + value));
+										return ResponseEntity.ok(res.fail(ResponseErrorCode.KO104.getCode(),
+												ResponseErrorCode.KO104.getDesc() + " 다시 한번 확인해주시길 바랍니다. 보내신 이메일주소 : " + value));
 									}
 								}
 							}
@@ -2274,7 +2284,11 @@ public class DynamicUserService {
 		}
 
 		// 검색 쿼리호출
-		List<Map<String, Object>> privacyList = dynamicUserRepositoryCustom.privacyListPagedData(resultQuery +" LIMIT "+kokonutSearchDto.getLimitNum()+" OFFSET "+offset);
+		if(kokonutSearchDto.getLimitNum() > 0) {
+			resultQuery.append(" LIMIT ").append(kokonutSearchDto.getLimitNum()).append(" OFFSET ").append(offset);
+		}
+
+		List<Map<String, Object>> privacyList = dynamicUserRepositoryCustom.privacyListPagedData(String.valueOf(resultQuery));
 		log.info("privacyList : "+privacyList);
 
 		// 검색 쿼리의 총합호출
@@ -2498,41 +2512,7 @@ public class DynamicUserService {
 						if(!String.valueOf(key).equals("없음")) { // 벨류값이 Null(없음)일 경우 제외
 							log.info("암호화 여부 체크시작");
 
-							String[] value = String.valueOf(key).split("\\|\\|__\\|\\|");; // "||__||" 단위로 끊음
-							String decryptValue = ""; // 복호화된 데이터
-
-							if (value.length == 1) {
-
-								log.info("구분자가 없는 암호화");
-								decryptValue = AESGCMcrypto.decrypt(value[0], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
-
-							} else {
-
-								log.info("||__|| 구분자로 들어간 암호화");
-
-								if(securityName.get(i).equals("이름")) {
-									if (value.length == 2) {
-										// 이름이 2글자일경우
-										decryptValue = value[0] + AESGCMcrypto.decrypt(value[1], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
-									} else {
-										// 그 외 모든이름 공통
-										decryptValue = value[0] + AESGCMcrypto.decrypt(value[1], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey()) + value[2];
-									}
-								}
-
-								else if(securityName.get(i).equals("이메일주소") || securityName.get(i).equals("운전면허번호") || securityName.get(i).equals("여권번호")) {
-									decryptValue = AESGCMcrypto.decrypt(value[0], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey()) + value[1];
-								}
-
-								else if(securityName.get(i).equals("휴대전화번호") || securityName.get(i).equals("연락처")) {
-									decryptValue = value[0] + AESGCMcrypto.decrypt(value[1], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey()) + value[2];;
-								}
-
-								else if(securityName.get(i).equals("주민등록번호") || securityName.get(i).equals("거소신고번호") || securityName.get(i).equals("외국인등록번호")) {
-									decryptValue = value[0] + AESGCMcrypto.decrypt(value[1], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
-								}
-
-							}
+							String decryptValue = Utils.decrypResult(String.valueOf(key), securityName.get(i), awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey()); // 복호화된 데이터
 
 //							log.info("복호화된 데이터 : "+ decryptValue);
 							map.put(securityHeaderNames.get(i), decryptValue);

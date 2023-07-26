@@ -4,7 +4,6 @@ import com.app.kokonut.auth.dtos.AdminCreateDto;
 import com.app.kokonut.auth.dtos.AdminGoogleOTPDto;
 import com.app.kokonut.auth.dtos.AdminPasswordChangeDto;
 import com.app.kokonut.auth.jwt.dto.AuthRequestDto;
-import com.app.kokonut.common.AjaxResponse;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -32,26 +30,9 @@ import java.util.Map;
 public class AuthRestController {
 
     private final AuthService authService;
-
     @Autowired
     public AuthRestController(AuthService authService){
         this.authService = authService;
-    }
-
-    @ApiOperation(value = "부트페이 웹훅 호출용 테스트 API")
-    @PostMapping(value = "/bootPayWebhookCallBack")
-    public ResponseEntity<Map<String,Object>> bootPayWebhookCallBack(@RequestBody HashMap<String,Object> paramMap,
-                                                                     HttpServletRequest request, HttpServletResponse response) {
-        log.info("bootPayWebhookCallBack 호출");
-
-        AjaxResponse res = new AjaxResponse();
-        HashMap<String, Object> data = new HashMap<>();
-
-        log.info("paramMap : "+paramMap);
-        log.info("request : "+request);
-        log.info("response : "+response);
-
-        return ResponseEntity.ok(res.success(data));
     }
 
     // 이메일 가입존재 여부(비밀번호찾기 사용)

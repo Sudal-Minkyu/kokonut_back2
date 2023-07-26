@@ -1,5 +1,6 @@
 package com.app.kokonut.configs.job;
 
+import com.app.kokonut.email.email.EmailService;
 import com.app.kokonut.payment.PaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,7 @@ public class BatchConfig {
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
 
+    private final EmailService emailService;
     private final PaymentService paymentService;
 
     // 일일 개인정보수 집계 @@
@@ -134,6 +136,54 @@ public class BatchConfig {
                     LocalDate localDate = LocalDate.parse(datePart, formatter);
 
                     paymentService.kokonutPayError(localDate);
+
+                    return RepeatStatus.FINISHED;
+                })
+                .build();
+    }
+    //@@@@@@@@@@@@@@@@@
+
+    // 이메일발송건 업데이트 처리 @@
+    @Bean(JOB_NAME+"kokonutSendEmailUpdateJob")
+    public Job kokonutSendEmailUpdateJob() {
+        return jobBuilderFactory.get("kokonutSendEmailUpdateJob")
+                .start(kokonutSendEmailUpdateStep(null))
+                .build();
+    }
+
+    @Bean(STEP_NAME+"kokonutSendEmailUpdateStep")
+    @JobScope
+    public Step kokonutSendEmailUpdateStep(@Value("#{jobParameters[requestDate]}") String requestDate) {
+        return stepBuilderFactory.get("kokonutSendEmailUpdateStep")
+                .tasklet((contribution, chunkContext) -> {
+                    log.info("이메일발송건 업데이트 처리 배치 실행");
+                    log.info("현재 날짜 : " + requestDate);
+
+                    emailService.kokonutSendEmailUpdate();
+
+                    return RepeatStatus.FINISHED;
+                })
+                .build();
+    }
+    //@@@@@@@@@@@@@@@@@
+
+    // 이메일 예약발송건 발송시작 @@ -> 사용안함 23.07.20
+    @Bean(JOB_NAME+"kokonutReservationEmailSendJob")
+    public Job kokonutReservationEmailSendJob() {
+        return jobBuilderFactory.get("kokonutReservationEmailSendJob")
+                .start(kokonutReservationEmailSendStep(null))
+                .build();
+    }
+
+    @Bean(STEP_NAME+"kokonutReservationEmailSendStep")
+    @JobScope
+    public Step kokonutReservationEmailSendStep(@Value("#{jobParameters[requestDate]}") String requestDate) {
+        return stepBuilderFactory.get("kokonutReservationEmailSendStep")
+                .tasklet((contribution, chunkContext) -> {
+                    log.info("이메일 예약발송건 발송시작 배치 실행");
+                    log.info("현재 날짜 : " + requestDate);
+
+//                    emailService.kokonutReservationEmailSend();
 
                     return RepeatStatus.FINISHED;
                 })

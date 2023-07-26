@@ -3,6 +3,7 @@ package com.app.kokonut.provision;
 import com.app.kokonut.admin.AdminService;
 import com.app.kokonut.auth.jwt.SecurityUtil;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
+import com.app.kokonut.configs.ExcelService;
 import com.app.kokonut.provision.dtos.ProvisionSaveDto;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -15,6 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,11 +33,13 @@ public class ProvisionRestController {
 
     private final AdminService adminService;
     private final ProvisionService provisionService;
+    private final ExcelService excelService;
 
     @Autowired
-    public ProvisionRestController(AdminService adminService, ProvisionService provisionService){
+    public ProvisionRestController(AdminService adminService, ProvisionService provisionService, ExcelService excelService){
         this.adminService = adminService;
         this.provisionService = provisionService;
+        this.excelService = excelService;
     }
 
     @ApiOperation(value="내부제공, 외부제공 관리자목록 리스트 호출")
@@ -95,5 +101,29 @@ public class ProvisionRestController {
         return provisionService.provisionDetail(proCode, jwtFilterDto);
     }
 
+    @GetMapping("/provisionDownloadExcel")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = false, dataTypeClass = String.class, paramType = "header", example = ""),
+    })
+    @ApiOperation(value = "개인정보 엑셀 다운로드 API", notes = "" +
+            "")
+    public ResponseEntity<Map<String, Object>> provisionDownloadExcel() throws  IOException {
+        List<Map<String, Object>> dataList = new ArrayList<>();
+
+        Map<String, Object> row1 = new HashMap<>();
+        row1.put("id", 1);
+        row1.put("name", "John");
+        row1.put("age", 35);
+
+        Map<String, Object> row2 = new HashMap<>();
+        row2.put("id", 2);
+        row2.put("name", "Sally");
+        row2.put("age", 28);
+
+        dataList.add(row1);
+        dataList.add(row2);
+
+        return excelService.createExcelFile("테스트압축파일", "테스트시트명", dataList, "1234");
+    }
 
 }

@@ -2,6 +2,7 @@ package com.app.kokonut.category.categoryitem;
 
 import com.app.kokonut.category.categoryitem.dtos.CategoryItemListDto;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.JPQLQuery;
 import org.qlrm.mapper.JpaResultMapper;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
@@ -36,7 +37,9 @@ public class CategoryItemRepositoryCustomImpl extends QuerydslRepositorySupport 
                 .select(Projections.constructor(CategoryItemListDto.class,
                         categoryItem.cddName,
                         categoryItem.cddSecurity,
-                        categoryItem.cddSubName,
+                        new CaseBuilder()
+                                .when(categoryItem.cddSubName.eq("모름")).then("")
+                                .otherwise(categoryItem.cddSubName),
                         categoryItem.cddClassName
                 ));
 

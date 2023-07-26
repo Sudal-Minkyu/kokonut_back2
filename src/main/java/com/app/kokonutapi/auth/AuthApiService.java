@@ -325,13 +325,50 @@ public class AuthApiService {
                                 }
                             }
 
-                            else if (names.get(i).equals("휴대전화번호") || names.get(i).equals("연락처")) {
-                                // 휴대전화번호 or 연락처의 데이터의 대한 암호화
+                            else if (names.get(i).equals("휴대전화번호")) {
+                                // 휴대전화번호 데이터의 대한 암호화
                                 if(value.length() == 11) {
                                     value = value.substring(0,3) + COLUMN_SEP_TYPE +
                                             AESGCMcrypto.encrypt(value.substring(3, 7).getBytes(StandardCharsets.UTF_8), awsKmsResultDto.getSecretKey(),
                                                     Base64.getDecoder().decode(awsKmsResultDto.getIvKey())) + COLUMN_SEP_TYPE +
                                             value.substring(7,11);
+                                } else {
+                                    log.error(names.get(i)+" 형식과 맞지 않습니다. (-)를 제거하고 보내주세요. 보내신 "+
+                                            names.get(i)+ " : " + value);
+                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_11.getCode(),
+                                            names.get(i)+ResponseErrorCode.ERROR_CODE_11.getDesc()+" 보내신 "+
+                                                    names.get(i)+ " : " + value));
+                                }
+                            }
+
+                            else if (names.get(i).equals("연락처")) {
+                                // 연락처의 데이터의 대한 암호화
+                                if(value.length() == 9 || value.length() == 10 || value.length() == 11) {
+                                    if(value.length() == 9) {
+                                        // 가운데 3자리만 암호화
+                                        value = value.substring(0,2) + COLUMN_SEP_TYPE +
+                                                AESGCMcrypto.encrypt(value.substring(2, 5).getBytes(StandardCharsets.UTF_8), awsKmsResultDto.getSecretKey(),
+                                                        Base64.getDecoder().decode(awsKmsResultDto.getIvKey())) + COLUMN_SEP_TYPE +
+                                                value.substring(5,9);
+                                    } else if(value.length() == 10) {
+                                        // 가운데 4자리만 암호화
+                                        if(value.startsWith("02")) {
+                                            value = value.substring(0,2) + COLUMN_SEP_TYPE +
+                                                    AESGCMcrypto.encrypt(value.substring(2, 6).getBytes(StandardCharsets.UTF_8), awsKmsResultDto.getSecretKey(),
+                                                            Base64.getDecoder().decode(awsKmsResultDto.getIvKey())) + COLUMN_SEP_TYPE +
+                                                    value.substring(6,10);
+                                        } else {
+                                            value = value.substring(0,3) + COLUMN_SEP_TYPE +
+                                                    AESGCMcrypto.encrypt(value.substring(3, 6).getBytes(StandardCharsets.UTF_8), awsKmsResultDto.getSecretKey(),
+                                                            Base64.getDecoder().decode(awsKmsResultDto.getIvKey())) + COLUMN_SEP_TYPE +
+                                                    value.substring(6,10);
+                                        }
+                                    } else{
+                                        value = value.substring(0,3) + COLUMN_SEP_TYPE +
+                                                AESGCMcrypto.encrypt(value.substring(3, 7).getBytes(StandardCharsets.UTF_8), awsKmsResultDto.getSecretKey(),
+                                                        Base64.getDecoder().decode(awsKmsResultDto.getIvKey())) + COLUMN_SEP_TYPE +
+                                                value.substring(7,11);
+                                    }
                                 } else {
                                     log.error(names.get(i)+" 형식과 맞지 않습니다. (-)를 제거하고 보내주세요. 보내신 "+
                                             names.get(i)+ " : " + value);
@@ -427,10 +464,22 @@ public class AuthApiService {
             data.put("kokonut_IDX",kokonutIdx); // kokonut_IDX 리턴
 
         } else {
-            log.error("파라메터 데이터가 없습니다.");
+            log.error("파라미터 데이터가 없습니다.");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_00.getCode(),ResponseErrorCode.ERROR_CODE_00.getDesc()));
         }
 
         return ResponseEntity.ok(res.success(data));
     }
+
+
+
+
+
+
+
+
+
+
+
+
 }

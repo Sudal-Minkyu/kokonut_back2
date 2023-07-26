@@ -80,7 +80,7 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
 //                .innerJoin(provisionRoster).on(provisionRoster.proCode.eq(provision.proCode).and(provisionRoster.adminId.eq(provisionSearchDto.getAdminId())))
                 .innerJoin(provisionRosterCnt).on(provisionRosterCnt.proCode.eq(provision.proCode)).groupBy(provisionRosterCnt.proCode)
                 .select(Projections.constructor(ProvisionListDto.class,
-                        provision.proId,
+//                        provision.proId,
                         provision.proCode,
                         proState,
                         admin.knName,
@@ -89,10 +89,10 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
                         provision.proExpDate,
                         provision.proDownloadYn,
                         provisionRosterCnt.count(),
-                        downloadHistoryCountSubQuery,
-                        new CaseBuilder()
-                                .when(InsertAdmin.adminId.eq(provisionSearchDto.getAdminId())).then("1")
-                                .otherwise("2") // 자신이 제공한건이면 "1", 받은건이면 "2"로 반환
+                        downloadHistoryCountSubQuery
+//                        new CaseBuilder()
+//                                .when(InsertAdmin.adminId.eq(provisionSearchDto.getAdminId())).then("1")
+//                                .otherwise("2") // 자신이 제공한건이면 "1", 받은건이면 "2"로 반환
                 ));
 
         if(!provisionSearchDto.getSearchText().equals("")) {

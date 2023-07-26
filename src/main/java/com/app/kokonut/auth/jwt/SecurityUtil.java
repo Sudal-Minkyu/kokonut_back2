@@ -47,16 +47,12 @@ public class SecurityUtil {
 
         if (authentication.getName().equals("anonymousUser")) {
             ApiKeyInfoDto apiKeyInfoDto = (ApiKeyInfoDto)request.getAttribute("apiKeyInfoDto");
-            if(apiKeyInfoDto != null) {
-                log.info("API Key로 통신함");
-                return JwtFilterDto
-                        .builder()
-                        .email(apiKeyInfoDto.getEmail())
-                        .role(null)
-                        .build();
-            }else {
-                return null;
-            }
+            log.info("API Key로 통신함");
+            return JwtFilterDto
+                    .builder()
+                    .email(apiKeyInfoDto.getEmail())
+                    .role(null)
+                    .build();
         } else {
             String desc = authentication.getAuthorities().toString().replaceAll("\\[|\\]", "");;
             String code = AuthorityRole.getCodeByDesc(desc);
