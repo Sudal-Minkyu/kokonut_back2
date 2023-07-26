@@ -62,4 +62,6 @@ public interface DynamicUserRepositoryCustom {
 
     String getColumnComment(String searchQuery, String tableName, String columnName); // 필드의 코멘트값 가져오기
 
+    Long getFieldCheck(String ctName, String fieldName); // 필드의 존재여부 가져오기
+
 }

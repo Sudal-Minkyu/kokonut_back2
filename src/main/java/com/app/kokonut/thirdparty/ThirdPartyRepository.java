@@ -13,7 +13,7 @@ import java.util.Optional;
  * Remark :
  */
 @Repository
-public interface ThirdPartyRepository extends JpaRepository<ThirdParty, Long>, JpaSpecificationExecutor<ThirdParty> {
+public interface ThirdPartyRepository extends JpaRepository<ThirdParty, Long>, JpaSpecificationExecutor<ThirdParty>, ThirdPartyRepositoryCustom {
 
     Optional<ThirdParty> findThirdPartyByCpCodeAndTsType(String cpCode, String tsType);
 

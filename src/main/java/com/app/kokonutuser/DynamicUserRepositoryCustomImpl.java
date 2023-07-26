@@ -241,4 +241,23 @@ public class DynamicUserRepositoryCustomImpl implements DynamicUserRepositoryCus
         return jdbcTemplate.queryForObject(searchQuery, (rs, rowNum) -> rs.getString("COLUMN_COMMENT"), tableName, columnName);
     }
 
+    // 필드의 존재유무 호출
+    public Long getFieldCheck(String ctName, String fieldName) {
+        String searchQuery = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '"+ctName+"' AND "+"COLUMN_NAME = '"+fieldName+"'";
+        log.info("searchQuery : "+searchQuery);
+        return jdbcTemplate.queryForObject(searchQuery, Long.class);
+    }
+
+//    @Override
+//    public List<KokonutUserFieldInfoDto> selectUserAlimTalkList(String VALUE, String searchQuery) {
+//        return jdbcTemplate.query(
+//                searchQuery,
+//                (rs, rowNum) ->
+//                        new KokonutUserFieldInfoDto(
+//                                rs.getLong("kokonut_IDX"),
+//                                rs.getObject(VALUE)
+//                        )
+//        );
+//    }
+
 }

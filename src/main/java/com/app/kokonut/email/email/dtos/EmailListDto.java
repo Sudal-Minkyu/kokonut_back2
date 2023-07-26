@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Data
 @NoArgsConstructor
@@ -42,5 +43,17 @@ public class EmailListDto {
     private String emEmailSend; // 발신자 이메일
 
     private LocalDateTime send_date; // 발송날짜 예약 발송이 일경우 emReservationDate값을 보냄 그게아니면 insert_date : (emType로 비교)
+
+    public Integer getEmSendAllCount() {
+        return Objects.requireNonNullElse(emSendAllCount, 0);
+    }
+
+    public Integer getEmSendSucCount() {
+        return Objects.requireNonNullElse(emSendSucCount, 0);
+    }
+
+    public Integer getEmSendFailCount() {
+        return Objects.requireNonNullElse(emSendFailCount, 0);
+    }
 
 }

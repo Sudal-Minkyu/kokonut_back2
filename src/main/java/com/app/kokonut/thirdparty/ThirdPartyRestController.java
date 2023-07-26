@@ -7,10 +7,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.Map;
@@ -42,7 +39,13 @@ public class ThirdPartyRestController {
         return thirdPartyService.bizmSetting(settingType, choseCode, jwtFilterDto);
     }
 
-
+    @ApiOperation(value = "비즈엠 서드파티에 지정된 항목 가져오기")
+    @GetMapping(value = "/bizmGetCode")
+    @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    public ResponseEntity<Map<String,Object>> bizmGetCode() {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return thirdPartyService.bizmGetCode(jwtFilterDto);
+    }
 
 
 

@@ -156,6 +156,9 @@ public enum ResponseErrorCode {
     ERROR_CODE_10("ERROR_CODE_10", "이미 사용중인 아이디입니다."),
     ERROR_CODE_11("ERROR_CODE_11", "형식과 맞지 않습니다. (-)를 제외하여 보내주시길 바랍니다."),
     ERROR_CODE_12("ERROR_CODE_12", "필수 파라메터가 존재하지 않습니다."),
+    ERROR_CODE_13("ERROR_CODE_13", "kokonut_IDX_List는 'ArrayList' 형태로 보내주시길 바랍니다."),
+    ERROR_CODE_14("ERROR_CODE_14", "지정된 고유코드가 존재하지 않습니다. 보낼 항목의 대상을 다시 지정해주시길 바랍니다."),
+
 
     ERROR_CODE_96("ERROR_CODE_96", "헤더에 APIKey가 존재하지 않습니다. APIKey를 담아 보내주세요."), // 400
     ERROR_CODE_97("ERROR_CODE_97", "호출하신 APIKey는 존재하지 않은 APIKey 입니다. APIKey관리 페이지에서 APIKey를 확인해주세요."), // 404

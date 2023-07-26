@@ -39,6 +39,81 @@ public class KokonutUserService {
 		this.dynamicUserRepositoryCustom = dynamicUserRepositoryCustom;
 	}
 
+	// @@@@@@@@@@@@ 서비스 사용되고 있는 함수 @@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+	// 테이블의 컬럼 목록 조회
+	public List<KokonutUserFieldDto> getColumns(String companyCode) {
+		log.info("getColumns 호출");
+		String searchQuery = "SHOW FULL COLUMNS FROM "+companyCode;
+//		log.info("searchQuery : "+searchQuery);
+		return dynamicUserRepositoryCustom.selectColumns(searchQuery);
+	}
+
+	// 테이블의 코멘트+암호화여부 목록 조회
+	public List<Map<String, Object>> getCommentOrEncrypt(String companyCode) {
+		log.info("getFields 호출");
+		String searchQuery = "SHOW FULL COLUMNS FROM "+companyCode;
+		log.info("searchQuery : "+searchQuery);
+		return dynamicUserRepositoryCustom.getCommentOrEncrypt(searchQuery);
+	}
+
+	// 테이블이 존재하는지 검증해주는 함수
+	public int getTableVerification(String table) {
+		log.info("getTableVerification 호출");
+		String searchQuery = "SHOW TABLES LIKE '"+table+"'";
+		log.info("searchQuery : "+searchQuery);
+		return dynamicUserRepositoryCustom.verificationQuery(searchQuery);
+	}
+
+	// 테이블 데이터가 하나라도 존재하는지 검증해주는 함수
+	public String getTableDataCheck(String table) {
+		log.info("getTableDataCheck 호출");
+		String searchQuery = "SELECT EXISTS(SELECT 1 FROM "+table+" LIMIT 1) as exists_flag";
+		log.info("searchQuery : "+searchQuery);
+		return dynamicUserRepositoryCustom.getTableDataCheck(searchQuery);
+	}
+
+	// 이메일 발송명단 호출
+	public List<KokonutUserEmailFieldDto> emailFieldList(String ctName, String fieldName, String emReceiverType, List<String> emailSendChoseList) {
+		log.info("emailFieldList 호출");
+
+//		log.info("ctName : "+ctName);
+//		log.info("csEmailCodeSetting : "+csEmailCodeSetting);
+//		log.info("emReceiverType : "+emReceiverType);
+//		log.info("emailSendChoseList : "+emailSendChoseList);
+
+		StringBuilder searchQuery = new StringBuilder();
+		searchQuery.append("SELECT ").append(fieldName).append(" FROM ").append(ctName)
+				.append(" WHERE ").append(fieldName).append(" IS NOT NULL AND ").append(fieldName).append(" != ''"); // 값이 null 또는 공백인건 제외한다.
+
+		if(emReceiverType.equals("2")) {
+			String joinedEmailSendChoseList = emailSendChoseList.stream()
+					.map(s -> "'" + s + "'")
+					.collect(Collectors.joining(", "));
+			searchQuery.append(" AND kokonut_IDX IN (").append(joinedEmailSendChoseList).append(")");
+		}
+
+		log.info("searchQuery : "+searchQuery);
+
+		return dynamicUserRepositoryCustom.emailFieldList(fieldName, String.valueOf(searchQuery));
+	}
+
+	// 컬럼의 코멘트 호출
+	public String getColumnComment(String tableName, String columnName) {
+		log.info("getColumnComment 호출");
+		String searchQuery = "SELECT COLUMN_COMMENT FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? AND COLUMN_NAME = ?";
+		return dynamicUserRepositoryCustom.getColumnComment(searchQuery, tableName, columnName);
+	}
+
+	// 필드의 존재유무 호출
+	public Long getFieldCheck(String ctName, String fieldName) {
+		log.info("getFieldCheck 호출");
+		return dynamicUserRepositoryCustom.getFieldCheck(ctName, fieldName);
+	}
+
+	// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
 	/**
 	 * 시스템 관리자가 지정한 기본 테이블 정보 조회
 	 */
@@ -236,74 +311,6 @@ public class KokonutUserService {
 		String searchQuery = "SELECT IDX FROM `"+companyCode+"` ORDER BY `IDX` DESC LIMIT 1";
 		return dynamicUserRepositoryCustom.selectTableLastIdx(searchQuery);
 	}
-
-	// @@@@@@@@@@@@ 서비스 사용되고 있는 함수 @@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-	// 테이블의 컬럼 목록 조회
-	public List<KokonutUserFieldDto> getColumns(String companyCode) {
-		log.info("getColumns 호출");
-		String searchQuery = "SHOW FULL COLUMNS FROM "+companyCode;
-//		log.info("searchQuery : "+searchQuery);
-		return dynamicUserRepositoryCustom.selectColumns(searchQuery);
-	}
-
-	// 테이블의 코멘트+암호화여부 목록 조회
-	public List<Map<String, Object>> getCommentOrEncrypt(String companyCode) {
-		log.info("getFields 호출");
-		String searchQuery = "SHOW FULL COLUMNS FROM "+companyCode;
-		log.info("searchQuery : "+searchQuery);
-		return dynamicUserRepositoryCustom.getCommentOrEncrypt(searchQuery);
-	}
-
-	// 테이블이 존재하는지 검증해주는 함수
-	public int getTableVerification(String table) {
-		log.info("getTableVerification 호출");
-		String searchQuery = "SHOW TABLES LIKE '"+table+"'";
-		log.info("searchQuery : "+searchQuery);
-		return dynamicUserRepositoryCustom.verificationQuery(searchQuery);
-	}
-
-	// 테이블 데이터가 하나라도 존재하는지 검증해주는 함수
-	public String getTableDataCheck(String table) {
-		log.info("getTableDataCheck 호출");
-		String searchQuery = "SELECT EXISTS(SELECT 1 FROM "+table+" LIMIT 1) as exists_flag";
-		log.info("searchQuery : "+searchQuery);
-		return dynamicUserRepositoryCustom.getTableDataCheck(searchQuery);
-	}
-
-	// 이메일 발송명단 호출
-	public List<KokonutUserEmailFieldDto> emailFieldList(String ctName, String fieldName, String emReceiverType, List<String> emailSendChoseList) {
-		log.info("emailFieldList 호출");
-
-//		log.info("ctName : "+ctName);
-//		log.info("csEmailCodeSetting : "+csEmailCodeSetting);
-//		log.info("emReceiverType : "+emReceiverType);
-//		log.info("emailSendChoseList : "+emailSendChoseList);
-
-		StringBuilder searchQuery = new StringBuilder();
-		searchQuery.append("SELECT ").append(fieldName).append(" FROM ").append(ctName)
-				.append(" WHERE ").append(fieldName).append(" IS NOT NULL AND ").append(fieldName).append(" != ''"); // 값이 null 또는 공백인건 제외한다.
-
-		if(emReceiverType.equals("2")) {
-			String joinedEmailSendChoseList = emailSendChoseList.stream()
-					.map(s -> "'" + s + "'")
-					.collect(Collectors.joining(", "));
-			searchQuery.append(" AND kokonut_IDX IN (").append(joinedEmailSendChoseList).append(")");
-		}
-
-		log.info("searchQuery : "+searchQuery);
-
-		return dynamicUserRepositoryCustom.emailFieldList(fieldName, String.valueOf(searchQuery));
-	}
-
-	// 이메일 발송명단 호출
-	public String getColumnComment(String tableName, String columnName) {
-		log.info("getColumnComment 호출");
-		String searchQuery = "SELECT COLUMN_COMMENT FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? AND COLUMN_NAME = ?";
-		return dynamicUserRepositoryCustom.getColumnComment(searchQuery, tableName, columnName);
-	}
-
-	// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 	/**
 	 * 유저테이블의 보낼 데이터의 필드만 조회 ex) kokonut_ 들어간 필드 제외
