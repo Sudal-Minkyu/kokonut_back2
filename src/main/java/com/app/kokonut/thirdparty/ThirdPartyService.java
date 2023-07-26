@@ -5,10 +5,14 @@ import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
 import com.app.kokonut.alimtalk.AlimtalkService;
 import com.app.kokonut.alimtalk.dtos.AlimtalkTemplateInfoDto;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
+import com.app.kokonut.awskmshistory.dto.AwsKmsResultDto;
 import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.common.realcomponent.CommonUtil;
+import com.app.kokonut.common.realcomponent.Utils;
 import com.app.kokonut.company.companydatakey.CompanyDataKeyService;
+import com.app.kokonut.company.companytablecolumninfo.CompanyTableColumnInfoRepository;
+import com.app.kokonut.company.companytablecolumninfo.dtos.CompanyTableColumnInfoCheck;
 import com.app.kokonut.history.HistoryService;
 import com.app.kokonut.history.dtos.ActivityCode;
 import com.app.kokonut.history.extra.encrypcounthistory.EncrypCountHistoryService;
@@ -16,6 +20,7 @@ import com.app.kokonut.thirdparty.bizm.ThirdPartyBizm;
 import com.app.kokonut.thirdparty.bizm.ThirdPartyBizmRepository;
 import com.app.kokonut.thirdparty.dtos.ThirdPartyAlimTalkSettingDto;
 import com.app.kokonutuser.KokonutUserService;
+import com.app.kokonutuser.dtos.use.KokonutUserAlimTalkFieldDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -40,6 +45,7 @@ public class ThirdPartyService {
 	private final ThirdPartyRepository thirdPartyRepository;
 	private final ThirdPartyBizmRepository thirdPartyBizmRepository;
 	private final AdminRepository adminRepository;
+	private final CompanyTableColumnInfoRepository companyTableColumnInfoRepository;
 
 	private final HistoryService historyService;
 	private final AlimtalkService alimtalkService;
@@ -49,11 +55,14 @@ public class ThirdPartyService {
 
 	@Autowired
 	public ThirdPartyService(ThirdPartyRepository thirdPartyRepository, ThirdPartyBizmRepository thirdPartyBizmRepository,
-							 AdminRepository adminRepository, HistoryService historyService, AlimtalkService alimtalkService,
-							 EncrypCountHistoryService encrypCountHistoryService, CompanyDataKeyService companyDataKeyService, KokonutUserService kokonutUserService) {
+							 AdminRepository adminRepository, CompanyTableColumnInfoRepository companyTableColumnInfoRepository,
+							 HistoryService historyService, AlimtalkService alimtalkService,
+							 EncrypCountHistoryService encrypCountHistoryService, CompanyDataKeyService companyDataKeyService,
+							 KokonutUserService kokonutUserService) {
 		this.thirdPartyRepository = thirdPartyRepository;
 		this.thirdPartyBizmRepository = thirdPartyBizmRepository;
 		this.adminRepository = adminRepository;
+		this.companyTableColumnInfoRepository = companyTableColumnInfoRepository;
 		this.historyService = historyService;
 		this.alimtalkService = alimtalkService;
 		this.encrypCountHistoryService = encrypCountHistoryService;
@@ -227,71 +236,83 @@ public class ThirdPartyService {
 					}
 				}
 
-				String ctName = cpCode+"_1";
-				String asTable = "kokonutTable";
+				String ctName = cpCode+"_1"; // 조회 테이블
+				List<String> designationChk = new ArrayList<>();
+				List<String> securityChk = new ArrayList<>();
 
 				// 알림톡 보낼 지정된 항목 가져오기 -> receiver_num 또는 app_user_id 없을 경우 에러 반환
 				ThirdPartyAlimTalkSettingDto thirdPartyAlimTalkSettingDto = thirdPartyRepository.findByAlimTalkSetting(cpCode);
 				String tsBizmReceiverNumCode;
 				String tsBizmAppUserIdCode;
 
+				String tsBizmReceiverNumCodeColumn = "";
+				String tsBizmAppUserIdCodeColumn = "";
+
+				int designate = 0;
 				if(thirdPartyAlimTalkSettingDto != null) {
 					tsBizmReceiverNumCode = thirdPartyAlimTalkSettingDto.getTsBizmReceiverNumCode();
 					tsBizmAppUserIdCode = thirdPartyAlimTalkSettingDto.getTsBizmAppUserIdCode();
 				} else {
-					log.error("kokonut_IDX_List는 'ArrayList' 형태로 보내주시길 바랍니다.");
-					return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_13.getCode(),ResponseErrorCode.ERROR_CODE_13.getDesc()));
+					log.error("환경설정 -> 서드파티 -> 비즈엠에서 보낼 대상의 항목을 지정해 주시길 바랍니다.");
+					return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_15.getCode(), ResponseErrorCode.ERROR_CODE_15.getDesc()));
 				}
 
 				Long fieldCheckResult;
 				if(!tsBizmReceiverNumCode.equals("")) {
-					fieldCheckResult = kokonutUserService.getFieldCheck(ctName, tsBizmReceiverNumCode);
-					if(fieldCheckResult == 0) {
+					CompanyTableColumnInfoCheck companyTableColumnInfoCheck = companyTableColumnInfoRepository.findByCheck(ctName, tsBizmReceiverNumCode);
+					if(companyTableColumnInfoCheck != null) {
+						fieldCheckResult = kokonutUserService.getFieldCheck(ctName, companyTableColumnInfoCheck.getCtciName());
+						if(fieldCheckResult == 0) {
+							log.error("지정된 고유코드가 존재하지 않습니다. 보낼 항목의 대상을 다시 지정해주시길 바랍니다. 현재 지정된 고유코드 : "+tsBizmReceiverNumCode);
+							return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_14.getCode(),
+									ResponseErrorCode.ERROR_CODE_14.getDesc()+"현재 지정된 고유코드 : "+tsBizmReceiverNumCode));
+						} else {
+							tsBizmReceiverNumCodeColumn = companyTableColumnInfoCheck.getCtciName();
+							designationChk.add(companyTableColumnInfoCheck.getCtciDesignation());
+							securityChk.add(companyTableColumnInfoCheck.getCtciSecuriy());
+							designate++;
+						}
+					} else {
 						log.error("지정된 고유코드가 존재하지 않습니다. 보낼 항목의 대상을 다시 지정해주시길 바랍니다. 현재 지정된 고유코드 : "+tsBizmReceiverNumCode);
 						return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_14.getCode(),
 								ResponseErrorCode.ERROR_CODE_14.getDesc()+"현재 지정된 고유코드 : "+tsBizmReceiverNumCode));
 					}
 				}
+				else {
+					designationChk.add("");
+					securityChk.add("0");
+				}
 
 				if(!tsBizmAppUserIdCode.equals("")) {
-					fieldCheckResult = kokonutUserService.getFieldCheck(ctName, tsBizmAppUserIdCode);
-					if(fieldCheckResult == 0) {
+					CompanyTableColumnInfoCheck companyTableColumnInfoCheck = companyTableColumnInfoRepository.findByCheck(ctName, tsBizmAppUserIdCode);
+					if(companyTableColumnInfoCheck != null) {
+						fieldCheckResult = kokonutUserService.getFieldCheck(ctName, companyTableColumnInfoCheck.getCtciName());
+						if(fieldCheckResult == 0) {
+							log.error("지정된 고유코드가 존재하지 않습니다. 보낼 항목의 대상을 다시 지정해주시길 바랍니다. 현재 지정된 고유코드 : "+tsBizmAppUserIdCode);
+							return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_14.getCode(),
+									ResponseErrorCode.ERROR_CODE_14.getDesc()+"현재 지정된 고유코드 : "+tsBizmAppUserIdCode));
+						} else {
+							tsBizmAppUserIdCodeColumn = companyTableColumnInfoCheck.getCtciName();
+							designationChk.add(companyTableColumnInfoCheck.getCtciDesignation());
+							securityChk.add(companyTableColumnInfoCheck.getCtciSecuriy());
+							designate++;
+						}
+					} else {
 						log.error("지정된 고유코드가 존재하지 않습니다. 보낼 항목의 대상을 다시 지정해주시길 바랍니다. 현재 지정된 고유코드 : "+tsBizmAppUserIdCode);
 						return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_14.getCode(),
 								ResponseErrorCode.ERROR_CODE_14.getDesc()+"현재 지정된 고유코드 : "+tsBizmAppUserIdCode));
 					}
 				}
+				else {
+					designationChk.add("");
+					securityChk.add("0");
+				}
 
+				AwsKmsResultDto awsKmsResultDto = null;
 
-				// 해당 필드의 코멘트 조회
-//				String comment = kokonutUserService.getColumnComment(ctName, fieldName);
-//				log.info("comment : "+comment);
-
-//				int encType; // 암호화실행 여부
-//				int secType; // 암호화, 비암호화여부 : "0" 암호화, "1" 비암호화
-//				String[] commentText = comment.split(",");
-//				String commentCheck = commentText[3];
-//				String commentSecurity = commentText[1];
-//				log.info("commentCheck : "+commentCheck);
-//
-//				if(commentCheck.equals("기본항목")) {
-//					encType = 0;
-//					secType = 1;
-//				}
-//				else if (commentCheck.equals("전자상거래법") && commentText[0].equals("이메일주소")) {
-//					encType = 1;
-//					secType = 0;
-//				}
-//				else if(commentCheck.equals("추가항목")){
-//					encType = 2;
-//					if (commentSecurity.equals("암호화")) {
-//						secType = 0;
-//					} else {
-//						secType = 1;
-//					}
-//				}
-
-//				AwsKmsResultDto awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(cpCode); 암호화 하기 전에 가져올것
+				log.info("tsBizmReceiverNumCodeColumn : "+tsBizmReceiverNumCodeColumn);
+				log.info("tsBizmAppUserIdCodeColumn : "+tsBizmAppUserIdCodeColumn);
+				log.info("designate : "+designate);
 
 				// 템플릿 컨텐츠부터 가져온다.
 				AlimtalkTemplateInfoDto alimtalkTemplateInfoDto = alimtalkService.alimtalkTemplateInfo(profileKey, templateCode);
@@ -307,7 +328,21 @@ public class ThirdPartyService {
 
 					// 알림톡전송하기
 					StringBuilder searchQuery = new StringBuilder();
-					searchQuery.append("SELECT ").append("ID_1_id").append(" FROM ").append(ctName);
+					searchQuery.append("SELECT ");
+
+					if(designate == 2) {
+						searchQuery.append(tsBizmReceiverNumCodeColumn).append(",").append(tsBizmAppUserIdCodeColumn);
+					} else {
+						if(!tsBizmReceiverNumCodeColumn.equals("")) {
+							searchQuery.append(tsBizmReceiverNumCodeColumn);
+						}
+
+						if(!tsBizmAppUserIdCodeColumn.equals("")) {
+							searchQuery.append(tsBizmAppUserIdCodeColumn);
+						}
+					}
+
+					searchQuery.append(" FROM ").append(ctName);
 					if(sendType.equals("SELECT")) {
 						if(!kokonutIdxList.equals("")) {
 							searchQuery.append(" WHERE ").append("kokonut_IDX IN (").append(kokonutIdxList).append(")");
@@ -315,19 +350,74 @@ public class ThirdPartyService {
 					}
 					log.info("searchQuery : "+searchQuery);
 
-					List<Map<String, Object>> basicTableList = kokonutUserService.selectBasicTableList(searchQuery.toString());
-					log.info("basicTableList : "+basicTableList);
+					KokonutUserAlimTalkFieldDto kokonutUserAlimTalkFieldDto;
+					List<KokonutUserAlimTalkFieldDto> kokonutUserAlimTalkFieldDtos =
+							kokonutUserService.selectUserAlimTalkList(tsBizmReceiverNumCodeColumn, tsBizmAppUserIdCodeColumn, searchQuery.toString());
+					log.info("kokonutUserAlimTalkFieldDtos : "+kokonutUserAlimTalkFieldDtos);
+
+					if(securityChk.contains("1")) {
+						log.info("암호화 항목이 있음");
+						awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(cpCode); // 암호화 하기 전에 가져올것
+
+						// 복호화작업
+						for(int i=0; i<kokonutUserAlimTalkFieldDtos.size(); i++) {
+
+							String receiverNum = "";
+							String appUserId = "";
+							if(securityChk.get(0).equals("0")) {
+								receiverNum = (String) kokonutUserAlimTalkFieldDtos.get(i).getReceiverNum();
+							}
+
+							if(securityChk.get(1).equals("0")) {
+								appUserId = (String) kokonutUserAlimTalkFieldDtos.get(i).getAppUserId();
+							}
+
+							if(securityChk.get(0).equals("1") && !designationChk.get(0).equals("")) {
+								try {
+
+									receiverNum = Utils.decrypResult(designationChk.get(0), (String) kokonutUserAlimTalkFieldDtos.get(i).getReceiverNum(),
+											awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey()); // 복호화된 데이터
+//									log.info("receiverNum : "+receiverNum);
+									dchCount++;
+								}catch (Exception e) {
+									receiverNum = "";
+									log.error("복호화 에러 발생");
+								}
+							}
+
+							if(securityChk.get(1).equals("1") && !designationChk.get(1).equals("")) {
+								try {
+
+									appUserId = Utils.decrypResult(designationChk.get(1), (String) kokonutUserAlimTalkFieldDtos.get(i).getAppUserId(),
+											awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey()); // 복호화된 데이터
+//									log.info("appUserId : "+appUserId);
+									dchCount++;
+								}catch (Exception e) {
+									appUserId = "";
+									log.error("복호화 에러 발생");
+								}
+							}
+
+							kokonutUserAlimTalkFieldDto = new KokonutUserAlimTalkFieldDto(receiverNum, appUserId);
+							kokonutUserAlimTalkFieldDtos.set(i, kokonutUserAlimTalkFieldDto);
+						}
+
+					}
+					else {
+						log.info("암호화 항목이 없음");
+					}
 
 
-
-
+					for(KokonutUserAlimTalkFieldDto kokonutUserAlimTalkField : kokonutUserAlimTalkFieldDtos) {
+						log.info("receiverNum : "+kokonutUserAlimTalkField.getReceiverNum());
+						log.info("appUserId : "+kokonutUserAlimTalkField.getAppUserId());
+					}
 
 
 					// 복호화 횟수 저장
 					if(dchCount > 0) {
 						encrypCountHistoryService.encrypCountHistorySave(cpCode, dchCount);
 					}
-
 
 
 				} else if (alimtalkTemplateInfoDto.getResult().equals("fail")) {

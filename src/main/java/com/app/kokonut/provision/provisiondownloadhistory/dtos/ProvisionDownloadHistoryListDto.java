@@ -19,9 +19,9 @@ import java.util.Locale;
 @AllArgsConstructor
 public class ProvisionDownloadHistoryListDto {
 
-    private LocalDateTime insert_date; // 만든 날짜
+    private LocalDateTime insert_date; // 다운로드 날짜
 
-    private LocalDateTime insert_time; // 만든 시간
+    private LocalDateTime insert_time; // 다운로드 시간
 
     private String knName; // 다운로드한사람
 

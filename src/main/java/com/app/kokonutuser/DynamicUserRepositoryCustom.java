@@ -1,6 +1,7 @@
 package com.app.kokonutuser;
 
 import com.app.kokonutuser.dtos.*;
+import com.app.kokonutuser.dtos.use.KokonutUserAlimTalkFieldDto;
 import com.app.kokonutuser.dtos.use.KokonutUserEmailFieldDto;
 
 import java.util.LinkedHashSet;
@@ -63,5 +64,7 @@ public interface DynamicUserRepositoryCustom {
     String getColumnComment(String searchQuery, String tableName, String columnName); // 필드의 코멘트값 가져오기
 
     Long getFieldCheck(String ctName, String fieldName); // 필드의 존재여부 가져오기
+
+    List<KokonutUserAlimTalkFieldDto> selectUserAlimTalkList(String receiverNum, String appUserId, String searchQuery); // 알림톡 발송 대상 리스트 호출
 
 }

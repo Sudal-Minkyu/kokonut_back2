@@ -1,6 +1,7 @@
 package com.app.kokonutuser;
 
 import com.app.kokonutuser.dtos.*;
+import com.app.kokonutuser.dtos.use.KokonutUserAlimTalkFieldDto;
 import com.app.kokonutuser.dtos.use.KokonutUserEmailFieldDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -248,16 +249,17 @@ public class DynamicUserRepositoryCustomImpl implements DynamicUserRepositoryCus
         return jdbcTemplate.queryForObject(searchQuery, Long.class);
     }
 
-//    @Override
-//    public List<KokonutUserFieldInfoDto> selectUserAlimTalkList(String VALUE, String searchQuery) {
-//        return jdbcTemplate.query(
-//                searchQuery,
-//                (rs, rowNum) ->
-//                        new KokonutUserFieldInfoDto(
-//                                rs.getLong("kokonut_IDX"),
-//                                rs.getObject(VALUE)
-//                        )
-//        );
-//    }
+    // 알림톡 발송 대상 리스트 호출
+    @Override
+    public List<KokonutUserAlimTalkFieldDto> selectUserAlimTalkList(String receiverNum, String appUserId, String searchQuery) {
+        return jdbcTemplate.query(
+                searchQuery,
+                (rs, rowNum) ->
+                        new KokonutUserAlimTalkFieldDto(
+                                receiverNum.isEmpty() ? null : rs.getObject(receiverNum),
+                                appUserId.isEmpty() ? null : rs.getObject(appUserId)
+                        )
+        );
+    }
 
 }

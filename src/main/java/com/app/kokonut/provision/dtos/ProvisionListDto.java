@@ -19,7 +19,7 @@ import java.time.format.DateTimeFormatter;
 @AllArgsConstructor
 public class ProvisionListDto {
 
-    private Long proId;
+//    private Long proId;
 
     private String proCode;
 
@@ -39,7 +39,7 @@ public class ProvisionListDto {
 
     private Long downloadCount;
 
-    private String test; // "1" : 제공함, "2" : 제공받음
+//    private String test; // "1" : 제공함, "2" : 제공받음
 
     public String getProDownloadYn() {
         if(proDownloadYn == 0) {

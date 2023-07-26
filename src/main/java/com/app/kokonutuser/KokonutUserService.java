@@ -3,6 +3,7 @@ package com.app.kokonutuser;
 import com.app.kokonut.commonfield.dtos.CommonFieldDto;
 import com.app.kokonut.commonfield.CommonFieldRepositoryCustom;
 import com.app.kokonutuser.dtos.*;
+import com.app.kokonutuser.dtos.use.KokonutUserAlimTalkFieldDto;
 import com.app.kokonutuser.dtos.use.KokonutUserEmailFieldDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,6 +110,12 @@ public class KokonutUserService {
 	public Long getFieldCheck(String ctName, String fieldName) {
 		log.info("getFieldCheck 호출");
 		return dynamicUserRepositoryCustom.getFieldCheck(ctName, fieldName);
+	}
+
+	// 알림톡 발송 대상 리스트 호출
+	public List<KokonutUserAlimTalkFieldDto> selectUserAlimTalkList(String tsBizmReceiverNumCodeColumn, String tsBizmAppUserIdCodeColumn, String searchQuery) {
+		log.info("selectUserAlimTalkList 호출");
+		return dynamicUserRepositoryCustom.selectUserAlimTalkList(tsBizmReceiverNumCodeColumn, tsBizmAppUserIdCodeColumn, searchQuery);
 	}
 
 	// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

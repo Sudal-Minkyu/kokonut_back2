@@ -28,7 +28,7 @@ public class EmailListDto {
 
     private String emTitle; // 제목
 
-    private String emState; // 메일상태(1: 발송중, 2: 발송예약중, 3: 일부실패, 4: 발송실패, 5: 발송완료, 6: 발송취소)
+    private String emState; // 메일상태(1: 발송중, 2: 발송예약중, 3: 일부성공, 4: 발송실패, 5: 발송완료, 6: 발송취소)
 
     private Integer emSendAllCount; // 이메일발송 전체건수
 

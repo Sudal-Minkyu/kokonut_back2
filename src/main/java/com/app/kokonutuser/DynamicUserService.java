@@ -2512,41 +2512,7 @@ public class DynamicUserService {
 						if(!String.valueOf(key).equals("없음")) { // 벨류값이 Null(없음)일 경우 제외
 							log.info("암호화 여부 체크시작");
 
-							String[] value = String.valueOf(key).split("\\|\\|__\\|\\|");; // "||__||" 단위로 끊음
-							String decryptValue = ""; // 복호화된 데이터
-
-							if (value.length == 1) {
-
-								log.info("구분자가 없는 암호화");
-								decryptValue = AESGCMcrypto.decrypt(value[0], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
-
-							} else {
-
-								log.info("||__|| 구분자로 들어간 암호화");
-
-								if(securityName.get(i).equals("이름")) {
-									if (value.length == 2) {
-										// 이름이 2글자일경우
-										decryptValue = value[0] + AESGCMcrypto.decrypt(value[1], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
-									} else {
-										// 그 외 모든이름 공통
-										decryptValue = value[0] + AESGCMcrypto.decrypt(value[1], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey()) + value[2];
-									}
-								}
-
-								else if(securityName.get(i).equals("이메일주소") || securityName.get(i).equals("운전면허번호") || securityName.get(i).equals("여권번호")) {
-									decryptValue = AESGCMcrypto.decrypt(value[0], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey()) + value[1];
-								}
-
-								else if(securityName.get(i).equals("휴대전화번호") || securityName.get(i).equals("연락처")) {
-									decryptValue = value[0] + AESGCMcrypto.decrypt(value[1], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey()) + value[2];;
-								}
-
-								else if(securityName.get(i).equals("주민등록번호") || securityName.get(i).equals("거소신고번호") || securityName.get(i).equals("외국인등록번호")) {
-									decryptValue = value[0] + AESGCMcrypto.decrypt(value[1], awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
-								}
-
-							}
+							String decryptValue = Utils.decrypResult(String.valueOf(key), securityName.get(i), awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey()); // 복호화된 데이터
 
 //							log.info("복호화된 데이터 : "+ decryptValue);
 							map.put(securityHeaderNames.get(i), decryptValue);
