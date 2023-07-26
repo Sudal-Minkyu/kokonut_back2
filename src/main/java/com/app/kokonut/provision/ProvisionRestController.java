@@ -123,7 +123,7 @@ public class ProvisionRestController {
         dataList.add(row1);
         dataList.add(row2);
 
-        return excelService.createExcelFile("테스트파일.xlsx", "테스트시트명", dataList);
+        return excelService.createExcelFile("테스트압축파일", "테스트시트명", dataList, "1234");
     }
 
 }

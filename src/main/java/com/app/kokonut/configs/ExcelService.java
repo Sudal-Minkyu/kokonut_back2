@@ -12,14 +12,19 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
+import net.lingala.zip4j.ZipFile;
+import net.lingala.zip4j.model.ZipParameters;
+import net.lingala.zip4j.model.enums.EncryptionMethod;
+import net.lingala.zip4j.model.enums.CompressionMethod;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import net.lingala.zip4j.io.outputstream.ZipOutputStream;
 import static org.apache.poi.ss.usermodel.FillPatternType.SOLID_FOREGROUND;
 
 @Slf4j
@@ -250,15 +255,14 @@ public class ExcelService {
 	}
 
 	// 데이터를 받아 엑셀파일로서 변환하여 반환
-	public ResponseEntity<Map<String, Object>> createExcelFile(String fileName, String sheetName, List<Map<String, Object>> dataList) throws IOException {
+	public ResponseEntity<Map<String, Object>> createExcelFile(String fileName, String sheetName, List<Map<String, Object>> dataList, String zipPassword) throws IOException {
 		AjaxResponse res = new AjaxResponse();
-		log.info("createExcelFile 호출");
 		if (sheetName == null || sheetName.trim().isEmpty()) {
 			sheetName = "";
 		}
 
 		XSSFWorkbook workbook = new XSSFWorkbook();
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
 		try {
 			Sheet sheet = workbook.createSheet(sheetName);
@@ -288,17 +292,40 @@ public class ExcelService {
 			for (int i = 0; i < dataList.get(0).size(); i++) {
 				sheet.autoSizeColumn(i);
 			}
-			workbook.write(out);
+
+			// Save Excel as a byte array
+			ByteArrayOutputStream excelBos = new ByteArrayOutputStream();
+			workbook.write(excelBos);
+			byte[] excelBytes = excelBos.toByteArray();
+
+			// Create a Zip File and add the excel byte array into it with password
+			ZipParameters zipParameters = new ZipParameters();
+			zipParameters.setFileNameInZip(fileName + ".xlsx");
+			zipParameters.setCompressionMethod(CompressionMethod.DEFLATE);
+			zipParameters.setEncryptionMethod(EncryptionMethod.ZIP_STANDARD);
+			zipParameters.setEncryptFiles(true);
+
+			ZipOutputStream zos = new ZipOutputStream(bos, zipPassword.toCharArray());
+			zos.putNextEntry(zipParameters);
+			zos.write(excelBytes);
+			zos.closeEntry();
+			zos.close();
+
+			// Get the created Zip file
+			byte[] zipBytes = bos.toByteArray();
+
+			// Encode the file as Base64
+			String encoded = Base64.getEncoder().encodeToString(zipBytes);
 
 			HashMap<String, Object> data = new HashMap<>();
-			data.put("fileData", Base64.getEncoder().encodeToString(out.toByteArray()));
-			data.put("fileName", fileName);
+			data.put("fileData", encoded);
+			data.put("fileName", fileName + ".zip");
 			return ResponseEntity.ok(res.success(data));
 		} catch (Exception e) {
 			throw new RuntimeException("엑셀을 데이터로 변환중 에러", e);
 		} finally {
 			workbook.close();
-			out.close();
+			bos.close();
 		}
 	}
 }
