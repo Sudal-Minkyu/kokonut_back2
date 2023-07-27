@@ -15,6 +15,7 @@ import com.app.kokonut.company.companytablecolumninfo.CompanyTableColumnInfoRepo
 import com.app.kokonut.company.companytablecolumninfo.dtos.CompanyTableColumnInfoCheck;
 import com.app.kokonut.history.HistoryService;
 import com.app.kokonut.history.dtos.ActivityCode;
+import com.app.kokonut.history.extra.decrypcounthistory.DecrypCountHistoryService;
 import com.app.kokonut.history.extra.encrypcounthistory.EncrypCountHistoryService;
 import com.app.kokonut.thirdparty.bizm.ThirdPartyBizm;
 import com.app.kokonut.thirdparty.bizm.ThirdPartyBizmRepository;
@@ -50,6 +51,7 @@ public class ThirdPartyService {
 	private final HistoryService historyService;
 	private final AlimtalkService alimtalkService;
 	private final EncrypCountHistoryService encrypCountHistoryService;
+	private final DecrypCountHistoryService decrypCountHistoryService;
 	private final CompanyDataKeyService companyDataKeyService;
 	private final KokonutUserService kokonutUserService;
 
@@ -57,7 +59,7 @@ public class ThirdPartyService {
 	public ThirdPartyService(ThirdPartyRepository thirdPartyRepository, ThirdPartyBizmRepository thirdPartyBizmRepository,
 							 AdminRepository adminRepository, CompanyTableColumnInfoRepository companyTableColumnInfoRepository,
 							 HistoryService historyService, AlimtalkService alimtalkService,
-							 EncrypCountHistoryService encrypCountHistoryService, CompanyDataKeyService companyDataKeyService,
+							 EncrypCountHistoryService encrypCountHistoryService, DecrypCountHistoryService decrypCountHistoryService, CompanyDataKeyService companyDataKeyService,
 							 KokonutUserService kokonutUserService) {
 		this.thirdPartyRepository = thirdPartyRepository;
 		this.thirdPartyBizmRepository = thirdPartyBizmRepository;
@@ -66,6 +68,7 @@ public class ThirdPartyService {
 		this.historyService = historyService;
 		this.alimtalkService = alimtalkService;
 		this.encrypCountHistoryService = encrypCountHistoryService;
+		this.decrypCountHistoryService = decrypCountHistoryService;
 		this.companyDataKeyService = companyDataKeyService;
 		this.kokonutUserService = kokonutUserService;
 	}
@@ -407,18 +410,15 @@ public class ThirdPartyService {
 						log.info("암호화 항목이 없음");
 					}
 
-
 					for(KokonutUserAlimTalkFieldDto kokonutUserAlimTalkField : kokonutUserAlimTalkFieldDtos) {
 						log.info("receiverNum : "+kokonutUserAlimTalkField.getReceiverNum());
 						log.info("appUserId : "+kokonutUserAlimTalkField.getAppUserId());
 					}
 
-
 					// 복호화 횟수 저장
 					if(dchCount > 0) {
-						encrypCountHistoryService.encrypCountHistorySave(cpCode, dchCount);
+						decrypCountHistoryService.decrypCountHistorySave(cpCode, dchCount);
 					}
-
 
 				} else if (alimtalkTemplateInfoDto.getResult().equals("fail")) {
 					log.error("비즈엠 API 호출에러 : "+alimtalkTemplateInfoDto.getResultMessage() + " 호출 이메일 : "+email);

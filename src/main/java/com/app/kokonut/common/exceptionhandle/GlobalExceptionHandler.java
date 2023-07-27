@@ -2,6 +2,7 @@ package com.app.kokonut.common.exceptionhandle;
 
 import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.ResponseErrorCode;
+import com.app.kokonut.configs.exception.KokonutAPIException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -10,7 +11,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.http.HttpStatus;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -30,8 +30,24 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> handleNumberFormatException(NumberFormatException e) {
         AjaxResponse res = new AjaxResponse();
-        log.error("메뉴얼에 지정되지 않은 값입니다. 고유 코드를 확인해 주시고 호출해 주시길 바랍니다. 코드 : "+e.getMessage());
+        log.error("에러내용 : "+ResponseErrorCode.ERROR_CODE_01.getDesc()+" 코드 : "+e.getMessage());
         return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_01.getCode(),ResponseErrorCode.ERROR_CODE_01.getDesc()+" 코드 : "+e.getMessage()));
+    }
+
+    // 현재는 코코넛API 호출할때만 에러를 호출하는 핸들러
+    @ExceptionHandler(KokonutAPIException.class)
+    public ResponseEntity<Map<String, Object>> handleKokonutAPIException(KokonutAPIException e) {
+        AjaxResponse res = new AjaxResponse();
+        log.error("에러내용 : "+e.getErrorCode().getDesc());
+        return ResponseEntity.ok(res.fail(e.getErrorCode().getCode(),e.getErrorCode().getDesc()));
+    }
+
+    // 무슨에러가 발생했는지 모를때
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, Object>> handleKokonutException(){
+        AjaxResponse res = new AjaxResponse();
+        log.error("에러내용 : "+ResponseErrorCode.ERROR_KOKONUT.getDesc());
+        return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_KOKONUT.getCode(),ResponseErrorCode.ERROR_KOKONUT.getDesc()));
     }
 
 }

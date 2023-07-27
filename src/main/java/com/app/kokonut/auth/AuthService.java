@@ -37,6 +37,7 @@ import com.app.kokonut.configs.KeyGenerateService;
 import com.app.kokonut.configs.MailSender;
 import com.app.kokonut.history.HistoryService;
 import com.app.kokonut.history.dtos.ActivityCode;
+import com.app.kokonut.history.extra.decrypcounthistory.DecrypCountHistoryService;
 import com.app.kokonutuser.KokonutUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,6 +80,7 @@ public class AuthService {
     private final AdminService adminService;
     private final HistoryService historyService;
     private final KokonutUserService kokonutUserService;
+    private final DecrypCountHistoryService decrypCountHistoryService;
 
     private final AwsKmsUtil awsKmsUtil;
     private final WhoisUtil whoisUtil;
@@ -104,7 +106,7 @@ public class AuthService {
 
     @Autowired
     public AuthService(AdminService adminService, HistoryService historyService,
-                       KokonutUserService kokonutUserService, AdminRepository adminRepository,
+                       KokonutUserService kokonutUserService, DecrypCountHistoryService decrypCountHistoryService, AdminRepository adminRepository,
                        AwsKmsUtil awsKmsUtil, WhoisUtil whoisUtil, KeyGenerateService keyGenerateService, CompanyRepository companyRepository,
                        CompanyDataKeyRepository companyDataKeyRepository, CompanyTableRepository companyTableRepository,
                        CompanyTableColumnInfoRepository companyTableColumnInfoRepository,
@@ -115,6 +117,7 @@ public class AuthService {
         this.adminService = adminService;
         this.historyService = historyService;
         this.kokonutUserService = kokonutUserService;
+        this.decrypCountHistoryService = decrypCountHistoryService;
         this.adminRepository = adminRepository;
         this.awsKmsUtil = awsKmsUtil;
         this.whoisUtil = whoisUtil;
@@ -965,15 +968,16 @@ public class AuthService {
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
 
-//        log.info("adminCreateDto.getEvKoData() : "+adminCreateDto.getEvKoData());
-//        log.info("adminCreateDto.getKvKoData() : "+adminCreateDto.getKvKoData());
-//        log.info("adminCreateDto.getIvKoData() : "+adminCreateDto.getIvKoData());
+//        log.info("ev : "+adminCreateDto.getEvKoData());
+//        log.info("kv : "+adminCreateDto.getKvKoData());
+//        log.info("iv : "+adminCreateDto.getIvKoData());
 
         long ev = Long.parseLong(adminCreateDto.getEvKoData());
         String kv = adminCreateDto.getKvKoData();
         String iv = adminCreateDto.getIvKoData();
 
         CompanyEncryptDto companyEncryptDto = companyRepository.findByDataKey(ev);
+
         AwsKmsResultDto awsKmsResultDto = awsKmsUtil.dataKeyDecrypt(companyEncryptDto.getDataKey());
         String email = AESGCMcrypto.decrypt(kv,awsKmsResultDto.getSecretKey(), iv);
 //        log.info("email : "+email);
@@ -996,6 +1000,9 @@ public class AuthService {
                     } else {
                         data.put("userEmail", email);
                         log.info("검증완료");
+
+                        // 복호화 횟수 저장
+                        decrypCountHistoryService.decrypCountHistorySave(companyEncryptDto.getCpCode(), 1);
                     }
                 }
             } else {

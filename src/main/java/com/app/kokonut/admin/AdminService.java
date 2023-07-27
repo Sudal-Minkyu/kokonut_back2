@@ -18,6 +18,7 @@ import com.app.kokonut.configs.MailSender;
 import com.app.kokonut.history.HistoryService;
 import com.app.kokonut.history.dtos.ActivityCode;
 import com.app.kokonut.history.dtos.HistoryLoginInfoDto;
+import com.app.kokonut.history.extra.encrypcounthistory.EncrypCountHistoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,12 +58,13 @@ public class AdminService {
     private final HistoryService historyService;
     private final PasswordEncoder passwordEncoder;
     private final MailSender mailSender;
+    private final EncrypCountHistoryService encrypCountHistoryService;
 
     private final RedisDao redisDao;
 
     @Autowired
     public AdminService(AwsKmsUtil awsKmsUtil, AdminRepository adminRepository, CompanyRepository companyRepository, CompanyDataKeyService companyDataKeyService,
-                        HistoryService historyService, PasswordEncoder passwordEncoder, MailSender mailSender, RedisDao redisDao) {
+                        HistoryService historyService, PasswordEncoder passwordEncoder, MailSender mailSender, EncrypCountHistoryService encrypCountHistoryService, RedisDao redisDao) {
         this.awsKmsUtil = awsKmsUtil;
         this.adminRepository = adminRepository;
         this.companyRepository = companyRepository;
@@ -70,6 +72,7 @@ public class AdminService {
         this.historyService = historyService;
         this.passwordEncoder = passwordEncoder;
         this.mailSender = mailSender;
+        this.encrypCountHistoryService = encrypCountHistoryService;
         this.redisDao = redisDao;
     }
 
@@ -487,10 +490,11 @@ public class AdminService {
 //            contents = mailSender.getHTML5(callTemplate);
 //            String reciverName = "kokonut";
 
-
             // 이메일인증코드
             // -> 레디스서버에 24시간동안 보관
-            String knEmailAuthCode = AESGCMcrypto.encrypt(userEmail.getBytes(StandardCharsets.UTF_8), awsKmsResultDto.getSecretKey(), Base64.getDecoder().decode(awsKmsResultDto.getIvKey()));
+            String knEmailAuthCode = AESGCMcrypto.encrypt(userEmail.getBytes(StandardCharsets.UTF_8), awsKmsResultDto.getSecretKey(), ivBytes);
+
+            String ivKo = Base64.getEncoder().encodeToString(ivBytes);
 
             // 관리자 등록메일 보내기
             String title = "관리자 등록 알림";
@@ -498,7 +502,7 @@ public class AdminService {
             String contents = "관리자등록 요청되었습니다. <br>해당 링크를 통해 가입을 이어서 해주시길 바랍니다.<br>링크 : "+
             "<a href=\""+frontServerDomainIp+"/#/create?" +
                     "evKo="+ companyId +"&" +
-                    "ivKo="+Base64.getEncoder().encodeToString(ivBytes) +"&" +
+                    "ivKo="+ivKo +"&" +
                     "kvKo="+knEmailAuthCode+"\" target=\"_blank\">"+
                     "이어서 가입하기"+
                     "</a>";
@@ -527,6 +531,9 @@ public class AdminService {
                 admin.setInsert_email(email);
                 admin.setInsert_date(LocalDateTime.now());
                 adminRepository.save(admin);
+
+                // 암호화 횟수 저장
+                encrypCountHistoryService.encrypCountHistorySave(companyCode, 1);
 
                 historyService.updateHistory(activityHistoryId,
                         companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);

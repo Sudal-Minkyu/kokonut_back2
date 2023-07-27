@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,7 +36,7 @@ public class ThirdPartyApiRestController {
     @ApiOperation(value = "알림톡전송 코코넛API 호출")
     @PostMapping("/alimTalkSend")
     @ApiImplicitParam(name ="x-api-key", required = true, dataTypeClass = String.class, paramType = "header")
-    public ResponseEntity<Map<String,Object>> alimTalkSend(@RequestBody HashMap<String, Object> paramMap, HttpServletRequest request) throws Exception {
+    public ResponseEntity<Map<String,Object>> alimTalkSend(@RequestBody HashMap<String, Object> paramMap, HttpServletRequest request, HttpServletResponse response) throws Exception {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwtOrApiKey(request);
         return thirdPartyService.alimTalkSend(paramMap, jwtFilterDto);
     }
