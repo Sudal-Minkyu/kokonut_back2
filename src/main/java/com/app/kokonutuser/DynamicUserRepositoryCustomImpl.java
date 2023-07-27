@@ -249,17 +249,17 @@ public class DynamicUserRepositoryCustomImpl implements DynamicUserRepositoryCus
         return jdbcTemplate.queryForObject(searchQuery, Long.class);
     }
 
-    // 알림톡 발송 대상 리스트 호출
-    @Override
-    public List<KokonutUserAlimTalkFieldDto> selectUserAlimTalkList(String receiverNum, String appUserId, String searchQuery) {
-        return jdbcTemplate.query(
-                searchQuery,
-                (rs, rowNum) ->
-                        new KokonutUserAlimTalkFieldDto(
-                                receiverNum.isEmpty() ? null : rs.getObject(receiverNum),
-                                appUserId.isEmpty() ? null : rs.getObject(appUserId)
-                        )
-        );
-    }
+//    // 알림톡 발송 대상 리스트 호출
+//    @Override
+//    public List<KokonutUserAlimTalkFieldDto> selectUserAlimTalkList(String receiverNum, String appUserId, String searchQuery) {
+//        return jdbcTemplate.query(
+//                searchQuery,
+//                (rs, rowNum) ->
+//                        new KokonutUserAlimTalkFieldDto(
+//                                receiverNum.isEmpty() ? null : rs.getObject(receiverNum),
+//                                appUserId.isEmpty() ? null : rs.getObject(appUserId)
+//                        )
+//        );
+//    }
 
 }

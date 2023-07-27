@@ -2387,7 +2387,7 @@ public class DynamicUserService {
 		}
 
 		for(Map<String, Object> map : privacyList) {
-			log.info("수정된 map : "+map);
+			log.info("수정후 map : "+map);
 		}
 
 		data.put("privacyList", privacyList);
@@ -2512,7 +2512,7 @@ public class DynamicUserService {
 						if(!String.valueOf(key).equals("없음")) { // 벨류값이 Null(없음)일 경우 제외
 							log.info("암호화 여부 체크시작");
 
-							String decryptValue = Utils.decrypResult(String.valueOf(key), securityName.get(i), awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey()); // 복호화된 데이터
+							String decryptValue = Utils.decrypResult(securityName.get(i), String.valueOf(key), awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey()); // 복호화된 데이터
 
 //							log.info("복호화된 데이터 : "+ decryptValue);
 							map.put(securityHeaderNames.get(i), decryptValue);

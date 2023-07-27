@@ -8,6 +8,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.JPQLQuery;
+import lombok.extern.slf4j.Slf4j;
 import org.qlrm.mapper.JpaResultMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -26,6 +27,7 @@ import java.util.Objects;
  * Time :
  * Remark : EmailRepositoryCustom 쿼리문 선언부
  */
+@Slf4j
 @Repository
 public class EmailRepositoryCustomImpl extends QuerydslRepositorySupport implements EmailRepositoryCustom {
 
@@ -121,10 +123,10 @@ public class EmailRepositoryCustomImpl extends QuerydslRepositorySupport impleme
 
         if(dateType.equals("1")) {
             // 오늘조회
-            query.where(email.insert_date.goe(filterTime).or(email.insert_date.loe(filterTime)));
+            query.where(email.insert_date.loe(filterTime).and(email.insert_date.goe(filterTime)));
         }else if(dateType.equals("2")) {
             // 이번주 조회
-            query.where(email.insert_date.loe(filterTime).and(email.insert_date.goe(nowTime))); // 날짜 사이값 정의 filterDate < now
+            query.where(email.insert_date.goe(filterTime).and(email.insert_date.loe(nowTime)));
         } else {
             // 이번달 조회
             query.where(
@@ -149,10 +151,10 @@ public class EmailRepositoryCustomImpl extends QuerydslRepositorySupport impleme
         if(emType.equals("1")) {
             if(dateType.equals("1")) {
                 // 오늘조회
-                dateCondition = email.insert_date.goe(filterTime).or(email.insert_date.loe(filterTime));
+                dateCondition = email.insert_date.goe(filterTime).and(email.insert_date.loe(filterTime));
             }else if(dateType.equals("2")) {
                 // 이번주 조회
-                dateCondition = email.insert_date.loe(filterTime).and(email.insert_date.goe(nowTime));
+                dateCondition = email.insert_date.goe(filterTime).and(email.insert_date.loe(nowTime));
             } else {
                 // 이번달 조회
                 dateCondition = email.insert_date.year().eq(filterDate.getYear()).and(email.insert_date.month().eq(filterDate.getMonthValue()));
@@ -160,7 +162,7 @@ public class EmailRepositoryCustomImpl extends QuerydslRepositorySupport impleme
         } else {
             if(dateType.equals("1")) {
                 // 오늘조회
-                dateCondition = email.emReservationDate.goe(filterTime).or(email.emReservationDate.loe(filterTime));
+                dateCondition = email.emReservationDate.goe(filterTime).and(email.emReservationDate.loe(filterTime));
             }else if(dateType.equals("2")) {
                 // 이번주 조회
                 dateCondition = email.emReservationDate.loe(filterTime).and(email.emReservationDate.goe(nowTime));

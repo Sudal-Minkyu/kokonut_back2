@@ -157,10 +157,12 @@ public enum ResponseErrorCode {
     ERROR_CODE_10("ERROR_CODE_10", "이미 사용중인 아이디입니다."),
     ERROR_CODE_11("ERROR_CODE_11", "형식과 맞지 않습니다. (-)를 제외하여 보내주시길 바랍니다."),
     ERROR_CODE_12("ERROR_CODE_12", "필수 파라메터가 존재하지 않습니다."),
-    ERROR_CODE_13("ERROR_CODE_13", "kokonut_IDX_List는 'ArrayList' 형태로 보내주시길 바랍니다."),
+    ERROR_CODE_13_1("ERROR_CODE_13_1", "'kokonut_IDX_List'는 'ArrayList' 형태로 보내주시길 바랍니다."),
+    ERROR_CODE_13_2("ERROR_CODE_13_2", "'codeList'는 'Map' 형태로 보내주시길 바랍니다."),
     ERROR_CODE_14("ERROR_CODE_14", "지정된 고유코드가 존재하지 않습니다. 보낼 항목의 대상을 다시 지정해주시길 바랍니다."),
     ERROR_CODE_15("ERROR_CODE_15", "환경설정 -> 서드파티 -> 비즈엠에서 보낼 대상의 항목을 지정해 주시길 바랍니다."),
-
+    ERROR_CODE_16("ERROR_CODE_16", "변수로 요청된 고유코드가 존재하지 않습니다. 보내신 고유코드를 다시 한번 확인해주시길 바랍니다."),
+    ERROR_CODE_17("ERROR_CODE_17", "알림톡 보낼 대상이 존재하지 않습니다."),
 
     ERROR_KOKONUT("ERROR_KOKONUT", "알 수 없는 에러가 발생했습니다. 코코넛에게 문의부탁드립니다."),
     ERROR_CODE_96("ERROR_CODE_96", "헤더에 APIKey가 존재하지 않습니다. APIKey를 담아 보내주세요."), // 400

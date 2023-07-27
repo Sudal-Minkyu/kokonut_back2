@@ -65,6 +65,6 @@ public interface DynamicUserRepositoryCustom {
 
     Long getFieldCheck(String ctName, String fieldName); // 필드의 존재여부 가져오기
 
-    List<KokonutUserAlimTalkFieldDto> selectUserAlimTalkList(String receiverNum, String appUserId, String searchQuery); // 알림톡 발송 대상 리스트 호출
+//    List<KokonutUserAlimTalkFieldDto> selectUserAlimTalkList(String receiverNum, String appUserId, String searchQuery); // 알림톡 발송 대상 리스트 호출
 
 }

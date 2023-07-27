@@ -40,7 +40,7 @@ public class KokonutUserService {
 		this.dynamicUserRepositoryCustom = dynamicUserRepositoryCustom;
 	}
 
-	// @@@@@@@@@@@@ 서비스 사용되고 있는 함수 @@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// @@@@@@@@@@@@ 서비스 사용되고 있는 함수 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 	// 테이블의 컬럼 목록 조회
 	public List<KokonutUserFieldDto> getColumns(String companyCode) {
@@ -112,13 +112,30 @@ public class KokonutUserService {
 		return dynamicUserRepositoryCustom.getFieldCheck(ctName, fieldName);
 	}
 
-	// 알림톡 발송 대상 리스트 호출
-	public List<KokonutUserAlimTalkFieldDto> selectUserAlimTalkList(String tsBizmReceiverNumCodeColumn, String tsBizmAppUserIdCodeColumn, String searchQuery) {
-		log.info("selectUserAlimTalkList 호출");
-		return dynamicUserRepositoryCustom.selectUserAlimTalkList(tsBizmReceiverNumCodeColumn, tsBizmAppUserIdCodeColumn, searchQuery);
+//	// 알림톡 발송 대상 리스트 호출
+//	public List<KokonutUserAlimTalkFieldDto> selectUserAlimTalkList(String tsBizmReceiverNumCodeColumn, String tsBizmAppUserIdCodeColumn, String searchQuery) {
+//		log.info("selectUserAlimTalkList 호출");
+//		return dynamicUserRepositoryCustom.selectUserAlimTalkList(tsBizmReceiverNumCodeColumn, tsBizmAppUserIdCodeColumn, searchQuery);
+//	}
+
+	// 개인정보 회원리스트 조회
+	public List<Map<String, Object>> selectBasicTableList(String searchQuery) {
+		log.info("selectBasicTableList 호출");
+
+//		log.info("searchQuery : "+searchQuery);
+
+		List<Map<String, Object>> result = dynamicUserRepositoryCustom.selectUserList(searchQuery);
+//		log.info("result : "+result);
+
+		if(result == null || result.size() == 0) {
+			log.info("기본 테이블에 개인정보가 존재하지 않습니다.");
+			return null;
+		}
+
+		return result;
 	}
 
-	// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 	/**
@@ -172,25 +189,6 @@ public class KokonutUserService {
 		Integer count = dynamicUserRepositoryCustom.selectUserIdCheck(searchQuery);
 
 		return count > 0;
-	}
-
-	/**
-	 * 기본 테이블의 개인정보 리스트 조회 -> DynamicUserService단에서 쿼리완성후 조회
-	 */
-	public List<Map<String, Object>> selectBasicTableList(String searchQuery) {
-		log.info("selectBasicTableList 호출");
-
-//		log.info("searchQuery : "+searchQuery);
-
-		List<Map<String, Object>> result = dynamicUserRepositoryCustom.selectUserList(searchQuery);
-//		log.info("result : "+result);
-
-		if(result == null || result.size() == 0) {
-			log.info("기본 테이블에 개인정보가 존재하지 않습니다.");
-			return null;
-		}
-
-		return result;
 	}
 
 	/**
