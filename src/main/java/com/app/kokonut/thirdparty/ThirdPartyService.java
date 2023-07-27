@@ -236,7 +236,7 @@ public class ThirdPartyService {
 								.map(str -> "'" + str + "'") // 각 항목을 따옴표로 감싸줍니다.
 								.collect(Collectors.joining(", "));
 					} else {
-						log.error("kokonut_IDX_List는 'ArrayList' 형태로 보내주시길 바랍니다.");
+						log.error("'kokonut_IDX_List'는 'List' 형태로 보내주시길 바랍니다.");
 						return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_13_1.getCode(),ResponseErrorCode.ERROR_CODE_13_1.getDesc()));
 					}
 				}
@@ -256,7 +256,7 @@ public class ThirdPartyService {
 						codeListKeys = new ArrayList<>(codeList.keySet());
 						codeListValues = new ArrayList<>(codeList.values());
 					} else {
-						log.error("'codeList'는 'Map' 형태로 보내주시길 바랍니다.");
+						log.error("'codeList'는 'JSON' 또는 'Map' 형태로 보내주시길 바랍니다.");
 						return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_13_2.getCode(),ResponseErrorCode.ERROR_CODE_13_2.getDesc()));
 					}
 				}
@@ -288,7 +288,7 @@ public class ThirdPartyService {
 					}
 				} else {
 					log.error("환경설정 -> 서드파티 -> 비즈엠에서 보낼 대상의 항목을 지정해 주시길 바랍니다.");
-					return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_15.getCode(), ResponseErrorCode.ERROR_CODE_15.getDesc()));
+					return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_14.getCode(), ResponseErrorCode.ERROR_CODE_14.getDesc()));
 				}
 
 				log.info("2. codeListKeys : "+codeListKeys);
@@ -310,8 +310,8 @@ public class ThirdPartyService {
 							fieldCheckResult = kokonutUserService.getFieldCheck(ctName, companyTableColumnInfoCheck.getCtciName());
 							if(fieldCheckResult == 0) {
 								log.error("지정된 고유코드가 존재하지 않습니다. 보낼 항목의 대상을 다시 지정해주시길 바랍니다. 현재 지정된 고유코드 : "+checkCode);
-								return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_14.getCode(),
-										ResponseErrorCode.ERROR_CODE_14.getDesc()+"현재 지정된 고유코드 : "+checkCode));
+								return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_15.getCode(),
+										ResponseErrorCode.ERROR_CODE_15.getDesc()+"현재 지정된 고유코드 : "+checkCode));
 							}
 							else {
 								fieldNameChk.add(companyTableColumnInfoCheck.getCtciName());
@@ -496,6 +496,9 @@ public class ThirdPartyService {
 
 						log.info("알림톡전송 성공건수 : "+alimTalkSendSuc);
 						log.info("알림톡전송 실패건수 : "+alimTalkSendFail);
+
+						data.put("alimTalkSendSuc", alimTalkSendSuc);
+						data.put("alimTalkSendFail", alimTalkSendFail);
 
 						// 알림톡 건수 저장
 						alimTalkHistoryService.alimTalkHistorySave(cpCode, email, alimTalkSendSuc, alimTalkSendFail);
