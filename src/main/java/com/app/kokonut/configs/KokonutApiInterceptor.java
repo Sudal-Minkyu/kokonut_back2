@@ -4,14 +4,16 @@ import com.app.kokonut.apikey.ApiKeyService;
 import com.app.kokonut.apikey.dtos.ApiKeyInfoDto;
 import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.common.realcomponent.CommonUtil;
+import com.app.kokonut.configs.exception.KokonutAPIException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 /**
  * @author Woody
@@ -47,8 +49,7 @@ public class KokonutApiInterceptor implements AsyncHandlerInterceptor {
 				Long check = apiKeyService.validateApiKey(apikey);
 				if(check == 0) {
 					log.error("호출하신 APIKey는 존재하지 않은 APIKey 입니다. APIKey관리 페이지에서 APIKey를 확인해주세요. (404에러)");
-					request.setAttribute("apiKeyError", ResponseErrorCode.ERROR_CODE_97);
-					response.sendError(HttpStatus.SC_NOT_FOUND, ResponseErrorCode.ERROR_CODE_97.getDesc());
+					throw new KokonutAPIException(ResponseErrorCode.ERROR_CODE_97);
 				} else {
 
 					String ip = CommonUtil.publicIp();
@@ -57,11 +58,11 @@ public class KokonutApiInterceptor implements AsyncHandlerInterceptor {
 					ApiKeyInfoDto apiKeyInfoDto = apiKeyService.findByApiKeyInfo(apikey, ip);
 					if(apiKeyInfoDto == null) {
 						log.error("허용되지 않은 IP 입니다. APIKey관리 페이지에서 허용IP를 추가해주세요. (403에러)");
-						response.sendError(HttpStatus.SC_FORBIDDEN, ResponseErrorCode.ERROR_CODE_99.getDesc());
+						throw new KokonutAPIException(ResponseErrorCode.ERROR_CODE_99);
 					} else {
 						if(apiKeyInfoDto.getAkUseYn().equals("N")) {
 							log.error("관리자에 의해 사용에 제한된 APIKey 입니다. 관리자에게 문의해주세요. (402에러)");
-							response.sendError(HttpStatus.SC_PAYMENT_REQUIRED, ResponseErrorCode.ERROR_CODE_98.getDesc());
+							throw new KokonutAPIException(ResponseErrorCode.ERROR_CODE_98);
 						} else {
 							log.info("apiKeyInfoDto : " + apiKeyInfoDto);
 							request.setAttribute("apiKeyInfoDto", apiKeyInfoDto);
@@ -70,10 +71,22 @@ public class KokonutApiInterceptor implements AsyncHandlerInterceptor {
 				}
 			} else {
 				log.error("헤더에 APIKey가 존재하지 않습니다. APIKey를 담아 보내주세요. (400에러)");
-				response.sendError(HttpStatus.SC_BAD_REQUEST, ResponseErrorCode.ERROR_CODE_96.getDesc());
+				throw new KokonutAPIException(ResponseErrorCode.ERROR_CODE_96);
 			}
 		}
 		return AsyncHandlerInterceptor.super.preHandle(request, response, handler);
+	}
+
+	public void sendErrorAsJson(HttpServletResponse response, int status, String message) throws IOException {
+		response.setStatus(status);
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
+
+		String errorResponse = String.format("{\"error\": \"%s\"}", message);
+
+		PrintWriter out = response.getWriter();
+		out.print(errorResponse);
+		out.flush();
 	}
 
 }
