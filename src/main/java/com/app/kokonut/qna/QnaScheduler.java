@@ -79,7 +79,7 @@ public class QnaScheduler {
 						// 받는메일, 받는사람이름 중 하나라도 조회되지 않으면 메일을 보내지 않음.
 						log.error("Scheduler :: 시스템관리자에게 메일전송을 하기 위한 정보(메일주소, 성명)를 찾을 수 없습니다.");
 					}else{
-						mailSender.sendMail(toEmail, toName, title, contents);
+						mailSender.sendKokonutMail(toEmail, toName, title, contents);
 					}
 				}
 			}else{

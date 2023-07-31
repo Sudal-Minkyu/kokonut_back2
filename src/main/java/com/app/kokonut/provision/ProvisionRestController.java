@@ -101,13 +101,23 @@ public class ProvisionRestController {
         return provisionService.provisionDetail(proCode, jwtFilterDto);
     }
 
-    @GetMapping("/provisionDownloadExcel")
+    @PostMapping("/provisionDownloadExcel")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = false, dataTypeClass = String.class, paramType = "header", example = ""),
+    })
+    @ApiOperation(value = "개인정보제공 다운로드 API", notes = "")
+    public ResponseEntity<Map<String, Object>> provisionDownloadExcel(@RequestParam(value="proCode", defaultValue = "") String proCode) throws IOException {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return provisionService.provisionDownloadExcel(proCode, jwtFilterDto);
+    }
+
+    @GetMapping("/provisionDownloadExcel2")
     @ApiImplicitParams({
             @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = false, dataTypeClass = String.class, paramType = "header", example = ""),
     })
     @ApiOperation(value = "개인정보 엑셀 다운로드 API", notes = "" +
             "")
-    public ResponseEntity<Map<String, Object>> provisionDownloadExcel() throws  IOException {
+    public ResponseEntity<Map<String, Object>> provisionDownloadExcel2() throws  IOException {
         List<Map<String, Object>> dataList = new ArrayList<>();
 
         Map<String, Object> row1 = new HashMap<>();

@@ -35,6 +35,10 @@ public class ProvisionDownloadHistory {
     @Column(name = "admin_id")
     private Long adminId;
 
+    @ApiModelProperty("다운로드 횟수")
+    @Column(name = "piph_count")
+    private Integer piphCount;
+
     @ApiModelProperty("등록자 email")
     @Column(name = "insert_email")
     private String insert_email;

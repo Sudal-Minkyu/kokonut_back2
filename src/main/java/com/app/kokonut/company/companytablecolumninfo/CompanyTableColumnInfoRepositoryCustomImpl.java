@@ -3,6 +3,7 @@ package com.app.kokonut.company.companytablecolumninfo;
 import com.app.kokonut.company.companytable.QCompanyTable;
 import com.app.kokonut.company.companytablecolumninfo.dtos.CompanyTableColumnInfoCheck;
 import com.app.kokonut.company.companytablecolumninfo.dtos.CompanyTableColumnInfoCheckList;
+import com.app.kokonut.company.companytablecolumninfo.dtos.CompanyTableColumnNameSearch;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPQLQuery;
 import org.qlrm.mapper.JpaResultMapper;
@@ -37,7 +38,8 @@ public class CompanyTableColumnInfoRepositoryCustomImpl extends QuerydslReposito
                 .select(Projections.constructor(CompanyTableColumnInfoCheckList.class,
                         companyTableColumnInfo.ctciDesignation,
                         companyTableColumnInfo.ctciName,
-                        companyTableColumnInfo.ctciSecuriy
+                        companyTableColumnInfo.ctciSecuriy,
+                        companyTableColumnInfo.ctciCode
                 ));
 
         query.orderBy(companyTableColumnInfo.ctciCode.asc());
@@ -59,6 +61,20 @@ public class CompanyTableColumnInfoRepositoryCustomImpl extends QuerydslReposito
                         companyTableColumnInfo.ctciName,
                         companyTableColumnInfo.ctciDesignation,
                         companyTableColumnInfo.ctciSecuriy
+                ));
+
+        return query.fetchOne();
+    }
+
+    @Override
+    public CompanyTableColumnNameSearch findByColumnName(String ctciName) {
+
+        QCompanyTableColumnInfo companyTableColumnInfo = QCompanyTableColumnInfo.companyTableColumnInfo;
+
+        JPQLQuery<CompanyTableColumnNameSearch> query = from(companyTableColumnInfo)
+                .where(companyTableColumnInfo.ctciName.eq(ctciName))
+                .select(Projections.constructor(CompanyTableColumnNameSearch.class,
+                        companyTableColumnInfo.ctciDesignation
                 ));
 
         return query.fetchOne();

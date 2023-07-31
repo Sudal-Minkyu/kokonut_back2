@@ -42,7 +42,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.ok(res.fail(e.getErrorCode().getCode(),e.getErrorCode().getDesc()));
     }
 
-    // 무슨에러가 발생했는지 모를때
+    // 무슨에러가 발생했는지 모를때 -> 일단주석처리
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleKokonutException(){
         AjaxResponse res = new AjaxResponse();

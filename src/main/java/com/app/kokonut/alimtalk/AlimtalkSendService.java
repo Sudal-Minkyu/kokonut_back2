@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 
 @Slf4j
 @Service
-public class AlimtalkService {
+public class AlimtalkSendService {
 
     @Value("${kokonut.happytalk.userId}")
     public String userId;
@@ -258,7 +258,7 @@ public class AlimtalkService {
 
 
     // 알림톡 전송
-    public String alimtalkSend(String profileKey, String templateCode, String message) {
+    public String alimtalkSend(String profileKey, String templateCode, String message, String receiver_num, String app_user_id) {
         log.info("alimtalkSend 호출");
 
         String url = alimHost + "/v2/" + profileKey + "/sendMessage";
@@ -283,8 +283,13 @@ public class AlimtalkService {
             bodyJson.put("message_type", "AT");
             bodyJson.put("template_code", templateCode);
             bodyJson.put("message", message);
-            bodyJson.put("receiver_num", "01064396533");
             bodyJson.put("reserved_time", "00000000000000");
+            if(receiver_num != null) {
+                bodyJson.put("receiver_num", receiver_num);
+            }
+            if(app_user_id != null) {
+                bodyJson.put("app_user_id", app_user_id);
+            }
 
             // JSON 객체를 배열에 추가
             JSONArray jsonArray = new JSONArray();
@@ -326,17 +331,19 @@ public class AlimtalkService {
                     return "Success";
                 }else {
                     log.info("알림톡전송 실패");
+                    return "Fail";
                 }
 
             }else {
                 log.info("알림톡전송 실패");
+                return "Fail";
             }
         } catch (Exception e) {
             log.error("예외처리 : "+e);
             log.error("예외처리 메세지 : "+e.getMessage());
         }
 
-        return "Failure";
+        return null;
     }
 
 }

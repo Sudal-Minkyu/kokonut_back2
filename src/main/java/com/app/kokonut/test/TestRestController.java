@@ -1,6 +1,6 @@
 package com.app.kokonut.test;
 
-import com.app.kokonut.alimtalk.AlimtalkService;
+import com.app.kokonut.alimtalk.AlimtalkSendService;
 import com.app.kokonut.alimtalk.dtos.AlimtalkTemplateInfoDto;
 import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.navercloud.NaverCloudPlatformService;
@@ -27,12 +27,12 @@ import java.util.Map;
 public class TestRestController {
 
     private final NaverCloudPlatformService naverCloudPlatformService;
-    private final AlimtalkService alimtalkService;
+    private final AlimtalkSendService alimtalkSendService;
 
     @Autowired
-    public TestRestController(NaverCloudPlatformService naverCloudPlatformService, AlimtalkService alimtalkService){
+    public TestRestController(NaverCloudPlatformService naverCloudPlatformService, AlimtalkSendService alimtalkSendService){
         this.naverCloudPlatformService = naverCloudPlatformService;
-        this.alimtalkService = alimtalkService;
+        this.alimtalkSendService = alimtalkSendService;
     }
 
     @ApiOperation(value = "코코넛 API호출 API 테스트용")
@@ -56,7 +56,7 @@ public class TestRestController {
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
 
-        String result = alimtalkService.alimtalkTemplateInspection(templateCode);
+        String result = alimtalkSendService.alimtalkTemplateInspection(templateCode);
         log.info("result : "+result);
 
         return ResponseEntity.ok(res.success(data));
@@ -69,7 +69,7 @@ public class TestRestController {
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
 
-        String result = alimtalkService.alimtalkTemplateAuth(phoneNumber);
+        String result = alimtalkSendService.alimtalkTemplateAuth(phoneNumber);
         log.info("result : "+result);
 
         return ResponseEntity.ok(res.success(data));
@@ -83,7 +83,7 @@ public class TestRestController {
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
 
-        String result = alimtalkService.alimtalkTemplateAuthCheck(phoneNumber, checkNumber);
+        String result = alimtalkSendService.alimtalkTemplateAuthCheck(phoneNumber, checkNumber);
         log.info("result : "+result);
 
         return ResponseEntity.ok(res.success(data));
@@ -96,7 +96,7 @@ public class TestRestController {
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
 
-        AlimtalkTemplateInfoDto result = alimtalkService.alimtalkTemplateInfo(profileKey, templateCode);
+        AlimtalkTemplateInfoDto result = alimtalkSendService.alimtalkTemplateInfo(profileKey, templateCode);
         log.info("result : "+result);
 
         return ResponseEntity.ok(res.success(data));
@@ -106,11 +106,12 @@ public class TestRestController {
     @PostMapping(value = "/alimtalkApiHocul")
     public ResponseEntity<Map<String,Object>> alimtalkApiHocul(@RequestParam(value="profileKey", defaultValue = "") String profileKey,
                                                                @RequestParam(value="templateCode", defaultValue = "") String templateCode,
-                                                               @RequestParam(value="message", defaultValue = "") String message) {
+                                                               @RequestParam(value="message", defaultValue = "") String message,
+                                                               @RequestParam(value="receiver_num", defaultValue = "") String receiver_num) {
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
 
-        String result = alimtalkService.alimtalkSend(profileKey, templateCode, message);
+        String result = alimtalkSendService.alimtalkSend(profileKey, templateCode, message, receiver_num, null);
         log.info("result : "+result);
 
         return ResponseEntity.ok(res.success(data));

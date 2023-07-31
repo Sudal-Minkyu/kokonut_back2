@@ -329,4 +329,80 @@ public class Utils {
 		return decryptValue;
 	}
 
+	// 개인정보 복호화후 마스킹처리
+	public static Map<String, Object> decrypMasking(String securityName, String[] securityValue, SecretKey secretKey, String ivKey) throws Exception {
+
+		Map<String, Object> result = new HashMap<>();
+		result.put("dch", "0"); // 기본값 복호화 "0"
+
+		int trigger = 0;
+
+		String securityResultValue = null; // 복호화된 데이터의 마스킹처리
+		String decryptValue;
+
+		// "이름" 항목을 조회시 3자리이상은 무조건 맨앞+'*'+맨뒤로 표시
+		if(securityName.equals("이름")) {
+			if (securityValue.length == 1) {
+				// 이름이 1글자일 경우
+				securityResultValue = "*";
+			}
+			else if (securityValue.length == 2) {
+				// 이름이 2글자일경우
+				securityResultValue = securityValue[0] + "*";
+			} else {
+				// 그 외 모든이름 공통
+				securityResultValue = securityValue[0]+"*"+securityValue[2];
+			}
+			trigger = 1;
+		}
+
+		// "이메일주소" 항목 조회 아이디(3분의2형태만 보여줌)@도메인
+		if(securityName.equals("이메일주소")) {
+			decryptValue = AESGCMcrypto.decrypt(securityValue[0], secretKey, ivKey);
+
+			int firstEmailLen = decryptValue.length();
+			int firstEmailLenVal = (firstEmailLen*2)/3;
+
+			securityResultValue = decryptValue.substring(0, firstEmailLenVal) + "*".repeat(Math.max(0, firstEmailLen - firstEmailLenVal + 1))+securityValue[1];
+
+			result.put("dch", "1");
+
+			trigger = 1;
+		}
+
+		// "휴대전화번호" 또는 "연락처" 항목 조회
+		if(securityName.equals("휴대전화번호") || securityName.equals("연락처")) {
+			securityResultValue = securityValue[0]+"****"+securityValue[2];
+			trigger = 1;
+		}
+
+		// "주민등록번호" 또는 "거소신고번호" 또는 "외국인등록번호" 항목 조회
+		if(securityName.equals("주민등록번호") || securityName.equals("거소신고번호") || securityName.equals("외국인등록번호")) {
+			securityResultValue = securityValue[0]+"-*******";
+			trigger = 1;
+		}
+
+		// "여권번호" 또는 "운전면허번호" 항목 조회
+		if(securityName.equals("여권번호") || securityName.equals("운전면허번호")) {
+			securityResultValue = securityValue[0]+"******";
+			trigger = 1;
+		}
+
+		if(trigger == 0) {
+			// 전체암호화 일 경우
+			log.info("구분자가 없는 암호화");
+			decryptValue = AESGCMcrypto.decrypt(securityValue[0], secretKey, ivKey);
+			securityResultValue = decryptValue.charAt(0) + Utils.starsForString(decryptValue) + decryptValue.substring(decryptValue.length() - 1);
+
+			result.put("dch", "1");
+		}
+
+		log.info("value : "+ Arrays.toString(securityValue));
+		log.info("securityResultValue : "+ securityResultValue);
+
+		result.put("result", securityResultValue);
+
+		return result;
+	}
+
 }

@@ -221,7 +221,7 @@ public class AuthService {
         String reciverEmail = knEmail;
         String reciverName = "kokonut";
 
-        String mailSenderResult = mailSender.sendMail(reciverEmail, reciverName, title, contents);
+        String mailSenderResult = mailSender.sendKokonutMail(reciverEmail, reciverName, title, contents);
         if(mailSenderResult != null) {
             // mailSender 성공
             log.info("### 메일전송 성공했습니다. reciver Email : "+ knEmail);
@@ -344,7 +344,7 @@ public class AuthService {
         contents = mailSender.getHTML5(callTemplate);
         String reciverName = "kokonut";
 
-        String mailSenderResult = mailSender.sendMail(knEmail, reciverName, title, contents);
+        String mailSenderResult = mailSender.sendKokonutMail(knEmail, reciverName, title, contents);
         if(mailSenderResult != null){
             // mailSender 성공
             log.info("### 메일전송 성공했습니다. reciver Email : "+ knEmail);

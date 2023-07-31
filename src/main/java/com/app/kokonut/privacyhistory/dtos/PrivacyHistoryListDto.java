@@ -60,7 +60,7 @@ public class PrivacyHistoryListDto {
 
             return firstEmail.substring(0, firstEmailLenVal) + "*".repeat(Math.max(0, firstEmailLen - firstEmailLenVal + 1)) + "@" + secondResult;
         } else {
-            return "알수엄음";
+            return "알수없음";
         }
 
     }

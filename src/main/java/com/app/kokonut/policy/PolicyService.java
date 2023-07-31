@@ -381,7 +381,7 @@ public class PolicyService {
     // 개인정보보호 첫번째 뎁스 등록
     @Transactional
     public ResponseEntity<Map<String, Object>> privacyPolicyFirstSave(PolicySaveFirstDto policySaveFirstDto, JwtFilterDto jwtFilterDto) throws IOException {
-        log.info("privacyPolicyFirstSave 호출");
+        log.info("24privacyPolicyFirstSave 호출");
 
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();

@@ -7,14 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CompanyTableColumnInfoCheckList {
+public class CompanyTableColumnNameSearch {
 
-    private String ctciDesignation;
-
-    private String ctciName;
-
-    private String ctciSecuriy;
-
-    private String ctciCode;
+    private String ctciDesignation; // 필드명칭
 
 }
