@@ -7,9 +7,13 @@ import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.common.realcomponent.CommonUtil;
 import com.app.kokonut.common.realcomponent.Utils;
+import com.app.kokonut.configs.ExcelService;
 import com.app.kokonut.configs.KeyGenerateService;
+import com.app.kokonut.configs.MailSender;
 import com.app.kokonut.history.HistoryService;
 import com.app.kokonut.history.dtos.ActivityCode;
+import com.app.kokonut.history.extra.decrypcounthistory.DecrypCountHistoryService;
+import com.app.kokonut.provision.dtos.ProvisionDownloadCheckDto;
 import com.app.kokonut.provision.dtos.ProvisionListDto;
 import com.app.kokonut.provision.dtos.ProvisionSaveDto;
 import com.app.kokonut.provision.dtos.ProvisionSearchDto;
@@ -34,10 +38,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -52,6 +53,8 @@ public class ProvisionService {
     private final KeyGenerateService keyGenerateService;
 
     private final HistoryService historyService;
+    private final ExcelService excelService;
+    private final MailSender mailSender;
 
     private final AdminRepository adminRepository;
     private final ProvisionRepository provisionRepository;
@@ -59,20 +62,24 @@ public class ProvisionService {
     private final ProvisionRosterRepository provisionRosterRepository;
     private final ProvisionEntryRepository provisionEntryRepository;
     private final ProvisionListRepository provisionListRepository;
+    private final DecrypCountHistoryService decrypCountHistoryService;
 
     @Autowired
     public ProvisionService(KeyGenerateService keyGenerateService, HistoryService historyService,
-                            AdminRepository adminRepository, ProvisionRepository provisionRepository,
+                            ExcelService excelService, MailSender mailSender, AdminRepository adminRepository, ProvisionRepository provisionRepository,
                             ProvisionDownloadHistoryRepository provisionDownloadHistoryRepository, ProvisionRosterRepository provisionRosterRepository,
-                            ProvisionEntryRepository provisionEntryRepository, ProvisionListRepository provisionListRepository){
+                            ProvisionEntryRepository provisionEntryRepository, ProvisionListRepository provisionListRepository, DecrypCountHistoryService decrypCountHistoryService){
         this.keyGenerateService = keyGenerateService;
         this.historyService = historyService;
+        this.excelService = excelService;
+        this.mailSender = mailSender;
         this.adminRepository = adminRepository;
         this.provisionRepository = provisionRepository;
         this.provisionDownloadHistoryRepository = provisionDownloadHistoryRepository;
         this.provisionRosterRepository = provisionRosterRepository;
         this.provisionEntryRepository = provisionEntryRepository;
         this.provisionListRepository = provisionListRepository;
+        this.decrypCountHistoryService = decrypCountHistoryService;
     }
 
     // 개인정보제공 등록
@@ -360,7 +367,7 @@ public class ProvisionService {
         Long activityHistoryId;
 
         // 개인정보 제공 리스트조회 코드
-        activityCode = ActivityCode.AC_47;
+        activityCode = ActivityCode.AC_47_1;
 
         // 활동이력 저장 -> 비정상 모드
         activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
@@ -377,6 +384,105 @@ public class ProvisionService {
         } else {
             return ResponseEntity.ok(res.ResponseEntityPage(provisionDownloadList));
         }
+    }
+
+    // 개인정보제공 다운로드 API
+    public ResponseEntity<Map<String, Object>> provisionDownloadExcel(String proCode, JwtFilterDto jwtFilterDto) throws IOException {
+        log.info("provisionDownloadExcel 호출");
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+        log.info("proCode : " + proCode);
+
+        String email = jwtFilterDto.getEmail();
+        log.info("email : " + email);
+
+        AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+
+        long adminId = adminCompanyInfoDto.getAdminId();
+        String cpCode = adminCompanyInfoDto.getCompanyCode();
+
+        int dchCount = 0; // 복호화 카운팅
+
+        ActivityCode activityCode;
+        String ip = CommonUtil.clientIp();
+        Long activityHistoryId;
+
+        ProvisionDownloadCheckDto provisionDownloadCheckDto = provisionRepository.findByProvisionDownloadCheck(cpCode, proCode, 1);
+        if(provisionDownloadCheckDto != null) {
+
+            LocalDate now = LocalDate.now();
+            //  제공기간내의 다운로드인지 체크
+            if (provisionDownloadCheckDto.getProStartDate().isAfter(now)) {
+                log.error("개인정보제공 시작전 입니다.");
+                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO113_1.getCode(), ResponseErrorCode.KO113_1.getDesc()));
+            }
+
+            if (provisionDownloadCheckDto.getProExpDate().isBefore(now)) {
+                log.error("개인정보제공 다운로드 기간이 지났습니다.");
+                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO113_2.getCode(), ResponseErrorCode.KO113_2.getDesc()));
+            }
+
+            // 개인정보제공 다운로드 권한이 있는지 체크(제공받은 사람인지)
+            boolean rosterCheck = provisionRosterRepository.existsByProCodeAndAdminId(proCode, adminId);
+            if(!rosterCheck) {
+                log.error("해당 개인정보제공에 등록되지 않은 관리자입니다.");
+                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO114.getCode(), ResponseErrorCode.KO114.getDesc()));
+            }
+
+            Map<String, Object> privacyMap;
+//            privacyMap = new HashMap<>();
+
+            if(provisionDownloadCheckDto.getProProvide() == 0) {
+                // 내부제공
+                activityCode = ActivityCode.AC_47_2;
+            } else {
+                // 외부제공
+                activityCode = ActivityCode.AC_47_3;
+            }
+
+            if(provisionDownloadCheckDto.getProTargetType() == 1) {
+                // 일부개인정보 조회
+                
+            }
+
+
+    //        List<Map<String, Object>> dataList = new ArrayList<>();
+
+    //        Map<String, Object> row1 = new HashMap<>();
+    //        row1.put("id", 1);
+    //        row1.put("name", "John");
+    //        row1.put("age", 35);
+
+    //        Map<String, Object> row2 = new HashMap<>();
+    //        row2.put("id", 2);
+    //        row2.put("name", "Sally");
+    //        row2.put("age", 28);
+
+    //        dataList.add(row1);
+    //        dataList.add(row2);
+
+
+            // 활동이력 저장 -> 비정상 모드
+            activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
+                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
+
+
+            historyService.updateHistory(activityHistoryId,
+                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+
+            // 복호화 횟수 저장
+            if(dchCount > 0) {
+                decrypCountHistoryService.decrypCountHistorySave(cpCode, dchCount);
+            }
+
+        } else {
+            log.error("개인정보제공 정보가 존재하지 않습니다.");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO112.getCode(), ResponseErrorCode.KO112.getDesc()));
+        }
+
+        return ResponseEntity.ok(res.success(data));
     }
 
     // 개인정보제공 상세내용 조회

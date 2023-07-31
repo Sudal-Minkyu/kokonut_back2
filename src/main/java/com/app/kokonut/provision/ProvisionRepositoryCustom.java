@@ -1,5 +1,6 @@
 package com.app.kokonut.provision;
 
+import com.app.kokonut.provision.dtos.ProvisionDownloadCheckDto;
 import com.app.kokonut.provision.dtos.ProvisionListDto;
 import com.app.kokonut.provision.dtos.ProvisionSearchDto;
 import org.springframework.data.domain.Page;
@@ -20,5 +21,7 @@ public interface ProvisionRepositoryCustom {
     Long findByProvisionIndexTodayCount(String cpCode, Integer type, LocalDate now);
 
     Long findByProvisionIndexOfferCount(String cpCode, Integer type, String dateType, LocalDate now, LocalDate filterDate);
+
+    ProvisionDownloadCheckDto findByProvisionDownloadCheck(String cpCode, String proCode, Integer proDownloadYn);
 
 }

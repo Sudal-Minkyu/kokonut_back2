@@ -53,18 +53,11 @@ public class MailSender {
 //		this.myHost = keyDataMAILDto.getOTPURL();
 	}
 
-	// 이메일발송 발송함수
-	public String sendEmail(String toEmail, String toName, String title, String contents, List<AttachFile> attachFiles) {
-		return sendMail(toEmail, toName, toEmail, "", title, contents);
-	}
+	// 발송된 이메일 상태 체크호출
+	public EmailCheckDto sendEmailCheck(String requestId) throws Exception {
+		log.info("sendEmailCheck 호출");
 
-	public String sendMail(String toEmail, String toName, String title, String contents) {
-		return sendMail(mailHost, "kokonut", toEmail, toName, title, contents);
-	}
-
-	// 기존 코코넛 inquiryController에서 사용 중, 해당 기능 아직 리팩토링 전. 추후 변경 예정.
-	public String inquirySendMail(String toEmail, String toName, String title, String contents) {
-		return sendMail(toEmail, toName, mailHost, "kokonut", title, contents);
+		return naverCloudPlatformService.sendEmailCheck(requestId);
 	}
 
 	// 리뉴얼 이메일발송
@@ -131,16 +124,13 @@ public class MailSender {
 		return requestId;
 	}
 
-	// 발송된 이메일 상태 체크호출
-	public EmailCheckDto sendEmailCheck(String requestId) throws Exception {
-		log.info("sendEmailCheck 호출");
-
-		return naverCloudPlatformService.sendEmailCheck(requestId);
+	public String sendKokonutMail(String toEmail, String toName, String title, String contents) {
+		return sendKokonutMail(mailHost, "kokonut", toEmail, toName, title, contents);
 	}
 
-	@Transactional
-	public String sendMail(String fromEmail, String fromName, String toEmail, String toName, String title, String contents) {
-		log.info("### MailSender.sendMail 시작");
+	// 서비스 내에게 이메일 발송
+	public String sendKokonutMail(String fromEmail, String fromName, String toEmail, String toName, String title, String contents) {
+		log.info("sendServiceMail 호출");
 
 		String result = null;
 
@@ -172,7 +162,7 @@ public class MailSender {
 
 		if(result != null) {
 			log.info("### 네이버 클라우드 플랫폼 서비스 sendMail 성공");
-			log.info("### 이메일 발송 내역 저장");
+			log.info("### 서비스 내에게 이메일 발송 내역 저장");
 			ContactEmailHistory contactEmailHistory = new ContactEmailHistory();
 			contactEmailHistory.setEchFrom(fromEmail);
 			contactEmailHistory.setEchFromName(fromName);
@@ -189,6 +179,13 @@ public class MailSender {
 
 		return result;
 	}
+
+
+	// 기존 코코넛 inquiryController에서 사용 중, 해당 기능 아직 리팩토링 전. 추후 변경 예정.
+	public String inquirySendMail(String toEmail, String toName, String title, String contents) {
+		return sendKokonutMail(toEmail, toName, mailHost, "kokonut", title, contents);
+	}
+
 
 	// TODO 메일 유형에 따라 발송시 HTML 화면으로 만들어줌.
 	public String getHTML2(String viewURL) throws IOException {

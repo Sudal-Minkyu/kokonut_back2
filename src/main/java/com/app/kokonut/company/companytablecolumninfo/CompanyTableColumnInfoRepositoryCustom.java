@@ -2,6 +2,7 @@ package com.app.kokonut.company.companytablecolumninfo;
 
 import com.app.kokonut.company.companytablecolumninfo.dtos.CompanyTableColumnInfoCheck;
 import com.app.kokonut.company.companytablecolumninfo.dtos.CompanyTableColumnInfoCheckList;
+import com.app.kokonut.company.companytablecolumninfo.dtos.CompanyTableColumnNameSearch;
 
 import java.util.List;
 
@@ -16,5 +17,7 @@ public interface CompanyTableColumnInfoRepositoryCustom {
     List<CompanyTableColumnInfoCheckList> findByCheckList(String ctName);
 
     CompanyTableColumnInfoCheck findByCheck(String ctName, String ctciCode);
+
+    CompanyTableColumnNameSearch findByColumnName(String ctciName);
 
 }

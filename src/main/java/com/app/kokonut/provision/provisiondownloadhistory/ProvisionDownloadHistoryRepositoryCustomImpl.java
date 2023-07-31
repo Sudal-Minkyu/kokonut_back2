@@ -1,8 +1,12 @@
 package com.app.kokonut.provision.provisiondownloadhistory;
 
 import com.app.kokonut.admin.QAdmin;
+import com.app.kokonut.email.email.QEmail;
+import com.app.kokonut.provision.QProvision;
+import com.app.kokonut.provision.dtos.ProvisionDownloadCheckDto;
 import com.app.kokonut.provision.provisiondownloadhistory.dtos.ProvisionDownloadHistoryListDto;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPQLQuery;
 import org.qlrm.mapper.JpaResultMapper;
 import org.springframework.data.domain.Page;
@@ -11,6 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -49,6 +55,5 @@ public class ProvisionDownloadHistoryRepositoryCustomImpl extends QuerydslReposi
         final List<ProvisionDownloadHistoryListDto> provisionDownloadHistoryListDtos = Objects.requireNonNull(getQuerydsl()).applyPagination(pageable, query).fetch();
         return new PageImpl<>(provisionDownloadHistoryListDtos, pageable, query.fetchCount());
     }
-
 
 }

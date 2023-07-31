@@ -1,6 +1,7 @@
 package com.app.kokonut.provision;
 
 import com.app.kokonut.admin.QAdmin;
+import com.app.kokonut.provision.dtos.ProvisionDownloadCheckDto;
 import com.app.kokonut.provision.dtos.ProvisionListDto;
 import com.app.kokonut.provision.dtos.ProvisionSearchDto;
 import com.app.kokonut.provision.provisiondownloadhistory.QProvisionDownloadHistory;
@@ -8,7 +9,6 @@ import com.app.kokonut.provision.provisionroster.QProvisionRoster;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
@@ -164,5 +164,23 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
 
         return query.fetchOne();
     }
+
+    public ProvisionDownloadCheckDto findByProvisionDownloadCheck(String cpCode, String proCode, Integer proDownloadYn) {
+
+        QProvision provision = QProvision.provision;
+
+        JPQLQuery<ProvisionDownloadCheckDto> query = from(provision)
+                .where(provision.proCode.eq(proCode).and(provision.cpCode.eq(cpCode).and(provision.proDownloadYn.eq(proDownloadYn))))
+                .select(Projections.constructor(ProvisionDownloadCheckDto.class,
+                        provision.proCode,
+                        provision.proProvide,
+                        provision.proStartDate,
+                        provision.proExpDate,
+                        provision.proTargetType
+                ));
+
+        return query.fetchOne();
+    }
+
 
 }

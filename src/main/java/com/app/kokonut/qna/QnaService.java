@@ -332,7 +332,7 @@ public class QnaService {
                     String title = "[Kokonut] 문의글 답변 등록 안내 메일입니다.";
                     String contents = "문의하신 글에 답변이 등록되었습니다.<br> 답변내용 : "+savedQna.get().getQnaAnswer();
                     // TODO : 답변 내용을 조회, 해당 내용을 HTML 태그를 붙여서 메일로 전송해준다. 화면단과 개발할 때 추가 개발해야함.
-                    mailSender.sendMail(jwtFilterDto.getEmail(), null, title, contents);
+                    mailSender.sendKokonutMail(jwtFilterDto.getEmail(), null, title, contents);
                 }
             }else{
                 log.error("답변을 등록할 문의글을 확인해주세요.");
