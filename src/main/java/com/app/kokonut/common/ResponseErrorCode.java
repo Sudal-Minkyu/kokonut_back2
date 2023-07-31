@@ -168,7 +168,7 @@ public enum ResponseErrorCode {
     ERROR_CODE_16("ERROR_CODE_16", "변수로 요청된 고유코드가 존재하지 않습니다. 보내신 고유코드를 다시 한번 확인해주시길 바랍니다."),
     ERROR_CODE_17("ERROR_CODE_17", "알림톡 보낼 대상이 존재하지 않습니다."),
 
-    ERROR_KOKONUT("ERROR_KOKONUT", "알 수 없는 에러가 발생했습니다. 코코넛에게 문의부탁드립니다."),
+    ERROR_KOKONUT("ERROR_KOKONUT", "알 수 없는 에러가 발생했습니다. 코코넛에게 해당 상황을 피드백 해주세요!"),
     ERROR_CODE_96("ERROR_CODE_96", "헤더에 APIKey가 존재하지 않습니다. APIKey를 담아 보내주세요."), // 400
     ERROR_CODE_97("ERROR_CODE_97", "호출하신 APIKey는 존재하지 않은 APIKey 입니다. APIKey관리 페이지에서 APIKey를 확인해주세요."), // 404
     ERROR_CODE_98("ERROR_CODE_98", "관리자에 의해 사용에 제한된 APIKey 입니다. 관리자에게 문의해주세요."), // 402

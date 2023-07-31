@@ -15,4 +15,6 @@ public class CompanyTableColumnInfoCheckList {
 
     private String ctciSecuriy;
 
+    private String ctciCode;
+
 }

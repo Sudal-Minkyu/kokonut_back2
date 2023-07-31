@@ -101,7 +101,7 @@ public class ProvisionRestController {
         return provisionService.provisionDetail(proCode, jwtFilterDto);
     }
 
-    @GetMapping("/provisionDownloadExcel")
+    @PostMapping("/provisionDownloadExcel")
     @ApiImplicitParams({
             @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = false, dataTypeClass = String.class, paramType = "header", example = ""),
     })

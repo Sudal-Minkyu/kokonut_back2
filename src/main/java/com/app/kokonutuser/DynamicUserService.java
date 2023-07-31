@@ -1567,7 +1567,7 @@ public class DynamicUserService {
 		for (KokonutUserFieldDto kokonutUserFieldDto : kokonutUserFieldDtos) {
 			kokonutUserFieldListDto = new KokonutUserFieldListDto();
 			String field = kokonutUserFieldDto.getField();
-			if(!field.contains("kokonut_")) {
+			if(!field.contains("kokonut_") && !field.equals("PASSWORD_1_pw")) { // 23/07/31 -> 개인정보제공할떄 비밀번호는 제공하지않는다. to. woody
 				String comment = kokonutUserFieldDto.getComment();
 				String key = kokonutUserFieldDto.getKey();
 				if (comment != null) {

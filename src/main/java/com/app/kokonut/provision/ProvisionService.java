@@ -7,6 +7,9 @@ import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.common.realcomponent.CommonUtil;
 import com.app.kokonut.common.realcomponent.Utils;
+import com.app.kokonut.company.companytablecolumninfo.CompanyTableColumnInfoRepository;
+import com.app.kokonut.company.companytablecolumninfo.dtos.CompanyTableColumnInfoCheck;
+import com.app.kokonut.company.companytablecolumninfo.dtos.CompanyTableColumnInfoCheckList;
 import com.app.kokonut.configs.ExcelService;
 import com.app.kokonut.configs.KeyGenerateService;
 import com.app.kokonut.configs.MailSender;
@@ -22,10 +25,12 @@ import com.app.kokonut.provision.provisiondownloadhistory.dtos.ProvisionDownload
 import com.app.kokonut.provision.provisionentry.ProvisionEntry;
 import com.app.kokonut.provision.provisionentry.ProvisionEntryRepository;
 import com.app.kokonut.provision.provisionentry.dtos.ProvisionEntrySaveDto;
+import com.app.kokonut.provision.provisionentry.dtos.ProvisionEntryTargetsDto;
 import com.app.kokonut.provision.provisionlist.ProvisionList;
 import com.app.kokonut.provision.provisionlist.ProvisionListRepository;
 import com.app.kokonut.provision.provisionroster.ProvisionRoster;
 import com.app.kokonut.provision.provisionroster.ProvisionRosterRepository;
+import com.app.kokonutuser.KokonutUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -55,6 +60,8 @@ public class ProvisionService {
     private final HistoryService historyService;
     private final ExcelService excelService;
     private final MailSender mailSender;
+    private final KokonutUserService kokonutUserService;
+    private final DecrypCountHistoryService decrypCountHistoryService;
 
     private final AdminRepository adminRepository;
     private final ProvisionRepository provisionRepository;
@@ -62,17 +69,20 @@ public class ProvisionService {
     private final ProvisionRosterRepository provisionRosterRepository;
     private final ProvisionEntryRepository provisionEntryRepository;
     private final ProvisionListRepository provisionListRepository;
-    private final DecrypCountHistoryService decrypCountHistoryService;
+    private final CompanyTableColumnInfoRepository companyTableColumnInfoRepository;
 
     @Autowired
     public ProvisionService(KeyGenerateService keyGenerateService, HistoryService historyService,
-                            ExcelService excelService, MailSender mailSender, AdminRepository adminRepository, ProvisionRepository provisionRepository,
+                            ExcelService excelService, MailSender mailSender, KokonutUserService kokonutUserService,
+                            AdminRepository adminRepository, ProvisionRepository provisionRepository,
                             ProvisionDownloadHistoryRepository provisionDownloadHistoryRepository, ProvisionRosterRepository provisionRosterRepository,
-                            ProvisionEntryRepository provisionEntryRepository, ProvisionListRepository provisionListRepository, DecrypCountHistoryService decrypCountHistoryService){
+                            ProvisionEntryRepository provisionEntryRepository, ProvisionListRepository provisionListRepository,
+                            DecrypCountHistoryService decrypCountHistoryService, CompanyTableColumnInfoRepository companyTableColumnInfoRepository){
         this.keyGenerateService = keyGenerateService;
         this.historyService = historyService;
         this.excelService = excelService;
         this.mailSender = mailSender;
+        this.kokonutUserService = kokonutUserService;
         this.adminRepository = adminRepository;
         this.provisionRepository = provisionRepository;
         this.provisionDownloadHistoryRepository = provisionDownloadHistoryRepository;
@@ -80,6 +90,7 @@ public class ProvisionService {
         this.provisionEntryRepository = provisionEntryRepository;
         this.provisionListRepository = provisionListRepository;
         this.decrypCountHistoryService = decrypCountHistoryService;
+        this.companyTableColumnInfoRepository = companyTableColumnInfoRepository;
     }
 
     // 개인정보제공 등록
@@ -387,6 +398,7 @@ public class ProvisionService {
     }
 
     // 개인정보제공 다운로드 API
+    @Transactional
     public ResponseEntity<Map<String, Object>> provisionDownloadExcel(String proCode, JwtFilterDto jwtFilterDto) throws IOException {
         log.info("provisionDownloadExcel 호출");
 
@@ -442,10 +454,47 @@ public class ProvisionService {
                 activityCode = ActivityCode.AC_47_3;
             }
 
+            String ctName = cpCode+"_1";
+            List<String> targetList = new ArrayList<>();
+            List<String> securityList = new ArrayList<>();
+            List<String> headerName = new ArrayList<>();
             if(provisionDownloadCheckDto.getProTargetType() == 1) {
                 // 일부개인정보 조회
-                
+                ProvisionEntryTargetsDto provisionEntryTargetsDto = provisionEntryRepository.findByProvisionEntryTargets(proCode, ctName);
+                if (provisionEntryTargetsDto != null) {
+                    targetList = provisionEntryTargetsDto.getPipeTableTargets();
+                    for(int i=0; i<targetList.size(); i++) {
+                        CompanyTableColumnInfoCheck companyTableColumnInfoCheck = companyTableColumnInfoRepository.findByCheck(ctName, targetList.get(i));
+                        if(companyTableColumnInfoCheck == null) {
+                            targetList.set(i, "");
+                            securityList.add("");
+                            headerName.add("");
+                        } else {
+                            targetList.set(i, companyTableColumnInfoCheck.getCtciName());
+                            securityList.add(companyTableColumnInfoCheck.getCtciSecuriy());
+                            headerName.add(companyTableColumnInfoCheck.getCtciDesignation());
+                        }
+                    }
+                }
+                log.info("일부 targetList : "+targetList);
+                log.info("일부 securityList : "+securityList);
+                log.info("일부 headerName : "+headerName);
             }
+            else {
+                List<CompanyTableColumnInfoCheckList> companyTableColumnInfoCheckLists = companyTableColumnInfoRepository.findByCheckList(ctName);
+                for(CompanyTableColumnInfoCheckList companyTableColumnInfoCheckList : companyTableColumnInfoCheckLists) {
+                    targetList.add(companyTableColumnInfoCheckList.getCtciCode());
+                    securityList.add(companyTableColumnInfoCheckList.getCtciSecuriy());
+                    headerName.add(companyTableColumnInfoCheckList.getCtciDesignation());
+                }
+
+                log.info("전체 targetList : "+targetList);
+                log.info("전체 securityList : "+securityList);
+                log.info("전체 headerName : "+headerName);
+            }
+
+
+
 
 
     //        List<Map<String, Object>> dataList = new ArrayList<>();
@@ -465,17 +514,17 @@ public class ProvisionService {
 
 
             // 활동이력 저장 -> 비정상 모드
-            activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
+//            activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
+//                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
 
 
-            historyService.updateHistory(activityHistoryId,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+//            historyService.updateHistory(activityHistoryId,
+//                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
 
-            // 복호화 횟수 저장
-            if(dchCount > 0) {
-                decrypCountHistoryService.decrypCountHistorySave(cpCode, dchCount);
-            }
+//            // 복호화 횟수 저장
+//            if(dchCount > 0) {
+//                decrypCountHistoryService.decrypCountHistorySave(cpCode, dchCount);
+//            }
 
         } else {
             log.error("개인정보제공 정보가 존재하지 않습니다.");

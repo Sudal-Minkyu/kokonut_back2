@@ -38,7 +38,8 @@ public class CompanyTableColumnInfoRepositoryCustomImpl extends QuerydslReposito
                 .select(Projections.constructor(CompanyTableColumnInfoCheckList.class,
                         companyTableColumnInfo.ctciDesignation,
                         companyTableColumnInfo.ctciName,
-                        companyTableColumnInfo.ctciSecuriy
+                        companyTableColumnInfo.ctciSecuriy,
+                        companyTableColumnInfo.ctciCode
                 ));
 
         query.orderBy(companyTableColumnInfo.ctciCode.asc());

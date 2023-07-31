@@ -11,6 +11,6 @@ import org.springframework.stereotype.Repository;
  * Remark :
  */
 @Repository
-public interface ProvisionEntryRepository extends JpaRepository<ProvisionEntry, Long>, JpaSpecificationExecutor<ProvisionEntry> {
+public interface ProvisionEntryRepository extends JpaRepository<ProvisionEntry, Long>, JpaSpecificationExecutor<ProvisionEntry>, ProvisionEntryRepositoryCustom {
 
 }
