@@ -39,11 +39,11 @@ public class ProvisionDownloadHistory {
     @Column(name = "piph_count")
     private Integer piphCount;
 
-    @ApiModelProperty("등록자 email")
+    @ApiModelProperty("다운로드 email")
     @Column(name = "insert_email")
     private String insert_email;
 
-    @ApiModelProperty("등록 날짜")
+    @ApiModelProperty("다운로드 날짜")
     @Column(name = "insert_date")
     private LocalDateTime insert_date;
 

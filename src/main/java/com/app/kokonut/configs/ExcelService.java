@@ -255,8 +255,8 @@ public class ExcelService {
 	}
 
 	// 데이터를 받아 엑셀파일로서 변환하여 반환
-	public ResponseEntity<Map<String, Object>> createExcelFile(String fileName, String sheetName, List<Map<String, Object>> dataList, String zipPassword) throws IOException {
-		AjaxResponse res = new AjaxResponse();
+	public HashMap<String, Object> createExcelFile(String fileName, String sheetName, List<Map<String, Object>> dataList, String zipPassword) throws IOException {
+
 		if (sheetName == null || sheetName.trim().isEmpty()) {
 			sheetName = "";
 		}
@@ -320,7 +320,8 @@ public class ExcelService {
 			HashMap<String, Object> data = new HashMap<>();
 			data.put("fileData", encoded);
 			data.put("fileName", fileName + ".zip");
-			return ResponseEntity.ok(res.success(data));
+			return data;
+
 		} catch (Exception e) {
 			throw new RuntimeException("엑셀을 데이터로 변환중 에러", e);
 		} finally {
