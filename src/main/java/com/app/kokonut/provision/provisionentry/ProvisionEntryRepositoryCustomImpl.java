@@ -9,9 +9,9 @@ import org.springframework.stereotype.Repository;
 
 /**
  * @author Woody
- * Date : 2023-05-11
+ * Date : 2023-07-31
  * Time :
- * Remark : ProvisionDownloadHistoryRepositoryCustom 쿼리문 선언부
+ * Remark : ProvisionEntryRepositoryCustom 쿼리문 선언부
  */
 @Repository
 public class ProvisionEntryRepositoryCustomImpl extends QuerydslRepositorySupport implements ProvisionEntryRepositoryCustom {

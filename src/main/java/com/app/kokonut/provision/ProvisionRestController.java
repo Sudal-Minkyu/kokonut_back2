@@ -3,6 +3,7 @@ package com.app.kokonut.provision;
 import com.app.kokonut.admin.AdminService;
 import com.app.kokonut.auth.jwt.SecurityUtil;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
+import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.configs.ExcelService;
 import com.app.kokonut.provision.dtos.ProvisionSaveDto;
 import io.swagger.annotations.ApiImplicitParam;
@@ -120,9 +121,12 @@ public class ProvisionRestController {
     public ResponseEntity<Map<String, Object>> provisionDownloadExcel2() throws  IOException {
         List<Map<String, Object>> dataList = new ArrayList<>();
 
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data;
+
         Map<String, Object> row1 = new HashMap<>();
         row1.put("id", 1);
-        row1.put("name", "John");
+        row1.put("name2", "John");
         row1.put("age", 35);
 
         Map<String, Object> row2 = new HashMap<>();
@@ -133,7 +137,9 @@ public class ProvisionRestController {
         dataList.add(row1);
         dataList.add(row2);
 
-        return excelService.createExcelFile("테스트압축파일", "테스트시트명", dataList, "1234");
+        data = excelService.createExcelFile("테스트압축파일", "테스트시트명", dataList, "1234");
+
+        return ResponseEntity.ok(res.success(data));
     }
 
 }

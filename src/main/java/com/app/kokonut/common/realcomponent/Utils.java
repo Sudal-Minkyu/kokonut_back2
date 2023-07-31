@@ -405,4 +405,15 @@ public class Utils {
 		return result;
 	}
 
+	// 리스트에 값을 담을때 유니크한 값을 반환해주는 함수
+	public static String generateUniqueName(String name, List<String> list) {
+		int count = 1;
+		String originalName = name;
+		while (list.contains(name)) {
+			count++;
+			name = originalName + count;
+		}
+		return name;
+	}
+
 }

@@ -4,9 +4,9 @@ import com.app.kokonut.provision.provisionentry.dtos.ProvisionEntryTargetsDto;
 
 /**
  * @author Woody
- * Date : 2023-05-11
+ * Date : 2023-07-31
  * Time :
- * Remark : ProvisionDownloadHistory Sql 쿼리호출
+ * Remark : ProvisionEntry Sql 쿼리호출
  */
 public interface ProvisionEntryRepositoryCustom {
 

@@ -397,7 +397,7 @@ public class ThirdPartyService {
 
 						log.info("보낼 대상 리스트 : "+alimTalkSendUserList);
 
-						// 암호화필드 복호화 처리하기
+						// 암호화된 개인정보 복호화하기
 						for(Map<String, Object> map : alimTalkSendUserList) {
 							log.info("수정전 map : "+map);
 							for(int i=0; i<securityChk.size(); i++) {
