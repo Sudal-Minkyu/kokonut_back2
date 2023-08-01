@@ -354,11 +354,7 @@ public class ThirdPartyService {
 					searchQuery.append("SELECT ");
 					for(int i=0; i<fieldNameChk.size(); i++) {
 						if(!fieldNameChk.get(i).equals("pass") && !designationChk.get(i).equals("pass") && !securityChk.get(i).equals("pass")) {
-							if(i == fieldNameChk.size()-1) {
-								searchQuery.append("COALESCE(").append(fieldNameChk.get(i)).append(", '없음') as ").append(codeListKeys.get(i)).append(" ");
-							} else {
-								searchQuery.append("COALESCE(").append(fieldNameChk.get(i)).append(", '없음') as ").append(codeListKeys.get(i)).append(",");
-							}
+							searchQuery.append(", COALESCE(").append(fieldNameChk.get(i)).append(", '없음') as ").append(codeListKeys.get(i)).append(" ");
 						}
 					}
 

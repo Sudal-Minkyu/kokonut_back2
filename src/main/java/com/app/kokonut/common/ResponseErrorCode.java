@@ -148,6 +148,7 @@ public enum ResponseErrorCode {
     KO114("KO114", "해당 개인정보제공에 등록되지 않은 관리자입니다."),
 
     KO115("KO115", "활동이력 데이터가 존재하지 않습니다."),
+    KO116("KO116", "개인정보 데이터가 존재하지 않습니다."),
 
     ERROR_CODE_API("ERROR_CODE_API", "API 내용"),
     ERROR_CODE_00("ERROR_CODE_00", "파라미터 데이터가 없습니다."),

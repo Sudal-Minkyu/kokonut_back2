@@ -554,11 +554,7 @@ public class ProvisionService {
 
             for(int i=0; i<targetList.size(); i++) {
                 if(!targetList.get(i).equals("pass") && !securityList.get(i).equals("pass") && !headerName.get(i).equals("pass")) {
-                    if(i == targetList.size()-1) {
-                        selectQuery.append("COALESCE(").append(targetList.get(i)).append(", '없음') as ").append(headerName.get(i)).append(" ");
-                    } else {
-                        selectQuery.append("COALESCE(").append(targetList.get(i)).append(", '없음') as ").append(headerName.get(i)).append(",");
-                    }
+                    selectQuery.append(", COALESCE(").append(targetList.get(i)).append(", '없음') as ").append(headerName.get(i)).append(" ");
                 }
             }
 

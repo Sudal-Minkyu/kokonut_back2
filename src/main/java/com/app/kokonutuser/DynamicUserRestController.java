@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -146,6 +147,17 @@ public class DynamicUserRestController {
 	public ResponseEntity<Map<String,Object>> privacyUserOpen(@RequestParam(name="kokonut_IDX", defaultValue = "") String idx) throws Exception {
 		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
 		return dynamicUserService.privacyUserOpen(idx, jwtFilterDto);
+	}
+
+	// 개인정보 열람데이터 엑셀다운로드
+	@PostMapping(value = "/privacyUserDownloadExcel")
+	@ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+	public ResponseEntity<Map<String,Object>> privacyUserDownloadExcel(@RequestBody List<Map<String, Object>> paramMap,
+																	   @RequestParam(value="otpValue", defaultValue = "") String otpValue,
+																	   @RequestParam(value="downloadReason", defaultValue = "") String downloadReason,
+																	   HttpServletRequest request) throws IOException {
+		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwtOrApiKey(request);
+		return dynamicUserService.privacyUserDownloadExcel(paramMap, otpValue, downloadReason, jwtFilterDto);
 	}
 
 //  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
