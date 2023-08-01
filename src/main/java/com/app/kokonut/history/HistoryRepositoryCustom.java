@@ -16,7 +16,9 @@ import java.util.List;
  */
 public interface HistoryRepositoryCustom {
 
-    Page<HistoryListDto> findByHistoryList(HistorySearchDto historySearchDto, Pageable pageable);
+    Page<HistoryListDto> findByHistoryPage(HistorySearchDto historySearchDto, Pageable pageable);
+
+    List<HistoryExcelDownloadListDto> findByHistoryList(HistorySearchDto historySearchDto);
 
     HistoryDto findByHistoryByIdx(Long idx); // SelectHistoryByIdx -> 변경후
 

@@ -107,9 +107,11 @@ public class ProvisionRestController {
             @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = false, dataTypeClass = String.class, paramType = "header", example = ""),
     })
     @ApiOperation(value = "개인정보제공 다운로드 API", notes = "")
-    public ResponseEntity<Map<String, Object>> provisionDownloadExcel(@RequestParam(value="proCode", defaultValue = "") String proCode) throws IOException {
+    public ResponseEntity<Map<String, Object>> provisionDownloadExcel(@RequestParam(value="proCode", defaultValue = "") String proCode,
+                                                                      @RequestParam(value="otpValue", defaultValue = "") String otpValue,
+                                                                      @RequestParam(value="downloadReason", defaultValue = "") String downloadReason) throws IOException {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
-        return provisionService.provisionDownloadExcel(proCode, jwtFilterDto);
+        return provisionService.provisionDownloadExcel(proCode, otpValue, downloadReason, jwtFilterDto);
     }
 
     @GetMapping("/provisionDownloadExcel2")

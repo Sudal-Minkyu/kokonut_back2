@@ -33,10 +33,10 @@ public class ThirdPartyRestController {
     @ApiOperation(value = "비즈엠 서드파티 셋팅")
     @PostMapping(value = "/bizmSetting")
     @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-    public ResponseEntity<Map<String,Object>> bizmSetting(@RequestParam(value="settingType", defaultValue = "") String settingType,
-                                                          @RequestParam(value="choseCode", defaultValue = "") String choseCode) throws IOException {
+    public ResponseEntity<Map<String,Object>> bizmSetting(@RequestParam(value="tsBizmReceiverNumCode", defaultValue = "") String tsBizmReceiverNumCode,
+                                                          @RequestParam(value="tsBizmAppUserIdCode", defaultValue = "") String tsBizmAppUserIdCode) throws IOException {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
-        return thirdPartyService.bizmSetting(settingType, choseCode, jwtFilterDto);
+        return thirdPartyService.bizmSetting(tsBizmReceiverNumCode, tsBizmAppUserIdCode, jwtFilterDto);
     }
 
     @ApiOperation(value = "비즈엠 서드파티에 지정된 항목 가져오기")

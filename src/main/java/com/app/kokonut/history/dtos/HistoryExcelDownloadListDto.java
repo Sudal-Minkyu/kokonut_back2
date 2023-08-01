@@ -10,38 +10,32 @@ import java.time.format.DateTimeFormatter;
 
 /**
  * @author Woody
- * Date : 2022-11-03
+ * Date : 2022-08-01
  * Time :
- * Remark : ActivityHistory 리스트 조회 Dto
- * 사용 메서드 : findByActivityHistoryList
+ * Remark : ActivityHistory 엑셀다운로드용 조회 Dto
+ * 사용 메서드 :
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class HistoryListDto {
+public class HistoryExcelDownloadListDto {
 
     private String knName;
     private String knEmail;
 
     private AuthorityRole knRoleDesc;
 
-    private AuthorityRole knRoleCode;
-
     private ActivityCode activityCode;
 
     private String ahActivityDetail;
 
-//    private String ahReason;
+    private String ahReason;
 
     private LocalDateTime insert_date;
 
     private String ahIpAddr;
 
     private Integer ahState;
-
-    public String getKnRoleCode() {
-        return knRoleCode.getCode();
-    }
 
     public String getKnRoleDesc() {
         return knRoleDesc.getDesc();
@@ -76,5 +70,12 @@ public class HistoryListDto {
         }
     }
 
+    public String getAhState() {
+        if(ahState == 0) {
+            return "비정상";
+        } else {
+            return "정상";
+        }
+    }
 
 }

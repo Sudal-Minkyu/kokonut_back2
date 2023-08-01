@@ -147,6 +147,8 @@ public enum ResponseErrorCode {
     KO113_2("KO113_2", "개인정보제공 다운로드 기간이 지났습니다."),
     KO114("KO114", "해당 개인정보제공에 등록되지 않은 관리자입니다."),
 
+    KO115("KO115", "활동이력 데이터가 존재하지 않습니다."),
+
     ERROR_CODE_API("ERROR_CODE_API", "API 내용"),
     ERROR_CODE_00("ERROR_CODE_00", "파라미터 데이터가 없습니다."),
     ERROR_CODE_01("ERROR_CODE_01", "지정되지 않은 값입니다. 고유코드를 확인해주시고 메뉴얼대로 호출해주시길 바랍니다."),
