@@ -189,59 +189,53 @@ public class ProvisionService {
 
             List<ProvisionEntry> provisionEntries = new ArrayList<>();
 
+            ProvisionEntry provisionEntry = new ProvisionEntry();
             // 제공 할 테이블+컬럼 저장 -> 모든 항목일 경우 저장하지 않음
             if(proTargetType == 1) {
-                ProvisionEntry provisionEntry;
                 ProvisionEntrySaveDto provisionEntrySaveDtos = provisionSaveDto.getProvisionEntrySaveDtos();
                 log.info("provisionEntrySaveDtos : "+provisionEntrySaveDtos);
-//                for(ProvisionEntrySaveDto provisionEntrySaveDto : provisionEntrySaveDtos) {
-                    if(provisionEntrySaveDtos.getPipeTableTargets().size() != 0) {
-                        provisionEntry = new ProvisionEntry();
-                        provisionEntry.setProCode(saveprovision.getProCode());
-                        provisionEntry.setInsert_email(email);
-                        provisionEntry.setInsert_date(LocalDateTime.now());
+                if(provisionEntrySaveDtos.getPipeTableTargets().size() != 0) {
+                    provisionEntry = new ProvisionEntry();
+                    provisionEntry.setProCode(saveprovision.getProCode());
+                    provisionEntry.setInsert_email(email);
+                    provisionEntry.setInsert_date(LocalDateTime.now());
 
-                        provisionEntry.setPipeTableName(cpCode+"_1");
+                    provisionEntry.setPipeTableName(cpCode+"_1");
 
-                        String pipeTableTargets = String.join(",", provisionEntrySaveDtos.getPipeTableTargets());
-                        log.info("pipeTableTargets : "+pipeTableTargets);
-                        provisionEntry.setPipeTableTargets(pipeTableTargets);
-
-                        provisionEntries.add(provisionEntry);
-                    }
-//                }
+                    String pipeTableTargets = String.join(",", provisionEntrySaveDtos.getPipeTableTargets());
+                    log.info("pipeTableTargets : "+pipeTableTargets);
+                    provisionEntry.setPipeTableTargets(pipeTableTargets);
+                }
             }
 
             // 제공할 개인정보의 idx
             ProvisionList provisionList = new ProvisionList();
+            if(provisionSaveDto.getPiplTargetIdxs().size() != 0) {
+                String piplTargetIdxs = provisionSaveDto.getPiplTargetIdxs().stream()
+                        .map(String::valueOf)
+                        .collect(Collectors.joining(","));
+                log.info("piplTargetIdxs : "+piplTargetIdxs);
+
+                provisionList.setProCode(saveprovision.getProCode());
+                provisionList.setPiplTargetIdxs(piplTargetIdxs);
+                provisionList.setInsert_email(email);
+                provisionList.setInsert_date(LocalDateTime.now());
+            }else {
+                log.error("제공할 개인정보가 존재하지 않습니다. 제공할 개인정보를 선택해주세요.");
+
+                provisionRepository.delete(saveprovision);
+
+                // 실패이력 업데이트
+                historyService.updateHistory(activityHistoryId,
+                        cpCode+" - "+activityCode.getDesc()+" 실패 이력", "제공할 개인정보를 선택해주세요.", 1);
+
+                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO093.getCode(),ResponseErrorCode.KO093.getDesc()));
+            }
+
             if(proTargetType == 1) {
-                if(provisionSaveDto.getPiplTargetIdxs().size() != 0) {
-                    String piplTargetIdxs = provisionSaveDto.getPiplTargetIdxs().stream()
-                            .map(String::valueOf)
-                            .collect(Collectors.joining(","));
-                    log.info("piplTargetIdxs : "+piplTargetIdxs);
-
-                    provisionList.setProCode(saveprovision.getProCode());
-                    provisionList.setPiplTargetIdxs(piplTargetIdxs);
-                    provisionList.setInsert_email(email);
-                    provisionList.setInsert_date(LocalDateTime.now());
-                }else {
-                    log.error("제공할 개인정보가 존재하지 않습니다. 제공할 개인정보를 선택해주세요.");
-
-                    provisionRepository.delete(saveprovision);
-
-                    // 실패이력 업데이트
-                    historyService.updateHistory(activityHistoryId,
-                            cpCode+" - "+activityCode.getDesc()+" 실패 이력", "제공할 개인정보를 선택해주세요.", 1);
-
-                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO093.getCode(),ResponseErrorCode.KO093.getDesc()));
-                }
+                provisionEntryRepository.save(provisionEntry);
             }
-
-            if(proTargetType == 1 && provisionEntries.size() != 0) {
-                provisionEntryRepository.saveAll(provisionEntries);
-                provisionListRepository.save(provisionList);
-            }
+            provisionListRepository.save(provisionList);
             provisionRosterRepository.saveAll(provisionRosters);
 
             // 성공이력 업데이트
@@ -508,7 +502,7 @@ public class ProvisionService {
             else {
                 List<CompanyTableColumnInfoCheckList> companyTableColumnInfoCheckLists = companyTableColumnInfoRepository.findByCheckList(ctName);
                 for(CompanyTableColumnInfoCheckList companyTableColumnInfoCheckList : companyTableColumnInfoCheckLists) {
-                    targetList.add(companyTableColumnInfoCheckList.getCtciCode());
+                    targetList.add(companyTableColumnInfoCheckList.getCtciName());
                     securityList.add(companyTableColumnInfoCheckList.getCtciSecuriy());
                     String uniqueName = Utils.generateUniqueName(companyTableColumnInfoCheckList.getCtciDesignation(), headerName);
                     headerName.add(uniqueName);
