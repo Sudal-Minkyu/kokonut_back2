@@ -152,7 +152,7 @@ public class DynamicUserRestController {
 	// 개인정보 열람데이터 엑셀다운로드
 	@PostMapping(value = "/privacyUserDownloadExcel")
 	@ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-	public ResponseEntity<Map<String,Object>> privacyUserDownloadExcel(@RequestBody List<Map<String, Object>> paramMap,
+	public ResponseEntity<Map<String,Object>> privacyUserDownloadExcel(@RequestParam(value="paramMap", defaultValue = "") List<Map<String, Object>> paramMap,
 																	   @RequestParam(value="otpValue", defaultValue = "") String otpValue,
 																	   @RequestParam(value="downloadReason", defaultValue = "") String downloadReason,
 																	   HttpServletRequest request) throws IOException {

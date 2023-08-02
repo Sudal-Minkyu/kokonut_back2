@@ -2452,7 +2452,8 @@ public class DynamicUserService {
 			for(CompanyTableColumnInfoCheckList companyTableColumnInfoCheckList : companyTableColumnInfoCheckLists) {
 				String designation = companyTableColumnInfoCheckList.getCtciDesignation();
 
-				String uniqueDesignation = Utils.generateUniqueName(designation, securityName);
+//				String uniqueDesignation = Utils.generateUniqueName(designation, securityName);
+				String uniqueDesignation = designation+"("+companyTableColumnInfoCheckList.getCtciCode()+")";
 
 				if(companyTableColumnInfoCheckList.getCtciSecuriy().equals("1")) {
 					securityHeaderNames.add(uniqueDesignation);

@@ -28,16 +28,13 @@ public class AlimtalkSendService {
     public String userId;
 
     @Value("${kokonut.happytalk.alimHost}")
-    public String alimHost;
+    public String alimHost; // 알림톡전송 URL
 
     @Value("${kokonut.happytalk.bizHost}")
-    public String bizHost;
-
-    @Value("${kokonut.happytalk.testAccessKey}")
-    public String testAccessKey;
+    public String bizHost; // 비즈엠용테스트용 URL
 
     // 테스트 탬플릿 검수승인 (참고 : https://alimtalk-api.bizmsg.kr/startTest.html)
-    public String alimtalkTemplateInspection(String templateCode) {
+    public String alimtalkTemplateInspection(String profileKey, String templateCode) {
         log.info("alimtalkTemplateInspection 호출");
 
         try {
@@ -52,7 +49,7 @@ public class AlimtalkSendService {
             conn.setDoOutput(true);
 
             // POST 파라미터 설정
-            String urlParameters = "senderKey=" + URLEncoder.encode(testAccessKey, StandardCharsets.UTF_8) +
+            String urlParameters = "senderKey=" + URLEncoder.encode(profileKey, StandardCharsets.UTF_8) +
                     "&templateCode=" + URLEncoder.encode(templateCode, StandardCharsets.UTF_8) +
                     "&senderKeyType=" + URLEncoder.encode("S", StandardCharsets.UTF_8) +
                     "&comment=" + URLEncoder.encode("코코넛 템플릿승인", StandardCharsets.UTF_8);
