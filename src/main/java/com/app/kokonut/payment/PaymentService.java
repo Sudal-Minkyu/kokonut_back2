@@ -33,6 +33,7 @@ import com.app.kokonut.payment.paymentprivacycount.PaymentPrivacyCountRepository
 import com.app.kokonut.payment.paymentprivacycount.dtos.PaymentPrivacyCountDayDto;
 import com.app.kokonut.payment.paymentprivacycount.dtos.PaymentPrivacyCountMonthAverageDto;
 import com.app.kokonutuser.DynamicUserRepositoryCustom;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -41,6 +42,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.Column;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -169,30 +171,51 @@ public class PaymentService {
 //			PaymentPayDto paymentPayDto = new PaymentPayDto();
 //			log.info("paymentPayDto : "+paymentPayDto);
 
-			// AWS RDS 클라우드 금액 호출
+			int payAmount = 0;
+
+			// AWS RDS 클라우드 금액 호출(트래픽)
+			int awsRDSCloud = 0;
+
 
 
 			// AWS S3 금액 호출
+			int awsS3Cloud = 0;
 
+			// AWS KMS 금액 호출
+			int awsKMSClound = 0;
+
+			int payCloudAmount = awsRDSCloud + awsS3Cloud + awsKMSClound;
 
 			// 서비스 금액 호출
+			int payServiceAmount = 0;
 			if(companyPaymentReservationListDto.getCpiPayType().equals("0")) {
-				price += Utils.kokonutMonthPrice(paymentPrivacyCountMonthAverageDto.getMonthAverageCount());
+				payServiceAmount += Utils.kokonutMonthPrice(paymentPrivacyCountMonthAverageDto.getMonthAverageCount());
 			}
-//			log.info("결제 할 금액 : "+price);
+
+			// 이메일이용 금액 호출
+			int payEmailAmount = 0;
+
+
+
+			// 결제 할 금액
+			payAmount = payCloudAmount + payServiceAmount + payEmailAmount;
+			log.info("결제 할 금액 : "+payAmount);
 
 			String orderId = keyGenerateService.keyGenerate("kn_payment", cpCode+LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMM")), "KokonutSystem");
 			log.info("orderId : "+orderId);
 
 			PaymentReservationResultDto paymentReservationResultDto = bootPayService.kokonutReservationPayment(
-					orderId, price, "월간 사용료 예약결제", companyPaymentReservationListDto.getCpiBillingKey(), payDayTime);
+					orderId, payAmount, "월간 사용료 예약결제", companyPaymentReservationListDto.getCpiBillingKey(), payDayTime);
 //			log.info("paymentReservationResultDto : "+paymentReservationResultDto);
 
 			if(paymentReservationResultDto != null) {
 				// 결제 내역 저장
 				payment.setPayOrderid(orderId);
 				payment.setCpCode(cpCode);
-				payment.setPayAmount(price);
+				payment.setPayAmount(payAmount);
+				payment.setPayCloudAmount(payCloudAmount);
+				payment.setPayServiceAmount(payServiceAmount);
+				payment.setPayEmailAmount(payEmailAmount);
 				payment.setPayState("2");
 				payment.setPayMethod("0");
 				payment.setPayPrivacyCount(paymentPrivacyCountMonthAverageDto.getMonthAverageCount());

@@ -44,6 +44,18 @@ public class Payment {
     @Column(name = "pay_amount")
     private Integer payAmount;
 
+    @ApiModelProperty("AWS 클라우드 금액")
+    @Column(name = "pay_cloud_amount")
+    private Integer payCloudAmount;
+
+    @ApiModelProperty("코코넛 서비스금액")
+    @Column(name = "pay_service_amount")
+    private Integer payServiceAmount;
+
+    @ApiModelProperty("이메일 사용금액")
+    @Column(name = "pay_email_amount")
+    private Integer payEmailAmount;
+
     @ApiModelProperty("상태(0:결제실패, 1:결제완료, 2:결제예약중)")
     @Column(name = "pay_state")
     private String payState;

@@ -314,7 +314,7 @@ public class AuthService {
     public ResponseEntity<Map<String, Object>> passwordSendKnEmail(String knEmail) throws IOException {
         log.info("passwordSendKnEmail 호출");
 
-//        log.info("knEmail : "+knEmail);
+        log.info("비밀번호찾는 이메일 : "+knEmail);
 
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
@@ -324,10 +324,9 @@ public class AuthService {
                 .orElseThrow(() -> new UsernameNotFoundException("해당하는 유저를 찾을 수 없습니다. : " + knEmail));
 
         String tempPassword = Utils.getRamdomStr(10);
-//        log.info("임시비밀번호 : "+tempPassword);
+        log.info("임시비밀번호 : "+tempPassword);
 
         admin.setKnPassword(passwordEncoder.encode(tempPassword));
-        adminRepository.save(admin);
 
         // 인증번호 메일전송
         // 이메일 전송을 위한 전처리 - filter, unfilter
@@ -345,9 +344,12 @@ public class AuthService {
         String reciverName = "kokonut";
 
         String mailSenderResult = mailSender.sendKokonutMail(knEmail, reciverName, title, contents);
+        log.info("mailSenderResult : "+ mailSenderResult);
+
         if(mailSenderResult != null){
             // mailSender 성공
             log.info("### 메일전송 성공했습니다. reciver Email : "+ knEmail);
+            adminRepository.save(admin);
         }else{
             // mailSender 실패
             log.error("### 해당 메일 전송에 실패했습니다. 관리자에게 문의하세요. reciverEmail : "+ knEmail);

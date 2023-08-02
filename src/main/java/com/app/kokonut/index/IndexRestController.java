@@ -117,11 +117,4 @@ public class IndexRestController {
         return indexService.thirdPartyInfo(jwtFilterDto);
     }
 
-    // 구독관리 관련 - 기업 (디폴트값 이번달)
-
-    // 이메일발송 현황 건수 데이터 - 기업 (디폴트 오늘)
-
-
-
-
 }
