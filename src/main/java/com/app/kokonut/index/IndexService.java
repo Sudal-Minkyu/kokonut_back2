@@ -29,6 +29,8 @@ import com.app.kokonut.payment.paymenterror.PaymentErrorRepository;
 import com.app.kokonut.payment.paymentprivacycount.PaymentPrivacyCountRepository;
 import com.app.kokonut.provision.ProvisionRepository;
 import com.app.kokonut.provision.provisionroster.ProvisionRosterRepository;
+import com.app.kokonut.thirdparty.ThirdPartyRepository;
+import com.app.kokonut.thirdparty.dtos.ThirdPartyAlimTalkSettingDto;
 import com.app.kokonutuser.DynamicUserRepositoryCustom;
 import com.app.kokonutuser.KokonutUserService;
 import lombok.extern.slf4j.Slf4j;
@@ -76,6 +78,7 @@ public class IndexService {
 	private final PaymentPrivacyCountRepository paymentPrivacyCountRepository;
 	private final DynamicUserRepositoryCustom dynamicUserRepositoryCustom;
 	private final EmailRepository emailRepository;
+	private final ThirdPartyRepository thirdPartyRepository;
 
 	private final ApiCallHistoryRepository apiCallHistoryRepository;
 	private final EncrypCountHistoryRepository encrypCountHistoryRepository;
@@ -93,7 +96,7 @@ public class IndexService {
 						CompanyPaymentInfoRepository companyPaymentInfoRepository,
 						CompanyTableLeaveHistoryRepository companyTableLeaveHistoryRepository, HistoryRepository historyRepository,
 						PaymentPrivacyCountRepository paymentPrivacyCountRepository, DynamicUserRepositoryCustom dynamicUserRepositoryCustom,
-						EmailRepository emailRepository, ApiCallHistoryRepository apiCallHistoryRepository,
+						EmailRepository emailRepository, ThirdPartyRepository thirdPartyRepository, ApiCallHistoryRepository apiCallHistoryRepository,
 						EncrypCountHistoryRepository encrypCountHistoryRepository, DecrypCountHistoryRepository decrypCountHistoryRepository,
 						KokonutUserService kokonutUserService, CompanyTableRepository companyTableRepository) {
 		this.historyService = historyService;
@@ -115,6 +118,7 @@ public class IndexService {
 		this.paymentPrivacyCountRepository = paymentPrivacyCountRepository;
 		this.dynamicUserRepositoryCustom = dynamicUserRepositoryCustom;
 		this.emailRepository = emailRepository;
+		this.thirdPartyRepository = thirdPartyRepository;
 		this.apiCallHistoryRepository = apiCallHistoryRepository;
 		this.encrypCountHistoryRepository = encrypCountHistoryRepository;
 		this.decrypCountHistoryRepository = decrypCountHistoryRepository;
@@ -698,7 +702,33 @@ public class IndexService {
 		return ResponseEntity.ok(res.success(data));
 	}
 
+	// 9. 서드파티 연동현황을 가져온다.
+	public ResponseEntity<Map<String, Object>> thirdPartyInfo(JwtFilterDto jwtFilterDto) {
+		log.info("thirdPartyInfo 호출");
 
+		AjaxResponse res = new AjaxResponse();
+		HashMap<String, Object> data = new HashMap<>();
+
+		String email = jwtFilterDto.getEmail();
+
+		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+		String cpCode = adminCompanyInfoDto.getCompanyCode();
+
+		// 비즈엠 사용여부 조회
+		ThirdPartyAlimTalkSettingDto thirdPartyAlimTalkSettingDto = thirdPartyRepository.findByAlimTalkSetting(cpCode);
+
+		if(thirdPartyAlimTalkSettingDto == null) {
+			data.put("bizmUseType", "0");
+		} else {
+			if(thirdPartyAlimTalkSettingDto.getTsBizmReceiverNumCode().equals("") && thirdPartyAlimTalkSettingDto.getTsBizmAppUserIdCode().equals("")) {
+				data.put("bizmUseType", "0");
+			} else {
+				data.put("bizmUseType", "1");
+			}
+		}
+
+		return ResponseEntity.ok(res.success(data));
+	}
 
 
 

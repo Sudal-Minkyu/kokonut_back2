@@ -14,6 +14,7 @@ import com.app.kokonut.company.companytablecolumninfo.CompanyTableColumnInfoRepo
 import com.app.kokonut.company.companytablecolumninfo.dtos.CompanyTableColumnInfoCheck;
 import com.app.kokonut.company.companytablecolumninfo.dtos.CompanyTableColumnInfoCheckList;
 import com.app.kokonut.configs.ExcelService;
+import com.app.kokonut.configs.GoogleOTP;
 import com.app.kokonut.configs.KeyGenerateService;
 import com.app.kokonut.configs.MailSender;
 import com.app.kokonut.history.HistoryService;
@@ -64,12 +65,15 @@ public class ProvisionService {
 
     private final KeyGenerateService keyGenerateService;
 
-    private final HistoryService historyService;
+    private final GoogleOTP googleOTP;
     private final ExcelService excelService;
     private final MailSender mailSender;
+
+    private final HistoryService historyService;
     private final KokonutUserService kokonutUserService;
     private final DecrypCountHistoryService decrypCountHistoryService;
     private final CompanyDataKeyService companyDataKeyService;
+
     private final AdminRepository adminRepository;
     private final ProvisionRepository provisionRepository;
     private final ProvisionDownloadHistoryRepository provisionDownloadHistoryRepository;
@@ -77,10 +81,11 @@ public class ProvisionService {
     private final ProvisionEntryRepository provisionEntryRepository;
     private final ProvisionListRepository provisionListRepository;
     private final CompanyTableColumnInfoRepository companyTableColumnInfoRepository;
+
     private final DynamicUserRepositoryCustom dynamicUserRepositoryCustom;
 
     @Autowired
-    public ProvisionService(KeyGenerateService keyGenerateService, HistoryService historyService,
+    public ProvisionService(KeyGenerateService keyGenerateService, GoogleOTP googleOTP, HistoryService historyService,
                             ExcelService excelService, MailSender mailSender, KokonutUserService kokonutUserService,
                             CompanyDataKeyService companyDataKeyService, AdminRepository adminRepository, ProvisionRepository provisionRepository,
                             ProvisionDownloadHistoryRepository provisionDownloadHistoryRepository, ProvisionRosterRepository provisionRosterRepository,
@@ -88,6 +93,7 @@ public class ProvisionService {
                             DecrypCountHistoryService decrypCountHistoryService, CompanyTableColumnInfoRepository companyTableColumnInfoRepository,
                             DynamicUserRepositoryCustom dynamicUserRepositoryCustom){
         this.keyGenerateService = keyGenerateService;
+        this.googleOTP = googleOTP;
         this.historyService = historyService;
         this.excelService = excelService;
         this.mailSender = mailSender;
@@ -189,59 +195,53 @@ public class ProvisionService {
 
             List<ProvisionEntry> provisionEntries = new ArrayList<>();
 
+            ProvisionEntry provisionEntry = new ProvisionEntry();
             // 제공 할 테이블+컬럼 저장 -> 모든 항목일 경우 저장하지 않음
             if(proTargetType == 1) {
-                ProvisionEntry provisionEntry;
                 ProvisionEntrySaveDto provisionEntrySaveDtos = provisionSaveDto.getProvisionEntrySaveDtos();
                 log.info("provisionEntrySaveDtos : "+provisionEntrySaveDtos);
-//                for(ProvisionEntrySaveDto provisionEntrySaveDto : provisionEntrySaveDtos) {
-                    if(provisionEntrySaveDtos.getPipeTableTargets().size() != 0) {
-                        provisionEntry = new ProvisionEntry();
-                        provisionEntry.setProCode(saveprovision.getProCode());
-                        provisionEntry.setInsert_email(email);
-                        provisionEntry.setInsert_date(LocalDateTime.now());
+                if(provisionEntrySaveDtos.getPipeTableTargets().size() != 0) {
+                    provisionEntry = new ProvisionEntry();
+                    provisionEntry.setProCode(saveprovision.getProCode());
+                    provisionEntry.setInsert_email(email);
+                    provisionEntry.setInsert_date(LocalDateTime.now());
 
-                        provisionEntry.setPipeTableName(cpCode+"_1");
+                    provisionEntry.setPipeTableName(cpCode+"_1");
 
-                        String pipeTableTargets = String.join(",", provisionEntrySaveDtos.getPipeTableTargets());
-                        log.info("pipeTableTargets : "+pipeTableTargets);
-                        provisionEntry.setPipeTableTargets(pipeTableTargets);
-
-                        provisionEntries.add(provisionEntry);
-                    }
-//                }
+                    String pipeTableTargets = String.join(",", provisionEntrySaveDtos.getPipeTableTargets());
+                    log.info("pipeTableTargets : "+pipeTableTargets);
+                    provisionEntry.setPipeTableTargets(pipeTableTargets);
+                }
             }
 
             // 제공할 개인정보의 idx
             ProvisionList provisionList = new ProvisionList();
+            if(provisionSaveDto.getPiplTargetIdxs().size() != 0) {
+                String piplTargetIdxs = provisionSaveDto.getPiplTargetIdxs().stream()
+                        .map(String::valueOf)
+                        .collect(Collectors.joining(","));
+                log.info("piplTargetIdxs : "+piplTargetIdxs);
+
+                provisionList.setProCode(saveprovision.getProCode());
+                provisionList.setPiplTargetIdxs(piplTargetIdxs);
+                provisionList.setInsert_email(email);
+                provisionList.setInsert_date(LocalDateTime.now());
+            }else {
+                log.error("제공할 개인정보가 존재하지 않습니다. 제공할 개인정보를 선택해주세요.");
+
+                provisionRepository.delete(saveprovision);
+
+                // 실패이력 업데이트
+                historyService.updateHistory(activityHistoryId,
+                        cpCode+" - "+activityCode.getDesc()+" 실패 이력", "제공할 개인정보를 선택해주세요.", 1);
+
+                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO093.getCode(),ResponseErrorCode.KO093.getDesc()));
+            }
+
             if(proTargetType == 1) {
-                if(provisionSaveDto.getPiplTargetIdxs().size() != 0) {
-                    String piplTargetIdxs = provisionSaveDto.getPiplTargetIdxs().stream()
-                            .map(String::valueOf)
-                            .collect(Collectors.joining(","));
-                    log.info("piplTargetIdxs : "+piplTargetIdxs);
-
-                    provisionList.setProCode(saveprovision.getProCode());
-                    provisionList.setPiplTargetIdxs(piplTargetIdxs);
-                    provisionList.setInsert_email(email);
-                    provisionList.setInsert_date(LocalDateTime.now());
-                }else {
-                    log.error("제공할 개인정보가 존재하지 않습니다. 제공할 개인정보를 선택해주세요.");
-
-                    provisionRepository.delete(saveprovision);
-
-                    // 실패이력 업데이트
-                    historyService.updateHistory(activityHistoryId,
-                            cpCode+" - "+activityCode.getDesc()+" 실패 이력", "제공할 개인정보를 선택해주세요.", 1);
-
-                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO093.getCode(),ResponseErrorCode.KO093.getDesc()));
-                }
+                provisionEntryRepository.save(provisionEntry);
             }
-
-            if(proTargetType == 1 && provisionEntries.size() != 0) {
-                provisionEntryRepository.saveAll(provisionEntries);
-                provisionListRepository.save(provisionList);
-            }
+            provisionListRepository.save(provisionList);
             provisionRosterRepository.saveAll(provisionRosters);
 
             // 성공이력 업데이트
@@ -410,13 +410,21 @@ public class ProvisionService {
 
     // 개인정보제공 다운로드 API
     @Transactional
-    public ResponseEntity<Map<String, Object>> provisionDownloadExcel(String proCode, JwtFilterDto jwtFilterDto) throws IOException {
+    public ResponseEntity<Map<String, Object>> provisionDownloadExcel(String proCode, String otpValue, String downloadReason, JwtFilterDto jwtFilterDto) throws IOException {
         log.info("provisionDownloadExcel 호출");
 
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data;
 
 //        log.info("proCode : " + proCode);
+//        log.info("otpValue : " + otpValue);
+//        log.info("downloadReason : " + downloadReason);
+
+        if(otpValue == null || otpValue.equals("")) {
+            log.error("구글 OTP 값이 존재하지 않습니다.");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO010.getCode(),ResponseErrorCode.KO010.getDesc()));
+        }
+
 
         String email = jwtFilterDto.getEmail();
 //        log.info("email : " + email);
@@ -425,6 +433,17 @@ public class ProvisionService {
 
         long adminId = adminCompanyInfoDto.getAdminId();
         String cpCode = adminCompanyInfoDto.getCompanyCode();
+        String knOtpKey = adminCompanyInfoDto.getKnOtpKey();
+
+        boolean auth = googleOTP.checkCode(otpValue, knOtpKey);
+        log.info("auth : " + auth);
+
+        if (!auth) {
+            log.error("입력된 구글 OTP 값이 일치하지 않습니다. 다시 확인해주세요.");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO012.getCode(), ResponseErrorCode.KO012.getDesc()));
+        } else {
+            log.info("OTP인증완료 -> 개인정보 제공엑셀 다운로드 시작");
+        }
 
         int dchCount = 0; // 복호화 카운팅
 
@@ -471,7 +490,7 @@ public class ProvisionService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
+                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason, ip, CommonUtil.publicIp(), 0, email);
 
             // 제공할 개인정보가 존재하는지 체크
             ProvisionTargetIdxDto provisionTargetIdxDto = provisionListRepository.findByProvisionIdxList(proCode);
@@ -508,7 +527,7 @@ public class ProvisionService {
             else {
                 List<CompanyTableColumnInfoCheckList> companyTableColumnInfoCheckLists = companyTableColumnInfoRepository.findByCheckList(ctName);
                 for(CompanyTableColumnInfoCheckList companyTableColumnInfoCheckList : companyTableColumnInfoCheckLists) {
-                    targetList.add(companyTableColumnInfoCheckList.getCtciCode());
+                    targetList.add(companyTableColumnInfoCheckList.getCtciName());
                     securityList.add(companyTableColumnInfoCheckList.getCtciSecuriy());
                     String uniqueName = Utils.generateUniqueName(companyTableColumnInfoCheckList.getCtciDesignation(), headerName);
                     headerName.add(uniqueName);
@@ -535,11 +554,7 @@ public class ProvisionService {
 
             for(int i=0; i<targetList.size(); i++) {
                 if(!targetList.get(i).equals("pass") && !securityList.get(i).equals("pass") && !headerName.get(i).equals("pass")) {
-                    if(i == targetList.size()-1) {
-                        selectQuery.append("COALESCE(").append(targetList.get(i)).append(", '없음') as ").append(headerName.get(i)).append(" ");
-                    } else {
-                        selectQuery.append("COALESCE(").append(targetList.get(i)).append(", '없음') as ").append(headerName.get(i)).append(",");
-                    }
+                    selectQuery.append(", COALESCE(").append(targetList.get(i)).append(", '없음') as ").append(headerName.get(i)).append(" ");
                 }
             }
 
@@ -650,11 +665,11 @@ public class ProvisionService {
                 }
 
                 historyService.updateHistory(activityHistoryId,
-                        cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+                        cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason, 1);
 
             }else{
                 historyService.updateHistory(activityHistoryId,
-                        cpCode+" - "+activityCode.getDesc()+" 시도 이력", "개인정보제공시 파일암호전송 실패", 0);
+                        cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason+"- 개인정보제공시 파일암호전송 실패", 0);
 
                 // mailSender 실패
                 log.error("### 해당 메일 전송에 실패했습니다. 관리자에게 문의하세요. reciverEmail : "+ email);

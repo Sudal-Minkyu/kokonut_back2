@@ -61,7 +61,8 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
                 .select(Projections.constructor(AdminCompanyInfoDto.class,
                         admin.adminId,
                         company.companyId,
-                        company.cpCode
+                        company.cpCode,
+                        admin.knOtpKey
                 ));
 
         return query.fetchOne();

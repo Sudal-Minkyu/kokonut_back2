@@ -21,4 +21,6 @@ public class AdminCompanyInfoDto {
 
     private String companyCode; // cpCode
 
+    private String knOtpKey; // 구글 OTP에 사용될 KEY
+
 }

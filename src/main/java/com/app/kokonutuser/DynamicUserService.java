@@ -7,6 +7,7 @@ import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import com.app.kokonut.awskmshistory.dto.AwsKmsResultDto;
 import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.ResponseErrorCode;
+import com.app.kokonut.common.component.ReqUtils;
 import com.app.kokonut.common.realcomponent.AESGCMcrypto;
 import com.app.kokonut.common.realcomponent.CommonUtil;
 import com.app.kokonut.common.realcomponent.Utils;
@@ -51,10 +52,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import com.app.kokonut.configs.MailSender;
 
 /**
  * @author Woody
@@ -74,6 +78,7 @@ public class DynamicUserService {
 	private final AdminRepository adminRepository;
 	private final CompanyRepository companyRepository;
 
+	private final MailSender mailSender;
 	private final GoogleOTP googleOTP;
 	private final ExcelService excelService;
 	private final KokonutUserService kokonutUserService;
@@ -96,7 +101,7 @@ public class DynamicUserService {
 
 	@Autowired
 	public DynamicUserService(PasswordEncoder passwordEncoder, AdminRepository adminRepository,
-							  CompanyRepository companyRepository, GoogleOTP googleOTP, ExcelService excelService,
+							  CompanyRepository companyRepository, MailSender mailSender, GoogleOTP googleOTP, ExcelService excelService,
 							  KokonutUserService kokonutUserService, CompanyDataKeyService companyDataKeyService, KokonutDormantService kokonutDormantService,
 							  CompanyService companyService, HistoryService historyService, PrivacyHistoryService privacyHistoryService,
 							  CompanySettingRepository companySettingRepository, KokonutRemoveService kokonutRemoveService, CompanyTableRepository companyTableRepository,
@@ -106,6 +111,7 @@ public class DynamicUserService {
 		this.passwordEncoder = passwordEncoder;
 		this.adminRepository = adminRepository;
 		this.companyRepository = companyRepository;
+		this.mailSender = mailSender;
 		this.googleOTP = googleOTP;
 		this.excelService = excelService;
 		this.kokonutUserService = kokonutUserService;
@@ -2276,9 +2282,7 @@ public class DynamicUserService {
 
 						selectQuery.append("COALESCE(");
 						String as = ", '없음') as ";
-
 						log.info("as : " + as);
-
 
 						selectQuery.append(asName).append(".").append(companyTableColumnInfoCheck.getCtciName()).append(as).append("'").append(uniqueDesignation).append("'").append(" ");
 						if (i != searchTexts.size() - 1) {
@@ -2431,7 +2435,7 @@ public class DynamicUserService {
 			nameCountMap = new HashMap<>();
 
 			List<CompanyTableColumnInfoCheckList> companyTableColumnInfoCheckLists = companyTableColumnInfoRepository.findByCheckList(ctName);
-			log.info("companyTableColumnInfoCheckLists : "+companyTableColumnInfoCheckLists);
+//			log.info("companyTableColumnInfoCheckLists : "+companyTableColumnInfoCheckLists);
 
 			// 쿼리 기본셋팅
 			resultQuery.append("SELECT ");
@@ -2447,24 +2451,17 @@ public class DynamicUserService {
 
 			for(CompanyTableColumnInfoCheckList companyTableColumnInfoCheckList : companyTableColumnInfoCheckLists) {
 				String designation = companyTableColumnInfoCheckList.getCtciDesignation();
-				Integer count = nameCountMap.get(designation);
 
-				if (count == null) {
-					count = 0;
-				}
-
-				nameCountMap.put(designation, count + 1);
-				String uniqueDesignation = designation + count;
+//				String uniqueDesignation = Utils.generateUniqueName(designation, securityName);
+				String uniqueDesignation = designation+"("+companyTableColumnInfoCheckList.getCtciCode()+")";
 
 				if(companyTableColumnInfoCheckList.getCtciSecuriy().equals("1")) {
 					securityHeaderNames.add(uniqueDesignation);
 					securityName.add(designation);
 				}
 
-				String as = ", '없음') as ";
-				selectQuery.append(", COALESCE(");
-
-				selectQuery.append(companyTableColumnInfoCheckList.getCtciName()).append(as).append("'").append(uniqueDesignation).append("'").append(" ");
+				selectQuery.append(", COALESCE(").append(companyTableColumnInfoCheckList.getCtciName())
+						.append(", '없음') as ").append("'").append(uniqueDesignation).append("'").append(" ");
 			}
 
 			whereQuery.append("WHERE kokonut_IDX = '").append(idx).append("'");
@@ -2520,25 +2517,93 @@ public class DynamicUserService {
 		return ResponseEntity.ok(res.success(data));
 	}
 
+	// 개인정보 열람데이터 엑셀다운로드
+	public ResponseEntity<Map<String, Object>> privacyUserDownloadExcel(List<Map<String, Object>> paramMap, String otpValue, String downloadReason, JwtFilterDto jwtFilterDto) throws IOException {
+		log.info("privacyUserDownloadExcel 호출");
 
+		AjaxResponse res = new AjaxResponse();
+		HashMap<String, Object> data;
 
+		if(otpValue == null || otpValue.equals("")) {
+			log.error("구글 OTP 값이 존재하지 않습니다.");
+			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO010.getCode(),ResponseErrorCode.KO010.getDesc()));
+		}
 
+		String email = jwtFilterDto.getEmail();
+//        log.info("email : " + email);
 
+		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
 
+		long adminId = adminCompanyInfoDto.getAdminId();
+		String cpCode = adminCompanyInfoDto.getCompanyCode();
+		String knOtpKey = adminCompanyInfoDto.getKnOtpKey();
 
+		boolean auth = googleOTP.checkCode(otpValue, knOtpKey);
+		log.info("auth : " + auth);
 
+		if (!auth) {
+			log.error("입력된 구글 OTP 값이 일치하지 않습니다. 다시 확인해주세요.");
+			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO012.getCode(), ResponseErrorCode.KO012.getDesc()));
+		} else {
+			log.info("OTP인증완료 -> 개인정보 제공엑셀 다운로드 시작");
+		}
 
+		if(paramMap.isEmpty()) {
+			log.error("입력된 구글 OTP 값이 일치하지 않습니다. 다시 확인해주세요.");
+			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO116.getCode(), ResponseErrorCode.KO116.getDesc()));
+		}
 
+		ActivityCode activityCode = ActivityCode.AC_06;
+		String ip = CommonUtil.clientIp();
+		Long activityHistoryId;
 
+		// 활동이력 저장 -> 비정상 모드
+		activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
+				cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason, ip, CommonUtil.publicIp(), 0, email);
 
+		String fileName = LocalDate.now()+"_개인정보열람파일";
+		String sheetName = paramMap.get(0).get("아이디")+"의 개인정보";
 
+		// 파일암호 전송
+		// 파일암호(숫자6자리) 생성
+		SecureRandom secureRandom = new SecureRandom();
+		int filePassword = secureRandom.nextInt(900000) + 100000;
+		log.info("생성된 파일암호 : "+filePassword);
 
+		// 인증번호 메일전송
+		String title = ReqUtils.filter("개인정보제공 파일의 암호가 도착했습니다.");
+		String contents = ReqUtils.unFilter("파일암호 : "+filePassword);
 
+		// 템플릿 호출을 위한 데이터 세팅
+		HashMap<String, String> callTemplate = new HashMap<>();
+		callTemplate.put("template", "KokonutMailTemplate");
+		callTemplate.put("title", "개인정보제공 파일암호 알림");
+		callTemplate.put("content", contents);
 
+		// 템플릿 TODO 템플릿 디자인 추가되면 수정
+		contents = mailSender.getHTML5(callTemplate);
+		String reciverName = "kokonut";
 
+		String mailSenderResult = mailSender.sendKokonutMail(email, reciverName, title, contents);
+		if(mailSenderResult != null) {
+			// mailSender 성공
+			log.info("### 메일전송 성공했습니다. reciver Email : "+ email);
 
+			log.info("파일명 : "+fileName);
+			log.info("시트명 : "+sheetName);
+			data = excelService.createExcelFile(fileName, sheetName, paramMap, String.valueOf(filePassword));
 
+			historyService.updateHistory(activityHistoryId,
+					cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason, 1);
+		}else{
+			historyService.updateHistory(activityHistoryId,
+					cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason+"- 개인정보열람 파일암호전송 실패", 0);
 
+			// mailSender 실패
+			log.error("### 해당 메일 전송에 실패했습니다. 관리자에게 문의하세요. reciverEmail : "+ email);
+			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO041.getCode(), ResponseErrorCode.KO041.getDesc()));
+		}
 
-
+		return ResponseEntity.ok(res.success(data));
+	}
 }

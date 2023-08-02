@@ -76,9 +76,9 @@ public class ThirdPartyService {
 		this.kokonutUserService = kokonutUserService;
 	}
 
-	// 비즈엠 서드파티 셋팅 -> settingType - "1" : receiver_num, "2" : app_user_id
+	// 비즈엠 서드파티 셋팅 -> tsBizmReceiverNumCode(휴대전화번호 셋팅 고유코드), tsBizmAppUserIdCode(앱유저아이디 셋팅 고유코드)
 	@Transactional
-	public ResponseEntity<Map<String, Object>> bizmSetting(String settingType, String choseCode, JwtFilterDto jwtFilterDto) throws IOException {
+	public ResponseEntity<Map<String, Object>> bizmSetting(String tsBizmReceiverNumCode, String tsBizmAppUserIdCode, JwtFilterDto jwtFilterDto) throws IOException {
 		log.info("bizmSetting 호출");
 
 		AjaxResponse res = new AjaxResponse();
@@ -90,18 +90,8 @@ public class ThirdPartyService {
 		Long adminId = adminCompanyInfoDto.getAdminId();
 		String cpCode = adminCompanyInfoDto.getCompanyCode();
 
-//		log.info("settingType : "+settingType);
-//		log.info("choseCode : "+choseCode);
-
-		if(settingType.equals("")) {
-			log.error("알림톡으로 전송항목 파라메터 타입을 보내주시길 바랍니다.('1': 받을번호, '2':카톡아이디)");
-			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO110.getCode(),ResponseErrorCode.KO110.getDesc()));
-		}
-
-		if(choseCode.equals("")) {
-			log.error("알림톡으로 전송하실 항목의 고유코드를 보내주시길 바랍니다.");
-			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO111.getCode(),ResponseErrorCode.KO111.getDesc()));
-		}
+//		log.info("tsBizmReceiverNumCode : "+tsBizmReceiverNumCode);
+//		log.info("tsBizmAppUserIdCode : "+tsBizmAppUserIdCode);
 
 		// 구독해지 코드
 		ActivityCode activityCode;
@@ -122,11 +112,8 @@ public class ThirdPartyService {
 				activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
 						cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
 
-				if(settingType.equals("1")) {
-					optionalThirdPartyBizm.get().setTsBizmReceiverNumCode(choseCode);
-				} else {
-					optionalThirdPartyBizm.get().setTsBizmAppUserIdCode(choseCode);
-				}
+				optionalThirdPartyBizm.get().setTsBizmReceiverNumCode(tsBizmReceiverNumCode);
+				optionalThirdPartyBizm.get().setTsBizmAppUserIdCode(tsBizmAppUserIdCode);
 
 				optionalThirdPartyBizm.get().setModify_email(email);
 				optionalThirdPartyBizm.get().setModify_date(LocalDateTime.now());
@@ -160,11 +147,10 @@ public class ThirdPartyService {
 
 			ThirdPartyBizm thirdPartyBizm = new ThirdPartyBizm();
 			thirdPartyBizm.setTsId(saveThirdParty.getTsId());
-			if(settingType.equals("1")) {
-				thirdPartyBizm.setTsBizmReceiverNumCode(choseCode);
-			} else {
-				thirdPartyBizm.setTsBizmAppUserIdCode(choseCode);
-			}
+
+			thirdPartyBizm.setTsBizmReceiverNumCode(tsBizmReceiverNumCode);
+			thirdPartyBizm.setTsBizmAppUserIdCode(tsBizmReceiverNumCode);
+
 			thirdPartyBizm.setInsert_email(email);
 			thirdPartyBizm.setInsert_date(LocalDateTime.now());
 
@@ -368,11 +354,7 @@ public class ThirdPartyService {
 					searchQuery.append("SELECT ");
 					for(int i=0; i<fieldNameChk.size(); i++) {
 						if(!fieldNameChk.get(i).equals("pass") && !designationChk.get(i).equals("pass") && !securityChk.get(i).equals("pass")) {
-							if(i == fieldNameChk.size()-1) {
-								searchQuery.append("COALESCE(").append(fieldNameChk.get(i)).append(", '없음') as ").append(codeListKeys.get(i)).append(" ");
-							} else {
-								searchQuery.append("COALESCE(").append(fieldNameChk.get(i)).append(", '없음') as ").append(codeListKeys.get(i)).append(",");
-							}
+							searchQuery.append(", COALESCE(").append(fieldNameChk.get(i)).append(", '없음') as ").append(codeListKeys.get(i)).append(" ");
 						}
 					}
 

@@ -51,12 +51,12 @@ public class TestRestController {
 
     @ApiOperation(value = "테스트 탬플릿 검수승인")
     @PostMapping(value = "/alimtalkTemplateInspection")
-    public ResponseEntity<Map<String,Object>> alimtalkTemplateInspection(@RequestParam(value="templateCode", defaultValue = "") String templateCode) {
-
+    public ResponseEntity<Map<String,Object>> alimtalkTemplateInspection(@RequestParam(value="templateCode", defaultValue = "") String templateCode,
+                                                                         @RequestParam(value="profileKey", defaultValue = "") String profileKey) {
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
 
-        String result = alimtalkSendService.alimtalkTemplateInspection(templateCode);
+        String result = alimtalkSendService.alimtalkTemplateInspection(profileKey, templateCode);
         log.info("result : "+result);
 
         return ResponseEntity.ok(res.success(data));

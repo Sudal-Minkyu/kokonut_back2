@@ -12,6 +12,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -35,9 +36,7 @@ public class HistoryRestController {
     @GetMapping("/activityList")
     @ApiOperation(value="관리자 활동이력 조회", notes="" +
             "1. 관리자 활동이력 목록을 조회한다.")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
-    })
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> activityList(@RequestParam(value="searchText", defaultValue = "") String searchText,
                                                            @RequestParam(value="stime", defaultValue = "") String stime,
                                                            @RequestParam(value="actvityType", defaultValue = "") String actvityType,
@@ -45,6 +44,19 @@ public class HistoryRestController {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return historyService.activityList(jwtFilterDto.getEmail(), searchText, stime, actvityType, pageable);
     }
+
+    @PostMapping("/activityDownloadExcel")
+    @ApiOperation(value="관리자 활동이력 엑셀다운로드", notes="")
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    public ResponseEntity<Map<String,Object>> activityDownloadExcel(@RequestParam(value="searchText", defaultValue = "") String searchText,
+                                                                    @RequestParam(value="stime", defaultValue = "") String stime,
+                                                                    @RequestParam(value="actvityType", defaultValue = "") String actvityType,
+                                                                    @RequestParam(value="otpValue", defaultValue = "") String otpValue,
+                                                                    @RequestParam(value="downloadReason", defaultValue = "") String downloadReason) throws IOException {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return historyService.activityDownloadExcel(jwtFilterDto.getEmail(), searchText, stime, actvityType, otpValue, downloadReason);
+    }
+
 
     @PostMapping("/activityUpdate")
     @ApiOperation(value="활동 업데이트", notes="")

@@ -109,7 +109,13 @@ public class IndexRestController {
         return indexService.emailSendCount(dateType, jwtFilterDto);
     }
 
-    // 서드파티 연동 현황 - 기업
+    @ApiOperation(value="서드파티 연동현황을 가져온다.", notes="")
+    @GetMapping(value = "/thirdPartyInfo")
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    public ResponseEntity<Map<String,Object>> thirdPartyInfo() {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return indexService.thirdPartyInfo(jwtFilterDto);
+    }
 
     // 구독관리 관련 - 기업 (디폴트값 이번달)
 
