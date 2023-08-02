@@ -254,7 +254,8 @@ public class Utils {
 		int price = 0;
 
 		if(countMonthAverage < 10000) {
-			price = 99000;
+//			price = 99000;
+			price = 500;
 		} else if(countMonthAverage < 100000) {
 			price = 390000;
 		} else if(countMonthAverage < 300000) {

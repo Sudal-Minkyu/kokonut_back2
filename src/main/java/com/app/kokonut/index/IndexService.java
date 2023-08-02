@@ -337,12 +337,12 @@ public class IndexService {
 		return ResponseEntity.ok(res.success(data));
 	}
 
-	// 오늘 등록된 개인정보제공 건수 반환함수(3번에서 사용)
+	// 3-1. 오늘 등록된 개인정보제공 건수 반환함수(3번에서 사용)
 	public Long todayCount(String cpCode, Integer type, LocalDate now) {
 		return provisionRepository.findByProvisionIndexTodayCount(cpCode, type, now);
 	}
 
-	// 제공 가능한 개인정보제공 건수 반환함수(3번에서 사용)
+	// 3-2. 제공 가능한 개인정보제공 건수 반환함수(3번에서 사용)
 	public Long offerCount(String cpCode, Integer type, String dateType, LocalDate now, LocalDate filterDate) {
 		return provisionRepository.findByProvisionIndexOfferCount(cpCode, type, dateType, now, filterDate);
 	}
@@ -461,7 +461,7 @@ public class IndexService {
 		return ResponseEntity.ok(res.success(data));
 	}
 
-	// - 금일 API 호출수를 호출한다. -> Kokonut API 사용
+	// 5-1. 금일 API 호출수를 호출한다. -> Kokonut API 사용
 	public ResponseEntity<Map<String, Object>> apiCount(JwtFilterDto jwtFilterDto) {
 		log.info("apiCount 호출");
 
@@ -485,7 +485,7 @@ public class IndexService {
 		return ResponseEntity.ok(res.success(data));
 	}
 
-	// - 금일 암호화, 복호화 수를 호출한다. -> Kokonut API 사용
+	// 5-2. 금일 암호화, 복호화 수를 호출한다. -> Kokonut API 사용
 	public ResponseEntity<Map<String, Object>> endeCount(JwtFilterDto jwtFilterDto) {
 		log.info("endeCount 호출");
 
@@ -632,17 +632,17 @@ public class IndexService {
 		return ResponseEntity.ok(res.success(data));
 	}
 
-	// 발송건수 호출 함수
+	// 8-1. 발송건수 호출 함수
 	public Long sendCount(String cpCode, String emType, String dateType, LocalDate now, LocalDate filterDate) {
 		return emailRepository.sendCount(cpCode, emType, dateType, now, filterDate);
 	}
 
-	// 수신자수 호출 함수
+	// 8-2. 수신자수 호출 함수
 	public Integer emailSendReceptionCount(String cpCode, String emType, String dateType, LocalDate now, LocalDate filterDate) {
 		return emailRepository.emailSendReceptionCount(cpCode, emType, dateType, now, filterDate);
 	}
 
-	// - 이메일 현황정보를 호출한다. -> Kokonut Kokonut API 사용
+	// KokonutAPI_01. 이메일 현황정보를 호출한다. -> Kokonut Kokonut API 사용
 	public ResponseEntity<Map<String, Object>> emailSendInfo(String dateType, JwtFilterDto jwtFilterDto) {
 		log.info("emailSendInfo 호출");
 
@@ -729,11 +729,5 @@ public class IndexService {
 
 		return ResponseEntity.ok(res.success(data));
 	}
-
-
-
-
-
-
 
 }
