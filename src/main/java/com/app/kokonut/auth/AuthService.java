@@ -327,21 +327,20 @@ public class AuthService {
         log.info("임시비밀번호 : "+tempPassword);
 
         admin.setKnPassword(passwordEncoder.encode(tempPassword));
-        adminRepository.save(admin);
-        
+
         // 인증번호 메일전송
         // 이메일 전송을 위한 전처리 - filter, unfilter
         String title = ReqUtils.filter("코코넛 이메일 임시비밀번호가 도착했습니다.");
         String contents = ReqUtils.unFilter("임시비밀번호 : "+tempPassword);
 
-        // 템플릿 호출을 위한 데이터 세팅
-        HashMap<String, String> callTemplate = new HashMap<>();
-        callTemplate.put("template", "KokonutMailTemplate");
-        callTemplate.put("title", "인증번호 알림");
-        callTemplate.put("content", contents);
-
-        // 템플릿 TODO 템플릿 디자인 추가되면 수정
-        contents = mailSender.getHTML5(callTemplate);
+//        // 템플릿 호출을 위한 데이터 세팅
+//        HashMap<String, String> callTemplate = new HashMap<>();
+//        callTemplate.put("template", "KokonutMailTemplate");
+//        callTemplate.put("title", "인증번호 알림");
+//        callTemplate.put("content", contents);
+//
+//        // 템플릿 TODO 템플릿 디자인 추가되면 수정
+//        contents = mailSender.getHTML5(callTemplate);
         String reciverName = "kokonut";
 
         String mailSenderResult = mailSender.sendKokonutMail(knEmail, reciverName, title, contents);
@@ -350,6 +349,7 @@ public class AuthService {
         if(mailSenderResult != null){
             // mailSender 성공
             log.info("### 메일전송 성공했습니다. reciver Email : "+ knEmail);
+            adminRepository.save(admin);
 
             data.put("tempPassword", tempPassword);
         }else{
@@ -455,7 +455,7 @@ public class AuthService {
             log.error("암호화 키 생성 실패");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO036.getCode(), ResponseErrorCode.KO036.getDesc()));
         }
-    //    }
+        //    }
 
         // 소속 저장
         String nowDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMM"));
@@ -556,7 +556,7 @@ public class AuthService {
 
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
-        
+
         // 이메일이 test@kokonut.me 체크하는 로직추가
         String knEmail = login.getKnEmail();
 
@@ -786,7 +786,7 @@ public class AuthService {
 
         // Redis 에서 해당 User knEmail 로 저장된 Refresh Token 이 있는지 여부를 확인 후 있을 경우 삭제합니다.
 //        if (redisDao.getValues("RT:" + authentication.getName()) != null) {
-            // Refresh Token 삭제
+        // Refresh Token 삭제
 //            redisDao.deleteValues("RT:" + authentication.getName());
 //        }
 
@@ -824,7 +824,7 @@ public class AuthService {
 
             // Redis 에서 해당 User knEmail 로 저장된 Refresh Token 이 있는지 여부를 확인 후 있을 경우 삭제합니다.
 //            if (redisDao.getValues("RT: "+authentication.getName()) != null) {
-                // Refresh Token 삭제
+            // Refresh Token 삭제
 //                redisDao.deleteValues("RT: "+authentication.getName());
 //            }
 
@@ -929,7 +929,7 @@ public class AuthService {
 
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
-        
+
         Optional<Admin> optionalAdmin = adminRepository.findByKnEmail(googleOtpSave.getKnEmail());
 
         if (optionalAdmin.isEmpty()) {
