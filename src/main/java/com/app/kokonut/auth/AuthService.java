@@ -327,7 +327,8 @@ public class AuthService {
         log.info("임시비밀번호 : "+tempPassword);
 
         admin.setKnPassword(passwordEncoder.encode(tempPassword));
-
+        adminRepository.save(admin);
+        
         // 인증번호 메일전송
         // 이메일 전송을 위한 전처리 - filter, unfilter
         String title = ReqUtils.filter("코코넛 이메일 임시비밀번호가 도착했습니다.");
@@ -349,14 +350,13 @@ public class AuthService {
         if(mailSenderResult != null){
             // mailSender 성공
             log.info("### 메일전송 성공했습니다. reciver Email : "+ knEmail);
-            adminRepository.save(admin);
+
+            data.put("tempPassword", tempPassword);
         }else{
             // mailSender 실패
             log.error("### 해당 메일 전송에 실패했습니다. 관리자에게 문의하세요. reciverEmail : "+ knEmail);
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO041.getCode(), ResponseErrorCode.KO041.getDesc()));
         }
-
-        data.put("tempPassword", tempPassword);
 
         return ResponseEntity.ok(res.success(data));
     }

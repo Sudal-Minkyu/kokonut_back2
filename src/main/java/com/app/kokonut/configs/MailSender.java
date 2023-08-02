@@ -213,6 +213,8 @@ public class MailSender {
 		for ( String key : keySet){
 			renaderdHtml = renaderdHtml.replace("{"+key+"}", callTemplate.get(key).toString());
 		}
+		log.info("이메일발송");
+
 		return renaderdHtml;
 	}
 
