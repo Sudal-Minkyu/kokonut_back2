@@ -359,19 +359,6 @@ public class AdminService {
         AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(jwtFilterDto.getEmail());
         Long companyId = adminCompanyInfoDto.getCompanyId();
 
-        String roleCode;
-        if(filterRole.equals("대표관리자")) {
-            roleCode = "ROLE_MASTER";
-        } else if(filterRole.equals("최고관리자")) {
-            roleCode = "ROLE_ADMIN";
-        } else if(filterRole.equals("일반관리자")) {
-            roleCode = "ROLE_USER";
-        } else if(filterRole.equals("임시관리자")) {
-            roleCode = "ROLE_GUEST";
-        } else {
-            roleCode = "";
-        }
-
         Integer knState;
         if(filterState.equals("정지")) {
             knState = 0;
@@ -390,7 +377,7 @@ public class AdminService {
         List<AdminListDto> adminListDtoList = new ArrayList<>();
         AdminListDto adminListDto;
 
-        Page<AdminListSubDto> adminListDtos = adminRepository.findByAdminList(searchText, roleCode, knState, companyId, email, pageable);
+        Page<AdminListSubDto> adminListDtos = adminRepository.findByAdminList(searchText, filterRole, knState, companyId, email, pageable);
         if(adminListDtos.getTotalPages() == 0) {
             log.info("조회된 데이터가 없습니다.");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO003.getCode(), ResponseErrorCode.KO003.getDesc()));
