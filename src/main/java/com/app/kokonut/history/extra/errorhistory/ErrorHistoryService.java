@@ -41,7 +41,7 @@ public class ErrorHistoryService {
 
         ErrorHistory errorHistory = new ErrorHistory();
         errorHistory.setEtTitle(errorHistorySaveDto.getEtTitle());
-        errorHistory.setEtMsg(errorHistorySaveDto.getEtTitle());
+        errorHistory.setEtMsg(errorHistorySaveDto.getEtMsg());
         errorHistory.setInsert_email(email);
         errorHistory.setInsert_date(LocalDateTime.now());
 
