@@ -664,7 +664,9 @@ public class AuthService {
                                 log.info("publicIp : "+publicIp);
                                 String clientIp = CommonUtil.clientIp();
                                 log.info("clientIp : "+clientIp);
-                                boolean accessIpCheckResult = companySettingAccessIPRepository.existsCompanySettingAccessIPByCsIdAndCsipIp(companySettingCheckDto.getCsId(), clientIp);
+                                String userIp = request.getRemoteAddr();
+                                log.info("userIp : "+userIp);
+                                boolean accessIpCheckResult = companySettingAccessIPRepository.existsCompanySettingAccessIPByCsIdAndCsipIp(companySettingCheckDto.getCsId(), userIp);
 //                                log.info("accessIpCheckResult : "+accessIpCheckResult);
                                 if(!accessIpCheckResult) {
                                     log.error("접속 허용되지 않은 IP 입니다. 관리자에게 등록을 요청해주세요.");
