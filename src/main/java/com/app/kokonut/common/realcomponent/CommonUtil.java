@@ -70,41 +70,42 @@ public class CommonUtil {
 	// public Ip 조회
 	public static String publicIp() throws IOException {
 
-		String url = "https://ipapi.co/json";
-
-		URL obj = new URL(url);
-		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-
-		con.setRequestMethod("GET");
-
-		int responseCode = con.getResponseCode();
-
-		BufferedReader in = new BufferedReader(
-				new InputStreamReader(con.getInputStream()));
-		String inputLine;
-		StringBuilder response = new StringBuilder();
-
-		while ((inputLine = in.readLine()) != null) {
-			response.append(inputLine);
-		}
-		in.close();
-
-		if(responseCode == 200) {
-			ObjectMapper objectMapper = new ObjectMapper();
-			JsonNode jsonNode = objectMapper.readTree(response.toString());
-
-			return jsonNode.get("ip").asText();
-		} else {
-			log.error("공인IP 체크에러 responseCode : "+responseCode);
-			return "";
-		}
-
-//		URL url = new URL("http://checkip.amazonaws.com/");
-//		String ip;
-//		try(BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()))){
-//			ip = br.readLine();
+//		String url = "https://ipapi.co/json";
+//
+//		URL obj = new URL(url);
+//		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+//
+//		con.setRequestMethod("GET");
+//
+//		int responseCode = con.getResponseCode();
+//
+//		BufferedReader in = new BufferedReader(
+//				new InputStreamReader(con.getInputStream()));
+//		String inputLine;
+//		StringBuilder response = new StringBuilder();
+//
+//		while ((inputLine = in.readLine()) != null) {
+//			response.append(inputLine);
 //		}
-//		return ip;
+//		in.close();
+//
+//		if(responseCode == 200) {
+//			log.info("response : "+response);
+//			ObjectMapper objectMapper = new ObjectMapper();
+//			JsonNode jsonNode = objectMapper.readTree(response.toString());
+//
+//			return jsonNode.get("ip").asText();
+//		} else {
+//			log.error("공인IP 체크에러 responseCode : "+responseCode);
+//			return "";
+//		}
+
+		URL url = new URL("https://checkip.amazonaws.com");
+		String ip;
+		try(BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()))){
+			ip = br.readLine();
+		}
+		return ip;
 	}
 
 //
