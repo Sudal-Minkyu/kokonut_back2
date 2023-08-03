@@ -562,14 +562,20 @@ public class PaymentService {
 
 	// 요금정산 계산(최고관리자 권한)
 	@Transactional
-	public ResponseEntity<Map<String, Object>> billingPay(String payAmount, JwtFilterDto jwtFilterDto) throws Exception {
+	public ResponseEntity<Map<String, Object>> billingPay(Integer payCloudAmount, Integer payServiceAmount, Integer payEmailAmount, JwtFilterDto jwtFilterDto) throws Exception {
 		log.info("billingPay 호출");
 
 		AjaxResponse res = new AjaxResponse();
 		HashMap<String, Object> data = new HashMap<>();
 
-//		log.info("payAmount : "+payAmount);
-		if(Objects.equals(payAmount, "") || payAmount.equals("0")) {
+		int payAmount = payCloudAmount + payServiceAmount + payEmailAmount;
+
+		log.info("payAmount : "+payAmount);
+		log.info("payCloudAmount : "+payCloudAmount);
+		log.info("payServiceAmount : "+payServiceAmount);
+		log.info("payEmailAmount : "+payEmailAmount);
+
+		if(payAmount == 0) {
 			log.info("계산할 요금이 존재하지 않습니다.");
 		}
 
@@ -603,7 +609,10 @@ public class PaymentService {
 
 			Payment payment = new Payment();
 			payment.setCpCode(cpCode);
-			payment.setPayAmount(Integer.parseInt(payAmount));
+			payment.setPayAmount(payAmount);
+			payment.setPayCloudAmount(payCloudAmount);
+			payment.setPayServiceAmount(payServiceAmount);
+			payment.setPayEmailAmount(payEmailAmount);
 			payment.setPayPrivacyCount(paymentPrivacyCountMonthAverageDto.getMonthAverageCount());
 			payment.setPayBillingStartDate(paymentPrivacyCountMonthAverageDto.getLowDate());
 			payment.setPayBillingEndDate(paymentPrivacyCountMonthAverageDto.getBigDate());
@@ -615,9 +624,9 @@ public class PaymentService {
 			String billingKey = companyPaymentSearchDto.getCpiBillingKey();
 
 			// 요금정산 처리
-			String receiptId = bootPayService.kokonutPayment(billingKey, orderId, Integer.parseInt(payAmount),
+			String receiptId = bootPayService.kokonutPayment(billingKey, orderId, payAmount,
 					"요금정산 결제", companyPaymentSearchDto.getKnName(), companyPaymentSearchDto.getKnPhoneNumber());
-			payment.setPayReceiptid(receiptId);
+
 			if(receiptId.equals("")) {
 				log.error("요금정산을 실패 했습니다. 코코넛으로 문의해 주시길 바랍니다.");
 
