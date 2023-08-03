@@ -659,6 +659,7 @@ public class AuthService {
                                 }
                             }
 
+                            
                             if(companySettingCheckDto.getCsAccessSetting().equals("1")) {
                                 log.info("접속 허용IP 체크");
                                 log.info("publicIp : "+publicIp);
