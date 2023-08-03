@@ -143,7 +143,7 @@ public class CompanyItemService {
             activityCode = ActivityCode.AC_42;
 
             // 활동이력 저장 -> 비정상 모드
-            activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
+            activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
                     companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
 
             CompanyItem companyItem = new CompanyItem();
@@ -281,7 +281,7 @@ public class CompanyItemService {
             activityCode = ActivityCode.AC_16;
 
             // 활동이력 저장 -> 비정상 모드
-            activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
+            activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
                     cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
 
             Optional<Company> optionalCompany = companyRepository.findByCpCode(cpCode);

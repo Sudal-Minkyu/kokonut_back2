@@ -18,9 +18,9 @@ public enum AuthorityRole {
 
     ROLE_ADMIN("ROLE_ADMIN", "최고관리자"), // 최고관리자(아이콘 없는 사람) -> 일반관리자, 제3자 추가 할 수 있는 권한이 있는 사람
 
-    ROLE_USER("ROLE_USER", "일반관리자"), // 일반관리자 -> 임시관리자를 추가 할 수 있는 권한이 있는 사람
+    ROLE_USER("ROLE_USER", "관리자"), // 관리자 -> 임시관리자를 추가 할 수 있는 권한이 있는 사람
 
-    ROLE_GUEST("ROLE_GUEST","임시관리자"); // 임시관리자 -> 정보제공 다운로드 권한만 할 수 있는 사람
+    ROLE_GUEST("ROLE_GUEST","게스트"); // 게스트 -> 정보제공 다운로드 권한만 할 수 있는 사람
 
     private final String code;
     private final String desc;

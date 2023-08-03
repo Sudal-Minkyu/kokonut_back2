@@ -430,7 +430,7 @@ public class EmailService {
             // 활동이력 저장 -> 비정상 모드
             String ip = CommonUtil.clientIp();
 
-            Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
+            Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
                     cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
 
             log.info("sendEmailList : "+sendEmailList);

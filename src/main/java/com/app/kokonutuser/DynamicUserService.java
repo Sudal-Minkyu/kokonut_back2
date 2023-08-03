@@ -502,454 +502,454 @@ public class DynamicUserService {
 	}
 
 	// 유저생성(회원생성)
-	@Transactional
-	@SuppressWarnings("unchecked")
-	public ResponseEntity<Map<String, Object>> userSaveCall(HashMap<String, Object> paramMap, String email) throws IOException {
-		log.info("userSaveCall 호출");
-
-		AjaxResponse res = new AjaxResponse();
-		HashMap<String, Object> data = new HashMap<>();
-
-		log.info("paramMap : "+ paramMap);
-		log.info("email : "+email);
-
-		// 해당 이메일을 통해 회사 IDX 조회
-		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
-
-		Long adminId;
-		Long companyId;
-		String companyCode;
-
-		if(adminCompanyInfoDto == null) {
-			log.error("이메일 정보가 존재하지 않습니다.");
-			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(), "해당 이메일의 정보가 "+ResponseErrorCode.KO004.getDesc()));
-		} else {
-			adminId = adminCompanyInfoDto.getAdminId(); // modifierIdx
-			companyId = adminCompanyInfoDto.getCompanyId(); // companyId
-			companyCode = adminCompanyInfoDto.getCompanyCode(); // tableName
-		}
-
-		String controlType = paramMap.get("controlType").toString();
-		if(controlType.equals("1")) {
-			controlType = "사용";
-		} else if(controlType.equals("2")) {
-			controlType = "휴면";
-		} else {
-			log.error("회원상태 여부를 선택해주세요. controlType : "+controlType);
-			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO044.getCode(), ResponseErrorCode.KO044.getDesc()));
-		}
-
-		// 회원등록 코드
-		ActivityCode activityCode = ActivityCode.AC_13;
-		// 활동이력 저장 -> 비정상 모드
-		String ip = CommonUtil.clientIp();
-		Long activityHistoryId = historyService.insertHistory(1, adminId, activityCode,
-				companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
-		String id = null;
-		try {
-
-			// 회사의 암호화 키
-			SecretKey secretKey = companyService.selectCompanyEncryptKey(companyId);
-
-			if(secretKey == null) {
-				log.error("해당 기업의 암호화 키가 존재하지 않습니다.");
-				return ResponseEntity.ok(res.fail(ResponseErrorCode.KO043.getCode(), ResponseErrorCode.KO043.getDesc()));
-			}
-
-			log.info(controlType+" 저장입니다.");
-
-			List<HashMap<String,Object>> userData = (List<HashMap<String, Object>>) paramMap.get("userData");
-
-			boolean isFieldCheck = false; // 필드 체크
-
-			List<KokonutUserFieldDto> columns = kokonutUserService.getColumns(companyCode); // columns
-			List<KokonutUserFieldDto> encryptColumns = kokonutUserService.selectUserEncryptColumns(companyCode); // encryptColumns
-
-			StringBuilder nameString = new StringBuilder();
-			StringBuilder valueString = new StringBuilder();
-
-			for (int i=0; i<userData.size(); i++) {
-				String field = userData.get(i).get("name").toString(); // 필드 이름
-				String value = userData.get(i).get("value").toString(); // 필드 값
-
-				if("".equals(value)) {
-					continue; // 입력된 값이 없을 경우 패스
-				}
-
-				// 입력한 필드가 존재하는지 검증
-				for(KokonutUserFieldDto column : columns) {
-					if(field.equals(column.getField())) {
-						isFieldCheck = true;
-						columns.remove(column);
-						break;
-					}
-				}
-
-				// 필드가 존재하지 않을 경우 리턴처리
-				if(!isFieldCheck) {
-					log.error("회원정보에 필드가 존재하지 않습니다. 핃드명 : "+field);
-					return ResponseEntity.ok(res.fail(ResponseErrorCode.KO045.getCode(), field+ResponseErrorCode.KO045.getDesc()));
-				}
-
-				// 필드 이름이 ID일 경우
-				if(field.equals("ID")) {
-					// 아이디 중복검사
-					boolean isUserExistCheck = kokonutUserService.isUserExistId(companyCode, value);
-					boolean isDormantExistCheck = kokonutDormantService.isDormantExistId(companyCode, value);
-					if(isUserExistCheck || isDormantExistCheck) {
-						log.error("이미 존재한 ID 입니다. 아이디 : "+value);
-						return ResponseEntity.ok(res.fail(ResponseErrorCode.KO046.getCode(), ResponseErrorCode.KO046.getDesc()));
-					} else {
-						log.info("사용하실 수 있는 아이디 입니다. : "+value);
-						id = value;
-					}
-				}
-
-				try {
-					// 비밀번호 암호화
-					if(field.equals("PASSWORD")) {
-						// 암호화된 비밀번호로 변경
-						value = passwordEncoder.encode(value);
-					}
-					// 암호화 속성을 갖는 컬럼의 데이터 암호화
-					else {
-						for(KokonutUserFieldDto column : encryptColumns) {
-							byte[] ivBytes = AESGCMcrypto.generateIV();
-							if(column.getField().equals(field)) {
-								String ciphertext = AESGCMcrypto.encrypt(value.getBytes(StandardCharsets.UTF_8), secretKey, ivBytes);
-								// 암호화된 데이터로 변경
-								value = ciphertext+","+Base64.getEncoder().encodeToString(ivBytes);
-								break;
-							}
-						}
-					}
-
-					if(i == userData.size()-1) {
-						nameString.append("`").append(field).append("`)");
-						valueString.append("'").append(value).append("')");
-					} else {
-						nameString.append("`").append(field).append("`,");
-						valueString.append("'").append(value).append("',");
-					}
-
-				} catch (Exception e) {
-					log.error("암호화 정보를 복호화하는데 실패했습니다.");
-					return ResponseEntity.ok(res.fail(ResponseErrorCode.KO046.getCode(), ResponseErrorCode.KO046.getDesc()));
-				}
-
-			}
-
-			boolean userInsertResult = kokonutUserService.insertUserTable(companyCode,
-					nameString.insert(0, "(").toString(), valueString.insert(0, "(").toString());
-			log.info("userInsertResult : "+userInsertResult);
-
-			if(userInsertResult && controlType.equals("휴면")) {
-				log.info("휴면계정 가입일 경우 휴면테이블로 이관 시작");
-
-				// 첫번째 괄호 문자 제거
-				nameString.deleteCharAt(0);
-				valueString.deleteCharAt(0);
-
-				// 해당 개인정보가 잘 저장됬는지 조회
-				Long idx = kokonutUserService.selectUserIdx(companyCode, id);
-				// 휴면테이블로 insert
-				boolean dormantInsertResult = kokonutDormantService.insertDormantTable(companyCode,
-						nameString.insert(0, "(`IDX`,").toString(), valueString.insert(0, "("+idx+",").toString());
-
-				if(dormantInsertResult) {
-					log.info("휴면테이블로 이관 성공");
-					boolean kokonutUserDelete = kokonutUserService.deleteUserTable(companyCode, idx);
-					if(kokonutUserDelete) {
-						log.error("인서트한 유저테이블 삭제 성공");
-					} else {
-						log.error("인서트한 유저테이블 삭제 실패");
-					}
-				} else {
-					log.error("휴면테이블로 이관 실패");
-				}
-			}
-
-			historyService.updateHistory(activityHistoryId,companyCode+" - "+activityCode.getDesc()+" 완료 이력", "", 1);
-
-		} catch (Exception e) {
-			log.error("회원등록 에러확인 필요");
-			log.error("e : "+e.getMessage());
-			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO059.getCode(), "회원등록 "+ResponseErrorCode.KO059.getDesc()));
-		}
-
-		return ResponseEntity.ok(res.success(data));
-	}
+//	@Transactional
+//	@SuppressWarnings("unchecked")
+//	public ResponseEntity<Map<String, Object>> userSaveCall(HashMap<String, Object> paramMap, String email) throws IOException {
+//		log.info("userSaveCall 호출");
+//
+//		AjaxResponse res = new AjaxResponse();
+//		HashMap<String, Object> data = new HashMap<>();
+//
+//		log.info("paramMap : "+ paramMap);
+//		log.info("email : "+email);
+//
+//		// 해당 이메일을 통해 회사 IDX 조회
+//		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+//
+//		Long adminId;
+//		Long companyId;
+//		String companyCode;
+//
+//		if(adminCompanyInfoDto == null) {
+//			log.error("이메일 정보가 존재하지 않습니다.");
+//			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(), "해당 이메일의 정보가 "+ResponseErrorCode.KO004.getDesc()));
+//		} else {
+//			adminId = adminCompanyInfoDto.getAdminId(); // modifierIdx
+//			companyId = adminCompanyInfoDto.getCompanyId(); // companyId
+//			companyCode = adminCompanyInfoDto.getCompanyCode(); // tableName
+//		}
+//
+//		String controlType = paramMap.get("controlType").toString();
+//		if(controlType.equals("1")) {
+//			controlType = "사용";
+//		} else if(controlType.equals("2")) {
+//			controlType = "휴면";
+//		} else {
+//			log.error("회원상태 여부를 선택해주세요. controlType : "+controlType);
+//			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO044.getCode(), ResponseErrorCode.KO044.getDesc()));
+//		}
+//
+//		// 회원등록 코드
+//		ActivityCode activityCode = ActivityCode.AC_13;
+//		// 활동이력 저장 -> 비정상 모드
+//		String ip = CommonUtil.clientIp();
+//		Long activityHistoryId = historyService.insertHistory(1, adminId, activityCode,
+//				companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
+//		String id = null;
+//		try {
+//
+//			// 회사의 암호화 키
+//			SecretKey secretKey = companyService.selectCompanyEncryptKey(companyId);
+//
+//			if(secretKey == null) {
+//				log.error("해당 기업의 암호화 키가 존재하지 않습니다.");
+//				return ResponseEntity.ok(res.fail(ResponseErrorCode.KO043.getCode(), ResponseErrorCode.KO043.getDesc()));
+//			}
+//
+//			log.info(controlType+" 저장입니다.");
+//
+//			List<HashMap<String,Object>> userData = (List<HashMap<String, Object>>) paramMap.get("userData");
+//
+//			boolean isFieldCheck = false; // 필드 체크
+//
+//			List<KokonutUserFieldDto> columns = kokonutUserService.getColumns(companyCode); // columns
+//			List<KokonutUserFieldDto> encryptColumns = kokonutUserService.selectUserEncryptColumns(companyCode); // encryptColumns
+//
+//			StringBuilder nameString = new StringBuilder();
+//			StringBuilder valueString = new StringBuilder();
+//
+//			for (int i=0; i<userData.size(); i++) {
+//				String field = userData.get(i).get("name").toString(); // 필드 이름
+//				String value = userData.get(i).get("value").toString(); // 필드 값
+//
+//				if("".equals(value)) {
+//					continue; // 입력된 값이 없을 경우 패스
+//				}
+//
+//				// 입력한 필드가 존재하는지 검증
+//				for(KokonutUserFieldDto column : columns) {
+//					if(field.equals(column.getField())) {
+//						isFieldCheck = true;
+//						columns.remove(column);
+//						break;
+//					}
+//				}
+//
+//				// 필드가 존재하지 않을 경우 리턴처리
+//				if(!isFieldCheck) {
+//					log.error("회원정보에 필드가 존재하지 않습니다. 핃드명 : "+field);
+//					return ResponseEntity.ok(res.fail(ResponseErrorCode.KO045.getCode(), field+ResponseErrorCode.KO045.getDesc()));
+//				}
+//
+//				// 필드 이름이 ID일 경우
+//				if(field.equals("ID")) {
+//					// 아이디 중복검사
+//					boolean isUserExistCheck = kokonutUserService.isUserExistId(companyCode, value);
+//					boolean isDormantExistCheck = kokonutDormantService.isDormantExistId(companyCode, value);
+//					if(isUserExistCheck || isDormantExistCheck) {
+//						log.error("이미 존재한 ID 입니다. 아이디 : "+value);
+//						return ResponseEntity.ok(res.fail(ResponseErrorCode.KO046.getCode(), ResponseErrorCode.KO046.getDesc()));
+//					} else {
+//						log.info("사용하실 수 있는 아이디 입니다. : "+value);
+//						id = value;
+//					}
+//				}
+//
+//				try {
+//					// 비밀번호 암호화
+//					if(field.equals("PASSWORD")) {
+//						// 암호화된 비밀번호로 변경
+//						value = passwordEncoder.encode(value);
+//					}
+//					// 암호화 속성을 갖는 컬럼의 데이터 암호화
+//					else {
+//						for(KokonutUserFieldDto column : encryptColumns) {
+//							byte[] ivBytes = AESGCMcrypto.generateIV();
+//							if(column.getField().equals(field)) {
+//								String ciphertext = AESGCMcrypto.encrypt(value.getBytes(StandardCharsets.UTF_8), secretKey, ivBytes);
+//								// 암호화된 데이터로 변경
+//								value = ciphertext+","+Base64.getEncoder().encodeToString(ivBytes);
+//								break;
+//							}
+//						}
+//					}
+//
+//					if(i == userData.size()-1) {
+//						nameString.append("`").append(field).append("`)");
+//						valueString.append("'").append(value).append("')");
+//					} else {
+//						nameString.append("`").append(field).append("`,");
+//						valueString.append("'").append(value).append("',");
+//					}
+//
+//				} catch (Exception e) {
+//					log.error("암호화 정보를 복호화하는데 실패했습니다.");
+//					return ResponseEntity.ok(res.fail(ResponseErrorCode.KO046.getCode(), ResponseErrorCode.KO046.getDesc()));
+//				}
+//
+//			}
+//
+//			boolean userInsertResult = kokonutUserService.insertUserTable(companyCode,
+//					nameString.insert(0, "(").toString(), valueString.insert(0, "(").toString());
+//			log.info("userInsertResult : "+userInsertResult);
+//
+//			if(userInsertResult && controlType.equals("휴면")) {
+//				log.info("휴면계정 가입일 경우 휴면테이블로 이관 시작");
+//
+//				// 첫번째 괄호 문자 제거
+//				nameString.deleteCharAt(0);
+//				valueString.deleteCharAt(0);
+//
+//				// 해당 개인정보가 잘 저장됬는지 조회
+//				Long idx = kokonutUserService.selectUserIdx(companyCode, id);
+//				// 휴면테이블로 insert
+//				boolean dormantInsertResult = kokonutDormantService.insertDormantTable(companyCode,
+//						nameString.insert(0, "(`IDX`,").toString(), valueString.insert(0, "("+idx+",").toString());
+//
+//				if(dormantInsertResult) {
+//					log.info("휴면테이블로 이관 성공");
+//					boolean kokonutUserDelete = kokonutUserService.deleteUserTable(companyCode, idx);
+//					if(kokonutUserDelete) {
+//						log.error("인서트한 유저테이블 삭제 성공");
+//					} else {
+//						log.error("인서트한 유저테이블 삭제 실패");
+//					}
+//				} else {
+//					log.error("휴면테이블로 이관 실패");
+//				}
+//			}
+//
+//			historyService.updateHistory(activityHistoryId,companyCode+" - "+activityCode.getDesc()+" 완료 이력", "", 1);
+//
+//		} catch (Exception e) {
+//			log.error("회원등록 에러확인 필요");
+//			log.error("e : "+e.getMessage());
+//			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO059.getCode(), "회원등록 "+ResponseErrorCode.KO059.getDesc()));
+//		}
+//
+//		return ResponseEntity.ok(res.success(data));
+//	}
 
 	// 유저정보 수정(회원수정)
-	@Transactional
-	@SuppressWarnings("unchecked")
-	public ResponseEntity<Map<String, Object>> userUpdateCall(HashMap<String, Object> paramMap, String email) throws IOException {
-		log.info("userUpdateCall 호출");
-
-		AjaxResponse res = new AjaxResponse();
-		HashMap<String, Object> data = new HashMap<>();
-
-		log.info("paramMap : "+ paramMap);
-		log.info("email : "+email);
-
-		// 해당 이메일을 통해 회사 IDX 조회
-		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
-
-		Long adminId;
-		Long companyId;
-		String companyCode;
-
-		if(adminCompanyInfoDto == null) {
-			log.error("이메일 정보가 존재하지 않습니다.");
-			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(), "해당 이메일의 정보가 "+ResponseErrorCode.KO004.getDesc()));
-		} else {
-			adminId = adminCompanyInfoDto.getAdminId(); // modifierIdx
-			companyId = adminCompanyInfoDto.getCompanyId(); // companyId
-			companyCode = adminCompanyInfoDto.getCompanyCode(); // tableName
-		}
-
-		String controlType = String.valueOf(paramMap.get("controlType"));
-		if(controlType.equals("1")) {
-			controlType = "사용";
-		} else if(controlType.equals("2")) {
-			controlType = "휴면";
-		} else {
-			log.error("개인정보 상태를 선택해주세요. controlType : "+controlType);
-			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO060.getCode(), ResponseErrorCode.KO060.getDesc()));
-		}
-
-		// 개인정보수정 코드
-		ActivityCode activityCode = ActivityCode.AC_02;
-		// 활동이력 저장 -> 비정상 모드
-		String ip = CommonUtil.clientIp();
-		Long activityHistoryId = historyService.insertHistory(1, adminId, activityCode, companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
-
-		try {
-
-			// 회사의 암호화 키
-			SecretKey secretKey = companyService.selectCompanyEncryptKey(companyId);
-
-			if(secretKey == null) {
-				log.error("해당 기업의 암호화 키가 존재하지 않습니다.");
-				return ResponseEntity.ok(res.fail(ResponseErrorCode.KO043.getCode(), ResponseErrorCode.KO043.getDesc()));
-			}
-
-			List<HashMap<String,Object>> userData = (List<HashMap<String, Object>>) paramMap.get("userData");
-
-			Long idx = Long.parseLong(String.valueOf(paramMap.get("IDX")));
-//			log.info("idx : "+ idx);
-
-			boolean isFieldCheck = false; // 필드 체크
-
-			List<KokonutUserFieldDto> columns;
-			List<KokonutUserFieldDto> encryptColumns;
-			if(controlType.equals("사용")) {
-				columns = kokonutUserService.getColumns(companyCode);
-				encryptColumns = kokonutUserService.selectUserEncryptColumns(companyCode);
-			} else {
-				columns = kokonutDormantService.getDormantColumns(companyCode);
-				encryptColumns = kokonutDormantService.selectDormantEncryptColumns(companyCode);
-			}
-
-			StringBuilder updateString = new StringBuilder();
-
-			for (int i=0; i<userData.size(); i++) {
-				String field = userData.get(i).get("name").toString(); // 필드 이름
-				String value = userData.get(i).get("value").toString(); // 필드 값
-
-				if("".equals(value)) {
-					continue; // 입력된 값이 없을 경우 패스
-				}
-
-				// 입력한 필드가 존재하는지 검증
-				for(KokonutUserFieldDto column : columns) {
-					if(field.equals(column.getField())) {
-						isFieldCheck = true;
-						columns.remove(column);
-						break;
-					}
-				}
-
-				// 필드가 존재하지 않을 경우 리턴처리
-				if(!isFieldCheck) {
-					log.error("해당 개인정보에 필드가 존재하지 않습니다. 핃드명 : "+field);
-					return ResponseEntity.ok(res.fail(ResponseErrorCode.KO045.getCode(), field+ResponseErrorCode.KO045.getDesc()));
-				}
-
-				// 필드 이름이 ID일 경우
-				if(field.equals("ID")) {
-					// 아이디 중복검사
-					boolean isUserExistCheck = kokonutUserService.isUserExistId(companyCode, value);
-					boolean isDormantExistCheck = kokonutDormantService.isDormantExistId(companyCode, value);
-					if(isUserExistCheck || isDormantExistCheck) {
-						log.error("이미 사용중인 개인정보 ID 입니다. 아이디 : "+value);
-						return ResponseEntity.ok(res.fail(ResponseErrorCode.KO046.getCode(), ResponseErrorCode.KO046.getDesc()));
-					} else {
-						log.info("사용하실 수 있는 아이디 입니다. : "+value);
-					}
-				}
-
-				try {
-					// 비밀번호 암호화
-					if(field.equals("PASSWORD")) {
-						// 암호화된 비밀번호로 변경
-						value = passwordEncoder.encode(value);
-					}
-					// 암호화 속성을 갖는 컬럼의 데이터 암호화
-					else {
-						for(KokonutUserFieldDto column : encryptColumns) {
-							byte[] ivBytes = AESGCMcrypto.generateIV();
-							if(column.getField().equals(field)) {
-								String ciphertext = AESGCMcrypto.encrypt(value.getBytes(StandardCharsets.UTF_8), secretKey, ivBytes);
-								// 암호화된 데이터로 변경
-								value = ciphertext+","+Base64.getEncoder().encodeToString(ivBytes);
-								break;
-							}
-						}
-					}
-
-//					if((!field.equals("NAME") && !field.equals("EMAIL")) || !controlType.equals("수정")) {
-//						Map<String, Object> item = new HashMap<String, Object>();
-//						item.put("field", field);
-//						item.put("value", value);
-//						list.add(item);
+//	@Transactional
+//	@SuppressWarnings("unchecked")
+//	public ResponseEntity<Map<String, Object>> userUpdateCall(HashMap<String, Object> paramMap, String email) throws IOException {
+//		log.info("userUpdateCall 호출");
+//
+//		AjaxResponse res = new AjaxResponse();
+//		HashMap<String, Object> data = new HashMap<>();
+//
+//		log.info("paramMap : "+ paramMap);
+//		log.info("email : "+email);
+//
+//		// 해당 이메일을 통해 회사 IDX 조회
+//		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+//
+//		Long adminId;
+//		Long companyId;
+//		String companyCode;
+//
+//		if(adminCompanyInfoDto == null) {
+//			log.error("이메일 정보가 존재하지 않습니다.");
+//			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(), "해당 이메일의 정보가 "+ResponseErrorCode.KO004.getDesc()));
+//		} else {
+//			adminId = adminCompanyInfoDto.getAdminId(); // modifierIdx
+//			companyId = adminCompanyInfoDto.getCompanyId(); // companyId
+//			companyCode = adminCompanyInfoDto.getCompanyCode(); // tableName
+//		}
+//
+//		String controlType = String.valueOf(paramMap.get("controlType"));
+//		if(controlType.equals("1")) {
+//			controlType = "사용";
+//		} else if(controlType.equals("2")) {
+//			controlType = "휴면";
+//		} else {
+//			log.error("개인정보 상태를 선택해주세요. controlType : "+controlType);
+//			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO060.getCode(), ResponseErrorCode.KO060.getDesc()));
+//		}
+//
+//		// 개인정보수정 코드
+//		ActivityCode activityCode = ActivityCode.AC_02;
+//		// 활동이력 저장 -> 비정상 모드
+//		String ip = CommonUtil.clientIp();
+//		Long activityHistoryId = historyService.insertHistory(1, adminId, activityCode, companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
+//
+//		try {
+//
+//			// 회사의 암호화 키
+//			SecretKey secretKey = companyService.selectCompanyEncryptKey(companyId);
+//
+//			if(secretKey == null) {
+//				log.error("해당 기업의 암호화 키가 존재하지 않습니다.");
+//				return ResponseEntity.ok(res.fail(ResponseErrorCode.KO043.getCode(), ResponseErrorCode.KO043.getDesc()));
+//			}
+//
+//			List<HashMap<String,Object>> userData = (List<HashMap<String, Object>>) paramMap.get("userData");
+//
+//			Long idx = Long.parseLong(String.valueOf(paramMap.get("IDX")));
+////			log.info("idx : "+ idx);
+//
+//			boolean isFieldCheck = false; // 필드 체크
+//
+//			List<KokonutUserFieldDto> columns;
+//			List<KokonutUserFieldDto> encryptColumns;
+//			if(controlType.equals("사용")) {
+//				columns = kokonutUserService.getColumns(companyCode);
+//				encryptColumns = kokonutUserService.selectUserEncryptColumns(companyCode);
+//			} else {
+//				columns = kokonutDormantService.getDormantColumns(companyCode);
+//				encryptColumns = kokonutDormantService.selectDormantEncryptColumns(companyCode);
+//			}
+//
+//			StringBuilder updateString = new StringBuilder();
+//
+//			for (int i=0; i<userData.size(); i++) {
+//				String field = userData.get(i).get("name").toString(); // 필드 이름
+//				String value = userData.get(i).get("value").toString(); // 필드 값
+//
+//				if("".equals(value)) {
+//					continue; // 입력된 값이 없을 경우 패스
+//				}
+//
+//				// 입력한 필드가 존재하는지 검증
+//				for(KokonutUserFieldDto column : columns) {
+//					if(field.equals(column.getField())) {
+//						isFieldCheck = true;
+//						columns.remove(column);
+//						break;
 //					}
-
-					if(i == userData.size()-1) {
-						updateString.append(field).append("='").append(value).append("',");
-						updateString.append("MODIFY_DATE").append("='").append(LocalDateTime.now()).append("'");
-					} else {
-						updateString.append(field).append("='").append(value).append("',");
-					}
-
-				} catch (Exception e) {
-					log.error("암호화 정보를 복호화하는데 실패했습니다.");
-					return ResponseEntity.ok(res.fail(ResponseErrorCode.KO046.getCode(), ResponseErrorCode.KO046.getDesc()));
-				}
-
-			}
-
-
-			historyService.updateHistory(activityHistoryId,companyCode+" - "+activityCode.getDesc()+" 완료 이력", "", 1);
-
-//			log.info("updateString : "+ updateString);
-
-			boolean result;
-			if(controlType.equals("사용")) {
-				result = kokonutUserService.updateUserTable(companyCode, idx, updateString.toString());
-			} else {
-				result = kokonutDormantService.updateDormantTable(companyCode, idx, updateString.toString());
-			}
-
-			if(result) {
-				log.info("개인정보 수정 성공");
-			} else {
-				log.error("개인정보 수정 실패");
-			}
-
-		} catch (Exception e) {
-			log.error("회원수정 에러확인 필요");
-			log.error("e : "+e.getMessage());
-			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO059.getCode(), "회원수정 "+ResponseErrorCode.KO059.getDesc()));
-		}
-
-		return ResponseEntity.ok(res.success(data));
-	}
+//				}
+//
+//				// 필드가 존재하지 않을 경우 리턴처리
+//				if(!isFieldCheck) {
+//					log.error("해당 개인정보에 필드가 존재하지 않습니다. 핃드명 : "+field);
+//					return ResponseEntity.ok(res.fail(ResponseErrorCode.KO045.getCode(), field+ResponseErrorCode.KO045.getDesc()));
+//				}
+//
+//				// 필드 이름이 ID일 경우
+//				if(field.equals("ID")) {
+//					// 아이디 중복검사
+//					boolean isUserExistCheck = kokonutUserService.isUserExistId(companyCode, value);
+//					boolean isDormantExistCheck = kokonutDormantService.isDormantExistId(companyCode, value);
+//					if(isUserExistCheck || isDormantExistCheck) {
+//						log.error("이미 사용중인 개인정보 ID 입니다. 아이디 : "+value);
+//						return ResponseEntity.ok(res.fail(ResponseErrorCode.KO046.getCode(), ResponseErrorCode.KO046.getDesc()));
+//					} else {
+//						log.info("사용하실 수 있는 아이디 입니다. : "+value);
+//					}
+//				}
+//
+//				try {
+//					// 비밀번호 암호화
+//					if(field.equals("PASSWORD")) {
+//						// 암호화된 비밀번호로 변경
+//						value = passwordEncoder.encode(value);
+//					}
+//					// 암호화 속성을 갖는 컬럼의 데이터 암호화
+//					else {
+//						for(KokonutUserFieldDto column : encryptColumns) {
+//							byte[] ivBytes = AESGCMcrypto.generateIV();
+//							if(column.getField().equals(field)) {
+//								String ciphertext = AESGCMcrypto.encrypt(value.getBytes(StandardCharsets.UTF_8), secretKey, ivBytes);
+//								// 암호화된 데이터로 변경
+//								value = ciphertext+","+Base64.getEncoder().encodeToString(ivBytes);
+//								break;
+//							}
+//						}
+//					}
+//
+////					if((!field.equals("NAME") && !field.equals("EMAIL")) || !controlType.equals("수정")) {
+////						Map<String, Object> item = new HashMap<String, Object>();
+////						item.put("field", field);
+////						item.put("value", value);
+////						list.add(item);
+////					}
+//
+//					if(i == userData.size()-1) {
+//						updateString.append(field).append("='").append(value).append("',");
+//						updateString.append("MODIFY_DATE").append("='").append(LocalDateTime.now()).append("'");
+//					} else {
+//						updateString.append(field).append("='").append(value).append("',");
+//					}
+//
+//				} catch (Exception e) {
+//					log.error("암호화 정보를 복호화하는데 실패했습니다.");
+//					return ResponseEntity.ok(res.fail(ResponseErrorCode.KO046.getCode(), ResponseErrorCode.KO046.getDesc()));
+//				}
+//
+//			}
+//
+//
+//			historyService.updateHistory(activityHistoryId,companyCode+" - "+activityCode.getDesc()+" 완료 이력", "", 1);
+//
+////			log.info("updateString : "+ updateString);
+//
+//			boolean result;
+//			if(controlType.equals("사용")) {
+//				result = kokonutUserService.updateUserTable(companyCode, idx, updateString.toString());
+//			} else {
+//				result = kokonutDormantService.updateDormantTable(companyCode, idx, updateString.toString());
+//			}
+//
+//			if(result) {
+//				log.info("개인정보 수정 성공");
+//			} else {
+//				log.error("개인정보 수정 실패");
+//			}
+//
+//		} catch (Exception e) {
+//			log.error("회원수정 에러확인 필요");
+//			log.error("e : "+e.getMessage());
+//			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO059.getCode(), "회원수정 "+ResponseErrorCode.KO059.getDesc()));
+//		}
+//
+//		return ResponseEntity.ok(res.success(data));
+//	}
 
 	// 유저삭제(회원삭제)
-	@Transactional
-	public ResponseEntity<Map<String, Object>> userDeleteCall(String TYPE, Integer IDX, String email) throws IOException {
-		log.info("userDeleteCall 호출");
-
-		AjaxResponse res = new AjaxResponse();
-		HashMap<String, Object> data = new HashMap<>();
-
-		log.info("TYPE : "+ TYPE);
-		log.info("IDX : "+ IDX);
-		log.info("email : "+email);
-
-		// 해당 이메일을 통해 회사 IDX 조회
-		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
-
-		Long adminId;
-		Long companyId;
-		String companyCode;
-
-		if(adminCompanyInfoDto == null) {
-			log.error("이메일 정보가 존재하지 않습니다.");
-			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(), "해당 이메일의 정보가 "+ResponseErrorCode.KO004.getDesc()));
-		} else {
-			adminId = adminCompanyInfoDto.getAdminId(); // modifierIdx
-			companyId = adminCompanyInfoDto.getCompanyId(); // companyId
-			companyCode = adminCompanyInfoDto.getCompanyCode(); // tableName
-		}
-
-		// TYPE -> "USER" 이면 사용중인 테이블, "DORMANT" 이면 휴면인 테이블
-		List<KokonutRemoveInfoDto> kokonutRemoveInfoDtos;
-		// 해당 테이블에 데이터 조회
-		if(TYPE.equals("USER")) {
-			kokonutRemoveInfoDtos = kokonutUserService.selectUserDataByIdx(companyCode, IDX);
-		} else if(TYPE.equals("DORMANT")) {
-			kokonutRemoveInfoDtos = kokonutDormantService.selectDormantDataByIdx(companyCode, IDX);
-		} else {
-			log.error("해당 유저의 TYPE 유형이 존재하지 않습니다.");
-			kokonutRemoveInfoDtos = null;
-		}
-
-		assert kokonutRemoveInfoDtos != null;
-		if(kokonutRemoveInfoDtos.size() == 0) {
-			log.error("존재하지 않은 유저입니다. 새로고침이후 다시 시도해주세요.");
-			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO058.getCode(), ResponseErrorCode.KO058.getDesc()));
-		}
-
-		// 회원삭제 코드
-		ActivityCode activityCode = ActivityCode.AC_03;
-		// 활동이력 저장 -> 비정상 모드
-		String ip = CommonUtil.clientIp();
-		Long activityHistoryId = historyService.insertHistory(1, adminId, activityCode,
-				companyCode+" - "+activityCode.getDesc()+" 시도 이력 ID : "+kokonutRemoveInfoDtos.get(0).getID(), "", ip,  CommonUtil.publicIp(), 0, email);
-
-		try {
-
-			boolean kokonutUserDelete = kokonutUserService.deleteUserTable(companyCode, kokonutRemoveInfoDtos.get(0).getIDX());
-			if(kokonutUserDelete) {
-				log.error("회원삭제 성공 -> 삭제 테이블로 이관");
-
-				StringBuilder nameString = new StringBuilder();
-				StringBuilder valueString = new StringBuilder();
-
-				nameString.append("(`").append("IDX").append("`,");
-				nameString.append("`").append("ID").append("`,");
-				nameString.append("`").append("REGDATE").append("`,");
-				nameString.append("`").append("DELETE_DATE").append("`)");
-				valueString.append("('").append(kokonutRemoveInfoDtos.get(0).getIDX()).append("',");
-				valueString.append("'").append(kokonutRemoveInfoDtos.get(0).getID()).append("',");
-				valueString.append("'").append(kokonutRemoveInfoDtos.get(0).getREGDATE()).append("',");
-				valueString.append("'").append(LocalDateTime.now()).append("')");
-
-				log.info("nameString : "+ nameString);
-				log.info("valueString : "+ valueString);
-
-				boolean result = kokonutRemoveService.insertRemoveTable(companyCode, nameString.toString(), valueString.toString());
-				if(result) {
-					log.info("유저 삭제이관 성공");
-				} else {
-					log.error("유저 삭제이관 실패");
-				}
-			}
-
-		} catch (Exception e ){
-			log.error("회원삭제 에러확인 필요");
-			log.error("e : "+e.getMessage());
-			historyService.deleteHistoryByIdx(activityHistoryId);
-			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO059.getCode(), "회원삭제 "+ResponseErrorCode.KO059.getDesc()));
-		}
-
-		historyService.updateHistory(activityHistoryId,
-				companyCode+" - "+activityCode.getDesc()+" 완료 이력 ID : "+kokonutRemoveInfoDtos.get(0).getID(), "", 1);
-
-		return ResponseEntity.ok(res.success(data));
-	}
+//	@Transactional
+//	public ResponseEntity<Map<String, Object>> userDeleteCall(String TYPE, Integer IDX, String email) throws IOException {
+//		log.info("userDeleteCall 호출");
+//
+//		AjaxResponse res = new AjaxResponse();
+//		HashMap<String, Object> data = new HashMap<>();
+//
+//		log.info("TYPE : "+ TYPE);
+//		log.info("IDX : "+ IDX);
+//		log.info("email : "+email);
+//
+//		// 해당 이메일을 통해 회사 IDX 조회
+//		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+//
+//		Long adminId;
+//		Long companyId;
+//		String companyCode;
+//
+//		if(adminCompanyInfoDto == null) {
+//			log.error("이메일 정보가 존재하지 않습니다.");
+//			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(), "해당 이메일의 정보가 "+ResponseErrorCode.KO004.getDesc()));
+//		} else {
+//			adminId = adminCompanyInfoDto.getAdminId(); // modifierIdx
+//			companyId = adminCompanyInfoDto.getCompanyId(); // companyId
+//			companyCode = adminCompanyInfoDto.getCompanyCode(); // tableName
+//		}
+//
+//		// TYPE -> "USER" 이면 사용중인 테이블, "DORMANT" 이면 휴면인 테이블
+//		List<KokonutRemoveInfoDto> kokonutRemoveInfoDtos;
+//		// 해당 테이블에 데이터 조회
+//		if(TYPE.equals("USER")) {
+//			kokonutRemoveInfoDtos = kokonutUserService.selectUserDataByIdx(companyCode, IDX);
+//		} else if(TYPE.equals("DORMANT")) {
+//			kokonutRemoveInfoDtos = kokonutDormantService.selectDormantDataByIdx(companyCode, IDX);
+//		} else {
+//			log.error("해당 유저의 TYPE 유형이 존재하지 않습니다.");
+//			kokonutRemoveInfoDtos = null;
+//		}
+//
+//		assert kokonutRemoveInfoDtos != null;
+//		if(kokonutRemoveInfoDtos.size() == 0) {
+//			log.error("존재하지 않은 유저입니다. 새로고침이후 다시 시도해주세요.");
+//			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO058.getCode(), ResponseErrorCode.KO058.getDesc()));
+//		}
+//
+//		// 회원삭제 코드
+//		ActivityCode activityCode = ActivityCode.AC_03;
+//		// 활동이력 저장 -> 비정상 모드
+//		String ip = CommonUtil.clientIp();
+//		Long activityHistoryId = historyService.insertHistory(1, adminId, activityCode,
+//				companyCode+" - "+activityCode.getDesc()+" 시도 이력 ID : "+kokonutRemoveInfoDtos.get(0).getID(), "", ip,  CommonUtil.publicIp(), 0, email);
+//
+//		try {
+//
+//			boolean kokonutUserDelete = kokonutUserService.deleteUserTable(companyCode, kokonutRemoveInfoDtos.get(0).getIDX());
+//			if(kokonutUserDelete) {
+//				log.error("회원삭제 성공 -> 삭제 테이블로 이관");
+//
+//				StringBuilder nameString = new StringBuilder();
+//				StringBuilder valueString = new StringBuilder();
+//
+//				nameString.append("(`").append("IDX").append("`,");
+//				nameString.append("`").append("ID").append("`,");
+//				nameString.append("`").append("REGDATE").append("`,");
+//				nameString.append("`").append("DELETE_DATE").append("`)");
+//				valueString.append("('").append(kokonutRemoveInfoDtos.get(0).getIDX()).append("',");
+//				valueString.append("'").append(kokonutRemoveInfoDtos.get(0).getID()).append("',");
+//				valueString.append("'").append(kokonutRemoveInfoDtos.get(0).getREGDATE()).append("',");
+//				valueString.append("'").append(LocalDateTime.now()).append("')");
+//
+//				log.info("nameString : "+ nameString);
+//				log.info("valueString : "+ valueString);
+//
+//				boolean result = kokonutRemoveService.insertRemoveTable(companyCode, nameString.toString(), valueString.toString());
+//				if(result) {
+//					log.info("유저 삭제이관 성공");
+//				} else {
+//					log.error("유저 삭제이관 실패");
+//				}
+//			}
+//
+//		} catch (Exception e ){
+//			log.error("회원삭제 에러확인 필요");
+//			log.error("e : "+e.getMessage());
+//			historyService.deleteHistoryByIdx(activityHistoryId);
+//			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO059.getCode(), "회원삭제 "+ResponseErrorCode.KO059.getDesc()));
+//		}
+//
+//		historyService.updateHistory(activityHistoryId,
+//				companyCode+" - "+activityCode.getDesc()+" 완료 이력 ID : "+kokonutRemoveInfoDtos.get(0).getID(), "", 1);
+//
+//		return ResponseEntity.ok(res.success(data));
+//	}
 
 	// 개인정보 등록 - 엑셀파일 양식 다운로드
 	public void downloadExcelForm(HttpServletRequest request, HttpServletResponse response, String email) {
@@ -1208,7 +1208,7 @@ public class DynamicUserService {
 			comment = fieldOptionName + "(수정가능)";
 		}
 
-		// 회원컬럼저장 코드
+		// 테이블 항목 추가 코드
 		ActivityCode activityCode = ActivityCode.AC_19;
 		// 활동이력 저장 -> 비정상 모드
 		String ip = CommonUtil.clientIp();
@@ -1227,333 +1227,333 @@ public class DynamicUserService {
 	}
 
 	// 개인정보 테이블 + 휴면 테이블 필드 수정
-	@Transactional
-	public ResponseEntity<Map<String, Object>> columUpdate(KokonutColumUpdateDto kokonutColumUpdateDto, String email) throws Exception {
-		log.info("columUpdate 호출");
-
-		AjaxResponse res = new AjaxResponse();
-		HashMap<String, Object> data = new HashMap<>();
-
-		log.info("kokonutColumUpdateDto : "+ kokonutColumUpdateDto);
-		log.info("email : "+email);
-
-		// 해당 이메일을 통해 회사 IDX 조회
-		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
-
-		Long adminId;
-		Long companyId;
-		String companyCode;
-
-		if(adminCompanyInfoDto == null) {
-			log.error("이메일 정보가 존재하지 않습니다.");
-			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(), "해당 이메일의 정보가 "+ResponseErrorCode.KO004.getDesc()));
-		} else {
-			adminId = adminCompanyInfoDto.getAdminId(); // modifierIdx
-			companyId = adminCompanyInfoDto.getCompanyId(); // companyId
-			companyCode = adminCompanyInfoDto.getCompanyCode(); // tableName
-		}
-
-		int check = kokonutUserService.selectExistUserTable(companyCode);
-		if(check == 0) {
-			log.error("유저 테이블이 존재하지 않습니다. companyCode : "+companyCode);
-			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(), "유저 테이블이 "+ResponseErrorCode.KO004.getDesc()));
-		}
-
-		String fieldName;
-		String beforField = kokonutColumUpdateDto.getBeforField(); // 현재 필드명
-		String afterField = kokonutColumUpdateDto.getAfterField(); // 수정할 필드명
-		if (afterField == null) {
-			fieldName = beforField;
-		} else {
-			fieldName = afterField;
-		}
-
-		String fieldOptionName = kokonutColumUpdateDto.getFieldOptionName(); // Comment 내용
-		// 데이터 타입 : "2" -> BIGINT, "3" -> DOUBLE, "4" -> VARCHAR,  "5" -> LONGTEXT,  "6" -> BOOLEAN,  "7" -> TIMESTAMP
-		String dataType = kokonutColumUpdateDto.getDataType();
-		Integer dataLength = kokonutColumUpdateDto.getDataLength(); // 데이터 길이
-		String isNullYn = kokonutColumUpdateDto.getIsNullYn(); // Null값 허용여부 true/false
-		String defaultValue = kokonutColumUpdateDto.getDefaultValue(); // 기본값
-		String isEncryption = kokonutColumUpdateDto.getIsEncryption(); // 암호화여부 - "0" 필요, "1" 불필요
-
-		// 데이터타입 정형화
-		String type = "";
-		if(dataType.equals("2")) {
-			type = "BIGINT";
-		} else if(dataType.equals("3")) {
-			type = "DOUBLE";
-		} else if(dataType.equals("4")) {
-			type = "VARCHAR";
-		} else if(dataType.equals("5")) {
-			type = "LONGTEXT";
-		} else if(dataType.equals("6")) {
-			type = "BOOLEAN";
-		} else if(dataType.equals("7")) {
-			type = "TIMESTAMP";
-		}
-		log.info("수정할 필드 데이터타입 : "+type);
-
-		// 길이 정형화
-		int length = 0;
-		if(dataLength != null) {
-			length = dataLength;
-		}
-
-		// Null check 정형화
-		boolean isNull = Boolean.parseBoolean(isNullYn);
-
-		// 대상 테이블 정보를 조회
-		List<KokonutUserFieldDto> targetTable = kokonutUserService.getColumns(companyCode);
-
-		// Field명과 Comment내용 중복 컬럼 체크
-		for (KokonutUserFieldDto column : targetTable) {
-			String Field = column.getField();
-			String Comment = column.getComment();
-
-			if(Comment.contains("(")) {
-				String[] CommentList = Comment.split("\\(");
-				Comment = CommentList[0];
-			}
-
-			// 필드를 수정하지 않을 경우
-			if(afterField != null) {
-				if(fieldName.equals(Field)) {
-					log.error("이미 존재하는 컬럼명 입니다.");
-					return ResponseEntity.ok(res.fail(ResponseErrorCode.KO064.getCode(), ResponseErrorCode.KO064.getDesc()));
-				}
-			}
-
-			if(!beforField.equals(Field) && Comment.equals(fieldOptionName)) {
-				log.error("이미 존재하는 개인정보 항목입니다. fieldOptionName : "+fieldOptionName);
-				return ResponseEntity.ok(res.fail(ResponseErrorCode.KO065.getCode(), ResponseErrorCode.KO065.getDesc()));
-			}
-		}
-
-		// Comment 정형화
-		String comment;
-
-		// 사업자 secretKey
-		SecretKey secretKey;
-
-		// 현재 바꾼 필드의 커멘트 가져오기
-		String changeColumnComment = kokonutUserService.selectUserColumnComment(companyCode, beforField);
-//		log.info("changeColumnComment : "+changeColumnComment);
-
-		// 회원컬럼수정 코드
-		ActivityCode activityCode = ActivityCode.AC_20;
-		// 활동이력 저장 -> 비정상 모드
-		String ip = CommonUtil.clientIp();
-		Long activityHistoryId = historyService.insertHistory(3, adminId, activityCode,
-				companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
-
-		// 암호화, 복호화 전환로직
-		if(changeColumnComment != null) {
-			if(changeColumnComment.contains("(암호화,수정가능)")) {
-				if(isEncryption.equals("1")) {
-					comment = fieldOptionName + "(수정가능)";
-
-					log.info("이전에 암호화필드였지만 암호화 불필요로 수정하여 모든데이터 복호화시작");
-					secretKey = companyService.selectCompanyEncryptKey(companyId);
-
-					// 개인정보(유저)테이블 필드의 데이터 복호화
-					List<KokonutUserFieldInfoDto> fieldList = kokonutUserService.selectUserFieldList(companyCode, beforField);
-					for (KokonutUserFieldInfoDto fieldMap : fieldList) {
-						Long userIdx = fieldMap.getIDX();
-						String fieldValue = String.valueOf(fieldMap.getVALUE());
-
-						if (fieldValue.isEmpty() || fieldValue.equals("null")) {
-							continue;
-						}
-
-						String[] result = fieldValue.split(",");
-						String resultText = result[0];
-						String resultIV = result[1];
-
-						// 암호화 -> 복호화 시작
-						String decryptedValue = AESGCMcrypto.decrypt(resultText, secretKey, resultIV);
-						String queryString = beforField + "='"+decryptedValue+"'";
-//					log.info("queryString : "+queryString);
-
-						kokonutUserService.updateUserTable(companyCode, userIdx, queryString);
-					}
-
-					// 개인정보(휴면)테이블 필드의 데이터 복호화
-					List<KokonutDormantFieldInfoDto> fieldListDormant = kokonutDormantService.selectDormantFieldList(companyCode, beforField);
-					for (KokonutDormantFieldInfoDto fieldMap : fieldListDormant) {
-						Long userIdx = fieldMap.getIDX();
-						String fieldValue = String.valueOf(fieldMap.getVALUE());
-
-						if (fieldValue.isEmpty() || fieldValue.equals("null")) {
-							continue;
-						}
-
-						String[] result = fieldValue.split(",");
-						String resultText = result[0];
-						String resultIV = result[1];
-
-						// 암호화 -> 복호화 시작
-						String decryptedValue = AESGCMcrypto.decrypt(resultText, secretKey, resultIV);
-						String queryString = beforField + "='"+decryptedValue+"'";
-//					log.info("queryString : "+queryString);
-
-						kokonutUserService.updateUserTable(companyCode, userIdx, queryString);
-					}
-
-				} else {
-					comment = fieldOptionName + "(암호화,수정가능)";
-				}
-			} else {
-				if(isEncryption.equals("0")) {
-					comment = fieldOptionName + "(암호화,수정가능)";
-
-					log.info("이전에 암호화필드가 아니였지만 암호화필요로 수정하여 이전 데이터를 암호화시작");
-					secretKey = companyService.selectCompanyEncryptKey(companyId);
-
-					// 개인정보(유저)테이블 필드의 데이터 암호화
-					List<KokonutUserFieldInfoDto> fieldListUser = kokonutUserService.selectUserFieldList(companyCode, beforField);
-					for (KokonutUserFieldInfoDto fieldMap : fieldListUser) {
-						Long userIdx = fieldMap.getIDX();
-						String fieldValue = String.valueOf(fieldMap.getVALUE());
-
-						if (fieldValue.isEmpty() || fieldValue.equals("null")){
-							continue;
-						}
-
-						byte[] ivBytes = AESGCMcrypto.generateIV();
-						String ciphertext = AESGCMcrypto.encrypt(fieldValue.getBytes(StandardCharsets.UTF_8), secretKey, ivBytes);
-						// 평문 -> 암호화 시작
-						String encryptedValue = ciphertext+","+Base64.getEncoder().encodeToString(ivBytes);
-
-						String queryString = beforField + "='"+encryptedValue+"'";
-//					log.info("queryString : "+queryString);
-
-						kokonutUserService.updateUserTable(companyCode, userIdx, queryString);
-					}
-
-					// 휴면테이블 필드의 데이터 암호화
-					List<KokonutDormantFieldInfoDto> fieldListDormant = kokonutDormantService.selectDormantFieldList(companyCode, beforField);
-					for (KokonutDormantFieldInfoDto fieldMap : fieldListDormant) {
-						Long userIdx = fieldMap.getIDX();
-						String fieldValue = String.valueOf(fieldMap.getVALUE());
-
-						if (fieldValue.isEmpty() || fieldValue.equals("null")){
-							continue;
-						}
-
-						byte[] ivBytes = AESGCMcrypto.generateIV();
-						String ciphertext = AESGCMcrypto.encrypt(fieldValue.getBytes(StandardCharsets.UTF_8), secretKey, ivBytes);
-
-						// 평문 -> 암호화 시작
-						String encryptedValue = ciphertext+","+Base64.getEncoder().encodeToString(ivBytes);
-
-						String queryString = beforField + "='"+encryptedValue+"'";
-//					log.info("queryString : "+queryString);
-
-						kokonutDormantService.updateDormantTable(companyCode, userIdx, queryString);
-					}
-				} else {
-					comment = fieldOptionName + "(수정가능)";
-				}
-			}
-
-			if (afterField == null) {
-				// 사용테이블에 컬럼 수정
-				kokonutUserService.alterModifyColumnCommentQuery(companyCode, fieldName, type, length, isNull, defaultValue, comment);
-				// 휴면테이블에 컬럼 수정
-				kokonutDormantService.alterModifyColumnCommentQuery(companyCode, fieldName, type, length, isNull, defaultValue, comment);
-			} else {
-				// 사용테이블에 컬럼 수정
-				kokonutUserService.alterChangeColumnTableQuery(companyCode, beforField, fieldName, type, length, isNull, defaultValue, comment);
-				// 휴면테이블에 컬럼 수정
-				kokonutDormantService.alterChangeColumnTableQuery(companyCode, beforField, fieldName, type, length, isNull, defaultValue, comment);
-			}
-
-			historyService.updateHistory(activityHistoryId,
-					companyCode+" - "+activityCode.getDesc()+" 완료 이력", "", 1);
-
-		} else {
-			log.error("수정할 필드가 테이블에 존재하지 않습니다.");
-			historyService.updateHistory(activityHistoryId,
-					companyCode+" - "+activityCode.getDesc()+" 실패 이력", "수정할 필드가 존재하지 않습니다.", 1);
-			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO067.getCode(), "수정할 필드가 "+ResponseErrorCode.KO067.getDesc()));
-		}
-
-		return ResponseEntity.ok(res.success(data));
-	}
+//	@Transactional
+//	public ResponseEntity<Map<String, Object>> columUpdate(KokonutColumUpdateDto kokonutColumUpdateDto, String email) throws Exception {
+//		log.info("columUpdate 호출");
+//
+//		AjaxResponse res = new AjaxResponse();
+//		HashMap<String, Object> data = new HashMap<>();
+//
+//		log.info("kokonutColumUpdateDto : "+ kokonutColumUpdateDto);
+//		log.info("email : "+email);
+//
+//		// 해당 이메일을 통해 회사 IDX 조회
+//		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+//
+//		Long adminId;
+//		Long companyId;
+//		String companyCode;
+//
+//		if(adminCompanyInfoDto == null) {
+//			log.error("이메일 정보가 존재하지 않습니다.");
+//			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(), "해당 이메일의 정보가 "+ResponseErrorCode.KO004.getDesc()));
+//		} else {
+//			adminId = adminCompanyInfoDto.getAdminId(); // modifierIdx
+//			companyId = adminCompanyInfoDto.getCompanyId(); // companyId
+//			companyCode = adminCompanyInfoDto.getCompanyCode(); // tableName
+//		}
+//
+//		int check = kokonutUserService.selectExistUserTable(companyCode);
+//		if(check == 0) {
+//			log.error("유저 테이블이 존재하지 않습니다. companyCode : "+companyCode);
+//			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(), "유저 테이블이 "+ResponseErrorCode.KO004.getDesc()));
+//		}
+//
+//		String fieldName;
+//		String beforField = kokonutColumUpdateDto.getBeforField(); // 현재 필드명
+//		String afterField = kokonutColumUpdateDto.getAfterField(); // 수정할 필드명
+//		if (afterField == null) {
+//			fieldName = beforField;
+//		} else {
+//			fieldName = afterField;
+//		}
+//
+//		String fieldOptionName = kokonutColumUpdateDto.getFieldOptionName(); // Comment 내용
+//		// 데이터 타입 : "2" -> BIGINT, "3" -> DOUBLE, "4" -> VARCHAR,  "5" -> LONGTEXT,  "6" -> BOOLEAN,  "7" -> TIMESTAMP
+//		String dataType = kokonutColumUpdateDto.getDataType();
+//		Integer dataLength = kokonutColumUpdateDto.getDataLength(); // 데이터 길이
+//		String isNullYn = kokonutColumUpdateDto.getIsNullYn(); // Null값 허용여부 true/false
+//		String defaultValue = kokonutColumUpdateDto.getDefaultValue(); // 기본값
+//		String isEncryption = kokonutColumUpdateDto.getIsEncryption(); // 암호화여부 - "0" 필요, "1" 불필요
+//
+//		// 데이터타입 정형화
+//		String type = "";
+//		if(dataType.equals("2")) {
+//			type = "BIGINT";
+//		} else if(dataType.equals("3")) {
+//			type = "DOUBLE";
+//		} else if(dataType.equals("4")) {
+//			type = "VARCHAR";
+//		} else if(dataType.equals("5")) {
+//			type = "LONGTEXT";
+//		} else if(dataType.equals("6")) {
+//			type = "BOOLEAN";
+//		} else if(dataType.equals("7")) {
+//			type = "TIMESTAMP";
+//		}
+//		log.info("수정할 필드 데이터타입 : "+type);
+//
+//		// 길이 정형화
+//		int length = 0;
+//		if(dataLength != null) {
+//			length = dataLength;
+//		}
+//
+//		// Null check 정형화
+//		boolean isNull = Boolean.parseBoolean(isNullYn);
+//
+//		// 대상 테이블 정보를 조회
+//		List<KokonutUserFieldDto> targetTable = kokonutUserService.getColumns(companyCode);
+//
+//		// Field명과 Comment내용 중복 컬럼 체크
+//		for (KokonutUserFieldDto column : targetTable) {
+//			String Field = column.getField();
+//			String Comment = column.getComment();
+//
+//			if(Comment.contains("(")) {
+//				String[] CommentList = Comment.split("\\(");
+//				Comment = CommentList[0];
+//			}
+//
+//			// 필드를 수정하지 않을 경우
+//			if(afterField != null) {
+//				if(fieldName.equals(Field)) {
+//					log.error("이미 존재하는 컬럼명 입니다.");
+//					return ResponseEntity.ok(res.fail(ResponseErrorCode.KO064.getCode(), ResponseErrorCode.KO064.getDesc()));
+//				}
+//			}
+//
+//			if(!beforField.equals(Field) && Comment.equals(fieldOptionName)) {
+//				log.error("이미 존재하는 개인정보 항목입니다. fieldOptionName : "+fieldOptionName);
+//				return ResponseEntity.ok(res.fail(ResponseErrorCode.KO065.getCode(), ResponseErrorCode.KO065.getDesc()));
+//			}
+//		}
+//
+//		// Comment 정형화
+//		String comment;
+//
+//		// 사업자 secretKey
+//		SecretKey secretKey;
+//
+//		// 현재 바꾼 필드의 커멘트 가져오기
+//		String changeColumnComment = kokonutUserService.selectUserColumnComment(companyCode, beforField);
+////		log.info("changeColumnComment : "+changeColumnComment);
+//
+//		// 회원컬럼수정 코드
+//		ActivityCode activityCode = ActivityCode.AC_20;
+//		// 활동이력 저장 -> 비정상 모드
+//		String ip = CommonUtil.clientIp();
+//		Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
+//				companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
+//
+//		// 암호화, 복호화 전환로직
+//		if(changeColumnComment != null) {
+//			if(changeColumnComment.contains("(암호화,수정가능)")) {
+//				if(isEncryption.equals("1")) {
+//					comment = fieldOptionName + "(수정가능)";
+//
+//					log.info("이전에 암호화필드였지만 암호화 불필요로 수정하여 모든데이터 복호화시작");
+//					secretKey = companyService.selectCompanyEncryptKey(companyId);
+//
+//					// 개인정보(유저)테이블 필드의 데이터 복호화
+//					List<KokonutUserFieldInfoDto> fieldList = kokonutUserService.selectUserFieldList(companyCode, beforField);
+//					for (KokonutUserFieldInfoDto fieldMap : fieldList) {
+//						Long userIdx = fieldMap.getIDX();
+//						String fieldValue = String.valueOf(fieldMap.getVALUE());
+//
+//						if (fieldValue.isEmpty() || fieldValue.equals("null")) {
+//							continue;
+//						}
+//
+//						String[] result = fieldValue.split(",");
+//						String resultText = result[0];
+//						String resultIV = result[1];
+//
+//						// 암호화 -> 복호화 시작
+//						String decryptedValue = AESGCMcrypto.decrypt(resultText, secretKey, resultIV);
+//						String queryString = beforField + "='"+decryptedValue+"'";
+////					log.info("queryString : "+queryString);
+//
+//						kokonutUserService.updateUserTable(companyCode, userIdx, queryString);
+//					}
+//
+//					// 개인정보(휴면)테이블 필드의 데이터 복호화
+//					List<KokonutDormantFieldInfoDto> fieldListDormant = kokonutDormantService.selectDormantFieldList(companyCode, beforField);
+//					for (KokonutDormantFieldInfoDto fieldMap : fieldListDormant) {
+//						Long userIdx = fieldMap.getIDX();
+//						String fieldValue = String.valueOf(fieldMap.getVALUE());
+//
+//						if (fieldValue.isEmpty() || fieldValue.equals("null")) {
+//							continue;
+//						}
+//
+//						String[] result = fieldValue.split(",");
+//						String resultText = result[0];
+//						String resultIV = result[1];
+//
+//						// 암호화 -> 복호화 시작
+//						String decryptedValue = AESGCMcrypto.decrypt(resultText, secretKey, resultIV);
+//						String queryString = beforField + "='"+decryptedValue+"'";
+////					log.info("queryString : "+queryString);
+//
+//						kokonutUserService.updateUserTable(companyCode, userIdx, queryString);
+//					}
+//
+//				} else {
+//					comment = fieldOptionName + "(암호화,수정가능)";
+//				}
+//			} else {
+//				if(isEncryption.equals("0")) {
+//					comment = fieldOptionName + "(암호화,수정가능)";
+//
+//					log.info("이전에 암호화필드가 아니였지만 암호화필요로 수정하여 이전 데이터를 암호화시작");
+//					secretKey = companyService.selectCompanyEncryptKey(companyId);
+//
+//					// 개인정보(유저)테이블 필드의 데이터 암호화
+//					List<KokonutUserFieldInfoDto> fieldListUser = kokonutUserService.selectUserFieldList(companyCode, beforField);
+//					for (KokonutUserFieldInfoDto fieldMap : fieldListUser) {
+//						Long userIdx = fieldMap.getIDX();
+//						String fieldValue = String.valueOf(fieldMap.getVALUE());
+//
+//						if (fieldValue.isEmpty() || fieldValue.equals("null")){
+//							continue;
+//						}
+//
+//						byte[] ivBytes = AESGCMcrypto.generateIV();
+//						String ciphertext = AESGCMcrypto.encrypt(fieldValue.getBytes(StandardCharsets.UTF_8), secretKey, ivBytes);
+//						// 평문 -> 암호화 시작
+//						String encryptedValue = ciphertext+","+Base64.getEncoder().encodeToString(ivBytes);
+//
+//						String queryString = beforField + "='"+encryptedValue+"'";
+////					log.info("queryString : "+queryString);
+//
+//						kokonutUserService.updateUserTable(companyCode, userIdx, queryString);
+//					}
+//
+//					// 휴면테이블 필드의 데이터 암호화
+//					List<KokonutDormantFieldInfoDto> fieldListDormant = kokonutDormantService.selectDormantFieldList(companyCode, beforField);
+//					for (KokonutDormantFieldInfoDto fieldMap : fieldListDormant) {
+//						Long userIdx = fieldMap.getIDX();
+//						String fieldValue = String.valueOf(fieldMap.getVALUE());
+//
+//						if (fieldValue.isEmpty() || fieldValue.equals("null")){
+//							continue;
+//						}
+//
+//						byte[] ivBytes = AESGCMcrypto.generateIV();
+//						String ciphertext = AESGCMcrypto.encrypt(fieldValue.getBytes(StandardCharsets.UTF_8), secretKey, ivBytes);
+//
+//						// 평문 -> 암호화 시작
+//						String encryptedValue = ciphertext+","+Base64.getEncoder().encodeToString(ivBytes);
+//
+//						String queryString = beforField + "='"+encryptedValue+"'";
+////					log.info("queryString : "+queryString);
+//
+//						kokonutDormantService.updateDormantTable(companyCode, userIdx, queryString);
+//					}
+//				} else {
+//					comment = fieldOptionName + "(수정가능)";
+//				}
+//			}
+//
+//			if (afterField == null) {
+//				// 사용테이블에 컬럼 수정
+//				kokonutUserService.alterModifyColumnCommentQuery(companyCode, fieldName, type, length, isNull, defaultValue, comment);
+//				// 휴면테이블에 컬럼 수정
+//				kokonutDormantService.alterModifyColumnCommentQuery(companyCode, fieldName, type, length, isNull, defaultValue, comment);
+//			} else {
+//				// 사용테이블에 컬럼 수정
+//				kokonutUserService.alterChangeColumnTableQuery(companyCode, beforField, fieldName, type, length, isNull, defaultValue, comment);
+//				// 휴면테이블에 컬럼 수정
+//				kokonutDormantService.alterChangeColumnTableQuery(companyCode, beforField, fieldName, type, length, isNull, defaultValue, comment);
+//			}
+//
+//			historyService.updateHistory(activityHistoryId,
+//					companyCode+" - "+activityCode.getDesc()+" 완료 이력", "", 1);
+//
+//		} else {
+//			log.error("수정할 필드가 테이블에 존재하지 않습니다.");
+//			historyService.updateHistory(activityHistoryId,
+//					companyCode+" - "+activityCode.getDesc()+" 실패 이력", "수정할 필드가 존재하지 않습니다.", 1);
+//			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO067.getCode(), "수정할 필드가 "+ResponseErrorCode.KO067.getDesc()));
+//		}
+//
+//		return ResponseEntity.ok(res.success(data));
+//	}
 
 	// 개인정보 테이블 + 휴면 테이블 필드 삭제 - 기존코코넛 메서드 : 없음
-	@Transactional
-	public ResponseEntity<Map<String, Object>> columDelete(String fieldName, String email) throws IOException {
-		log.info("columDelete 호출");
-
-		AjaxResponse res = new AjaxResponse();
-		HashMap<String, Object> data = new HashMap<>();
-
-		log.info("fieldName : "+ fieldName);
-		log.info("email : "+email);
-
-		// 해당 이메일을 통해 회사 IDX 조회
-		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
-
-		Long adminId;
-		Long companyId;
-		String companyCode;
-
-		if(adminCompanyInfoDto == null) {
-			log.error("이메일 정보가 존재하지 않습니다.");
-			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(), "해당 이메일의 정보가 "+ResponseErrorCode.KO004.getDesc()));
-		} else {
-			adminId = adminCompanyInfoDto.getAdminId(); // modifierIdx
-			companyId = adminCompanyInfoDto.getCompanyId(); // companyId
-			companyCode = adminCompanyInfoDto.getCompanyCode(); // tableName
-		}
-
-		int userCheckTable = kokonutUserService.selectExistUserTable(companyCode);
-		if(userCheckTable == 0) {
-			log.error("유저 테이블이 존재하지 않습니다. companyCode : "+companyCode);
-			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(), "유저 테이블이 "+ResponseErrorCode.KO004.getDesc()));
-		}
-		int dormantCheckTable = kokonutDormantService.selectExistDormantTable(companyCode);
-		if(dormantCheckTable == 0) {
-			log.error("휴면 테이블이 존재하지 않습니다. companyCode : "+companyCode);
-			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(), "휴면 테이블이 "+ResponseErrorCode.KO004.getDesc()));
-		}
-
-		// 개인정보테이블에 삭제할 필드가 존재하는지 여부 체크
-		List<KokonutUserFieldCheckDto> userTableCheck = kokonutUserService.selectUserTableNameAndFieldName(companyCode, fieldName);
-		if(userTableCheck.size() == 0) {
-			log.error("삭제할 필드가 개인정보 테이블에 존재하지 않습니다. companyCode : "+companyCode+", fieldName : "+fieldName);
-			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(), "삭제할 필드가 개인정보 "+ResponseErrorCode.KO004.getDesc()));
-		}
-
-		// 휴면테이블에 삭제할 필드가 존재하는지 여부 체크
-		List<KokonutDormantFieldCheckDto> dormantTableCheck = kokonutDormantService.selectDormantTableNameAndFieldName(companyCode, fieldName);
-		if(dormantTableCheck.size() == 0) {
-			log.error("삭제할 필드가 휴면 테이블에 존재하지 않습니다. companyCode : "+companyCode+", fieldName : "+fieldName);
-			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(), "삭제할 필드가 휴면 "+ResponseErrorCode.KO004.getDesc()));
-		}
-
-		// 회원컬럼수정 코드
-		ActivityCode activityCode = ActivityCode.AC_21;
-		// 활동이력 저장 -> 비정상 모드
-		String ip = CommonUtil.clientIp();
-		Long activityHistoryId = historyService.insertHistory(3, adminId, activityCode, companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
-
-		if(companyCode.equals(userTableCheck.get(0).getTABLE_NAME()) && fieldName.equals(userTableCheck.get(0).getCOLUMN_NAME()) &&
-				companyCode.equals(dormantTableCheck.get(0).getTABLE_NAME()) && fieldName.equals(dormantTableCheck.get(0).getCOLUMN_NAME())){
-			// 위 조건이 충족할 시 두테이블필드 삭제(Drop) 처리
-			kokonutUserService.alterDropColumnUserTableQuery(companyCode, fieldName);
-			kokonutDormantService.alterDropColumnDormantTableQuery(companyCode, fieldName);
-
-			historyService.updateHistory(activityHistoryId,
-					companyCode+" - "+activityCode.getDesc()+" 완료 이력", "", 1);
-		} else {
-			historyService.updateHistory(activityHistoryId,
-					companyCode+" - "+activityCode.getDesc()+" 실패 이력", "필드 삭제 조건에 부합하지 않습니다.", 1);
-		}
-
-		return ResponseEntity.ok(res.success(data));
-	}
+//	@Transactional
+//	public ResponseEntity<Map<String, Object>> columDelete(String fieldName, String email) throws IOException {
+//		log.info("columDelete 호출");
+//
+//		AjaxResponse res = new AjaxResponse();
+//		HashMap<String, Object> data = new HashMap<>();
+//
+//		log.info("fieldName : "+ fieldName);
+//		log.info("email : "+email);
+//
+//		// 해당 이메일을 통해 회사 IDX 조회
+//		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+//
+//		Long adminId;
+//		Long companyId;
+//		String companyCode;
+//
+//		if(adminCompanyInfoDto == null) {
+//			log.error("이메일 정보가 존재하지 않습니다.");
+//			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(), "해당 이메일의 정보가 "+ResponseErrorCode.KO004.getDesc()));
+//		} else {
+//			adminId = adminCompanyInfoDto.getAdminId(); // modifierIdx
+//			companyId = adminCompanyInfoDto.getCompanyId(); // companyId
+//			companyCode = adminCompanyInfoDto.getCompanyCode(); // tableName
+//		}
+//
+//		int userCheckTable = kokonutUserService.selectExistUserTable(companyCode);
+//		if(userCheckTable == 0) {
+//			log.error("유저 테이블이 존재하지 않습니다. companyCode : "+companyCode);
+//			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(), "유저 테이블이 "+ResponseErrorCode.KO004.getDesc()));
+//		}
+//		int dormantCheckTable = kokonutDormantService.selectExistDormantTable(companyCode);
+//		if(dormantCheckTable == 0) {
+//			log.error("휴면 테이블이 존재하지 않습니다. companyCode : "+companyCode);
+//			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(), "휴면 테이블이 "+ResponseErrorCode.KO004.getDesc()));
+//		}
+//
+//		// 개인정보테이블에 삭제할 필드가 존재하는지 여부 체크
+//		List<KokonutUserFieldCheckDto> userTableCheck = kokonutUserService.selectUserTableNameAndFieldName(companyCode, fieldName);
+//		if(userTableCheck.size() == 0) {
+//			log.error("삭제할 필드가 개인정보 테이블에 존재하지 않습니다. companyCode : "+companyCode+", fieldName : "+fieldName);
+//			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(), "삭제할 필드가 개인정보 "+ResponseErrorCode.KO004.getDesc()));
+//		}
+//
+//		// 휴면테이블에 삭제할 필드가 존재하는지 여부 체크
+//		List<KokonutDormantFieldCheckDto> dormantTableCheck = kokonutDormantService.selectDormantTableNameAndFieldName(companyCode, fieldName);
+//		if(dormantTableCheck.size() == 0) {
+//			log.error("삭제할 필드가 휴면 테이블에 존재하지 않습니다. companyCode : "+companyCode+", fieldName : "+fieldName);
+//			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(), "삭제할 필드가 휴면 "+ResponseErrorCode.KO004.getDesc()));
+//		}
+//
+//		// 회원컬럼수정 코드
+//		ActivityCode activityCode = ActivityCode.AC_21;
+//		// 활동이력 저장 -> 비정상 모드
+//		String ip = CommonUtil.clientIp();
+//		Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode, companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
+//
+//		if(companyCode.equals(userTableCheck.get(0).getTABLE_NAME()) && fieldName.equals(userTableCheck.get(0).getCOLUMN_NAME()) &&
+//				companyCode.equals(dormantTableCheck.get(0).getTABLE_NAME()) && fieldName.equals(dormantTableCheck.get(0).getCOLUMN_NAME())){
+//			// 위 조건이 충족할 시 두테이블필드 삭제(Drop) 처리
+//			kokonutUserService.alterDropColumnUserTableQuery(companyCode, fieldName);
+//			kokonutDormantService.alterDropColumnDormantTableQuery(companyCode, fieldName);
+//
+//			historyService.updateHistory(activityHistoryId,
+//					companyCode+" - "+activityCode.getDesc()+" 완료 이력", "", 1);
+//		} else {
+//			historyService.updateHistory(activityHistoryId,
+//					companyCode+" - "+activityCode.getDesc()+" 실패 이력", "필드 삭제 조건에 부합하지 않습니다.", 1);
+//		}
+//
+//		return ResponseEntity.ok(res.success(data));
+//	}
 
 	// 기본 테이블의 컬럼조회
 	public ResponseEntity<Map<String, Object>> tableColumnCall(JwtFilterDto jwtFilterDto) {
@@ -1621,8 +1621,9 @@ public class DynamicUserService {
 		Long adminId = adminCompanyInfoDto.getAdminId();
 		String companyCode = adminCompanyInfoDto.getCompanyCode();
 
-		// 휴대전화변경 코드
+		// 테이블 항목 추가 코드
 		ActivityCode activityCode = ActivityCode.AC_19;
+
 		// 활동이력 저장 -> 비정상 모드
 		String ip = CommonUtil.clientIp();
 
@@ -1757,13 +1758,14 @@ public class DynamicUserService {
 
 	// 테이블에 추가된 컬럼을 삭제한다.
 	@Transactional
-	public ResponseEntity<Map<String, Object>> tableColumnDelete(KokonutColumnDeleteDto kokonutColumnDeleteDto, JwtFilterDto jwtFilterDto) {
+	public ResponseEntity<Map<String, Object>> tableColumnDelete(KokonutColumnDeleteDto kokonutColumnDeleteDto, JwtFilterDto jwtFilterDto) throws IOException {
 		log.info("tableColumnDelete 호출");
 
 		AjaxResponse res = new AjaxResponse();
 		HashMap<String, Object> data = new HashMap<>();
 
 		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(jwtFilterDto.getEmail());
+		long adminId = adminCompanyInfoDto.getAdminId();
 		String cpCode = adminCompanyInfoDto.getCompanyCode();
 
 		AdminOtpKeyDto adminOtpKeyDto = adminRepository.findByOtpKey(jwtFilterDto.getEmail());
@@ -1779,6 +1781,12 @@ public class DynamicUserService {
 
 		Optional<CompanyTable> optionalCompanyTable = companyTableRepository.findCompanyTableByCtName(tableName);
 		if(optionalCompanyTable.isPresent()) {
+
+			// 테이블 항목 삭제 코드
+			ActivityCode activityCode = ActivityCode.AC_21;
+			// 활동이력 저장 -> 비정상 모드
+			String ip = CommonUtil.clientIp();
+			Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode, cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
 
 			String ctNameStatus = optionalCompanyTable.get().getCtNameStatus();
 			String ctPhoneStatus = optionalCompanyTable.get().getCtPhoneStatus();
@@ -1835,6 +1843,8 @@ public class DynamicUserService {
 			optionalCompanyTable.get().setModify_date(LocalDateTime.now());
 			companyTableRepository.save(optionalCompanyTable.get());
 
+			historyService.updateHistory(activityHistoryId,
+					cpCode+" - "+activityCode.getDesc()+" 완료 이력", "", 1);
 		}
 
 		return ResponseEntity.ok(res.success(data));

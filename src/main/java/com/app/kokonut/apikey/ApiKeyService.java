@@ -166,7 +166,7 @@ public class ApiKeyService {
             activityCode = ActivityCode.AC_25;
 
             // 활동이력 저장 -> 비정상 모드
-            activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
+            activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
                     companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
 
             String akKey = optionalApiKey.get().getAkKey();

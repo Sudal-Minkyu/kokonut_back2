@@ -171,7 +171,7 @@ public class ProvisionService {
         provision.setInsert_date(LocalDateTime.now());
 
         // 활동이력 저장 -> 비정상 모드
-        activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
+        activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
                 cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(),0, email);
 
         try {
@@ -447,7 +447,7 @@ public class ProvisionService {
 
         int dchCount = 0; // 복호화 카운팅
 
-        ActivityCode activityCode;
+        ActivityCode activityCode = ActivityCode.AC_47_2;
         String ip = CommonUtil.clientIp();
         Long activityHistoryId;
 
@@ -478,12 +478,10 @@ public class ProvisionService {
 
             if(provisionDownloadCheckDto.getProProvide() == 0) {
                 // 내부제공
-                activityCode = ActivityCode.AC_47_2;
                 fileName = "개인정보_내부제공 압축파일";
                 sheetName = proCode+"_내부제공";
             } else {
                 // 외부제공
-                activityCode = ActivityCode.AC_47_3;
                 fileName = "개인정보_외부제공 압축파일";
                 sheetName = proCode+"_외부제공";
             }
