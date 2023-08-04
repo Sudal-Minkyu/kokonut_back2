@@ -51,12 +51,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_KOKONUT.getCode(),ResponseErrorCode.ERROR_KOKONUT.getDesc()));
     }
 
-    @ExceptionHandler(AccessDeniedException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public void handleAccessDeniedException(AccessDeniedException ex) {
-        log.error("에러내용 : 403 에러발생!");
-        log.error("ex : "+ex);
-        log.error("ex.getMessage() : "+ex.getMessage());
-    }
+//    @ExceptionHandler(AccessDeniedException.class)
+//    @ResponseStatus(HttpStatus.FORBIDDEN)
+//    public void handleAccessDeniedException(AccessDeniedException ex) {
+//        log.error("에러내용 : 403 에러발생!");
+//        log.error("ex : "+ex);
+//        log.error("ex.getMessage() : "+ex.getMessage());
+//    }
 
 }

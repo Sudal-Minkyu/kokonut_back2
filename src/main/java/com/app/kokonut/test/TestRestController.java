@@ -3,7 +3,10 @@ package com.app.kokonut.test;
 import com.app.kokonut.alimtalk.AlimtalkSendService;
 import com.app.kokonut.alimtalk.dtos.AlimtalkTemplateInfoDto;
 import com.app.kokonut.common.AjaxResponse;
+import com.app.kokonut.common.ResponseErrorCode;
+import com.app.kokonut.common.component.ReqUtils;
 import com.app.kokonut.common.realcomponent.CommonUtil;
+import com.app.kokonut.configs.MailSender;
 import com.app.kokonut.navercloud.NaverCloudPlatformService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -28,14 +31,53 @@ import java.util.Map;
 @RestController
 public class TestRestController {
 
+    private final MailSender mailSender;
     private final NaverCloudPlatformService naverCloudPlatformService;
     private final AlimtalkSendService alimtalkSendService;
 
     @Autowired
-    public TestRestController(NaverCloudPlatformService naverCloudPlatformService, AlimtalkSendService alimtalkSendService){
+    public TestRestController(MailSender mailSender, NaverCloudPlatformService naverCloudPlatformService, AlimtalkSendService alimtalkSendService){
+        this.mailSender = mailSender;
         this.naverCloudPlatformService = naverCloudPlatformService;
         this.alimtalkSendService = alimtalkSendService;
     }
+
+    @ApiOperation(value = "메일전송 테스트용")
+    @GetMapping(value = "/mailSendTest")
+    public ResponseEntity<Map<String,Object>> mailSendTest() throws IOException {
+        log.info("mailSendTest 호출");
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+        // 인증번호 메일전송
+        String title = ReqUtils.filter("메일전송을 완료했습니다. - 1");
+        String contents = ReqUtils.unFilter("메일내용 : 쌸라쌸라");
+
+        // 템플릿 호출을 위한 데이터 세팅
+		HashMap<String, String> callTemplate = new HashMap<>();
+		callTemplate.put("template", "KokonutMailTemplate");
+		callTemplate.put("title", "메일전송을 완료했습니다. - 2");
+
+		callTemplate.put("content", contents);
+
+//		// 템플릿 TODO 템플릿 디자인 추가되면 수정
+		contents = mailSender.getHTML5(callTemplate);
+        String reciverName = "kokonut";
+
+        String mailSenderResult = mailSender.sendKokonutMail("woody@kokonut.me", reciverName, title, contents);
+        if(mailSenderResult != null) {
+            // mailSender 성공
+            log.info("### 메일전송 성공했습니다. reciver Email : woody@kokonut.me");
+        }else{
+            // mailSender 실패
+            log.error("### 해당 메일 전송에 실패했습니다. 관리자에게 문의하세요. reciverEmail : woody@kokonut.me");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO041.getCode(), ResponseErrorCode.KO041.getDesc()));
+        }
+
+        return ResponseEntity.ok(res.success(data));
+    }
+
 
     @ApiOperation(value = "공인IP 호출 테스트용")
     @GetMapping(value = "/publicIpGet")
