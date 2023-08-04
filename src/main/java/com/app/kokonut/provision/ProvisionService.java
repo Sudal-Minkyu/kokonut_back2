@@ -352,7 +352,7 @@ public class ProvisionService {
         activityCode = ActivityCode.AC_14;
 
         // 활동이력 저장 -> 비정상 모드
-        activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
+        activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
                 cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
 
         Page<ProvisionListDto> provisionListDtos = provisionRepository.findByProvisionList(provisionSearchDto, pageable);
@@ -548,7 +548,7 @@ public class ProvisionService {
             // 셀렉트 기본셋팅
             selectQuery.append(
                     ", DATE_FORMAT(kokonut_REGISTER_DATE, '%Y-%m-%d %H시') as 회원가입일시, " +
-                            "COALESCE(DATE_FORMAT(kokonut_LAST_LOGIN_DATE, '%Y-%m-%d %H시'), '없음') as 마지막로그인일시, ");
+                            "COALESCE(DATE_FORMAT(kokonut_LAST_LOGIN_DATE, '%Y-%m-%d %H시'), '없음') as 마지막로그인일시 ");
 
             for(int i=0; i<targetList.size(); i++) {
                 if(!targetList.get(i).equals("pass") && !securityList.get(i).equals("pass") && !headerName.get(i).equals("pass")) {
@@ -606,9 +606,9 @@ public class ProvisionService {
                 }
             }
 
-            for(Map<String, Object> map : privacyInfo) {
+//            for(Map<String, Object> map : privacyInfo) {
 //                log.info("수정후 map : "+map);
-            }
+//            }
 
 //            log.info("privacyInfo : "+privacyInfo);
 
@@ -623,13 +623,13 @@ public class ProvisionService {
             String contents = ReqUtils.unFilter("파일암호 : "+filePassword);
 
             // 템플릿 호출을 위한 데이터 세팅
-            HashMap<String, String> callTemplate = new HashMap<>();
-            callTemplate.put("template", "KokonutMailTemplate");
-            callTemplate.put("title", "개인정보제공 파일암호 알림");
-            callTemplate.put("content", contents);
-
-            // 템플릿 TODO 템플릿 디자인 추가되면 수정
-            contents = mailSender.getHTML5(callTemplate);
+//            HashMap<String, String> callTemplate = new HashMap<>();
+//            callTemplate.put("template", "KokonutMailTemplate");
+//            callTemplate.put("title", "개인정보제공 파일암호 알림");
+//            callTemplate.put("content", contents);
+//
+//            // 템플릿 TODO 템플릿 디자인 추가되면 수정
+//            contents = mailSender.getHTML5(callTemplate);
             String reciverName = "kokonut";
 
             String mailSenderResult = mailSender.sendKokonutMail(email, reciverName, title, contents);

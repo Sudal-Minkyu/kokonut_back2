@@ -429,13 +429,14 @@ public class AdminService {
         String email = jwtFilterDto.getEmail();
 
         String roleCode;
-        if(choseRole.equals("대표관리자")) {
-            roleCode = "ROLE_MASTER";
-        } else if(choseRole.equals("최고관리자")) {
+//        if(choseRole.equals("대표관리자")) {
+//            roleCode = "ROLE_MASTER";
+//        } else
+        if(choseRole.equals("최고관리자")) {
             roleCode = "ROLE_ADMIN";
-        } else if(choseRole.equals("일반관리자")) {
+        } else if(choseRole.equals("관리자")) {
             roleCode = "ROLE_USER";
-        } else if(choseRole.equals("임시관리자")) {
+        } else if(choseRole.equals("게스트")) {
             roleCode = "ROLE_GUEST";
         } else {
             roleCode = "";
