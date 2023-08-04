@@ -206,12 +206,21 @@ public class MailSender {
 		log.info("htmlURL : "+htmlURL);
 
 		URL url = new URL(htmlURL);
+		log.info("여기까지왔니? - 1");
 		URLConnection conn = url.openConnection();
+		log.info("여기까지왔니? - 2");
 		InputStream is = conn.getInputStream();
+		log.info("여기까지왔니? - 3");
 		String renaderdHtml = IOUtils.toString(is, StandardCharsets.UTF_8);
+		log.info("여기까지왔니? - 4");
 		Set<String>keySet = callTemplate.keySet();
+		log.info("여기까지왔니? - 5");
 		for ( String key : keySet){
-			renaderdHtml = renaderdHtml.replace("{"+key+"}", callTemplate.get(key).toString());
+			log.info("key : "+key);
+			log.info("keySet : "+keySet);
+
+			renaderdHtml = renaderdHtml.replace("{"+key+"}", callTemplate.get(key));
+			log.info("여기까지왔니? - 6");
 		}
 		log.info("이메일발송");
 
