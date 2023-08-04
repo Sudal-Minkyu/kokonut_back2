@@ -213,7 +213,6 @@ public class MailSender {
 		log.info("여기까지왔니? - 2");
 		log.info("conn : "+conn);
 		log.info("conn.getInputStream() : "+conn.getInputStream());
-
 		InputStream is = conn.getInputStream();
 		log.info("여기까지왔니? - 3");
 		String renaderdHtml = IOUtils.toString(is, StandardCharsets.UTF_8);
