@@ -3,6 +3,7 @@ package com.app.kokonut.test;
 import com.app.kokonut.alimtalk.AlimtalkSendService;
 import com.app.kokonut.alimtalk.dtos.AlimtalkTemplateInfoDto;
 import com.app.kokonut.common.AjaxResponse;
+import com.app.kokonut.common.realcomponent.CommonUtil;
 import com.app.kokonut.navercloud.NaverCloudPlatformService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,6 +35,23 @@ public class TestRestController {
     public TestRestController(NaverCloudPlatformService naverCloudPlatformService, AlimtalkSendService alimtalkSendService){
         this.naverCloudPlatformService = naverCloudPlatformService;
         this.alimtalkSendService = alimtalkSendService;
+    }
+
+    @ApiOperation(value = "공인IP 호출 테스트용")
+    @GetMapping(value = "/publicIpGet")
+    public ResponseEntity<Map<String,Object>> publicIpGet(HttpServletRequest request) throws IOException {
+        log.info("publicIpGet 호출");
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+        log.info("request.getRemoteAddr() : "+request.getRemoteAddr());
+        log.info("CommonUtil.publicIp() : "+CommonUtil.publicIp());
+        log.info("CommonUtil.clientIp() : "+CommonUtil.clientIp());
+        log.info("CommonUtil.testIp(request) : "+CommonUtil.testIp(request));
+        log.info("CommonUtil.getServerIp() : "+ CommonUtil.getServerIp());
+
+        return ResponseEntity.ok(res.success(data));
     }
 
     @ApiOperation(value = "코코넛 API호출 API 테스트용")

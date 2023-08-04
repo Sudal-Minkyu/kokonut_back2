@@ -5,6 +5,7 @@ import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.configs.exception.KokonutAPIException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -48,6 +49,14 @@ public class GlobalExceptionHandler {
         AjaxResponse res = new AjaxResponse();
         log.error("에러내용 : "+ResponseErrorCode.ERROR_KOKONUT.getDesc());
         return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_KOKONUT.getCode(),ResponseErrorCode.ERROR_KOKONUT.getDesc()));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public void handleAccessDeniedException(AccessDeniedException ex) {
+        log.error("에러내용 : 403 에러발생!");
+        log.error("ex : "+ex);
+        log.error("ex.getMessage() : "+ex.getMessage());
     }
 
 }

@@ -108,6 +108,27 @@ public class CommonUtil {
 		return ip;
 	}
 
+	// 테스트 IP 조회
+	public static String testIp(HttpServletRequest request){
+		String ip = request.getHeader("X-FORWARDED-FOR");
+
+		//proxy 환경일 경우
+		if (ip == null || ip.length() == 0) {
+			ip = request.getHeader("Proxy-Client-IP");
+		}
+
+		//웹로직 서버일 경우
+		if (ip == null || ip.length() == 0) {
+			ip = request.getHeader("WL-Proxy-Client-IP");
+		}
+
+		if (ip == null || ip.length() == 0) {
+			ip = request.getRemoteAddr() ;
+		}
+
+		return ip;
+	}
+
 //
 //    /**
 //	 * 브라우저별 파일 이름 가져오기
