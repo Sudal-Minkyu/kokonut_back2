@@ -221,7 +221,6 @@ public class MailSender {
 		log.info("여기까지왔니? - 5");
 		for ( String key : keySet){
 			log.info("key : "+key);
-			log.info("keySet : "+keySet);
 
 			renaderdHtml = renaderdHtml.replace("{"+key+"}", callTemplate.get(key));
 			log.info("여기까지왔니? - 6");
