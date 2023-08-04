@@ -44,19 +44,19 @@ public class GlobalExceptionHandler {
     }
 
     // 무슨에러가 발생했는지 모를때 -> 일단주석처리
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleKokonutException(){
-        AjaxResponse res = new AjaxResponse();
-        log.error("에러내용 : "+ResponseErrorCode.ERROR_KOKONUT.getDesc());
-        return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_KOKONUT.getCode(),ResponseErrorCode.ERROR_KOKONUT.getDesc()));
-    }
-
-//    @ExceptionHandler(AccessDeniedException.class)
-//    @ResponseStatus(HttpStatus.FORBIDDEN)
-//    public void handleAccessDeniedException(AccessDeniedException ex) {
-//        log.error("에러내용 : 403 에러발생!");
-//        log.error("ex : "+ex);
-//        log.error("ex.getMessage() : "+ex.getMessage());
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<Map<String, Object>> handleKokonutException(){
+//        AjaxResponse res = new AjaxResponse();
+//        log.error("에러내용 : "+ResponseErrorCode.ERROR_KOKONUT.getDesc());
+//        return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_KOKONUT.getCode(),ResponseErrorCode.ERROR_KOKONUT.getDesc()));
 //    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public void handleAccessDeniedException(AccessDeniedException ex) {
+        log.error("에러내용 : 403 에러발생!");
+        log.error("ex : "+ex);
+        log.error("ex.getMessage() : "+ex.getMessage());
+    }
 
 }
