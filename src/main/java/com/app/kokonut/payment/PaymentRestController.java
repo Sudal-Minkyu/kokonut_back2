@@ -50,9 +50,11 @@ public class PaymentRestController {
             "2. 받은 요금의 값이 빈값이거나, 0원일 경우 에러를 던저준다." +
             "3. 결제API를 호출하여 결제하고 디비에 기록한다.")
     @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-    public ResponseEntity<Map<String,Object>> billingPay(@RequestParam(value="payAmount", defaultValue = "") String payAmount) throws Exception {
+    public ResponseEntity<Map<String,Object>> billingPay(@RequestParam(value="payCloudAmount", defaultValue = "0") Integer payCloudAmount,
+                                                         @RequestParam(value="payServiceAmount", defaultValue = "0") Integer payServiceAmount,
+                                                         @RequestParam(value="payEmailAmount", defaultValue = "0") Integer payEmailAmount) throws Exception {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
-        return paymentService.billingPay(payAmount, jwtFilterDto);
+        return paymentService.billingPay(payCloudAmount, payServiceAmount, payEmailAmount, jwtFilterDto);
     }
 
     @PostMapping(value = "/billingDelete")
