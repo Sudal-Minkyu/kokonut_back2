@@ -91,8 +91,8 @@
 ////        // 정보제공 등록 코드
 ////        ActivityCode activityCode = ActivityCode.AC_21;
 ////        // 활동이력 저장 -> 비정상 모드
-////        String ip = CommonUtil.clientIp();
-////        Long activityHistoryId = activityHistoryService.insertHistory(4, adminId, activityCode, companyCode + " - " + activityCode.getDesc() + " 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
+////        String ip = CommonUtil.publicIp();
+////        Long activityHistoryId = activityHistoryService.insertHistory(4, adminId, activityCode, companyCode + " - " + activityCode.getDesc() + " 시도 이력", "", ip, 0, email);
 ////
 //        String nowDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 //        // 고유넘버

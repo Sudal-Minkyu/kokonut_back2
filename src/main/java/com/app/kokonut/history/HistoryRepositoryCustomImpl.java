@@ -250,7 +250,7 @@ public class HistoryRepositoryCustomImpl extends QuerydslRepositorySupport imple
                     history.activityCode,
                     history.ahActivityDetail,
                     history.ahReason,
-                    history.ahIpv4IpAddr,
+                    history.ahPublicIpAddr,
                     history.ahState,
                     history.insert_email
                 ));

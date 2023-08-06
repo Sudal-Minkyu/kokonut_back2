@@ -21,7 +21,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -79,7 +78,7 @@ public class CompanySettingService {
 
     // 해외로그인 차단 서비스 설정
     @Transactional
-    public ResponseEntity<Map<String, Object>> overseasBlockSetting(JwtFilterDto jwtFilterDto) throws IOException {
+    public ResponseEntity<Map<String, Object>> overseasBlockSetting(JwtFilterDto jwtFilterDto) {
         log.info("overseasBlockSetting 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -103,18 +102,13 @@ public class CompanySettingService {
 
             if(overseasBlock.equals("0")) {
                 optionalCompanySetting.get().setCsOverseasBlockSetting("1");
-
                 state = " 차단";
-                activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                        cpCode+" - "+activityCode.getDesc()+state+" 시도 이력", "", CommonUtil.clientIp(), CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
-
             } else {
                 optionalCompanySetting.get().setCsOverseasBlockSetting("0");
-
                 state = " 허용";
-                activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                        cpCode+" - "+activityCode.getDesc()+state+" 시도 이력", "", CommonUtil.clientIp(), CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
             }
+            activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
+                    cpCode+" - "+activityCode.getDesc()+state+" 시도 이력", "", CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
 
             companySettingRepository.save(optionalCompanySetting.get());
 
@@ -127,7 +121,7 @@ public class CompanySettingService {
 
     // 접속허용 IP설정
     @Transactional
-    public ResponseEntity<Map<String, Object>> accessSetting(JwtFilterDto jwtFilterDto) throws IOException {
+    public ResponseEntity<Map<String, Object>> accessSetting(JwtFilterDto jwtFilterDto) {
         log.info("accessSetting 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -150,20 +144,16 @@ public class CompanySettingService {
 
             if(accessIpSetting.equals("0")) {
                 optionalCompanySetting.get().setCsAccessSetting("1");
-
                 state = " 활성화";
-                activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                        cpCode+" - "+activityCode.getDesc()+state+" 시도 이력", "", CommonUtil.clientIp(), CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
-
             } else {
                 optionalCompanySetting.get().setCsAccessSetting("0");
-
                 state = " 비활성화";
-                activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                        cpCode+" - "+activityCode.getDesc()+state+" 시도 이력", "", CommonUtil.clientIp(), CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
             }
+            activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
+                    cpCode+" - "+activityCode.getDesc()+state+" 시도 이력", "", CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
 
             companySettingRepository.save(optionalCompanySetting.get());
+
             historyService.updateHistory(activityHistoryId,
                     cpCode+" - "+activityCode.getDesc()+state+" 시도 이력", "", 1);
         }
@@ -173,7 +163,7 @@ public class CompanySettingService {
 
     // 비밀번호 변경주기 설정
     @Transactional
-    public ResponseEntity<Map<String, Object>> passwordChangeSetting(JwtFilterDto jwtFilterDto, String csPasswordChangeSetting) throws IOException {
+    public ResponseEntity<Map<String, Object>> passwordChangeSetting(JwtFilterDto jwtFilterDto, String csPasswordChangeSetting) {
         log.info("passwordChangeSetting 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -189,7 +179,7 @@ public class CompanySettingService {
         Optional<CompanySetting> optionalCompanySetting = companySettingRepository.findCompanySettingByCpCode(cpCode);
         if(optionalCompanySetting.isPresent()) {
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", CommonUtil.clientIp(), CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
+                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
 
             optionalCompanySetting.get().setCsPasswordChangeSetting(csPasswordChangeSetting);
             companySettingRepository.save(optionalCompanySetting.get());
@@ -203,7 +193,7 @@ public class CompanySettingService {
 
     // 비밀번호 오류 접속제한 설정
     @Transactional
-    public ResponseEntity<Map<String, Object>> passwordErrorCountSetting(JwtFilterDto jwtFilterDto, String csPasswordErrorCountSetting) throws IOException {
+    public ResponseEntity<Map<String, Object>> passwordErrorCountSetting(JwtFilterDto jwtFilterDto, String csPasswordErrorCountSetting) {
         log.info("passwordErrorCountSetting 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -219,7 +209,7 @@ public class CompanySettingService {
         Optional<CompanySetting> optionalCompanySetting = companySettingRepository.findCompanySettingByCpCode(cpCode);
         if(optionalCompanySetting.isPresent()) {
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", CommonUtil.clientIp(), CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
+                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
 
             optionalCompanySetting.get().setCsPasswordErrorCountSetting(csPasswordErrorCountSetting);
             companySettingRepository.save(optionalCompanySetting.get());
@@ -233,7 +223,7 @@ public class CompanySettingService {
 
     // 자동 로그아웃 시간 설정
     @Transactional
-    public ResponseEntity<Map<String, Object>> autoLogoutSetting(JwtFilterDto jwtFilterDto, String csAutoLogoutSetting) throws IOException {
+    public ResponseEntity<Map<String, Object>> autoLogoutSetting(JwtFilterDto jwtFilterDto, String csAutoLogoutSetting) {
         log.info("autoLogoutSetting 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -249,7 +239,7 @@ public class CompanySettingService {
         Optional<CompanySetting> optionalCompanySetting = companySettingRepository.findCompanySettingByCpCode(cpCode);
         if(optionalCompanySetting.isPresent()) {
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", CommonUtil.clientIp(), CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
+                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
 
             optionalCompanySetting.get().setCsAutoLogoutSetting(csAutoLogoutSetting);
             companySettingRepository.save(optionalCompanySetting.get());
@@ -263,7 +253,7 @@ public class CompanySettingService {
 
     // 장기 미접속 접근제한 설정
     @Transactional
-    public ResponseEntity<Map<String, Object>> longDisconnectionSetting(JwtFilterDto jwtFilterDto, String csLongDisconnectionSetting) throws IOException {
+    public ResponseEntity<Map<String, Object>> longDisconnectionSetting(JwtFilterDto jwtFilterDto, String csLongDisconnectionSetting) {
         log.info("longDisconnectionSetting 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -280,7 +270,7 @@ public class CompanySettingService {
         if(optionalCompanySetting.isPresent()) {
 
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", CommonUtil.clientIp(), CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
+                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
 
             optionalCompanySetting.get().setCsLongDisconnectionSetting(csLongDisconnectionSetting);
             companySettingRepository.save(optionalCompanySetting.get());
@@ -294,7 +284,7 @@ public class CompanySettingService {
 
     // 접속허용 IP 등록
     @Transactional
-    public ResponseEntity<Map<String, Object>> accessIpSave(String csipIp, String csipRemarks, JwtFilterDto jwtFilterDto) throws IOException {
+    public ResponseEntity<Map<String, Object>> accessIpSave(String csipIp, String csipRemarks, JwtFilterDto jwtFilterDto) {
         log.info("accessIpSave 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -311,7 +301,7 @@ public class CompanySettingService {
         if(optionalCompanySetting.isPresent()) {
 
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", CommonUtil.clientIp(), CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
+                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
 
             if(!companySettingAccessIPRepository.existsCompanySettingAccessIPByCsIdAndCsipIp(optionalCompanySetting.get().getCsId(), csipIp)) {
                 CompanySettingAccessIP companySettingAccessIP = new CompanySettingAccessIP();
@@ -335,7 +325,7 @@ public class CompanySettingService {
 
     // 접속허용 IP 삭제
     @Transactional
-    public ResponseEntity<Map<String, Object>> apiKeyIpDelete(AccessIpDeleteDto accessIpDeleteDto, JwtFilterDto jwtFilterDto) throws IOException {
+    public ResponseEntity<Map<String, Object>> apiKeyIpDelete(AccessIpDeleteDto accessIpDeleteDto, JwtFilterDto jwtFilterDto) {
         log.info("apiKeyIpDelete 호출");
 
         String otpValue = accessIpDeleteDto.getOtpValue();
@@ -375,7 +365,7 @@ public class CompanySettingService {
         if(optionalCompanySetting.isPresent()) {
 
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", CommonUtil.clientIp(), CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
+                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
 
             companySettingAccessIPRepository.findByCompanySettingAccessIPDelete(deleteIpList);
 
@@ -387,7 +377,7 @@ public class CompanySettingService {
     }
 
     // 이메일발송 항목지정
-    public ResponseEntity<Map<String, Object>> emailSendItemSetting(String csEmailCodeSetting, JwtFilterDto jwtFilterDto) throws IOException {
+    public ResponseEntity<Map<String, Object>> emailSendItemSetting(String csEmailCodeSetting, JwtFilterDto jwtFilterDto) {
         log.info("emailSendItemSetting 호출");
 
 //        log.info("csEmailCodeSetting : "+csEmailCodeSetting);
@@ -413,7 +403,7 @@ public class CompanySettingService {
             }
 
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", CommonUtil.clientIp(), CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
+                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
 
             if (csEmailCodeSetting.equals("")) {
                 csEmailCodeSetting = null;

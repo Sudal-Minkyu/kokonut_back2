@@ -81,7 +81,7 @@ public class TestRestController {
 
     @ApiOperation(value = "공인IP 호출 테스트용")
     @GetMapping(value = "/publicIpGet")
-    public ResponseEntity<Map<String,Object>> publicIpGet(HttpServletRequest request) throws IOException {
+    public ResponseEntity<Map<String,Object>> publicIpGet(HttpServletRequest request) {
         log.info("publicIpGet 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -89,14 +89,10 @@ public class TestRestController {
 
         log.info("request.getRemoteAddr() : "+request.getRemoteAddr());
         log.info("CommonUtil.publicIp() : "+CommonUtil.publicIp());
-        log.info("CommonUtil.clientIp() : "+CommonUtil.clientIp());
-        log.info("CommonUtil.testIp(request) : "+CommonUtil.testIp(request));
         log.info("CommonUtil.getServerIp() : "+ CommonUtil.getServerIp());
 
         data.put("request.getRemoteAddr()", request.getRemoteAddr());
         data.put("CommonUtil.publicIp()",CommonUtil.publicIp());
-        data.put("CommonUtil.clientIp()",CommonUtil.clientIp());
-        data.put("CommonUtil.testIp(request)",CommonUtil.testIp(request));
         data.put("CommonUtil.getServerIp()",CommonUtil.getServerIp());
 
         return ResponseEntity.ok(res.success(data));

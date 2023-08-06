@@ -133,10 +133,10 @@ public class QnaService {
         // 1:1 문의하기등록 코드
         ActivityCode activityCode = ActivityCode.AC_41;
         // 활동이력 저장 -> 비정상 모드
-        String ip = CommonUtil.clientIp();
+        String ip = CommonUtil.publicIp();
 
         Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-                companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
+                companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
 
         // 1:1 문의 등록
         Qna qna = new Qna();
@@ -239,7 +239,7 @@ public class QnaService {
 
     // 1:1 문의 상세보기
     @Transactional
-    public ResponseEntity<Map<String, Object>> qnaDetail(Long qnaId, JwtFilterDto jwtFilterDto) throws IOException {
+    public ResponseEntity<Map<String, Object>> qnaDetail(Long qnaId, JwtFilterDto jwtFilterDto) {
         log.info("qnaDetail 호출");
 
         log.info("qnaId : "+qnaId);
@@ -290,7 +290,7 @@ public class QnaService {
 
     // 1:1 문의 답변하기
     @Transactional
-    public ResponseEntity<Map<String, Object>> qnaAnswer(QnaAnswerSaveDto qnaAnswerSaveDto, JwtFilterDto jwtFilterDto) throws IOException {
+    public ResponseEntity<Map<String, Object>> qnaAnswer(QnaAnswerSaveDto qnaAnswerSaveDto, JwtFilterDto jwtFilterDto) {
         log.info("qnaAnswer 호출");
 
         AjaxResponse res = new AjaxResponse();

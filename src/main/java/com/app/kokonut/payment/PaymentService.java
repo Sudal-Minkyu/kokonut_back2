@@ -450,7 +450,7 @@ public class PaymentService {
 			String cpCode = adminCompanyInfoDto.getCompanyCode();
 
 			ActivityCode activityCode;
-			String ip = CommonUtil.clientIp();
+			String ip = CommonUtil.publicIp();
 			Long activityHistoryId;
 
 			Optional<Company> optionalCompany = companyRepository.findByCpCode(cpCode);
@@ -463,7 +463,7 @@ public class PaymentService {
 
 					// 활동이력 저장 -> 비정상 모드
 					activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-							cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
+							cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
 
 					Optional<CompanyPayment> optionalCompanyPayment = companyPaymentRepository.findCompanyPaymentByCpiIdAndCpCode(optionalCompany.get().getCpiId(), cpCode);
 					if(optionalCompanyPayment.isPresent()) {
@@ -506,7 +506,7 @@ public class PaymentService {
 
 					// 활동이력 저장 -> 비정상 모드
 					activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-							cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
+							cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
 
 					LocalDate validStart;
 					if(optionalCompany.get().getCpValidStart() != null) {
@@ -591,7 +591,7 @@ public class PaymentService {
 
 		// 요금정산 코드
 		ActivityCode activityCode = ActivityCode.AC_60;
-		String ip = CommonUtil.clientIp();
+		String ip = CommonUtil.publicIp();
 		Long activityHistoryId;
 
 		// 빌링키 조회하기
@@ -599,7 +599,7 @@ public class PaymentService {
 
 			// 활동이력 저장 -> 비정상 모드
 			activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-					cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
+					cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
 
 			LocalDate firstDayOfLastMonth = LocalDate.now().withDayOfMonth(1);
 			LocalDate lastDayOfLastMonth = LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth());
@@ -674,12 +674,12 @@ public class PaymentService {
 
 				// 구독해지 코드
 				ActivityCode activityCode = ActivityCode.AC_61;
-				String ip = CommonUtil.clientIp();
+				String ip = CommonUtil.publicIp();
 				Long activityHistoryId;
 
 				// 활동이력 저장 -> 비정상 모드
 				activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-						cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
+						cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
 
 				Optional<CompanyPayment> optionalCompanyPayment = companyPaymentRepository.findCompanyPaymentByCpiIdAndCpCode(optionalCompany.get().getCpiId(), cpCode);
 

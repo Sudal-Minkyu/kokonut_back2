@@ -3,7 +3,6 @@ package com.app.kokonut.history;
 import com.app.kokonut.auth.jwt.SecurityUtil;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,7 +74,7 @@ public class HistoryRestController {
 //
 //        ApiKeyInfo apiKeyInfo = (ApiKeyInfo)request.getAttribute("apiKeyInfo");
 //        final Integer API_KEY_IDX = apiKeyInfo.getIdx();
-//        final String IP = CommonUtil.clientIp();
+//        final String ip = CommonUtil.publicIp();
 //        final String LOG_HEADER = "[kokonut api activity history excel download]";
 //
 //        try {

@@ -12,7 +12,6 @@ import com.app.kokonut.common.realcomponent.AESGCMcrypto;
 import com.app.kokonut.common.realcomponent.CommonUtil;
 import com.app.kokonut.common.realcomponent.Utils;
 import com.app.kokonut.company.company.CompanyRepository;
-import com.app.kokonut.company.company.CompanyService;
 import com.app.kokonut.company.companydatakey.CompanyDataKeyService;
 import com.app.kokonut.company.companysetting.CompanySettingRepository;
 import com.app.kokonut.company.companysetting.dtos.CompanySettingEmailDto;
@@ -26,6 +25,7 @@ import com.app.kokonut.company.companytablecolumninfo.dtos.CompanyTableColumnInf
 import com.app.kokonut.company.companytablecolumninfo.dtos.CompanyTableColumnNameSearch;
 import com.app.kokonut.configs.ExcelService;
 import com.app.kokonut.configs.GoogleOTP;
+import com.app.kokonut.configs.MailSender;
 import com.app.kokonut.history.HistoryService;
 import com.app.kokonut.history.dtos.ActivityCode;
 import com.app.kokonut.history.extra.decrypcounthistory.DecrypCountHistoryService;
@@ -33,21 +33,16 @@ import com.app.kokonut.history.extra.encrypcounthistory.EncrypCountHistoryServic
 import com.app.kokonut.privacyhistory.PrivacyHistoryService;
 import com.app.kokonut.privacyhistory.dtos.PrivacyHistoryCode;
 import com.app.kokonutdormant.KokonutDormantService;
-import com.app.kokonutdormant.dtos.KokonutDormantFieldCheckDto;
-import com.app.kokonutdormant.dtos.KokonutDormantFieldInfoDto;
 import com.app.kokonutdormant.dtos.KokonutDormantListDto;
-import com.app.kokonutremove.KokonutRemoveService;
 import com.app.kokonutuser.dtos.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import javax.crypto.SecretKey;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -58,7 +53,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-import com.app.kokonut.configs.MailSender;
 
 /**
  * @author Woody
@@ -70,10 +64,8 @@ import com.app.kokonut.configs.MailSender;
 @Service
 public class DynamicUserService {
 
-	private static final String HEADER_SEP_TYPE = "%%__%%";
 	private static final String COLUMN_SEP_TYPE = "||__||";
 
-	private final PasswordEncoder passwordEncoder;
 
 	private final AdminRepository adminRepository;
 	private final CompanyRepository companyRepository;
@@ -82,14 +74,12 @@ public class DynamicUserService {
 	private final GoogleOTP googleOTP;
 	private final ExcelService excelService;
 	private final KokonutUserService kokonutUserService;
-	private final CompanyService companyService;
 	private final HistoryService historyService;
 	private final PrivacyHistoryService privacyHistoryService;
 	private final CompanyDataKeyService companyDataKeyService;
 	private final CompanySettingRepository companySettingRepository;
 
 	private final KokonutDormantService kokonutDormantService;
-	private final KokonutRemoveService kokonutRemoveService;
 
 	private final CompanyTableRepository companyTableRepository;
 	private final CompanyTableColumnInfoRepository companyTableColumnInfoRepository;
@@ -100,15 +90,14 @@ public class DynamicUserService {
 	private final DynamicUserRepositoryCustom dynamicUserRepositoryCustom;
 
 	@Autowired
-	public DynamicUserService(PasswordEncoder passwordEncoder, AdminRepository adminRepository,
+	public DynamicUserService(AdminRepository adminRepository,
 							  CompanyRepository companyRepository, MailSender mailSender, GoogleOTP googleOTP, ExcelService excelService,
 							  KokonutUserService kokonutUserService, CompanyDataKeyService companyDataKeyService, KokonutDormantService kokonutDormantService,
-							  CompanyService companyService, HistoryService historyService, PrivacyHistoryService privacyHistoryService,
-							  CompanySettingRepository companySettingRepository, KokonutRemoveService kokonutRemoveService, CompanyTableRepository companyTableRepository,
+							  HistoryService historyService, PrivacyHistoryService privacyHistoryService,
+							  CompanySettingRepository companySettingRepository, CompanyTableRepository companyTableRepository,
 							  CompanyTableColumnInfoRepository companyTableColumnInfoRepository,
 							  EncrypCountHistoryService encrypCountHistoryService, DecrypCountHistoryService decrypCountHistoryService,
 							  DynamicUserRepositoryCustom dynamicUserRepositoryCustom) {
-		this.passwordEncoder = passwordEncoder;
 		this.adminRepository = adminRepository;
 		this.companyRepository = companyRepository;
 		this.mailSender = mailSender;
@@ -117,11 +106,9 @@ public class DynamicUserService {
 		this.kokonutUserService = kokonutUserService;
 		this.companyDataKeyService = companyDataKeyService;
 		this.kokonutDormantService = kokonutDormantService;
-		this.companyService = companyService;
 		this.historyService = historyService;
 		this.privacyHistoryService = privacyHistoryService;
 		this.companySettingRepository = companySettingRepository;
-		this.kokonutRemoveService = kokonutRemoveService;
 		this.companyTableRepository = companyTableRepository;
 		this.companyTableColumnInfoRepository = companyTableColumnInfoRepository;
 		this.encrypCountHistoryService = encrypCountHistoryService;
@@ -542,9 +529,9 @@ public class DynamicUserService {
 //		// 회원등록 코드
 //		ActivityCode activityCode = ActivityCode.AC_13;
 //		// 활동이력 저장 -> 비정상 모드
-//		String ip = CommonUtil.clientIp();
+//		String ip = CommonUtil.publicIp();
 //		Long activityHistoryId = historyService.insertHistory(1, adminId, activityCode,
-//				companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
+//				companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
 //		String id = null;
 //		try {
 //
@@ -721,7 +708,7 @@ public class DynamicUserService {
 //		// 개인정보수정 코드
 //		ActivityCode activityCode = ActivityCode.AC_02;
 //		// 활동이력 저장 -> 비정상 모드
-//		String ip = CommonUtil.clientIp();
+//		String ip = CommonUtil.publicIp();
 //		Long activityHistoryId = historyService.insertHistory(1, adminId, activityCode, companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
 //
 //		try {
@@ -905,7 +892,7 @@ public class DynamicUserService {
 //		// 회원삭제 코드
 //		ActivityCode activityCode = ActivityCode.AC_03;
 //		// 활동이력 저장 -> 비정상 모드
-//		String ip = CommonUtil.clientIp();
+//		String ip = CommonUtil.publicIp();
 //		Long activityHistoryId = historyService.insertHistory(1, adminId, activityCode,
 //				companyCode+" - "+activityCode.getDesc()+" 시도 이력 ID : "+kokonutRemoveInfoDtos.get(0).getID(), "", ip,  CommonUtil.publicIp(), 0, email);
 //
@@ -1211,9 +1198,9 @@ public class DynamicUserService {
 		// 테이블 항목 추가 코드
 		ActivityCode activityCode = ActivityCode.AC_19;
 		// 활동이력 저장 -> 비정상 모드
-		String ip = CommonUtil.clientIp();
+		String ip = CommonUtil.publicIp();
 		Long activityHistoryId = historyService.insertHistory(3, adminId, activityCode,
-				companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
+				companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,0, email);
 
 		// 사용테이블에 컬럼 추가
 		kokonutUserService.alterAddColumnTableQuery(companyCode, fieldName, type, length, isNull, defaultValue, comment);
@@ -1342,7 +1329,7 @@ public class DynamicUserService {
 //		// 회원컬럼수정 코드
 //		ActivityCode activityCode = ActivityCode.AC_20;
 //		// 활동이력 저장 -> 비정상 모드
-//		String ip = CommonUtil.clientIp();
+//		String ip = CommonUtil.publicIp();
 //		Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
 //				companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
 //
@@ -1536,7 +1523,7 @@ public class DynamicUserService {
 //		// 회원컬럼수정 코드
 //		ActivityCode activityCode = ActivityCode.AC_21;
 //		// 활동이력 저장 -> 비정상 모드
-//		String ip = CommonUtil.clientIp();
+//		String ip = CommonUtil.publicIp();
 //		Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode, companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
 //
 //		if(companyCode.equals(userTableCheck.get(0).getTABLE_NAME()) && fieldName.equals(userTableCheck.get(0).getCOLUMN_NAME()) &&
@@ -1611,7 +1598,7 @@ public class DynamicUserService {
 
 	// 컬럼추가 버튼(오른쪽에 추가)
 	@Transactional
-	public ResponseEntity<Map<String, Object>> tableColumnAdd(KokonutColumnAddDto kokonutColumnAddDto, JwtFilterDto jwtFilterDto) throws IOException {
+	public ResponseEntity<Map<String, Object>> tableColumnAdd(KokonutColumnAddDto kokonutColumnAddDto, JwtFilterDto jwtFilterDto) {
 		log.info("tableColumnAdd 호출");
 
 		AjaxResponse res = new AjaxResponse();
@@ -1625,7 +1612,7 @@ public class DynamicUserService {
 		ActivityCode activityCode = ActivityCode.AC_19;
 
 		// 활동이력 저장 -> 비정상 모드
-		String ip = CommonUtil.clientIp();
+		String ip = CommonUtil.publicIp();
 
 		log.info("kokonutColumAddDto : "+ kokonutColumnAddDto);
 
@@ -1671,7 +1658,7 @@ public class DynamicUserService {
 				companyTableColumnInfo.setInsert_date(LocalDateTime.now());
 
 				Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-						companyCode+" - "+activityCode.getDesc()+" 시도 이력"+ "추가된 컬럼명 : "+kokonutAddColumnListDto.getCiName(), "", ip,  CommonUtil.publicIp(),0, jwtFilterDto.getEmail());
+						companyCode+" - "+activityCode.getDesc()+" 시도 이력"+ "추가된 컬럼명 : "+kokonutAddColumnListDto.getCiName(), "", ip,0, jwtFilterDto.getEmail());
 
 				String fieldCode = optionalCompanyTable.get().getCtTableCount()+"_"+tableAddColumnCount;
 				companyTableColumnInfo.setCtciCode(fieldCode);
@@ -1758,7 +1745,7 @@ public class DynamicUserService {
 
 	// 테이블에 추가된 컬럼을 삭제한다.
 	@Transactional
-	public ResponseEntity<Map<String, Object>> tableColumnDelete(KokonutColumnDeleteDto kokonutColumnDeleteDto, JwtFilterDto jwtFilterDto) throws IOException {
+	public ResponseEntity<Map<String, Object>> tableColumnDelete(KokonutColumnDeleteDto kokonutColumnDeleteDto, JwtFilterDto jwtFilterDto) {
 		log.info("tableColumnDelete 호출");
 
 		AjaxResponse res = new AjaxResponse();
@@ -1785,8 +1772,8 @@ public class DynamicUserService {
 			// 테이블 항목 삭제 코드
 			ActivityCode activityCode = ActivityCode.AC_21;
 			// 활동이력 저장 -> 비정상 모드
-			String ip = CommonUtil.clientIp();
-			Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode, cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
+			String ip = CommonUtil.publicIp();
+			Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode, cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,0, jwtFilterDto.getEmail());
 
 			String ctNameStatus = optionalCompanyTable.get().getCtNameStatus();
 			String ctPhoneStatus = optionalCompanyTable.get().getCtPhoneStatus();
@@ -2383,7 +2370,7 @@ public class DynamicUserService {
 			data.put("totalCount", totalCount);
 
 			// 개인정보 조회로그 저장
-			privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_04, 1, CommonUtil.clientIp(), email);
+			privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_04, 1, CommonUtil.publicIp(), email);
 
 			// 암호화 횟수 저장
 			if(echCount > 0) {
@@ -2517,7 +2504,7 @@ public class DynamicUserService {
 		data.put("privacyInfo",privacyInfo);
 
 		// 개인정보 열람로그 저장
-		privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_05, 1, CommonUtil.clientIp(), email);
+		privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_05, 1, CommonUtil.publicIp(), email);
 
 		// 복호화 횟수 저장
 		if(dchCount > 0) {
@@ -2564,12 +2551,12 @@ public class DynamicUserService {
 		}
 
 		ActivityCode activityCode = ActivityCode.AC_06;
-		String ip = CommonUtil.clientIp();
+		String ip = CommonUtil.publicIp();
 		Long activityHistoryId;
 
 		// 활동이력 저장 -> 비정상 모드
 		activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-				cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason, ip, CommonUtil.publicIp(), 0, email);
+				cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason, ip, 0, email);
 
 		String fileName = LocalDate.now()+"_개인정보열람파일";
 		String sheetName = paramMap.get(0).get("아이디")+"의 개인정보";
