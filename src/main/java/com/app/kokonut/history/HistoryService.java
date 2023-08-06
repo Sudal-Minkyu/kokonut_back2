@@ -189,12 +189,12 @@ public class HistoryService {
 
         // 활동이력 다운로드 코드
         ActivityCode activityCode = ActivityCode.AC_07;
-        String ip = CommonUtil.clientIp();
+        String ip = CommonUtil.publicIp();
         Long activityHistoryId;
 
         // 활동이력 저장 -> 비정상 모드
         activityHistoryId = insertHistory(2, adminId, activityCode,
-                cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason, ip, CommonUtil.publicIp(), 0, email);
+                cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason, ip, 0, email);
 
         // 파일암호 전송
         // 파일암호(숫자6자리) 생성
@@ -301,7 +301,7 @@ public class HistoryService {
 
     // 활동이력 인서트
     public Long insertHistory(int ahType, Long adminId, ActivityCode activityCode,
-                                      String ahActivityDetail, String ahReason, String ahIpv4IpAddr, String ahPublicIpAddr, int ahState, String email) {
+                                      String ahActivityDetail, String ahReason, String ahPublicIpAddr, int ahState, String email) {
 
         History History = new History();
         History.setAhType(ahType);
@@ -309,7 +309,6 @@ public class HistoryService {
         History.setActivityCode(activityCode);
         History.setAhActivityDetail(ahActivityDetail);
         History.setAhReason(ahReason);
-        History.setAhIpv4IpAddr(ahIpv4IpAddr);
         History.setAhPublicIpAddr(ahPublicIpAddr);
         History.setAhState(ahState);
         History.setInsert_email(email);

@@ -2,7 +2,10 @@ package com.app.kokonutuser;
 
 import com.app.kokonut.auth.jwt.SecurityUtil;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
-import com.app.kokonutuser.dtos.*;
+import com.app.kokonutuser.dtos.KokonutColumnAddDto;
+import com.app.kokonutuser.dtos.KokonutColumnDeleteDto;
+import com.app.kokonutuser.dtos.KokonutSearchDto;
+import com.app.kokonutuser.dtos.KokonutUserSearchDto;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -15,7 +18,6 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,28 +32,7 @@ import java.util.Map;
 @RequestMapping(value = "/v2/api/DynamicUser")
 public class DynamicUserRestController {
 
-//	@Autowired
-//	PersonalInfoService personalInfoService;
-//
-//	@Autowired
-//	UserService userService;
-
 	private final DynamicUserService dynamicUserService;
-//
-//	@Autowired
-//	DynamicRemoveService dynamicRemoveService;
-//
-//	@Autowired
-//	DynamicDormantService dynamicDormantService;
-//
-//	@Autowired
-//	CompanyService companyService;
-//
-//	@Autowired
-//	AwsKmsService awsKmsService;
-//
-//	@Autowired
-//	ActivityHistoryService activityHistoryService;
 
 	@Autowired
 	public DynamicUserRestController(DynamicUserService dynamicUserService) {
@@ -77,7 +58,7 @@ public class DynamicUserRestController {
 	// 컬럼추가 버튼(오른쪽에 추가)
 	@PostMapping(value = "/tableColumnAdd")
 	@ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-	public ResponseEntity<Map<String, Object>> tableColumnAdd(@RequestBody KokonutColumnAddDto kokonutColumnAddDto) throws IOException {
+	public ResponseEntity<Map<String, Object>> tableColumnAdd(@RequestBody KokonutColumnAddDto kokonutColumnAddDto) {
 		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
 		return dynamicUserService.tableColumnAdd(kokonutColumnAddDto, jwtFilterDto);
 	}
@@ -89,7 +70,7 @@ public class DynamicUserRestController {
 			"3. 받은 테이블과 데이터를 삭제(drop)한다.")
 	@PostMapping(value = "/tableColumnDelete")
 	@ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-	public ResponseEntity<Map<String,Object>> tableColumnDelete(@RequestBody KokonutColumnDeleteDto kokonutColumnDeleteDto) throws IOException {
+	public ResponseEntity<Map<String,Object>> tableColumnDelete(@RequestBody KokonutColumnDeleteDto kokonutColumnDeleteDto) {
 		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
 		return dynamicUserService.tableColumnDelete(kokonutColumnDeleteDto, jwtFilterDto);
 	}
@@ -168,7 +149,7 @@ public class DynamicUserRestController {
 	@ApiImplicitParams({
 			@ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
 	})
-	public ResponseEntity<Map<String,Object>> createUserDatabase(HttpServletRequest request) throws IOException {
+	public ResponseEntity<Map<String,Object>> createUserDatabase(HttpServletRequest request) {
 		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwtOrApiKey(request);
 		return dynamicUserService.createTable(jwtFilterDto.getEmail());
 	}
@@ -178,41 +159,11 @@ public class DynamicUserRestController {
 	@ApiImplicitParams({
 			@ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
 	})
-	public ResponseEntity<Map<String,Object>> userListCall(@RequestBody KokonutUserSearchDto kokonutUserSearchDto, HttpServletRequest request) throws IOException {
+	public ResponseEntity<Map<String,Object>> userListCall(@RequestBody KokonutUserSearchDto kokonutUserSearchDto, HttpServletRequest request) {
 		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwtOrApiKey(request);
 		return dynamicUserService.userListCall(kokonutUserSearchDto, jwtFilterDto.getEmail());
 	}
 
-	// 유저생성(회원생성) -> 기존 코코넛 URL : /member/user/saveUser
-//	@PostMapping(value = "/userSaveCall")
-//	@ApiImplicitParams({
-//			@ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
-//	})
-//	public ResponseEntity<Map<String,Object>> userSaveCall(@RequestBody HashMap<String,Object> paramMap, HttpServletRequest request) throws IOException {
-//		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwtOrApiKey(request);
-//		return dynamicUserService.userSaveCall(paramMap, jwtFilterDto.getEmail());
-//	}
-
-//	// 유저정보 수정(회원수정) -> 기존 코코넛 URL : 없음
-//	@PostMapping(value = "/userUpdateCall")
-//	@ApiImplicitParams({
-//			@ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
-//	})
-//	public ResponseEntity<Map<String,Object>> userUpdateCall(@RequestBody HashMap<String,Object> paramMap, HttpServletRequest request) throws IOException {
-//		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwtOrApiKey(request);
-//		return dynamicUserService.userUpdateCall(paramMap, jwtFilterDto.getEmail());
-//	}
-//
-//	// 유저삭제(회원삭제) -> 기존 코코넛 URL : 없음
-//	@PostMapping(value = "/userDeleteCall")
-//	@ApiImplicitParams({
-//			@ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
-//	})
-//	public ResponseEntity<Map<String,Object>> userDeleteCall(@RequestParam(name="TYPE", defaultValue = "") String TYPE,
-//														   @RequestParam(name="IDX", defaultValue = "") Integer IDX, HttpServletRequest request) throws IOException {
-//		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwtOrApiKey(request);
-//		return dynamicUserService.userDeleteCall(TYPE, IDX, jwtFilterDto.getEmail());
-//	}
 
 	// 개인정보 일괄등록 - 엑셀파일 양식 다운로드 -> 기존 코코넛 URL : downloadExcelForm
 	@GetMapping(value = "/downloadExcelForm")
@@ -230,40 +181,9 @@ public class DynamicUserRestController {
 			@ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
 	})
 	public ResponseEntity<Map<String, Object>> readUploadExcelFile(@RequestParam(name="type", defaultValue = "") String type,
-																   MultipartHttpServletRequest request) throws IOException {
+																   MultipartHttpServletRequest request) {
 		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwtOrApiKey(request);
 		return dynamicUserService.readUploadExcelFile(request, type, jwtFilterDto.getEmail());
 	}
-
-	// 개인정보 테이블 필드 추가 - 기존코코넛 메서드 : /member/userDB/save
-//	@PostMapping(value = "/columSave")
-//	@ApiImplicitParams({
-//			@ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
-//	})
-//	public ResponseEntity<Map<String, Object>> columSave(@RequestBody KokonutColumSaveDto kokonutColumSaveDto, HttpServletRequest request) throws IOException {
-//		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwtOrApiKey(request);
-//		return dynamicUserService.columSave(kokonutColumSaveDto, jwtFilterDto.getEmail());
-//	}
-//
-//	// 개인정보 테이블 필드 수정 - 기존코코넛 메서드 : 없음
-//	@PostMapping(value = "/columUpdate")
-//	@ApiImplicitParams({
-//			@ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
-//	})
-//	public ResponseEntity<Map<String, Object>> columUpdate(@RequestBody KokonutColumUpdateDto kokonutColumUpdateDto, HttpServletRequest request) throws Exception {
-//		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwtOrApiKey(request);
-//		return dynamicUserService.columUpdate(kokonutColumUpdateDto, jwtFilterDto.getEmail());
-//	}
-//
-//	// 개인정보 테이블 필드 삭제 - 기존코코넛 메서드 : 없음
-//	@PostMapping(value = "/columDelete")
-//	@ApiImplicitParams({
-//			@ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
-//	})
-//	public ResponseEntity<Map<String, Object>> columDelete(@RequestParam(name="fieldName", defaultValue = "") String fieldName, HttpServletRequest request) throws IOException {
-//		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwtOrApiKey(request);
-//		return dynamicUserService.columDelete(fieldName, jwtFilterDto.getEmail());
-//	}
-
 
 }

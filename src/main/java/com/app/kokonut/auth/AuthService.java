@@ -585,7 +585,6 @@ public class AuthService {
                     // 로그인 코드
                     String publicIp = CommonUtil.publicIp();
                     ActivityCode activityCode = ActivityCode.AC_01;
-                    String ip = CommonUtil.clientIp();
 
                     AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(knEmail);
                     Long adminId = adminCompanyInfoDto.getAdminId();
@@ -594,7 +593,7 @@ public class AuthService {
 
                     // 활동이력 저장 -> 로그인실패 - 비정상 모드
                     Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-                            companyCode+" - "+activityCode.getDesc()+" 시도 이력", "로그인 실패 비밀번호 일치하지 않음", ip, publicIp, 0, knEmail);
+                            companyCode+" - "+activityCode.getDesc()+" 시도 이력", "로그인 실패 비밀번호 일치하지 않음", publicIp, 0, knEmail);
 
                     // Login ID/PW 를 기반으로 Authentication 객체 생성 -> 아아디 / 비번 검증
                     // 이때 authentication은 인증 여부를 확인하는 authenticated 값이 false
@@ -655,24 +654,23 @@ public class AuthService {
                                     }
                                 } else {
                                     historyService.insertHistory(4, adminId, activityCode,
-                                            companyCode+" - "+activityCode.getDesc()+" 시도 이력", "whois library 호출오류", ip, publicIp, 0, knEmail);
+                                            companyCode+" - "+activityCode.getDesc()+" 시도 이력", "whois library 호출오류", publicIp, 0, knEmail);
                                 }
                             }
 
                             
                             if(companySettingCheckDto.getCsAccessSetting().equals("1")) {
                                 log.info("접속 허용IP 체크");
-                                log.info("publicIp : "+publicIp);
                                 boolean accessIpCheckResult = companySettingAccessIPRepository.existsCompanySettingAccessIPByCsIdAndCsipIp(companySettingCheckDto.getCsId(), publicIp);
-                                log.info("accessIpCheckResult : "+accessIpCheckResult);
-//                                if(!accessIpCheckResult) {
-//                                    log.error("접속 허용되지 않은 IP 입니다. 관리자에게 등록을 요청해주세요.");
-//
-//                                    historyService.updateHistory(activityHistoryId,
-//                                            companyCode+" - "+activityCode.getDesc()+" 시도 이력", "접속 허용되지 않은 IP에서 로그인 시도하여 실패", 0);
-//
-//                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO094.getCode(),ResponseErrorCode.KO094.getDesc()));
-//                                }
+//                                log.info("accessIpCheckResult : "+accessIpCheckResult);
+                                if(!accessIpCheckResult) {
+                                    log.error("접속 허용되지 않은 IP 입니다. 관리자에게 등록을 요청해주세요.");
+
+                                    historyService.updateHistory(activityHistoryId,
+                                            companyCode+" - "+activityCode.getDesc()+" 시도 이력", "접속 허용되지 않은 IP에서 로그인 시도하여 실패", 0);
+
+                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO094.getCode(),ResponseErrorCode.KO094.getDesc()));
+                                }
                             }
 
                             int csPasswordErrorCountSetting = Integer.parseInt(companySettingCheckDto.getCsPasswordErrorCountSetting());

@@ -29,7 +29,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -50,8 +49,6 @@ public class AdminService {
     @Value("${kokonut.front.server.domain}")
     public String frontServerDomainIp;
 
-    private final AwsKmsUtil awsKmsUtil;
-
     private final AdminRepository adminRepository;
     private final CompanyRepository companyRepository;
     private final CompanyDataKeyService companyDataKeyService;
@@ -63,9 +60,8 @@ public class AdminService {
     private final RedisDao redisDao;
 
     @Autowired
-    public AdminService(AwsKmsUtil awsKmsUtil, AdminRepository adminRepository, CompanyRepository companyRepository, CompanyDataKeyService companyDataKeyService,
+    public AdminService(AdminRepository adminRepository, CompanyRepository companyRepository, CompanyDataKeyService companyDataKeyService,
                         HistoryService historyService, PasswordEncoder passwordEncoder, MailSender mailSender, EncrypCountHistoryService encrypCountHistoryService, RedisDao redisDao) {
-        this.awsKmsUtil = awsKmsUtil;
         this.adminRepository = adminRepository;
         this.companyRepository = companyRepository;
         this.companyDataKeyService = companyDataKeyService;
@@ -104,7 +100,7 @@ public class AdminService {
 
     // 휴대전화번호 변경
     @Transactional
-    public ResponseEntity<Map<String, Object>> phoneChange(String knName, String knPhoneNumber, JwtFilterDto jwtFilterDto) throws IOException {
+    public ResponseEntity<Map<String, Object>> phoneChange(String knName, String knPhoneNumber, JwtFilterDto jwtFilterDto) {
         log.info("phoneChange 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -119,14 +115,14 @@ public class AdminService {
         // 휴대전화변경 코드
         ActivityCode activityCode = ActivityCode.AC_35;
         // 활동이력 저장 -> 비정상 모드
-        String ip = CommonUtil.clientIp();
+        String ip = CommonUtil.publicIp();
 
         log.info("휴대전화번호 변경 이메일 : "+email);
 
         Optional<Admin> optionalAdmin = adminRepository.findByKnEmail(email);
         if(optionalAdmin.isPresent()) {
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
+                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
 
             optionalAdmin.get().setKnName(knName);
             optionalAdmin.get().setKnPhoneNumber(knPhoneNumber);
@@ -146,7 +142,7 @@ public class AdminService {
 
     // 소속명 변경
     @Transactional
-    public ResponseEntity<Map<String, Object>> cpChange(String cpContent, String knPassword, Integer state, JwtFilterDto jwtFilterDto) throws IOException {
+    public ResponseEntity<Map<String, Object>> cpChange(String cpContent, String knPassword, Integer state, JwtFilterDto jwtFilterDto) {
         log.info("cpChange 호출");
 
         log.info("변경내용 : "+cpContent);
@@ -171,7 +167,7 @@ public class AdminService {
             activityCode = ActivityCode.AC_37;
         }
 
-        String ip = CommonUtil.clientIp();
+        String ip = CommonUtil.publicIp();
 
         Optional<Admin> optionalAdmin = adminRepository.findByKnEmail(email);
         if(optionalAdmin.isPresent()) {
@@ -184,7 +180,7 @@ public class AdminService {
 
             // 활동이력 저장 -> 비정상 모드
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
+                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
 
             if(state == 1) {
                 // 소속명 변경
@@ -217,7 +213,7 @@ public class AdminService {
 
     // 비밀번호 변경
     @Transactional
-    public ResponseEntity<Map<String, Object>> pwdChange(String oldknPassword, String newknPassword, String newknPasswordCheck, JwtFilterDto jwtFilterDto) throws IOException {
+    public ResponseEntity<Map<String, Object>> pwdChange(String oldknPassword, String newknPassword, String newknPasswordCheck, JwtFilterDto jwtFilterDto) {
         log.info("pwdChange 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -231,7 +227,7 @@ public class AdminService {
 
         // 활동 코드
         ActivityCode activityCode = ActivityCode.AC_38;
-        String ip = CommonUtil.clientIp();
+        String ip = CommonUtil.publicIp();
 
         Optional<Admin> optionalAdmin = adminRepository.findByKnEmail(email);
         if(optionalAdmin.isPresent()) {
@@ -250,7 +246,7 @@ public class AdminService {
 
             // 활동이력 저장 -> 비정상 모드
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(),0, jwtFilterDto.getEmail());
+                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,0, jwtFilterDto.getEmail());
 
             optionalAdmin.get().setKnPassword(passwordEncoder.encode(newknPassword));
             optionalAdmin.get().setKnPwdChangeDate(LocalDateTime.now());
@@ -450,14 +446,14 @@ public class AdminService {
 
         // 활동 코드
         ActivityCode activityCode = ActivityCode.AC_04;
-        String ip = CommonUtil.clientIp();
+        String ip = CommonUtil.publicIp();
 
         if(jwtFilterDto.getRole().getCode().equals("ROLE_SYSTEM") || jwtFilterDto.getRole().getCode().equals("ROLE_MASTER")) {
             log.info("관리자 등록 시작");
 
             // 관리자추가 저장 -> 비정상 모드
             Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
+                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
 
             AwsKmsResultDto awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(companyCode);
             byte[] ivBytes = AESGCMcrypto.generateIV();
@@ -540,7 +536,7 @@ public class AdminService {
     }
 
     // 내부제공, 외부제공 관리자목록 리스트 호출
-    public ResponseEntity<Map<String, Object>> offerAdminList(String type, JwtFilterDto jwtFilterDto) throws IOException {
+    public ResponseEntity<Map<String, Object>> offerAdminList(String type, JwtFilterDto jwtFilterDto) {
         log.info("offerAdminList 호출");
 
         AjaxResponse res = new AjaxResponse();

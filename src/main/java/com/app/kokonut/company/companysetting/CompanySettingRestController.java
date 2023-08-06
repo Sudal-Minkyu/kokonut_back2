@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.Map;
 
 @RestController
@@ -36,7 +35,7 @@ public class CompanySettingRestController {
     @ApiOperation(value="해외로그인 차단 서비스 설정", notes="")
     @PostMapping(value = "/overseasBlockSetting")
     @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-    public ResponseEntity<Map<String,Object>> overseasBlockSetting() throws IOException {
+    public ResponseEntity<Map<String,Object>> overseasBlockSetting() {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return companySettingService.overseasBlockSetting(jwtFilterDto);
     }
@@ -44,7 +43,7 @@ public class CompanySettingRestController {
     @ApiOperation(value="접속허용 IP설정", notes="")
     @PostMapping(value = "/accessSetting")
     @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-    public ResponseEntity<Map<String,Object>> accessSetting() throws IOException {
+    public ResponseEntity<Map<String,Object>> accessSetting() {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return companySettingService.accessSetting(jwtFilterDto);
     }
@@ -52,7 +51,7 @@ public class CompanySettingRestController {
     @ApiOperation(value="비밀번호 변경주기 설정", notes="")
     @PostMapping(value = "/passwordChangeSetting")
     @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-    public ResponseEntity<Map<String,Object>> passwordChangeSetting(@RequestParam(name="csPasswordChangeSetting", defaultValue = "") String csPasswordChangeSetting) throws IOException {
+    public ResponseEntity<Map<String,Object>> passwordChangeSetting(@RequestParam(name="csPasswordChangeSetting", defaultValue = "") String csPasswordChangeSetting) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return companySettingService.passwordChangeSetting(jwtFilterDto, csPasswordChangeSetting);
     }
@@ -60,7 +59,7 @@ public class CompanySettingRestController {
     @ApiOperation(value="비밀번호 오류 접속제한 설정", notes="")
     @PostMapping(value = "/passwordErrorCountSetting")
     @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-    public ResponseEntity<Map<String,Object>> passwordErrorCountSetting(@RequestParam(name="csPasswordErrorCountSetting", defaultValue = "") String csPasswordErrorCountSetting) throws IOException {
+    public ResponseEntity<Map<String,Object>> passwordErrorCountSetting(@RequestParam(name="csPasswordErrorCountSetting", defaultValue = "") String csPasswordErrorCountSetting) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return companySettingService.passwordErrorCountSetting(jwtFilterDto, csPasswordErrorCountSetting);
     }
@@ -68,7 +67,7 @@ public class CompanySettingRestController {
     @ApiOperation(value="자동 로그아웃 시간 설정", notes="")
     @PostMapping(value = "/autoLogoutSetting")
     @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-    public ResponseEntity<Map<String,Object>> autoLogoutSetting(@RequestParam(name="csAutoLogoutSetting", defaultValue = "") String csAutoLogoutSetting) throws IOException {
+    public ResponseEntity<Map<String,Object>> autoLogoutSetting(@RequestParam(name="csAutoLogoutSetting", defaultValue = "") String csAutoLogoutSetting) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return companySettingService.autoLogoutSetting(jwtFilterDto, csAutoLogoutSetting);
     }
@@ -76,7 +75,7 @@ public class CompanySettingRestController {
     @ApiOperation(value="장기 미접속 접근제한 설정", notes="")
     @PostMapping(value = "/longDisconnectionSetting")
     @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-    public ResponseEntity<Map<String,Object>> longDisconnectionSetting(@RequestParam(name="csLongDisconnectionSetting", defaultValue = "") String csLongDisconnectionSetting) throws IOException {
+    public ResponseEntity<Map<String,Object>> longDisconnectionSetting(@RequestParam(name="csLongDisconnectionSetting", defaultValue = "") String csLongDisconnectionSetting) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return companySettingService.longDisconnectionSetting(jwtFilterDto, csLongDisconnectionSetting);
     }
@@ -85,7 +84,7 @@ public class CompanySettingRestController {
     @ApiOperation(value = "접속허용 IP 등록", notes = "")
     @ApiImplicitParam(name ="Authorization",  value="JWT Token", required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> apiKeyIpSave(@RequestParam(value="csipIp", defaultValue = "") String csipIp,
-                                                           @RequestParam(value="csipRemarks", defaultValue = "") String csipRemarks) throws IOException {
+                                                           @RequestParam(value="csipRemarks", defaultValue = "") String csipRemarks) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return companySettingService.accessIpSave(csipIp, csipRemarks, jwtFilterDto);
     }
@@ -94,7 +93,7 @@ public class CompanySettingRestController {
     @ApiOperation(value = "접속허용 IP 삭제", notes = "" +
             "1. 등록한 허용 IP를 삭제한다.")
     @ApiImplicitParam(name ="Authorization",  value="JWT Token", required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-    public ResponseEntity<Map<String,Object>> apiKeyIpDelete(@RequestBody AccessIpDeleteDto accessIpDeleteDto) throws IOException {
+    public ResponseEntity<Map<String,Object>> apiKeyIpDelete(@RequestBody AccessIpDeleteDto accessIpDeleteDto) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return companySettingService.apiKeyIpDelete(accessIpDeleteDto, jwtFilterDto);
     }
@@ -102,7 +101,7 @@ public class CompanySettingRestController {
     @PostMapping("/emailSendItemSetting")
     @ApiOperation(value = "이메일발송 항목지정", notes = "")
     @ApiImplicitParam(name ="Authorization",  value="JWT Token", required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-    public ResponseEntity<Map<String,Object>> emailSendItemSetting(@RequestParam(value="csEmailCodeSetting", defaultValue = "") String csEmailCodeSetting) throws IOException {
+    public ResponseEntity<Map<String,Object>> emailSendItemSetting(@RequestParam(value="csEmailCodeSetting", defaultValue = "") String csEmailCodeSetting) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return companySettingService.emailSendItemSetting(csEmailCodeSetting, jwtFilterDto);
     }

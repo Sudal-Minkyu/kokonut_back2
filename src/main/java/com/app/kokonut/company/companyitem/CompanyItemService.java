@@ -21,15 +21,12 @@ import com.app.kokonut.company.companytable.dtos.CompanyTableListDto;
 import com.app.kokonut.history.HistoryService;
 import com.app.kokonut.history.dtos.ActivityCode;
 import com.app.kokonutuser.KokonutUserService;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.Column;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -117,7 +114,7 @@ public class CompanyItemService {
 
     // 추가 카테고리의 항목을 추가한다.
     @Transactional
-    public ResponseEntity<Map<String, Object>> saveItem(JwtFilterDto jwtFilterDto, String ciName, Integer ciSecurity) throws IOException {
+    public ResponseEntity<Map<String, Object>> saveItem(JwtFilterDto jwtFilterDto, String ciName, Integer ciSecurity) {
         log.info("saveItem 호출");
 
         log.info("ciName : "+ciName);
@@ -133,7 +130,7 @@ public class CompanyItemService {
         String companyCode = adminCompanyInfoDto.getCompanyCode();
 
         ActivityCode activityCode;
-        String ip = CommonUtil.clientIp();
+        String ip = CommonUtil.publicIp();
         Long activityHistoryId;
         if(companyItemRepository.existsByCiNameAndCpCode(ciName, companyCode)) {
             log.error("이미 등록되어 있는 항목입니다.");
@@ -144,7 +141,7 @@ public class CompanyItemService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
+                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
 
             CompanyItem companyItem = new CompanyItem();
             companyItem.setCpCode(companyCode);
@@ -163,7 +160,7 @@ public class CompanyItemService {
 
     // 추가 카테고리의 항목을 수정한다.
     @Transactional
-    public ResponseEntity<Map<String, Object>> updateItem(Long ciId, String ciName, JwtFilterDto jwtFilterDto) throws IOException {
+    public ResponseEntity<Map<String, Object>> updateItem(Long ciId, String ciName, JwtFilterDto jwtFilterDto) {
         log.info("updateItem 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -176,7 +173,7 @@ public class CompanyItemService {
         String companyCode = adminCompanyInfoDto.getCompanyCode();
 
         ActivityCode activityCode;
-        String ip = CommonUtil.clientIp();
+        String ip = CommonUtil.publicIp();
         Long activityHistoryId;
         if(companyItemRepository.existsByCiNameAndCpCode(ciName, companyCode)) {
             log.error("이미 등록되어 있는 항목입니다.");
@@ -189,7 +186,7 @@ public class CompanyItemService {
 
                 // 활동이력 저장 -> 비정상 모드
                 activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
+                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,0, email);
 
                 optionalCompanyItem.get().setCiName(ciName);
                 optionalCompanyItem.get().setModify_email(jwtFilterDto.getEmail());
@@ -210,7 +207,7 @@ public class CompanyItemService {
 
     // 추가 카테고리의 항목을 삭제한다.
     @Transactional
-    public ResponseEntity<Map<String, Object>> deleteItem(Long ciId, JwtFilterDto jwtFilterDto) throws IOException {
+    public ResponseEntity<Map<String, Object>> deleteItem(Long ciId, JwtFilterDto jwtFilterDto) {
         log.info("deleteItem 호출");
 
         log.info("ciId : "+ciId);
@@ -225,7 +222,7 @@ public class CompanyItemService {
         String companyCode = adminCompanyInfoDto.getCompanyCode();
 
         ActivityCode activityCode;
-        String ip = CommonUtil.clientIp();
+        String ip = CommonUtil.publicIp();
         Long activityHistoryId;
 
         Optional<CompanyItem> optionalCompanyItem = companyItemRepository.findById(ciId);
@@ -235,7 +232,7 @@ public class CompanyItemService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
+                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,0, email);
 
             companyItemRepository.delete(optionalCompanyItem.get());
 
@@ -251,7 +248,7 @@ public class CompanyItemService {
 
     // 테이블 추가
     @Transactional
-    public ResponseEntity<Map<String, Object>> userTableSave(JwtFilterDto jwtFilterDto, String ctDesignation) throws IOException {
+    public ResponseEntity<Map<String, Object>> userTableSave(JwtFilterDto jwtFilterDto, String ctDesignation) {
         log.info("userTableSave 호출");
 
         log.info("ctDesignation : "+ctDesignation);
@@ -271,7 +268,7 @@ public class CompanyItemService {
         String cpCode = adminCompanyInfoDto.getCompanyCode();
 
         ActivityCode activityCode;
-        String ip = CommonUtil.clientIp();
+        String ip = CommonUtil.publicIp();
         Long activityHistoryId;
         if(companyTableRepository.existsByCtDesignation(ctDesignation)) {
             log.error("이미 등록되어 있는 테이블명 입니다.");
@@ -282,7 +279,7 @@ public class CompanyItemService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
+                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,0, email);
 
             Optional<Company> optionalCompany = companyRepository.findByCpCode(cpCode);
 

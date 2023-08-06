@@ -13,7 +13,6 @@ import com.app.kokonut.configs.GoogleOTP;
 import com.app.kokonut.configs.MailSender;
 import com.app.kokonut.history.HistoryService;
 import com.app.kokonut.history.dtos.ActivityCode;
-import com.app.kokonut.history.dtos.HistoryExcelDownloadListDto;
 import com.app.kokonut.privacyhistory.dtos.PrivacyHistoryCode;
 import com.app.kokonut.privacyhistory.dtos.PrivacyHistoryExcelDownloadListDto;
 import com.app.kokonut.privacyhistory.dtos.PrivacyHistoryListDto;
@@ -29,7 +28,10 @@ import java.io.IOException;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Woody
@@ -190,12 +192,12 @@ public class PrivacyHistoryService {
 
         // 처리이력 다운로드 코드
         ActivityCode activityCode = ActivityCode.AC_10;
-        String ip = CommonUtil.clientIp();
+        String ip = CommonUtil.publicIp();
         Long activityHistoryId;
 
         // 활동이력 저장 -> 비정상 모드
         activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-                cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason, ip, CommonUtil.publicIp(), 0, email);
+                cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason, ip, 0, email);
 
         // 파일암호 전송
         // 파일암호(숫자6자리) 생성

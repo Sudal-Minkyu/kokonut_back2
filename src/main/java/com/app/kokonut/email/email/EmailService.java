@@ -2,7 +2,6 @@ package com.app.kokonut.email.email;
 
 import com.app.kokonut.admin.AdminRepository;
 import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
-import com.app.kokonut.admin.dtos.AdminEmailInfoDto;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import com.app.kokonut.awskmshistory.dto.AwsKmsResultDto;
 import com.app.kokonut.common.AjaxResponse;
@@ -12,25 +11,20 @@ import com.app.kokonut.common.realcomponent.AESGCMcrypto;
 import com.app.kokonut.common.realcomponent.CommonUtil;
 import com.app.kokonut.common.realcomponent.Utils;
 import com.app.kokonut.company.companydatakey.CompanyDataKeyService;
-import com.app.kokonut.company.companypayment.dtos.CompanyPaymentSearchDto;
 import com.app.kokonut.company.companysetting.CompanySettingRepository;
 import com.app.kokonut.company.companysetting.dtos.CompanySettingEmailDto;
-import com.app.kokonut.company.companytable.CompanyTableRepository;
 import com.app.kokonut.configs.MailSender;
-import com.app.kokonut.email.email.dtos.*;
+import com.app.kokonut.email.email.dtos.EmailCheckDto;
+import com.app.kokonut.email.email.dtos.EmailListDto;
+import com.app.kokonut.email.email.dtos.EmailSearchDto;
+import com.app.kokonut.email.email.dtos.EmailSendDto;
 import com.app.kokonut.history.HistoryService;
 import com.app.kokonut.history.dtos.ActivityCode;
 import com.app.kokonut.history.extra.decrypcounthistory.DecrypCountHistoryService;
-import com.app.kokonut.keydata.KeyDataService;
-import com.app.kokonut.navercloud.NaverCloudPlatformService;
-import com.app.kokonut.payment.Payment;
-import com.app.kokonut.payment.paymenterror.PaymentError;
-import com.app.kokonut.provision.dtos.ProvisionListDto;
 import com.app.kokonutuser.KokonutUserService;
 import com.app.kokonutuser.dtos.use.KokonutUserEmailFieldDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -40,10 +34,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -55,9 +47,6 @@ import java.util.*;
 @Service
 public class EmailService {
 
-    @Value("${kokonut.otp.hostUrl}")
-    private String hostUrl; // otp_url
-
     private final HistoryService historyService;
     private final KokonutUserService kokonutUserService;
     private final CompanyDataKeyService companyDataKeyService;
@@ -66,87 +55,21 @@ public class EmailService {
     private final EmailRepository emailRepository;
     private final MailSender mailSender;
 
-    private final CompanyTableRepository companyTableRepository;
     private final CompanySettingRepository companySettingRepository;
     private final DecrypCountHistoryService decrypCountHistoryService;
 
     @Autowired
-    public EmailService(KeyDataService keyDataService, HistoryService historyService, KokonutUserService kokonutUserService,
+    public EmailService(HistoryService historyService, KokonutUserService kokonutUserService,
                         CompanyDataKeyService companyDataKeyService, EmailRepository emailRepository, AdminRepository adminRepository,
-                        MailSender mailSender, CompanyTableRepository companyTableRepository,
-                        CompanySettingRepository companySettingRepository, DecrypCountHistoryService decrypCountHistoryService) {
+                        MailSender mailSender, CompanySettingRepository companySettingRepository, DecrypCountHistoryService decrypCountHistoryService) {
         this.historyService = historyService;
         this.kokonutUserService = kokonutUserService;
         this.companyDataKeyService = companyDataKeyService;
         this.emailRepository = emailRepository;
         this.adminRepository = adminRepository;
         this.mailSender = mailSender;
-        this.companyTableRepository = companyTableRepository;
         this.companySettingRepository = companySettingRepository;
         this.decrypCountHistoryService = decrypCountHistoryService;
-    }
-
-    /**
-     * 이메일 상세보기
-     * @param idx email의 idx
-     */
-    public ResponseEntity<Map<String,Object>> sendEmailDetail(Long idx){
-        log.info("### sendEmailDetail 호출");
-
-        AjaxResponse res = new AjaxResponse();
-        HashMap<String, Object> data = new HashMap<>();
-
-        if(idx == null){
-            log.error("### 이메일 호출할 idx가 존재 하지 않습니다. : "+idx);
-            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO031.getCode(), ResponseErrorCode.KO031.getDesc()));
-        } else {
-            log.info("### 이메일 상세보기 idx : "+idx);
-            // 이메일 인덱스로 이메일 정보 조회
-            EmailDetailDto emailDetailDto = emailRepository.findEmailByIdx(idx);
-            if(emailDetailDto != null){
-                String receiverType = emailDetailDto.getEmReceiverType();
-                String adminIdList = "";
-                if("I".equals(receiverType)){
-                    // 개별 선택으로 발송한 경우
-                    adminIdList = emailDetailDto.getEmReceiverAdminIdList().toString();
-                }else if("G".equals(receiverType)){
-                    // 그룹 선택으로 메일을 발송한 경우
-                    Long emailGroupIdx = emailDetailDto.getEgId();
-                    // 메일 그룹 조회 쿼리 동작
-//                    EmailGroupAdminInfoDto emailGroupAdminInfoDto = emailGroupRepository.findEmailGroupAdminInfoByIdx(emailGroupIdx);
-//                    adminIdList = emailGroupAdminInfoDto.getEgAdminIdList();
-                }else{
-                    log.error("### 받는사람 타입(I:개별,G:그룹)을 알 수 없습니다. :" + receiverType);
-                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO040.getCode(), ResponseErrorCode.KO040.getDesc()));
-                }
-
-                // 받는 사람 이메일 문자열 조회
-                StringBuilder emailList = new StringBuilder();
-                String[] toks = adminIdList.split(",");
-                for(int i = 0; i < toks.length; i++) {
-                    String tok = toks[i];
-                    AdminEmailInfoDto adminEmailInfoDto = adminRepository.findByKnEmailInfo(Long.valueOf(tok));
-                    if(adminEmailInfoDto != null){
-                        emailList.append(adminEmailInfoDto.getKnEmail());
-                        if(i < toks.length - 1) {
-                            emailList.append(", ");
-                        }
-                    }else{ // kokonut_1@kokonut.me, kokonut_2@kokonut.me, 탈퇴한 사용자, kokonut_4@kokonut.me 형태로 이메일 문자열 반환, 추후 변경될 수 있음.
-                        emailList.append("탈퇴한 사용자");
-                        if(i < toks.length - 1) {
-                            emailList.append(", ");
-                        }
-                    }
-                }
-                data.put("emailList", emailList); // 받는 사람 이메일 문자열
-                data.put("title", emailDetailDto.getEmTitle()); // 제목
-                data.put("contents", emailDetailDto.getEmContents()); // 내용
-            } else {
-                log.error("### 이메일 정보가 존재 하지 않습니다. : "+idx);
-                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO031.getCode(), ResponseErrorCode.KO031.getDesc()));
-            }
-            return ResponseEntity.ok(res.success(data));
-        }
     }
 
     // 매일 5분마다 실행
@@ -164,7 +87,7 @@ public class EmailService {
         for(Email email : emailList) {
 
             String requestId = email.getEmRequestId();
-            if(requestId != null || !requestId.equals("")) {
+            if(requestId != null && !requestId.equals("")) {
 //                log.info("requestId : "+requestId);
 
                 EmailCheckDto emailCheckDto = mailSender.sendEmailCheck(requestId);
@@ -222,7 +145,7 @@ public class EmailService {
         log.info("emailSearchDto : "+emailSearchDto);
 
         ActivityCode activityCode;
-        String ip = CommonUtil.clientIp();
+        String ip = CommonUtil.publicIp();
         Long activityHistoryId;
 
         // 이메일 발송목록 조회 코드
@@ -230,7 +153,7 @@ public class EmailService {
 
         // 활동이력 저장 -> 비정상 모드
         activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
+                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
 
         Page<EmailListDto> emailListDtos = emailRepository.findByEmailPage(emailSearchDto, pageable);
 
@@ -329,8 +252,6 @@ public class EmailService {
         else {
 
             AwsKmsResultDto awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(cpCode);
-//            log.info("DataKey : "+awsKmsResultDto.getDataKey());
-//            log.info("IV : "+awsKmsResultDto.getIvKey());
 
             String toCompanyName = companySettingEmailDto.getCpName();
 
@@ -428,10 +349,10 @@ public class EmailService {
             ActivityCode activityCode = ActivityCode.AC_59_3;
 
             // 활동이력 저장 -> 비정상 모드
-            String ip = CommonUtil.clientIp();
+            String ip = CommonUtil.publicIp();
 
             Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
+                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
 
             log.info("sendEmailList : "+sendEmailList);
 
@@ -451,8 +372,7 @@ public class EmailService {
             callTemplate.put("title", emTitle);
             callTemplate.put("content", contents);
 
-            String contentsTemplate = mailSender.getHTML5(callTemplate);
-//            log.info("contentsTemplate : "+contentsTemplate);
+//            String contents = mailSender.getHTML5(callTemplate);
 
 //            List<String> testSendEmail = new ArrayList<>(); // sendEmailList
 //            testSendEmail.add("brian20@nate.com");
@@ -461,7 +381,7 @@ public class EmailService {
             String emailSendResult = null;
             if(!sendEmailList.isEmpty()) {
 
-                emailSendResult = mailSender.newSendMail(emailSendDto.getEmEmailSend(), toCompanyName, sendEmailList, emTitle, contentsTemplate, reservationTime, multipartFiles);
+                emailSendResult = mailSender.newSendMail(emailSendDto.getEmEmailSend(), toCompanyName, sendEmailList, emTitle, contents, reservationTime, multipartFiles);
 //                emailSendResult = mailSender.newSendMail(emailSendDto.getEmEmailSend(), toCompanyName, testSendEmail, emTitle, contentsTemplate, reservationTime, multipartFiles);
 
             } else {
@@ -519,7 +439,7 @@ public class EmailService {
     }
 
     // 이메일 발송 예약 취소
-    public ResponseEntity<Map<String, Object>> emailReservedCancel(Long emId, JwtFilterDto jwtFilterDto) throws IOException {
+    public ResponseEntity<Map<String, Object>> emailReservedCancel(Long emId, JwtFilterDto jwtFilterDto) {
         log.info("emailReservedCancel 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -535,10 +455,10 @@ public class EmailService {
         ActivityCode activityCode = ActivityCode.AC_59_5;
 
         // 활동이력 저장 -> 비정상 모드
-        String ip = CommonUtil.clientIp();
+        String ip = CommonUtil.publicIp();
 
         Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
+                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  0, email);
 
         Optional<Email> optionalEmail = emailRepository.findById(emId);
         if(optionalEmail.isPresent()) {
@@ -567,78 +487,6 @@ public class EmailService {
 
         return ResponseEntity.ok(res.success(data));
     }
-
-
-    /**
-     * 이메일 발송 대상 목록 조회하기
-     * @param pageable 페이징 처리를 위한 정보
-     */
-    //    public ResponseEntity<Map<String, Object>> emailTargetGroupList(Pageable pageable) {
-//        log.info("### emailTargetGroupList 호출");
-//        /*
-//         * 그룹명 : 미식플랫폼 00 관리자
-//         * 설 명 : 미식플랫폼 00의 관리자 그룹
-//         * 관리자 Idx : 2, 4, 5 ...
-//         * 이메일 : a001@00.oo.com, a002@00.oo.com, a003@00.oo.com
-//         *
-//         * findEmailGroupDatils()를 조회한다
-//         * 해당 결과에서 가져온 관리자 인덱스를 가지고 관리자 이메일을 조회한다.
-//         * EmailGroup Entity 클래스를 가지는 List에 각 값을 넣어서 던져준다.
-//         */
-//
-//        AjaxResponse res = new AjaxResponse();
-//
-//        EmailGroup emailGroup = new EmailGroup(); // TEMP
-//        List<EmailGroupListDto> resultDto = emailGroupRepository.findEmailGroupDetails();
-//
-//        List<EmailGroup> resultList = new ArrayList<>();
-//        for(int i = 0; i<resultDto.size(); i++){
-//            emailGroup.setEgId(resultDto.get(i).getEgId());
-//            emailGroup.setEgName(resultDto.get(i).getEgName());
-//            emailGroup.setEgDesc(resultDto.get(i).getEgDesc());
-//            emailGroup.setEgAdminIdList(resultDto.get(i).getEgAdminIdList());
-//
-//            String adminIds = resultDto.get(i).getEgAdminIdList();
-//            String adminIdList[] = adminIds.split(",");
-//
-//            List<String> emailList = new ArrayList<>();
-//            for (String adminId : adminIdList) {
-//                String adminEmail = adminRepository.findByKnEmailInfo(Long.parseLong(adminId)).getKnEmail();
-//                emailList.add(adminEmail); // a001@00.oo.com, a002@00.oo.com, a003@00.oo.com
-//            }
-//            StringBuilder adminEmailList = new StringBuilder();
-//            for(int j = 0; j < emailList.size(); j++){
-//                adminEmailList.append(emailList.get(j));
-//                if(j == emailList.size()-1){
-//                    // 마지막
-//                    adminEmailList.append("");
-//                }else {
-//                    adminEmailList.append(",");
-//                }
-//            }
-//            String stAdminEmailList = adminEmailList.toString();
-//            emailGroup.setAdminEmailList(stAdminEmailList);
-//            resultList.add(emailGroup);
-//            log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ");
-//            log.info(">>>> idx: "+resultList.get(i).getEgId());
-//            log.info(">>>> name: "+resultList.get(i).getEgName());
-//            log.info(">>>> Desc: "+resultList.get(i).getEgDesc());
-//            log.info(">>>> adminId: "+resultList.get(i).getEgAdminIdList());
-//            log.info(">>>> adminEmail: "+resultList.get(i).getAdminEmailList());
-//            log.info("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ");
-//        }
-//
-//
-//        Page resultPage = new PageImpl<>(resultList, pageable, resultList.size());
-//        log.info("결과 List size : "+resultList.size());
-//
-//    return ResponseEntity.ok(res.ResponseEntityPage(resultPage));
-//    }
-
-
-
-
-
 
 
 }

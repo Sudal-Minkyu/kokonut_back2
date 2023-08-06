@@ -78,7 +78,7 @@ public class ThirdPartyService {
 
 	// 비즈엠 서드파티 셋팅 -> tsBizmReceiverNumCode(휴대전화번호 셋팅 고유코드), tsBizmAppUserIdCode(앱유저아이디 셋팅 고유코드)
 	@Transactional
-	public ResponseEntity<Map<String, Object>> bizmSetting(String tsBizmReceiverNumCode, String tsBizmAppUserIdCode, JwtFilterDto jwtFilterDto) throws IOException {
+	public ResponseEntity<Map<String, Object>> bizmSetting(String tsBizmReceiverNumCode, String tsBizmAppUserIdCode, JwtFilterDto jwtFilterDto) {
 		log.info("bizmSetting 호출");
 
 		AjaxResponse res = new AjaxResponse();
@@ -95,7 +95,7 @@ public class ThirdPartyService {
 
 		// 구독해지 코드
 		ActivityCode activityCode;
-		String ip = CommonUtil.clientIp();
+		String ip = CommonUtil.publicIp();
 		Long activityHistoryId;
 
 		ThirdParty thirdParty;
@@ -110,7 +110,7 @@ public class ThirdPartyService {
 
 				// 활동이력 저장 -> 비정상 모드
 				activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-						cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
+						cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
 
 				optionalThirdPartyBizm.get().setTsBizmReceiverNumCode(tsBizmReceiverNumCode);
 				optionalThirdPartyBizm.get().setTsBizmAppUserIdCode(tsBizmAppUserIdCode);
@@ -134,7 +134,7 @@ public class ThirdPartyService {
 
 			// 활동이력 저장 -> 비정상 모드
 			activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-					cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
+					cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
 
 			// 신규셋팅
 			thirdParty = new ThirdParty();

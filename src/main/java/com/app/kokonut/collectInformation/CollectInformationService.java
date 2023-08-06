@@ -141,7 +141,7 @@ public class CollectInformationService {
 
                 ActivityCode activityCode;
                 Long companyId = adminCompanyInfoDto.getCompanyId();
-                String ip = CommonUtil.clientIp();
+                String ip = CommonUtil.publicIp();
                 String companyCode = adminCompanyInfoDto.getCompanyCode();
 
                 if(collectInfoDetailDto.getCiId() != null){
@@ -173,7 +173,7 @@ public class CollectInformationService {
 
                 // 활동이력 -> 비정상 모드
                 Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode
-                        , companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
+                        , companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
                 try{
                     log.info("개인정보처리방침 등록/수정 시작.");
                     Long savedIdx = collectInfoRepository.save(saveCollectInfo).getCiId();
@@ -230,12 +230,12 @@ public class CollectInformationService {
                     ActivityCode activityCode = ActivityCode.AC_29;
                     Long adminId = admin.getAdminId();
                     Long companyId = adminCompanyInfoDto.getCompanyId();
-                    String ip = CommonUtil.clientIp();
+                    String ip = CommonUtil.publicIp();
                     String companyCode = adminCompanyInfoDto.getCompanyCode();
 
                     // 활동이력 -> 비정상 모드
                     Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode
-                            , companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
+                            , companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
 
                     collectInfoRepository.deleteById(ciId);
                     if(!collectInfoRepository.existsById(ciId)){

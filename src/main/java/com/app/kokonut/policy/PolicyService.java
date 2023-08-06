@@ -144,7 +144,7 @@ public class PolicyService {
         log.info("policySearchDto : "+policySearchDto);
 
         ActivityCode activityCode;
-        String ip = CommonUtil.clientIp();
+        String ip = CommonUtil.publicIp();
         Long activityHistoryId;
 
         // 개인정보 처리방침 리스트조회 코드
@@ -152,7 +152,7 @@ public class PolicyService {
 
         // 활동이력 저장 -> 비정상 모드
         activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
+                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
 
         Page<PolicyListDto> policyListDtos = policyRepository.findByPolicyList(policySearchDto, pageable);
 
@@ -168,7 +168,7 @@ public class PolicyService {
     }
 
     // 개인정보처리방침 상세내용 조회
-    public ResponseEntity<Map<String, Object>> policyDetail(Long piId, JwtFilterDto jwtFilterDto) throws IOException {
+    public ResponseEntity<Map<String, Object>> policyDetail(Long piId, JwtFilterDto jwtFilterDto) {
         log.info("policyDetail 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -251,7 +251,7 @@ public class PolicyService {
 
     // 작성중단 클릭후 작동하는 함수
     @Transactional
-    public ResponseEntity<Map<String, Object>> privacyPolicyDelete(Long piId, JwtFilterDto jwtFilterDto) throws IOException {
+    public ResponseEntity<Map<String, Object>> privacyPolicyDelete(Long piId, JwtFilterDto jwtFilterDto) {
         log.info("privacyPolicyDelete 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -270,7 +270,7 @@ public class PolicyService {
             log.info("companyCode : "+companyCode);
 
             ActivityCode activityCode;
-            String ip = CommonUtil.clientIp();
+            String ip = CommonUtil.publicIp();
             Long activityHistoryId;
 
             int piStage = optionalPolicy.get().getPiStage();
@@ -280,7 +280,7 @@ public class PolicyService {
 
                 // 활동이력 저장 -> 비정상 모드
                 activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
+                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
 
                 if(piStage < 6) {
 
@@ -380,7 +380,7 @@ public class PolicyService {
 
     // 개인정보보호 첫번째 뎁스 등록
     @Transactional
-    public ResponseEntity<Map<String, Object>> privacyPolicyFirstSave(PolicySaveFirstDto policySaveFirstDto, JwtFilterDto jwtFilterDto) throws IOException {
+    public ResponseEntity<Map<String, Object>> privacyPolicyFirstSave(PolicySaveFirstDto policySaveFirstDto, JwtFilterDto jwtFilterDto) {
         log.info("24privacyPolicyFirstSave 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -395,7 +395,7 @@ public class PolicyService {
         log.info("policySaveFirstDto : "+policySaveFirstDto);
 
         ActivityCode activityCode;
-        String ip = CommonUtil.clientIp();
+        String ip = CommonUtil.publicIp();
         Long activityHistoryId;
 
         // 개인정보 처리방침 작성중 코드
@@ -403,7 +403,7 @@ public class PolicyService {
 
         // 활동이력 저장 -> 비정상 모드
         activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                companyCode+" - "+activityCode.getDesc()+" 첫번째 뎁스 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
+                companyCode+" - "+activityCode.getDesc()+" 첫번째 뎁스 시도 이력", "", ip, 0, email);
 
 //        String getPiDate = policySaveFirstDto.getPiDate()+" 00:00:00.000";
 //        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy. MM. dd HH:mm:ss.SSS");
@@ -446,7 +446,7 @@ public class PolicyService {
 
     // 개인정보보호 두번쨰 뎁스 등록
     @Transactional
-    public ResponseEntity<Map<String, Object>> privacyPolicySecondSave(PolicySaveSecondDto policySaveSecondDto, JwtFilterDto jwtFilterDto) throws IOException {
+    public ResponseEntity<Map<String, Object>> privacyPolicySecondSave(PolicySaveSecondDto policySaveSecondDto, JwtFilterDto jwtFilterDto) {
         log.info("privacyPolicySecondSave 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -465,7 +465,7 @@ public class PolicyService {
 //        log.info("policySaveSecondDto : "+policySaveSecondDto);
 
         ActivityCode activityCode;
-        String ip = CommonUtil.clientIp();
+        String ip = CommonUtil.publicIp();
         Long activityHistoryId;
 
         // 개인정보 처리방침 작성중 코드
@@ -475,7 +475,7 @@ public class PolicyService {
         if(optionalPolicy.isPresent()) {
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 두번째 뎁스 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
+                    companyCode+" - "+activityCode.getDesc()+" 두번째 뎁스 시도 이력", "", ip, 0, email);
 
             List<PolicyPurpose> policyPurposeSaveList = new ArrayList<>();
             PolicyPurpose policyPurpose;
@@ -534,7 +534,7 @@ public class PolicyService {
     }
 
     // 개인정보보호 세번쨰 뎁스 등록
-    public ResponseEntity<Map<String, Object>> privacyPolicyThirdSave(PolicySaveThirdDto policySaveThirdDto, JwtFilterDto jwtFilterDto) throws IOException {
+    public ResponseEntity<Map<String, Object>> privacyPolicyThirdSave(PolicySaveThirdDto policySaveThirdDto, JwtFilterDto jwtFilterDto) {
         log.info("privacyPolicyThirdSave 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -553,7 +553,7 @@ public class PolicyService {
         log.info("policySaveThirdDto : "+policySaveThirdDto);
 
         ActivityCode activityCode;
-        String ip = CommonUtil.clientIp();
+        String ip = CommonUtil.publicIp();
         Long activityHistoryId;
 
         // 개인정보 처리방침 작성중 코드
@@ -564,7 +564,7 @@ public class PolicyService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 세번째 뎁스 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
+                    companyCode+" - "+activityCode.getDesc()+" 세번째 뎁스 시도 이력", "", ip, 0, email);
 
             List<PolicyBefore> policyBeforeSaveList = new ArrayList<>();
             List<PolicyAfter> policyAfterSaveList = new ArrayList<>();
@@ -738,7 +738,7 @@ public class PolicyService {
     }
 
     // 개인정보보호 네번쨰 뎁스 등록
-    public ResponseEntity<Map<String, Object>> privacyPolicyFourthSave(PolicySaveFourthDto policySaveFourthDto, JwtFilterDto jwtFilterDto) throws IOException {
+    public ResponseEntity<Map<String, Object>> privacyPolicyFourthSave(PolicySaveFourthDto policySaveFourthDto, JwtFilterDto jwtFilterDto) {
         log.info("privacyPolicyFourthSave 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -757,7 +757,7 @@ public class PolicyService {
         log.info("policySaveFourthDto : "+policySaveFourthDto);
 
         ActivityCode activityCode;
-        String ip = CommonUtil.clientIp();
+        String ip = CommonUtil.publicIp();
         Long activityHistoryId;
 
         // 개인정보 처리방침 작성중 코드
@@ -768,7 +768,7 @@ public class PolicyService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 네번째 뎁스 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
+                    companyCode+" - "+activityCode.getDesc()+" 네번째 뎁스 시도 이력", "", ip, 0, email);
 
             List<PolicyOut> policyOutSaveList = new ArrayList<>();
             List<PolicyOutDetail> policyOutDetailSaveList = new ArrayList<>();
@@ -896,7 +896,7 @@ public class PolicyService {
     }
 
     // 개인정보보호 다섯번쨰 뎁스 등록
-    public ResponseEntity<Map<String, Object>> privacyPolicyFifthSave(PolicySaveFifthDto policySaveFifthDto, JwtFilterDto jwtFilterDto) throws IOException {
+    public ResponseEntity<Map<String, Object>> privacyPolicyFifthSave(PolicySaveFifthDto policySaveFifthDto, JwtFilterDto jwtFilterDto) {
         log.info("privacyPolicyFifthSave 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -915,7 +915,7 @@ public class PolicyService {
         log.info("policySaveFifthDto : "+policySaveFifthDto);
 
         ActivityCode activityCode;
-        String ip = CommonUtil.clientIp();
+        String ip = CommonUtil.publicIp();
         Long activityHistoryId;
 
         // 개인정보 처리방침 작성중 코드
@@ -926,7 +926,7 @@ public class PolicyService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 네번째 뎁스 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
+                    companyCode+" - "+activityCode.getDesc()+" 네번째 뎁스 시도 이력", "", ip, 0, email);
 
             int thirdState = 0;
             int thirdOverseasState = 0;
@@ -1065,7 +1065,7 @@ public class PolicyService {
     }
 
     // 개인정보보호 여섯번쨰 뎁스 등록
-    public ResponseEntity<Map<String, Object>> privacyPolicySixthSave(PolicySaveSixthDto policySaveSixthDto, JwtFilterDto jwtFilterDto) throws IOException {
+    public ResponseEntity<Map<String, Object>> privacyPolicySixthSave(PolicySaveSixthDto policySaveSixthDto, JwtFilterDto jwtFilterDto) {
         log.info("privacyPolicySixthSave 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -1084,7 +1084,7 @@ public class PolicyService {
         log.info("policySaveSixthDto : "+policySaveSixthDto);
 
         ActivityCode activityCode;
-        String ip = CommonUtil.clientIp();
+        String ip = CommonUtil.publicIp();
         Long activityHistoryId;
 
         // 개인정보 처리방침 작성중 코드
@@ -1095,7 +1095,7 @@ public class PolicyService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode + " - " + activityCode.getDesc() + " 여섯번째 뎁스 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
+                    companyCode + " - " + activityCode.getDesc() + " 여섯번째 뎁스 시도 이력", "", ip, 0, email);
 
             List<PolicyResponsible> policyResponsibleSaveList = new ArrayList<>();
             PolicyResponsible policyResponsible;
@@ -1170,7 +1170,7 @@ public class PolicyService {
     }
 
     // 개인정보보호 마지막 뎁스 등록
-    public ResponseEntity<Map<String, Object>> privacyPolicyFinalSave(Long piId, JwtFilterDto jwtFilterDto) throws IOException {
+    public ResponseEntity<Map<String, Object>> privacyPolicyFinalSave(Long piId, JwtFilterDto jwtFilterDto) {
         log.info("privacyPolicyFinalSave 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -1189,7 +1189,7 @@ public class PolicyService {
         log.info("piId : "+piId);
 
         ActivityCode activityCode;
-        String ip = CommonUtil.clientIp();
+        String ip = CommonUtil.publicIp();
         Long activityHistoryId;
 
         // 개인정보 처리방침 작성중 코드
@@ -1200,7 +1200,7 @@ public class PolicyService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode + " - " + activityCode.getDesc() + " 마지막 뎁스 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
+                    companyCode + " - " + activityCode.getDesc() + " 마지막 뎁스 시도 이력", "", ip, 0, email);
 
             optionalPolicy.get().setPiStage(7);
             optionalPolicy.get().setPiAutosave(1);

@@ -55,11 +55,6 @@ public class History {
     @Column(name = "ah_reason")
     private String ahReason;
 
-    // IP주소 : IPv4를 뜻함
-    @ApiModelProperty("IP주소 : IPv4를 뜻함")
-    @Column(name = "ah_ipv4_ip_addr")
-    private String ahIpv4IpAddr;
-
     // IP주소 : 공인IP를 뜻함
     @ApiModelProperty("IP주소 : 공인IP를 뜻함")
     @Column(name = "ah_public_ip_addr")

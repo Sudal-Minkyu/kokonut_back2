@@ -23,8 +23,7 @@ import java.util.Iterator;
 @Slf4j
 public class CommonUtil {
 
-    // IPv4 조회
-    public static String clientIp() {
+    public static String publicIp() {
     	ServletRequestAttributes sra = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
 		HttpServletRequest request = sra.getRequest();
 		String ip;
@@ -66,68 +65,6 @@ public class CommonUtil {
 
         return ip;
     }
-
-	// public Ip 조회
-	public static String publicIp() throws IOException {
-
-//		String url = "https://ipapi.co/json";
-//
-//		URL obj = new URL(url);
-//		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-//
-//		con.setRequestMethod("GET");
-//
-//		int responseCode = con.getResponseCode();
-//
-//		BufferedReader in = new BufferedReader(
-//				new InputStreamReader(con.getInputStream()));
-//		String inputLine;
-//		StringBuilder response = new StringBuilder();
-//
-//		while ((inputLine = in.readLine()) != null) {
-//			response.append(inputLine);
-//		}
-//		in.close();
-//
-//		if(responseCode == 200) {
-//			log.info("response : "+response);
-//			ObjectMapper objectMapper = new ObjectMapper();
-//			JsonNode jsonNode = objectMapper.readTree(response.toString());
-//
-//			return jsonNode.get("ip").asText();
-//		} else {
-//			log.error("공인IP 체크에러 responseCode : "+responseCode);
-//			return "";
-//		}
-
-		URL url = new URL("https://checkip.amazonaws.com");
-		String ip;
-		try(BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()))){
-			ip = br.readLine();
-		}
-		return ip;
-	}
-
-	// 테스트 IP 조회
-	public static String testIp(HttpServletRequest request){
-		String ip = request.getHeader("X-FORWARDED-FOR");
-
-		//proxy 환경일 경우
-		if (ip == null || ip.length() == 0) {
-			ip = request.getHeader("Proxy-Client-IP");
-		}
-
-		//웹로직 서버일 경우
-		if (ip == null || ip.length() == 0) {
-			ip = request.getHeader("WL-Proxy-Client-IP");
-		}
-
-		if (ip == null || ip.length() == 0) {
-			ip = request.getRemoteAddr() ;
-		}
-
-		return ip;
-	}
 
 //
 //    /**

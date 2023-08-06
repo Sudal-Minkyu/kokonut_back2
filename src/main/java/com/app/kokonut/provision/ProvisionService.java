@@ -112,7 +112,7 @@ public class ProvisionService {
 
     // 개인정보제공 등록
     @Transactional
-    public ResponseEntity<Map<String, Object>> provisionSave(ProvisionSaveDto provisionSaveDto, JwtFilterDto jwtFilterDto) throws IOException {
+    public ResponseEntity<Map<String, Object>> provisionSave(ProvisionSaveDto provisionSaveDto, JwtFilterDto jwtFilterDto) {
         log.info("provisionSave 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -145,7 +145,7 @@ public class ProvisionService {
 
         // 정보제공 등록 코드
         ActivityCode activityCode;
-        String ip = CommonUtil.clientIp();
+        String ip = CommonUtil.publicIp();
         Long activityHistoryId;
 
         // 개인정보제공 등록 코드
@@ -172,7 +172,7 @@ public class ProvisionService {
 
         // 활동이력 저장 -> 비정상 모드
         activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(),0, email);
+                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,0, email);
 
         try {
             Provision saveprovision = provisionRepository.save(provision);
@@ -345,7 +345,7 @@ public class ProvisionService {
         log.info("provisionSearchDto : "+provisionSearchDto);
 
         ActivityCode activityCode;
-        String ip = CommonUtil.clientIp();
+        String ip = CommonUtil.publicIp();
         Long activityHistoryId;
 
         // 개인정보 제공 리스트조회 코드
@@ -353,7 +353,7 @@ public class ProvisionService {
 
         // 활동이력 저장 -> 비정상 모드
         activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
+                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
 
         Page<ProvisionListDto> provisionListDtos = provisionRepository.findByProvisionList(provisionSearchDto, pageable);
 
@@ -385,7 +385,7 @@ public class ProvisionService {
         String cpCode = adminCompanyInfoDto.getCompanyCode();
 
         ActivityCode activityCode;
-        String ip = CommonUtil.clientIp();
+        String ip = CommonUtil.publicIp();
         Long activityHistoryId;
 
         // 개인정보 제공 리스트조회 코드
@@ -393,7 +393,7 @@ public class ProvisionService {
 
         // 활동이력 저장 -> 비정상 모드
         activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, email);
+                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
 
         Page<ProvisionDownloadHistoryListDto> provisionDownloadList = provisionDownloadHistoryRepository.findByProvisionDownloadList(proCode, pageable);
 
@@ -448,7 +448,7 @@ public class ProvisionService {
         int dchCount = 0; // 복호화 카운팅
 
         ActivityCode activityCode = ActivityCode.AC_47_2;
-        String ip = CommonUtil.clientIp();
+        String ip = CommonUtil.publicIp();
         Long activityHistoryId;
 
         ProvisionDownloadCheckDto provisionDownloadCheckDto = provisionRepository.findByProvisionDownloadCheck(cpCode, proCode, 1);
@@ -488,7 +488,7 @@ public class ProvisionService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason, ip, CommonUtil.publicIp(), 0, email);
+                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason, ip, 0, email);
 
             // 제공할 개인정보가 존재하는지 체크
             ProvisionTargetIdxDto provisionTargetIdxDto = provisionListRepository.findByProvisionIdxList(proCode);
@@ -684,7 +684,7 @@ public class ProvisionService {
     }
 
     // 개인정보제공 상세내용 조회
-    public ResponseEntity<Map<String, Object>> provisionDetail(String proCode, JwtFilterDto jwtFilterDto) throws IOException {
+    public ResponseEntity<Map<String, Object>> provisionDetail(String proCode, JwtFilterDto jwtFilterDto) {
         log.info("provisionDetail 호출");
 
         AjaxResponse res = new AjaxResponse();

@@ -153,7 +153,7 @@ public class ApiKeyService {
 
         // 활동코드
         ActivityCode activityCode;
-        String ip = CommonUtil.clientIp();
+        String ip = CommonUtil.publicIp();
         Long activityHistoryId;
 
         Optional<ApiKey> optionalApiKey = apiKeyRepository.findApiKeyByAdminIdAndCompanyId(adminId, companyId);
@@ -167,7 +167,7 @@ public class ApiKeyService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
+                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
 
             String akKey = optionalApiKey.get().getAkKey();
             log.info("현재 API Key : "+akKey);
@@ -191,7 +191,7 @@ public class ApiKeyService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
+                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
 
             ApiKey apiKey = new ApiKey();
 
@@ -218,7 +218,7 @@ public class ApiKeyService {
 
     // APIKey 허용 IP 등록
     @Transactional
-    public ResponseEntity<Map<String, Object>> apiKeyIpSave(String accessIp, String ipMemo, JwtFilterDto jwtFilterDto) throws IOException {
+    public ResponseEntity<Map<String, Object>> apiKeyIpSave(String accessIp, String ipMemo, JwtFilterDto jwtFilterDto) {
         log.info("apiKeyIpSave 호출");
 
         log.info("accessIp : "+accessIp);
@@ -235,14 +235,14 @@ public class ApiKeyService {
 
         // API KEY 허용 IP등록 코드
         ActivityCode activityCode = ActivityCode.AC_33;
-        String ip = CommonUtil.clientIp();
+        String ip = CommonUtil.publicIp();
 
         Optional<ApiKey> optionalApiKey = apiKeyRepository.findApiKeyByAdminIdAndCompanyId(adminId, companyId);
         if(optionalApiKey.isPresent()) {
 
             // 활동이력 저장 -> 비정상 모드
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
+                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
 
             if(!apiKeyRepository.doesAccessIpExist(accessIp)) {
                 if(optionalApiKey.get().getAkAgreeIp1() == null) {
@@ -286,7 +286,7 @@ public class ApiKeyService {
 
     // APIKey 허용 IP 삭제
     @Transactional
-    public ResponseEntity<Map<String, Object>> apiKeyIpDelete(ApiKeyIpDeleteDto apiKeyIpDeleteDto, JwtFilterDto jwtFilterDto) throws IOException {
+    public ResponseEntity<Map<String, Object>> apiKeyIpDelete(ApiKeyIpDeleteDto apiKeyIpDeleteDto, JwtFilterDto jwtFilterDto) {
         log.info("apiKeyIpDelete 호출");
 
         String otpValue = apiKeyIpDeleteDto.getOtpValue();
@@ -326,14 +326,14 @@ public class ApiKeyService {
 
         // API KEY 허용 IP등록 코드
         ActivityCode activityCode = ActivityCode.AC_34;
-        String ip = CommonUtil.clientIp();
+        String ip = CommonUtil.publicIp();
 
         Optional<ApiKey> optionalApiKey = apiKeyRepository.findApiKeyByAdminIdAndCompanyId(adminId, companyId);
         if(optionalApiKey.isPresent()) {
 
             // 활동이력 저장 -> 비정상 모드
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
+                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
 
             for (String deleteIp : deleteIpList) {
                 while (true) {
