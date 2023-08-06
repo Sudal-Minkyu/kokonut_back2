@@ -93,6 +93,12 @@ public class TestRestController {
         log.info("CommonUtil.testIp(request) : "+CommonUtil.testIp(request));
         log.info("CommonUtil.getServerIp() : "+ CommonUtil.getServerIp());
 
+        data.put("request.getRemoteAddr()", request.getRemoteAddr());
+        data.put("CommonUtil.publicIp()",CommonUtil.publicIp());
+        data.put("CommonUtil.clientIp()",CommonUtil.clientIp());
+        data.put("CommonUtil.testIp(request)",CommonUtil.testIp(request));
+        data.put("CommonUtil.getServerIp()",CommonUtil.getServerIp());
+
         return ResponseEntity.ok(res.success(data));
     }
 
