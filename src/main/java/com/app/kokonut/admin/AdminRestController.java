@@ -104,15 +104,20 @@ public class AdminRestController {
             "3. 입력한 이메일로 인증메일을 전송한다." +
             "4. 해당메일의 링크를 통해 사용할 비밀번호를 입력하여 비밀번호를 등록한다." +
             "5. 최종적으로 비밀번호가 변경되면, 로그인을 할 수 있다.")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
-    })
+    @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> create(@RequestParam(value="userEmail", defaultValue = "") String userEmail,
                                                      @RequestParam(value="choseRole", defaultValue = "") String choseRole) throws Exception {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return adminService.create(userEmail, choseRole, jwtFilterDto);
     }
 
+    @PostMapping("/createMailAgain")
+    @ApiOperation(value = "관리자등록 인증메일 재전송")
+    @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    public ResponseEntity<Map<String,Object>> createMailAgain(@RequestParam(value="userEmail", defaultValue = "") String userEmail) throws Exception {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return adminService.createMailAgain(userEmail, jwtFilterDto);
+    }
 
 
 
