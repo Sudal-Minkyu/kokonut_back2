@@ -2369,8 +2369,11 @@ public class DynamicUserService {
 			data.put("privacyList", privacyList);
 			data.put("totalCount", totalCount);
 
+			String kphReason = ""; // 처리사유
+//			kphReason = value.charAt(0) + Utils.starsForString(value) + value.substring(value.length() - 1)+" 님의 개인정보 열람";
+
 			// 개인정보 조회로그 저장
-			privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_04, 1, CommonUtil.publicIp(), email);
+			privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_04, 1, kphReason, CommonUtil.publicIp(), email);
 
 			// 암호화 횟수 저장
 			if(echCount > 0) {
@@ -2397,6 +2400,8 @@ public class DynamicUserService {
 		log.info("idx : "+idx);
 
 		String email = jwtFilterDto.getEmail();
+		String kphReason = ""; // 처리사유
+
 		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
 		long adminId = adminCompanyInfoDto.getAdminId();
 		String cpCode = adminCompanyInfoDto.getCompanyCode();
@@ -2417,7 +2422,10 @@ public class DynamicUserService {
 
 		Map<String, List<Map<String, Object>>> privacyInfoMap = new HashMap<>();
 		List<String> securityHeaderNames = new ArrayList<>(); // 암호화된 데이터의 as 이름리스트
+		securityHeaderNames.add("아이디(1_id)");
+
 		List<String> securityName = new ArrayList<>(); // 암호화된 데이터 이름리스트
+		securityName.add("아이디");
 
 		String ctName = cpCode+"_1"; // 기본테이블
 
@@ -2475,21 +2483,30 @@ public class DynamicUserService {
 			List<Map<String, Object>> privacyInfo = dynamicUserRepositoryCustom.privacyOpenInfoData(String.valueOf(resultQuery));
 
 			for(Map<String, Object> map : privacyInfo) {
-//				log.info("수정전 map : "+map);
+				log.info("수정전 map : "+map);
+
 				for(int i=0; i<securityHeaderNames.size(); i++) {
 //					log.info("복호화대상 : "+securityName.get(i));
-					Object key = map.get(securityHeaderNames.get(i));
-					if(key != null) {
-						if(!String.valueOf(key).equals("없음")) { // 벨류값이 Null(없음)일 경우 제외
-							log.info("암호화 여부 체크시작");
 
-							String decryptValue = Utils.decrypResult(securityName.get(i), String.valueOf(key), awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey()); // 복호화된 데이터
+					if(securityHeaderNames.get(i).equals("아이디(1_id)")) {
+						String value = (String) map.get(securityHeaderNames.get(i));
+						if(value != null) {
+							kphReason = value.charAt(0) + Utils.starsForString(value) + value.substring(value.length() - 1)+" 님의 개인정보 열람";
+						}
+					} else {
+						Object key = map.get(securityHeaderNames.get(i));
+						if(key != null) {
+							if(!String.valueOf(key).equals("없음")) { // 벨류값이 Null(없음)일 경우 제외
+								log.info("암호화 여부 체크시작");
 
-//							log.info("복호화된 데이터 : "+ decryptValue);
-							map.put(securityHeaderNames.get(i), decryptValue);
+								String decryptValue = Utils.decrypResult(securityName.get(i), String.valueOf(key), awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey()); // 복호화된 데이터
+//								log.info("복호화된 데이터 : "+ decryptValue);
+
+								map.put(securityHeaderNames.get(i), decryptValue);
+								dchCount++;
+							}
 						}
 					}
-					dchCount++;
 				}
 			}
 
@@ -2504,7 +2521,7 @@ public class DynamicUserService {
 		data.put("privacyInfo",privacyInfo);
 
 		// 개인정보 열람로그 저장
-		privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_05, 1, CommonUtil.publicIp(), email);
+		privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_05, 1, kphReason, CommonUtil.publicIp(), email);
 
 		// 복호화 횟수 저장
 		if(dchCount > 0) {

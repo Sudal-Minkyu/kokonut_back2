@@ -107,6 +107,7 @@ public class AuthApiService {
 
         log.info("paramMap : "+paramMap);
 
+        String kphReason = ""; // 처리사유
         String email = jwtFilterDto.getEmail();
 
         AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
@@ -285,6 +286,8 @@ public class AuthApiService {
                                // result가 true일 경우 존재한다고 판단
                                 log.error("이미 사용중인 아이디입니다.");
                                 return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_10.getCode(),ResponseErrorCode.ERROR_CODE_10.getDesc()));
+                            } else {
+                                kphReason = value.charAt(0) + Utils.starsForString(value) + value.substring(value.length() - 1)+" 님의 개인정보 생성";
                             }
                         }
                         if (encrypts.get(i).equals("암호화")) {
@@ -451,7 +454,7 @@ public class AuthApiService {
             }
 
             // 개인정보 생성로그 저장
-            privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_01, 2, CommonUtil.publicIp(), email);
+            privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_01, 2, kphReason, CommonUtil.publicIp(), email);
 
             // 암호화 횟수 저장
             if(echCount > 0) {

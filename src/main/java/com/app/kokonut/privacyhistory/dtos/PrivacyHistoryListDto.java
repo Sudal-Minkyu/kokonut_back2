@@ -22,6 +22,8 @@ public class PrivacyHistoryListDto {
     private String knName; // 마스킹처리
     private String knEmail; // 마스킹처리
 
+    private String kphReason;
+
     private AuthorityRole knRoleCode;
 
     private AuthorityRole knRoleDesc;
