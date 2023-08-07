@@ -2053,6 +2053,8 @@ public class DynamicUserService {
 		HashMap<String, Object> data = new HashMap<>();
 
 		String email = jwtFilterDto.getEmail();
+		StringBuilder kphReason = new StringBuilder(); // 처리사유
+		kphReason.append("개인정보 조회 - ");
 
 		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
 		long adminId = adminCompanyInfoDto.getAdminId();
@@ -2085,9 +2087,9 @@ public class DynamicUserService {
 			return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_08.getCode(),ResponseErrorCode.ERROR_CODE_08.getDesc()));
 		}
 
-		log.info("페이지번호 : "+kokonutSearchDto.getPageNum());
-		log.info("searchCodes : "+searchCodes);
-		log.info("searchTexts : "+searchTexts);
+//		log.info("페이지번호 : "+kokonutSearchDto.getPageNum());
+//		log.info("searchCodes : "+searchCodes);
+//		log.info("searchTexts : "+searchTexts);
 
 		// 코드중복 검사
 		Set<String> duplicates = searchCodes.stream()
@@ -2176,6 +2178,12 @@ public class DynamicUserService {
 						log.error("존재하지 않은 고유코드 입니다. 고유코드를 확인 해주세요. 고유코드 : " + code);
 						return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_04.getCode(), ResponseErrorCode.ERROR_CODE_04.getDesc() + " 고유코드 : " + code));
 					} else {
+
+						if(i == searchCodes.size()-1) {
+							kphReason.append(companyTableColumnInfoCheck.getCtciDesignation()).append(" 조회 : ");
+						} else {
+							kphReason.append(companyTableColumnInfoCheck.getCtciDesignation()).append(", ");
+						}
 
 						if(companyTableColumnInfoCheck.getCtciSecuriy().equals("1")) {
 
@@ -2322,15 +2330,16 @@ public class DynamicUserService {
 			int totalCount = dynamicUserRepositoryCustom.privacyListTotal("SELECT COUNT(*) FROM ("+ resultQuery +") as totalCount");
 			log.info("totalCount : "+totalCount);
 
-			log.info("headerNames : "+headerNames); // 상단헤더 내용들
+			kphReason.append("총 ").append(totalCount).append("건");
+
+//			log.info("headerNames : "+headerNames); // 상단헤더 내용들
 
 			for(Map<String, Object> map : privacyList) {
 
-				log.info("수정전 map : "+map);
+//				log.info("수정전 map : "+map);
 				for(int i=0; i<headerNames.size(); i++) {
 
-					int trigger = 0;
-					log.info("headerNames.get(i) : "+headerNames.get(i));
+//					log.info("headerNames.get(i) : "+headerNames.get(i));
 
 					Object key = map.get(headerNames.get(i));
 					if(key != null) {
@@ -2362,18 +2371,15 @@ public class DynamicUserService {
 				}
 			}
 
-			for(Map<String, Object> map : privacyList) {
-				log.info("수정후 map : "+map);
-			}
+//			for(Map<String, Object> map : privacyList) {
+//				log.info("수정후 map : "+map);
+//			}
 
 			data.put("privacyList", privacyList);
 			data.put("totalCount", totalCount);
 
-			String kphReason = ""; // 처리사유
-//			kphReason = value.charAt(0) + Utils.starsForString(value) + value.substring(value.length() - 1)+" 님의 개인정보 열람";
-
 			// 개인정보 조회로그 저장
-			privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_04, 1, kphReason, CommonUtil.publicIp(), email);
+			privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_04, 1, kphReason.toString(), CommonUtil.publicIp(), email);
 
 			// 암호화 횟수 저장
 			if(echCount > 0) {
