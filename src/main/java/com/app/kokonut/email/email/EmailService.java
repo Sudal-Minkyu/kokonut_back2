@@ -34,6 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -75,8 +76,10 @@ public class EmailService {
     // 매일 5분마다 실행
     // 이메일발송건 업데이트 처리
     @Transactional
-    public void kokonutSendEmailUpdate() throws Exception {
+    public void kokonutSendEmailUpdate(LocalDate localDate) throws Exception {
         log.info("kokonutSendEmailUpdate 호출");
+
+        log.info("현재날짜 : "+localDate);
 
         List<Email> emailList = emailRepository.findEmails(Arrays.asList("1", "2"), LocalDateTime.now()); // 미발송 or 발송준비중이면서 현재시간보다 낮은 상태인 메일만 조회
 //        log.info("emailList : "+emailList);
@@ -368,11 +371,11 @@ public class EmailService {
             log.info("contents : "+contents);
 
             HashMap<String, String> callTemplate = new HashMap<>();
-            callTemplate.put("template", "MailTemplateOld"); // 고객용 템플릿 MailTemplateOld, 코코넛용 템플릿 MailTemplate
+            callTemplate.put("template", "MailTemplate"); // 고객용 템플릿 MailTemplateOld, 코코넛용 템플릿 MailTemplate
             callTemplate.put("title", emTitle);
             callTemplate.put("content", contents);
 
-//            String contents = mailSender.getHTML5(callTemplate);
+            contents = mailSender.getHTML5(callTemplate);
 
 //            List<String> testSendEmail = new ArrayList<>(); // sendEmailList
 //            testSendEmail.add("brian20@nate.com");

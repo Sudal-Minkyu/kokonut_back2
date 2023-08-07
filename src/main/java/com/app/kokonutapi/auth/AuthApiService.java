@@ -329,6 +329,23 @@ public class AuthApiService {
                             }
 
                             else if (names.get(i).equals("휴대전화번호")) {
+                                boolean onlyDigits = true;
+
+                                // 문자가 있는지 검사하기
+                                for (char c : value.toCharArray()) {
+                                    if (!Character.isDigit(c)) {
+                                        onlyDigits = false;
+                                        break;
+                                    }
+                                }
+
+                                if (!onlyDigits) {
+                                    log.error("휴대전화번호에 문자 또는 공백이 포함되어 있습니다. "+ names.get(i)+ " : " + value);
+                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_18.getCode(),
+                                            "휴대전화번호에 "+ResponseErrorCode.ERROR_CODE_18.getDesc()+" 보내신 "+
+                                                    names.get(i)+ " : " + value));
+                                }
+
                                 // 휴대전화번호 데이터의 대한 암호화
                                 if(value.length() == 11) {
                                     value = value.substring(0,3) + COLUMN_SEP_TYPE +
@@ -345,6 +362,23 @@ public class AuthApiService {
                             }
 
                             else if (names.get(i).equals("연락처")) {
+                                boolean onlyDigits = true;
+
+                                // 문자가 있는지 검사하기
+                                for (char c : value.toCharArray()) {
+                                    if (!Character.isDigit(c)) {
+                                        onlyDigits = false;
+                                        break;
+                                    }
+                                }
+
+                                if (!onlyDigits) {
+                                    log.error("연락처에 문자 또는 공백이 포함되어 있습니다. "+ names.get(i)+ " : " + value);
+                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_18.getCode(),
+                                            "연락처에 "+ResponseErrorCode.ERROR_CODE_18.getDesc()+" 보내신 "+
+                                                    names.get(i)+ " : " + value));
+                                }
+
                                 // 연락처의 데이터의 대한 암호화
                                 if(value.length() == 9 || value.length() == 10 || value.length() == 11) {
                                     if(value.length() == 9) {

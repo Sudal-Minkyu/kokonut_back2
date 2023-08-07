@@ -113,7 +113,7 @@ public class ApiKeyRepositoryCustomImpl extends QuerydslRepositorySupport implem
     @PersistenceContext
     private EntityManager entityManager;
 
-    public boolean doesAccessIpExist(String accessIp) {
+    public boolean doesAccessIpExist(Long companyId, String accessIp) {
         QApiKey apiKey = QApiKey.apiKey;
 
         BooleanExpression accessIpMatchesAnyIpField = apiKey.akAgreeIp1.eq(accessIp)
@@ -122,11 +122,10 @@ public class ApiKeyRepositoryCustomImpl extends QuerydslRepositorySupport implem
                 .or(apiKey.akAgreeIp4.eq(accessIp))
                 .or(apiKey.akAgreeIp5.eq(accessIp));
 
-
         JPQLQuery<Long> query = new JPAQuery<>(entityManager);
 
         long count = query.from(apiKey)
-                .where(accessIpMatchesAnyIpField)
+                .where(accessIpMatchesAnyIpField.and(apiKey.companyId.eq(companyId)))
                 .fetchCount();
 
         return count > 0;
