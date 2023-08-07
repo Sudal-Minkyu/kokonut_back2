@@ -62,12 +62,13 @@ public class PrivacyHistoryService {
         this.privacyHistoryRepository = privacyHistoryRepository;
     }
 
-    public void privacyHistoryInsert(Long adminId, PrivacyHistoryCode privacyHistoryCode,Integer kphType, String kphIpAddr, String email) {
+    public void privacyHistoryInsert(Long adminId, PrivacyHistoryCode privacyHistoryCode,Integer kphType, String kphReason, String kphIpAddr, String email) {
         log.info("privacyHistoryInsert 개인정보 처리이력 저장  호출");
         PrivacyHistory privacyHistory = new PrivacyHistory();
         privacyHistory.setAdminId(adminId);
         privacyHistory.setPrivacyHistoryCode(privacyHistoryCode);
         privacyHistory.setKphType(kphType);
+        privacyHistory.setKphReason(kphReason);
         privacyHistory.setKphIpAddr(kphIpAddr);
         privacyHistory.setInsert_email(email);
         privacyHistory.setInsert_date(LocalDateTime.now());

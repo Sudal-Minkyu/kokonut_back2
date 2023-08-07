@@ -159,37 +159,16 @@ public class BatchConfig {
                     log.info("이메일발송건 업데이트 처리 배치 실행");
                     log.info("현재 날짜 : " + requestDate);
 
-                    emailService.kokonutSendEmailUpdate();
+                    String datePart = requestDate.split(" ")[0];
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                    LocalDate localDate = LocalDate.parse(datePart, formatter);
+
+                    emailService.kokonutSendEmailUpdate(localDate);
 
                     return RepeatStatus.FINISHED;
                 })
                 .build();
     }
     //@@@@@@@@@@@@@@@@@
-
-    // 이메일 예약발송건 발송시작 @@ -> 사용안함 23.07.20
-    @Bean(JOB_NAME+"kokonutReservationEmailSendJob")
-    public Job kokonutReservationEmailSendJob() {
-        return jobBuilderFactory.get("kokonutReservationEmailSendJob")
-                .start(kokonutReservationEmailSendStep(null))
-                .build();
-    }
-
-    @Bean(STEP_NAME+"kokonutReservationEmailSendStep")
-    @JobScope
-    public Step kokonutReservationEmailSendStep(@Value("#{jobParameters[requestDate]}") String requestDate) {
-        return stepBuilderFactory.get("kokonutReservationEmailSendStep")
-                .tasklet((contribution, chunkContext) -> {
-                    log.info("이메일 예약발송건 발송시작 배치 실행");
-                    log.info("현재 날짜 : " + requestDate);
-
-//                    emailService.kokonutReservationEmailSend();
-
-                    return RepeatStatus.FINISHED;
-                })
-                .build();
-    }
-    //@@@@@@@@@@@@@@@@@
-
 
 }

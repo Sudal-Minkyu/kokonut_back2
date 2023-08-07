@@ -1,11 +1,11 @@
 package com.app.kokonut.configs;
 
 import com.app.kokonut.admin.enums.AuthorityRole;
-import com.app.kokonut.common.exceptionhandle.JwtAccessDeniedHandler;
-import com.app.kokonut.common.exceptionhandle.JwtAuthenticationEntryPoint;
 import com.app.kokonut.auth.jwt.been.JwtAuthenticationFilter;
 import com.app.kokonut.auth.jwt.been.JwtTokenProvider;
 import com.app.kokonut.auth.jwt.dto.RedisDao;
+import com.app.kokonut.common.exceptionhandle.JwtAccessDeniedHandler;
+import com.app.kokonut.common.exceptionhandle.JwtAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -85,6 +85,7 @@ public class SecurityConfig {
 
             .and()
             .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, redisDao), UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 

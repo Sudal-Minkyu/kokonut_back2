@@ -45,6 +45,10 @@ public class PrivacyHistory {
     @Column(name = "kph_ip_addr")
     private String kphIpAddr;
 
+    @ApiModelProperty("처리 내용")
+    @Column(name = "kph_reason")
+    private String kphReason;
+
     @ApiModelProperty("등록자 email")
     @Column(name = "insert_email", nullable = false)
     private String insert_email;

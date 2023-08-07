@@ -7,6 +7,7 @@ import com.app.kokonut.privacyhistory.dtos.PrivacyHistoryExcelDownloadListDto;
 import com.app.kokonut.privacyhistory.dtos.PrivacyHistoryListDto;
 import com.app.kokonut.privacyhistory.dtos.PrivacyHistorySearchDto;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.JPQLQuery;
 import org.qlrm.mapper.JpaResultMapper;
 import org.springframework.data.domain.Page;
@@ -44,6 +45,9 @@ public class PrivacyHistoryRepositoryCustomImpl extends QuerydslRepositorySuppor
                 .select(Projections.constructor(PrivacyHistoryListDto.class,
                         admin.knName,
                         admin.knEmail,
+                        new CaseBuilder()
+                                .when(privacyHistory.kphReason.isNotNull()).then(privacyHistory.kphReason)
+                                .otherwise(""),
                         admin.knRoleCode,
                         admin.knRoleCode,
                         privacyHistory.privacyHistoryCode,

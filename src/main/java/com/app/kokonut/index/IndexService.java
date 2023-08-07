@@ -189,8 +189,8 @@ public class IndexService {
 
 			// 최근접속일시
 			if (adminConnectListSubDto.getKnLastLoginDate() != null) {
-				log.info("현재날짜 있음 : "+now);
-				log.info("최근접속일 있음 : "+adminConnectListSubDto.getKnLastLoginDate());
+//				log.info("현재날짜 있음 : "+now);
+//				log.info("최근접속일 있음 : "+adminConnectListSubDto.getKnLastLoginDate());
 
 				String state;
 				LocalDateTime knLastLoginDate = adminConnectListSubDto.getKnLastLoginDate();
