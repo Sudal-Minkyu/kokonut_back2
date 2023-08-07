@@ -4,6 +4,7 @@ import com.app.kokonut.admin.enums.AuthorityRole;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -14,6 +15,7 @@ import java.time.format.DateTimeFormatter;
  * Time :
  * Remark : 관리자 목록관리에 보여줄 ListDto
  */
+@Slf4j
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -29,11 +31,11 @@ public class AdminListSubDto {
 
     private String insertName;
 
-    private LocalDateTime insert_date;
+    private LocalDateTime knLastLoginDate;
 
-//    private LocalDateTime ah_Insert_date; // 최근접속정보
-//
-//    private String ahIpAddr; // 접속IP
+    private String knIpAddr;
+
+    private LocalDateTime insert_date;
 
     private String knIsEmailAuth; // 이메일 인증여부
 
@@ -47,11 +49,15 @@ public class AdminListSubDto {
         return knRoleCode.getCode();
     }
 
+    public String getKnLastLoginDate() {
+        if(knLastLoginDate != null) {
+            return DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(knLastLoginDate);
+        } else {
+            return "";
+        }
+    }
+
     public String getInsert_date() {
         return DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(insert_date);
     }
-
-//    public String getAh_Insert_date() {
-//        return ah_Insert_date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm"));
-//    }
 }

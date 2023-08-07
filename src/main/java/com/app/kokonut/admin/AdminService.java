@@ -8,7 +8,6 @@ import com.app.kokonut.awskmshistory.dto.AwsKmsResultDto;
 import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.common.realcomponent.AESGCMcrypto;
-import com.app.kokonut.common.realcomponent.AwsKmsUtil;
 import com.app.kokonut.common.realcomponent.CommonUtil;
 import com.app.kokonut.common.realcomponent.Utils;
 import com.app.kokonut.company.company.Company;
@@ -17,7 +16,6 @@ import com.app.kokonut.company.companydatakey.CompanyDataKeyService;
 import com.app.kokonut.configs.MailSender;
 import com.app.kokonut.history.HistoryService;
 import com.app.kokonut.history.dtos.ActivityCode;
-import com.app.kokonut.history.dtos.HistoryLoginInfoDto;
 import com.app.kokonut.history.extra.encrypcounthistory.EncrypCountHistoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -373,30 +371,24 @@ public class AdminService {
         List<AdminListDto> adminListDtoList = new ArrayList<>();
         AdminListDto adminListDto;
 
-        Page<AdminListSubDto> adminListDtos = adminRepository.findByAdminList(searchText, filterRole, knState, companyId, email, pageable);
+         Page<AdminListSubDto> adminListDtos = adminRepository.findByAdminList(searchText, filterRole, knState, companyId, email, pageable);
         if(adminListDtos.getTotalPages() == 0) {
             log.info("조회된 데이터가 없습니다.");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO003.getCode(), ResponseErrorCode.KO003.getDesc()));
         } else {
-            HistoryLoginInfoDto historyLoginInfoDto;
-//            log.info("adminListDtos.getSize() : "+adminListDtos.getSize());
 
             for(int i=0; i<adminListDtos.getNumberOfElements(); i++) {
                 adminListDto = new AdminListDto();
-
-                historyLoginInfoDto = historyService.findByLoginHistory(adminListDtos.getContent().get(i).getKnEmail());
-//                log.info("historyLoginInfoDto :"+historyLoginInfoDto);
-
-                if(historyLoginInfoDto != null) {
-                    adminListDto.setAh_Insert_date(historyLoginInfoDto.getAh_Insert_date());
-                    adminListDto.setAhIpAddr(historyLoginInfoDto.getAhIpAddr());
-                }
 
                 adminListDto.setKnName(adminListDtos.getContent().get(i).getKnName());
                 adminListDto.setKnEmail(adminListDtos.getContent().get(i).getKnEmail());
                 adminListDto.setKnState(adminListDtos.getContent().get(i).getKnState());
                 adminListDto.setKnRoleDesc(adminListDtos.getContent().get(i).getKnRoleDesc());
                 adminListDto.setKnRoleCode(adminListDtos.getContent().get(i).getKnRoleCode());
+
+                adminListDto.setKnLastLoginDate(adminListDtos.getContent().get(i).getKnLastLoginDate());
+                adminListDto.setKnIpAddr(adminListDtos.getContent().get(i).getKnIpAddr());
+
                 adminListDto.setKnIsEmailAuth(adminListDtos.getContent().get(i).getKnIsEmailAuth());
                 adminListDto.setInsertName(adminListDtos.getContent().get(i).getInsertName());
                 adminListDto.setInsert_date(adminListDtos.getContent().get(i).getInsert_date());

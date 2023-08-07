@@ -646,7 +646,7 @@ public class AuthService {
                                         log.info("해외로그인 차단서비스 활성화");
                                         historyState = 1;
                                         historyService.updateHistory(activityHistoryId,
-                                                companyCode+" - "+activityCode.getDesc()+" 시도 이력", "해외로그인 차단서비스 활성화 -> 로그인 시도 해당 국가코드 : "+countryCode, 0);
+                                                 companyCode+" - "+activityCode.getDesc()+" 시도 이력", "해외로그인 차단서비스 활성화 -> 로그인 시도 해당 국가코드 : "+countryCode, 0);
                                         data.put("blockAbroad", activityHistoryId);
                                         data.put("knName", optionalAdmin.get().getKnName());
                                         data.put("knPhoneNumber", optionalAdmin.get().getKnPhoneNumber());
@@ -662,15 +662,15 @@ public class AuthService {
                             if(companySettingCheckDto.getCsAccessSetting().equals("1")) {
                                 log.info("접속 허용IP 체크");
                                 boolean accessIpCheckResult = companySettingAccessIPRepository.existsCompanySettingAccessIPByCsIdAndCsipIp(companySettingCheckDto.getCsId(), publicIp);
-//                                log.info("accessIpCheckResult : "+accessIpCheckResult);
-                                if(!accessIpCheckResult) {
-                                    log.error("접속 허용되지 않은 IP 입니다. 관리자에게 등록을 요청해주세요.");
-
-                                    historyService.updateHistory(activityHistoryId,
-                                            companyCode+" - "+activityCode.getDesc()+" 시도 이력", "접속 허용되지 않은 IP에서 로그인 시도하여 실패", 0);
-
-                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO094.getCode(),ResponseErrorCode.KO094.getDesc()));
-                                }
+                                log.info("accessIpCheckResult : "+accessIpCheckResult);
+//                                if(!accessIpCheckResult) {
+//                                    log.error("허용되지 않은 IP 차단");
+//
+//                                    historyService.updateHistory(activityHistoryId,
+//                                            companyCode+" - "+activityCode.getDesc()+" 시도 이력", "접속 허용되지 않은 IP에서 로그인 시도하여 실패", 0);
+//
+//                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO094.getCode(),ResponseErrorCode.KO094.getDesc()));
+//                                }
                             }
 
                             int csPasswordErrorCountSetting = Integer.parseInt(companySettingCheckDto.getCsPasswordErrorCountSetting());

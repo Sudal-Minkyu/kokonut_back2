@@ -1,10 +1,10 @@
 package com.app.kokonut.common.realcomponent;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URL;
 import java.net.UnknownHostException;
@@ -21,46 +20,71 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 @Slf4j
+@Component
 public class CommonUtil {
 
+	private static String kokonutState;
+
+	@Value("${kokonut.state}")
+	public void setKokonutState(String kokonutState) {
+		CommonUtil.kokonutState = kokonutState;
+	}
+
     public static String publicIp() {
-    	ServletRequestAttributes sra = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
-		HttpServletRequest request = sra.getRequest();
-		String ip;
+		String ip = "";
 
-		ip = request.getHeader("X-Forwarded-For");
-//		ip = Inet4Address.getLocalHost().getHostAddress(); IPV4 가져오기
+		log.info("kokonutState : "+kokonutState);
 
-		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-			ip = request.getHeader("Proxy-Client-IP");
-		}
+		if(kokonutState.equals("1")) {
+			try {
+				URL url = new URL("https://checkip.amazonaws.com");
 
-		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-			ip = request.getHeader("WL-Proxy-Client-IP");
-		}
+				try(BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()))){
+					ip = br.readLine();
+				}
 
-		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-			ip = request.getHeader("HTTP_CLIENT_IP");
-		}
+			} catch (IOException e) {
+				log.error("개발용 public Ip 조회 에러 : "+e);
+			}
 
-		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-			ip = request.getHeader("HTTP_X_FORWARDED_FOR");
-		}
+		} else {
+			ServletRequestAttributes sra = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+			HttpServletRequest request = sra.getRequest();
 
-		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-			ip = request.getHeader("X-Real-IP");
-		}
+			ip = request.getHeader("X-Forwarded-For");
+//			ip = Inet4Address.getLocalHost().getHostAddress(); // IPV4 가져오기
 
-		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-			ip = request.getHeader("X-RealIP");
-		}
+			if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+				ip = request.getHeader("Proxy-Client-IP");
+			}
 
-		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-			ip = request.getHeader("REMOTE_ADDR");
-		}
+			if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+				ip = request.getHeader("WL-Proxy-Client-IP");
+			}
 
-		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-			ip = request.getRemoteAddr();
+			if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+				ip = request.getHeader("HTTP_CLIENT_IP");
+			}
+
+			if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+				ip = request.getHeader("HTTP_X_FORWARDED_FOR");
+			}
+
+			if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+				ip = request.getHeader("X-Real-IP");
+			}
+
+			if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+				ip = request.getHeader("X-RealIP");
+			}
+
+			if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+				ip = request.getHeader("REMOTE_ADDR");
+			}
+
+			if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+				ip = request.getRemoteAddr();
+			}
 		}
 
         return ip;
