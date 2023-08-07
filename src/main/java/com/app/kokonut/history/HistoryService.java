@@ -291,14 +291,6 @@ public class HistoryService {
         return ResponseEntity.ok(res.ResponseEntityPage(historyListDtos));
     }
 
-    // 해당 유저의 최근 접속(로그인) 날짜 + 접속IP 가져오기
-    public HistoryLoginInfoDto findByLoginHistory(String knEmail) {
-        if(knEmail == null) {
-            return null;
-        }
-        return historyRepository.findByLoginHistory(knEmail);
-    }
-
     // 활동이력 인서트
     public Long insertHistory(int ahType, Long adminId, ActivityCode activityCode,
                                       String ahActivityDetail, String ahReason, String ahPublicIpAddr, int ahState, String email) {

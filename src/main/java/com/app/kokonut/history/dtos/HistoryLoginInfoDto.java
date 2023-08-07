@@ -19,13 +19,7 @@ import java.time.format.DateTimeFormatter;
 @AllArgsConstructor
 public class HistoryLoginInfoDto {
 
-    private LocalDateTime ah_Insert_date; // 최근접속정보
-
     private String ahIpAddr; // 접속IP
-
-    public String getAh_Insert_date() {
-        return ah_Insert_date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm"));
-    }
 
     public String getAhIpAddr() {
         if(ahIpAddr.equals("0:0:0:0:0:0:0:1")) {
