@@ -81,7 +81,7 @@ public class ApiKeyService {
         AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(knEmail);
 
         if(adminCompanyInfoDto != null) {
-            ApiKeyDto apiKeyDto = apiKeyRepository.findByApiKey(adminCompanyInfoDto.getAdminId(), adminCompanyInfoDto.getCompanyId());
+            ApiKeyDto apiKeyDto = apiKeyRepository.findByApiKey(adminCompanyInfoDto.getCompanyId());
 //            log.info("apiKeyDto : "+apiKeyDto);
             if(apiKeyDto == null) {
                 data.put("result", 1);

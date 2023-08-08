@@ -36,13 +36,12 @@ public class ApiKeyRepositoryCustomImpl extends QuerydslRepositorySupport implem
 
     // ApiKey가 존재하는지 그리고 유효한지 검증하는 메서드
     @Override
-    public ApiKeyDto findByApiKey(Long adminId, Long companyId) {
+    public ApiKeyDto findByApiKey(Long companyId) {
 
         QApiKey apiKey = QApiKey.apiKey;
 
         JPQLQuery<ApiKeyDto> query = from(apiKey)
-                .where(apiKey.adminId.eq(adminId).and(apiKey.companyId.eq(companyId))
-                        .and(apiKey.akUseYn.eq("Y")))
+                .where(apiKey.companyId.eq(companyId).and(apiKey.akUseYn.eq("Y")))
                 .select(Projections.constructor(ApiKeyDto.class,
                         apiKey.akKey,
                         apiKey.akAgreeIp1,

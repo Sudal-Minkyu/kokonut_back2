@@ -11,7 +11,7 @@ import com.app.kokonut.apikey.dtos.ApiKeyInfoDto;
  */
 public interface ApiKeyRepositoryCustom {
 
-    ApiKeyDto findByApiKey(Long adminId, Long companyId); // API Key 존재여부
+    ApiKeyDto findByApiKey(Long companyId); // API Key 존재여부
 
     Long findByCheck(String akKey); // ApiKey가 존재하는지 그리고 유효한지 검증하는 메서드
 
