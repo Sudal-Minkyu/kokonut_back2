@@ -19,6 +19,7 @@ import com.app.kokonut.company.companypayment.dtos.CompanyPaymentSearchDto;
 import com.app.kokonut.company.companypaymentinfo.CompanyPaymentInfo;
 import com.app.kokonut.company.companypaymentinfo.CompanyPaymentInfoRepository;
 import com.app.kokonut.company.companypaymentinfo.dtos.CompanyPaymentInfoDto;
+import com.app.kokonut.configs.GoogleOTP;
 import com.app.kokonut.configs.KeyGenerateService;
 import com.app.kokonut.configs.MailSender;
 import com.app.kokonut.history.HistoryService;
@@ -33,7 +34,6 @@ import com.app.kokonut.payment.paymentprivacycount.PaymentPrivacyCountRepository
 import com.app.kokonut.payment.paymentprivacycount.dtos.PaymentPrivacyCountDayDto;
 import com.app.kokonut.payment.paymentprivacycount.dtos.PaymentPrivacyCountMonthAverageDto;
 import com.app.kokonutuser.DynamicUserRepositoryCustom;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -42,10 +42,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.Column;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 /**
@@ -59,7 +59,7 @@ import java.util.*;
 public class PaymentService {
 
 	private final MailSender mailSender;
-
+	private final GoogleOTP googleOTP;
 	private final HistoryService historyService;
 	private final BootPayService bootPayService;
 	private final KeyGenerateService keyGenerateService;
@@ -75,12 +75,13 @@ public class PaymentService {
 	private final DynamicUserRepositoryCustom dynamicUserRepositoryCustom;
 
 	@Autowired
-	public PaymentService(HistoryService historyService, MailSender mailSender, BootPayService bootPayService, KeyGenerateService keyGenerateService,
+	public PaymentService(HistoryService historyService, MailSender mailSender, GoogleOTP googleOTP, BootPayService bootPayService, KeyGenerateService keyGenerateService,
 						  AdminRepository adminRepository, CompanyRepository companyRepository, PaymentRepository paymentRepository,
 						  PaymentErrorRepository paymentErrorRepository, CompanyPaymentRepository companyPaymentRepository, CompanyPaymentInfoRepository companyPaymentInfoRepository,
 						  PaymentPrivacyCountRepository paymentPrivacyCountRepository, DynamicUserRepositoryCustom dynamicUserRepositoryCustom) {
 		this.historyService = historyService;
 		this.mailSender = mailSender;
+		this.googleOTP = googleOTP;
 		this.bootPayService = bootPayService;
 		this.keyGenerateService = keyGenerateService;
 		this.adminRepository = adminRepository;
@@ -153,6 +154,11 @@ public class PaymentService {
 //		log.info("companyPaymentReservationListDtos : "+companyPaymentReservationListDtos);
 
 		List<Payment> paymentList = new ArrayList<>();
+
+		// 구독해지한 기업 빌링키 삭제처리
+		List<CompanyPayment> companyPaymentList = new ArrayList<>();
+		List<CompanyPaymentInfo> companyPaymentInfoList = new ArrayList<>();
+
 		Payment payment;
 		for(CompanyPaymentReservationListDto companyPaymentReservationListDto : companyPaymentReservationListDtos) {
 			payment = new Payment();
@@ -173,23 +179,42 @@ public class PaymentService {
 
 			int payAmount = 0;
 
-			// AWS RDS 클라우드 금액 호출(트래픽)
+			// AWS RDS 클라우드 금액 호출(아웃바운드 트래픽)
 			int awsRDSCloud = 0;
-
+			
 
 
 			// AWS S3 금액 호출
 			int awsS3Cloud = 0;
 
+
+
 			// AWS KMS 금액 호출
 			int awsKMSClound = 0;
+
+
 
 			int payCloudAmount = awsRDSCloud + awsS3Cloud + awsKMSClound;
 
 			// 서비스 금액 호출
 			int payServiceAmount = 0;
 			if(companyPaymentReservationListDto.getCpiPayType().equals("0")) {
-				payServiceAmount += Utils.kokonutMonthPrice(paymentPrivacyCountMonthAverageDto.getMonthAverageCount());
+				payServiceAmount = Utils.kokonutMonthPrice(paymentPrivacyCountMonthAverageDto.getMonthAverageCount());
+
+				// 만약 구독해지한 기업일 경우 부분 결제
+				if(companyPaymentReservationListDto.getSubscribeCheck().equals("1")) {
+					LocalDateTime cpSubscribeDate = companyPaymentReservationListDto.getCpSubscribeDate();
+
+					LocalDate dateToCheckWithoutTime = cpSubscribeDate.toLocalDate();
+
+					LocalDate cpiValidStart = companyPaymentReservationListDto.getCpiValidStart();
+					log.info("kokonutPay 호출 - 해지날짜 : " + cpiValidStart);
+
+					long dateCount = ChronoUnit.DAYS.between(dateToCheckWithoutTime, localDate);
+
+					payServiceAmount = Utils.calculateUsedAmount(payServiceAmount, localDate, (int)dateCount);
+					log.info("kokonutPay 호출 - 해지후 중간결제 금액 : " + payServiceAmount);
+				}
 			}
 
 			// 이메일이용 금액 호출
@@ -226,9 +251,22 @@ public class PaymentService {
 				paymentList.add(payment);
 			}
 
+			if(companyPaymentReservationListDto.getSubscribeCheck().equals("1")) {
+				// 구독해지한 기업이므로 빌링값 삭제처리
+				Optional<CompanyPayment> optionalCompanyPayment = companyPaymentRepository.findCompanyPaymentByCpiIdAndCpCode(companyPaymentReservationListDto.getCpiId(), cpCode);
+				if(optionalCompanyPayment.isPresent()) {
+					companyPaymentList.add(optionalCompanyPayment.get());
+					Optional<CompanyPaymentInfo> optionalCompanyPaymentInfo = companyPaymentInfoRepository.findCompanyPaymentInfoByCpiId(optionalCompanyPayment.get().getCpiId());
+					optionalCompanyPaymentInfo.ifPresent(companyPaymentInfoList::add);
+				}
+			}
+
 		}
 
 		paymentRepository.saveAll(paymentList);
+
+		companyPaymentRepository.deleteAll(companyPaymentList);
+		companyPaymentInfoRepository.deleteAll(companyPaymentInfoList);
 
 		// *숙제*
 		// 알림메일 전송하기
@@ -398,6 +436,16 @@ public class PaymentService {
 		} else {
 			log.error("companyPaymentInfo : 회사가 조회되지 않음");
 		}
+
+		// 현재 결제할 금액 가져오기 로직
+		// 무료사용중인지 유료사용중인지체크
+		// - 무료사용중이면 모두 0을 반환 -> 무료사용중일 경우 구독해지할 경우 해지하시겠습니까? 여부 붇기
+		// -> '예' 할경우 현재 빌링한 카드 빌링삭제 처리, '아니오' 할 경우 팝업닫기
+
+		// 유료사용중이면 월결제인지, 연결제인지 체크
+		// - 월결제일 경우 사용시작날짜의 연월 가져오기 오늘날짜기분 연월과 비교
+		// 1. 같으면 사용시작날짜기준으로 현재까지 사용된 금액 계산
+		// 2. 같지않으면 이번달 1일부터 현재까지 사용된 금액계산
 
 		Integer nowpay = 0;
 
@@ -660,8 +708,84 @@ public class PaymentService {
 	}
 
 	// 구독해지(최고관리자 권한)
-	public ResponseEntity<Map<String, Object>> billingDelete(JwtFilterDto jwtFilterDto) throws Exception {
+	public ResponseEntity<Map<String, Object>> billingDelete(String otpValue, String reason, JwtFilterDto jwtFilterDto) throws Exception {
 		log.info("billingDelete 호출");
+
+		AjaxResponse res = new AjaxResponse();
+		HashMap<String, Object> data = new HashMap<>();
+
+		if(otpValue == null || otpValue.equals("")) {
+			log.error("구글 OTP 값이 존재하지 않습니다.");
+			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO010.getCode(),ResponseErrorCode.KO010.getDesc()));
+		}
+
+		String email = jwtFilterDto.getEmail();
+
+		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+		Long adminId = adminCompanyInfoDto.getAdminId();
+		String cpCode = adminCompanyInfoDto.getCompanyCode();
+		String knOtpKey = adminCompanyInfoDto.getKnOtpKey();
+
+		boolean auth = googleOTP.checkCode(otpValue, knOtpKey);
+		log.info("auth : " + auth);
+
+		if (!auth) {
+			log.error("입력된 구글 OTP 값이 일치하지 않습니다. 다시 확인해주세요.");
+			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO012.getCode(), ResponseErrorCode.KO012.getDesc()));
+		} else {
+			log.info("OTP인증완료 -> 구독해지 시작");
+		}
+
+		Optional<Company> optionalCompany = companyRepository.findByCpCode(cpCode);
+		if(optionalCompany.isPresent()) {
+			if (optionalCompany.get().getCpiId() != null) {
+
+				// 구독해지 코드
+				ActivityCode activityCode = ActivityCode.AC_61_1;
+				String ip = CommonUtil.publicIp();
+				Long activityHistoryId;
+
+				// 활동이력 저장 -> 비정상 모드
+				activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
+						cpCode+" - "+activityCode.getDesc()+" 시도 이력", reason, ip, 0, email);
+
+				Optional<CompanyPayment> optionalCompanyPayment = companyPaymentRepository.findCompanyPaymentByCpiIdAndCpCode(optionalCompany.get().getCpiId(), cpCode);
+
+				if(optionalCompanyPayment.isPresent()) {
+
+					String billingKey = optionalCompanyPayment.get().getCpiBillingKey();
+					boolean result = bootPayService.billingKeyDelete(billingKey);
+					if(!result) {
+						log.error("구독해지를 실패 했습니다. 코코넛으로 문의해 주시길 바랍니다.");
+
+						historyService.updateHistory(activityHistoryId,
+								cpCode+" - "+activityCode.getDesc()+"시도 실패 이력", "구독해지를 실패했습니다.", 1);
+
+						return ResponseEntity.ok(res.fail(ResponseErrorCode.KO100_1.getCode(), ResponseErrorCode.KO100_1.getDesc()));
+					}
+					else {
+						log.error("구독해지를 성공 했습니다.");
+
+						// 해지날짜 기록
+						optionalCompany.get().setCpSubscribe("2");
+						optionalCompany.get().setCpSubscribeDate(LocalDateTime.now());
+						companyRepository.save(optionalCompany.get());
+
+						historyService.updateHistory(activityHistoryId,
+								cpCode+" - "+activityCode.getDesc()+"시도 성공 이력", reason, 1);
+					}
+				} else {
+					log.error("등록된 빌링키 정보가 존재하지 않습니다.");
+				}
+			}
+		}
+
+		return ResponseEntity.ok(res.success(data));
+	}
+
+	// 구독해지 취소
+	public ResponseEntity<Map<String, Object>> billingDeleteCancel(JwtFilterDto jwtFilterDto) throws Exception {
+		log.info("billingDeleteCancel 호출");
 
 		AjaxResponse res = new AjaxResponse();
 		HashMap<String, Object> data = new HashMap<>();
@@ -676,8 +800,8 @@ public class PaymentService {
 		if(optionalCompany.isPresent()) {
 			if (optionalCompany.get().getCpiId() != null) {
 
-				// 구독해지 코드
-				ActivityCode activityCode = ActivityCode.AC_61;
+				// 구독해지취소 코드
+				ActivityCode activityCode = ActivityCode.AC_61_2;
 				String ip = CommonUtil.publicIp();
 				Long activityHistoryId;
 
@@ -692,23 +816,20 @@ public class PaymentService {
 					String billingKey = optionalCompanyPayment.get().getCpiBillingKey();
 					boolean result = bootPayService.billingKeyDelete(billingKey);
 					if(!result) {
-						log.error("구독해지를 실패 했습니다. 코코넛으로 문의해 주시길 바랍니다.");
+						log.error("구독해지 취소를 실패 했습니다. 코코넛으로 문의해 주시길 바랍니다.");
 
 						historyService.updateHistory(activityHistoryId,
-								cpCode+" - "+activityCode.getDesc()+"시도 실패 이력", "구독해지를 실패했습니다.", 1);
+								cpCode+" - "+activityCode.getDesc()+"시도 실패 이력", "구독해지 취소를 실패했습니다.", 1);
 
-						return ResponseEntity.ok(res.fail(ResponseErrorCode.KO100.getCode(), ResponseErrorCode.KO100.getDesc()));
+						return ResponseEntity.ok(res.fail(ResponseErrorCode.KO100_2.getCode(), ResponseErrorCode.KO100_2.getDesc()));
 					} else {
-						log.error("구독해지를 성공 했습니다.");
 
-						optionalCompany.get().setCpiId(null);
-						optionalCompany.get().setCpSubscribe("2");
-						optionalCompany.get().setCpSubscribeDate(LocalDateTime.now());
+						log.error("구독해지 취소를 성공 했습니다.");
+
+						// 해지날짜 기록
+						optionalCompany.get().setCpSubscribe("1");
+						optionalCompany.get().setCpSubscribeDate(null);
 						companyRepository.save(optionalCompany.get());
-
-						companyPaymentRepository.delete(optionalCompanyPayment.get());
-						Optional<CompanyPaymentInfo> optionalCompanyPaymentInfo = companyPaymentInfoRepository.findCompanyPaymentInfoByCpiId(optionalCompanyPayment.get().getCpiId());
-						optionalCompanyPaymentInfo.ifPresent(companyPaymentInfoRepository::delete);
 
 						historyService.updateHistory(activityHistoryId,
 								cpCode+" - "+activityCode.getDesc()+"시도 성공 이력", "", 1);
@@ -721,5 +842,4 @@ public class PaymentService {
 
 		return ResponseEntity.ok(res.success(data));
 	}
-
 }

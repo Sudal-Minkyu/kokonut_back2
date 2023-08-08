@@ -1,12 +1,14 @@
 package com.app.kokonut.company.companypayment;
 
 import com.app.kokonut.admin.QAdmin;
+import com.app.kokonut.company.company.QCompany;
 import com.app.kokonut.company.companypayment.dtos.CompanyPaymentListDto;
 import com.app.kokonut.company.companypayment.dtos.CompanyPaymentReservationListDto;
 import com.app.kokonut.company.companypayment.dtos.CompanyPaymentSearchDto;
 import com.app.kokonut.company.companytable.QCompanyTable;
 import com.app.kokonut.payment.paymentprivacycount.QPaymentPrivacyCount;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.JPQLQuery;
 import org.qlrm.mapper.JpaResultMapper;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
@@ -36,10 +38,13 @@ public class CompanyPaymentRepositoryCustomImpl extends QuerydslRepositorySuppor
 
         QCompanyPayment companyPayment = QCompanyPayment.companyPayment;
         QCompanyTable companyTable = QCompanyTable.companyTable;
+        QCompany company = QCompany.company;
 
         JPQLQuery<CompanyPaymentListDto> query = from(companyPayment)
                 .where(companyPayment.cpiValidStart.loe(date))
+                .where(company.cpSubscribe.eq("1").and(company.cpSubscribeDate.isNotNull())) // 구독중이면서 구독해지날짜가 Null값일 경우만
                 .innerJoin(companyTable).on(companyTable.cpCode.eq(companyPayment.cpCode))
+                .innerJoin(company).on(company.cpCode.eq(companyPayment.cpCode))
                 .where(companyTable.ctTableCount.eq("1").and(companyTable.ctDesignation.eq("기본")))
                 .select(Projections.constructor(CompanyPaymentListDto.class,
                         companyPayment.cpCode,
@@ -54,16 +59,24 @@ public class CompanyPaymentRepositoryCustomImpl extends QuerydslRepositorySuppor
 
         QCompanyPayment companyPayment = QCompanyPayment.companyPayment;
         QCompanyTable companyTable = QCompanyTable.companyTable;
+        QCompany company = QCompany.company;
 
         JPQLQuery<CompanyPaymentReservationListDto> query = from(companyPayment)
                 .where(companyPayment.cpiValidStart.loe(date))
                 .innerJoin(companyTable).on(companyTable.cpCode.eq(companyPayment.cpCode))
+                .innerJoin(company).on(company.cpCode.eq(companyPayment.cpCode))
                 .where(companyTable.ctTableCount.eq("1").and(companyTable.ctDesignation.eq("기본")))
                 .select(Projections.constructor(CompanyPaymentReservationListDto.class,
                         companyPayment.cpCode,
                         companyTable.ctName,
                         companyPayment.cpiPayType,
-                        companyPayment.cpiBillingKey
+                        companyPayment.cpiBillingKey,
+                        companyPayment.cpiValidStart,
+                        company.cpiId,
+                        new CaseBuilder()
+                                .when(company.cpSubscribe.eq("2").and(company.cpSubscribeDate.isNotNull())).then("1")
+                                .otherwise("2"),
+                        company.cpSubscribeDate
                 ));
 
         return query.fetch();

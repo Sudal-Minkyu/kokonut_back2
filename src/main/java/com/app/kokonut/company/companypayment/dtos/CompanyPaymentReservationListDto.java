@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 /**
  * @author Woody
  * Date : 2023-06-20
@@ -23,4 +26,11 @@ public class CompanyPaymentReservationListDto {
 
     private String cpiBillingKey; // 카드(빌링키)
 
+    private LocalDate cpiValidStart; // 자동결제부과 시작일
+
+    private Long cpiId;
+
+    private String subscribeCheck; // 구독해지 여부 : "1" 일 경우 구독해지상태, "2"일 경우 정상
+
+    private LocalDateTime cpSubscribeDate;
 }

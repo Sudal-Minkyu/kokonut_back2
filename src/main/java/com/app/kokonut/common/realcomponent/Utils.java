@@ -16,7 +16,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.SecureRandom;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -234,7 +236,7 @@ public class Utils {
 		return sb.toString();
 	}
 
-	// LocalDateTime -> yyyy-mm-dd 형태로 변환
+	// LocalDateTime -> String yyyy-mm-dd 형태로 변환
 	public static String convertLocalDateTimeToString(LocalDateTime localDateTime) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 		return localDateTime.format(formatter);
@@ -254,8 +256,8 @@ public class Utils {
 		int price = 0;
 
 		if(countMonthAverage < 10000) {
-//			price = 99000;
-			price = 500;
+			price = 99000;
+//			price = 500;
 		} else if(countMonthAverage < 100000) {
 			price = 390000;
 		} else if(countMonthAverage < 300000) {
@@ -269,6 +271,19 @@ public class Utils {
 		}
 
 		return price;
+	}
+
+	// 구독해지 대상 사용한만큼 금액결제
+	public static int calculateUsedAmount(int totalAmount, LocalDate currentDate, int daysUsed) {
+		// 현재 월의 총 일수를 가져옵니다.
+		YearMonth yearMonth = YearMonth.from(currentDate);
+		int daysInCurrentMonth = yearMonth.lengthOfMonth();
+
+		// 일일 서비스 비용 계산
+		int dailyServiceAmount = totalAmount / daysInCurrentMonth;
+
+		// 사용한 서비스에 대한 비용 계산
+		return dailyServiceAmount * daysUsed;
 	}
 
 	// 이메일 체크 정규식 함수 - true일 경우 준수함, false일 경우 준수하지 않음

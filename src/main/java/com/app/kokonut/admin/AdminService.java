@@ -321,7 +321,16 @@ public class AdminService {
 
             data.put("paymentBillingCheck",adminInfoDto.getBillingCheck()); // "1"이면 등록됨, "0" 이면 등록되지않음(팝업창 안내)
 
-            data.put("emailSendSettingState",adminInfoDto.getEmailSendSettingState()); // "1"이면 이메일발송 셋팅함, "0" 이면 이메일발송 셋팅하지않음
+            data.put("emailSendSettingState",adminInfoDto.getEmailSendSettingState()); // "1"이면 이메일발송 셋팅함, "0" 이면 이메일발송 셋팅하지않음, "2"면 구독해지
+            if(adminInfoDto.getEmailSendSettingState().equals("2")) {
+                // 구독해지인 상태일 경우 구독해지를 취소하고 계속이어나갈지의 대한 여부
+                LocalDateTime cpSubscribeDate = adminInfoDto.getCpSubscribeDate();
+                if(LocalDateTime.now().getMonth() == cpSubscribeDate.getMonth()) {
+                    data.put("paymentDeleteCancel","1"); // 구독해지했지만 이어서 할 경우 구독상태를 "1"로 수정하고 구독취소날짜를 NULL 값으로 수정하는 API 호출
+                } else {
+                    data.put("paymentDeleteCancel","0"); // 구독해지했지만 이어서 할수없고 다시 카드를 재등록해야되는 상태
+                }
+            }
 
         }
 

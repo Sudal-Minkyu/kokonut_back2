@@ -37,6 +37,8 @@ public class AdminInfoDto {
 
     private String emailSendSettingState; // 이메일발송 셋팅 여부
 
+    private LocalDateTime cpSubscribeDate;
+
     public long getCsPasswordChangeSetting() {
         return Long.parseLong(csPasswordChangeSetting);
     }

@@ -122,11 +122,12 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
                         companySetting.csAutoLogoutSetting,
                         new CaseBuilder()
                                 .when(company.cpSubscribe.eq("1").and(company.cpiId.isNotNull())).then("1")
-                                .when(company.cpSubscribe.eq("2")).then("2")
+                                .when(company.cpSubscribe.eq("2").and(company.cpSubscribeDate.isNotNull())).then("2")
                                 .otherwise("0"),
                         new CaseBuilder()
                                 .when(companySetting.csEmailCodeSetting.isNotNull()).then("1")
-                                .otherwise("0")
+                                .otherwise("0"),
+                        company.cpSubscribeDate
                 ));
 
         return query.fetchOne();

@@ -663,14 +663,14 @@ public class AuthService {
                                 log.info("접속 허용IP 체크");
                                 boolean accessIpCheckResult = companySettingAccessIPRepository.existsCompanySettingAccessIPByCsIdAndCsipIp(companySettingCheckDto.getCsId(), publicIp);
                                 log.info("accessIpCheckResult : "+accessIpCheckResult);
-//                                if(!accessIpCheckResult) {
-//                                    log.error("허용되지 않은 IP 차단");
-//
-//                                    historyService.updateHistory(activityHistoryId,
-//                                            companyCode+" - "+activityCode.getDesc()+" 시도 이력", "접속 허용되지 않은 IP에서 로그인 시도하여 실패", 0);
-//
-//                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO094.getCode(),ResponseErrorCode.KO094.getDesc()));
-//                                }
+                                if(!accessIpCheckResult) {
+                                    log.error("허용되지 않은 IP 차단");
+
+                                    historyService.updateHistory(activityHistoryId,
+                                            companyCode+" - "+activityCode.getDesc()+" 시도 이력", "접속 허용되지 않은 IP에서 로그인 시도하여 실패", 0);
+
+                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO094.getCode(),ResponseErrorCode.KO094.getDesc()));
+                                }
                             }
 
                             int csPasswordErrorCountSetting = Integer.parseInt(companySettingCheckDto.getCsPasswordErrorCountSetting());

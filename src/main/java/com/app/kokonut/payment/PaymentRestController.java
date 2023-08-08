@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -58,11 +57,20 @@ public class PaymentRestController {
     }
 
     @PostMapping(value = "/billingDelete")
-    @ApiOperation(value = "구독해지" , notes = "")
+    @ApiOperation(value = "구독해지" , notes = "최고관리자 권한")
     @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
-    public ResponseEntity<Map<String,Object>> billingDelete() throws Exception {
+    public ResponseEntity<Map<String,Object>> billingDelete(@RequestParam(value="otpValue", defaultValue = "") String otpValue,
+                                                            @RequestParam(value="reason", defaultValue = "") String reason) throws Exception {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
-        return paymentService.billingDelete(jwtFilterDto);
+        return paymentService.billingDelete(otpValue, reason, jwtFilterDto);
+    }
+
+    @PostMapping(value = "/billingDeleteCancel")
+    @ApiOperation(value = "구독해지 취소" , notes = "최고관리자 권한")
+    @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    public ResponseEntity<Map<String,Object>> billingDeleteCancel() throws Exception {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return paymentService.billingDeleteCancel(jwtFilterDto);
     }
 
 }
