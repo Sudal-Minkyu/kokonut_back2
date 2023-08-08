@@ -27,9 +27,9 @@ public class AdminListDto {
 
     private String insert_date;
 
-    private String ah_Insert_date; // 최근접속정보
+    private String knLastLoginDate;
 
-    private String ahIpAddr; // 접속IP
+    private String knIpAddr;
 
     private String knIsEmailAuth; // 이메일 인증여부
 

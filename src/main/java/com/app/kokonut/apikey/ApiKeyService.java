@@ -244,7 +244,7 @@ public class ApiKeyService {
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
                     companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
 
-            if(!apiKeyRepository.doesAccessIpExist(accessIp)) {
+            if(!apiKeyRepository.doesAccessIpExist(companyId, accessIp)) {
                 if(optionalApiKey.get().getAkAgreeIp1() == null) {
                     optionalApiKey.get().setAkAgreeIp1(accessIp);
                     optionalApiKey.get().setAkAgreeMemo1(ipMemo);

@@ -1,11 +1,11 @@
 package com.app.kokonut.configs;
 
 import com.app.kokonut.admin.enums.AuthorityRole;
-import com.app.kokonut.common.exceptionhandle.JwtAccessDeniedHandler;
-import com.app.kokonut.common.exceptionhandle.JwtAuthenticationEntryPoint;
 import com.app.kokonut.auth.jwt.been.JwtAuthenticationFilter;
 import com.app.kokonut.auth.jwt.been.JwtTokenProvider;
 import com.app.kokonut.auth.jwt.dto.RedisDao;
+import com.app.kokonut.common.exceptionhandle.JwtAccessDeniedHandler;
+import com.app.kokonut.common.exceptionhandle.JwtAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -71,11 +71,11 @@ public class SecurityConfig {
             .antMatchers("/v2/api/Admin/masterTest")
                 .hasAnyAuthority(AuthorityRole.ROLE_MASTER.getDesc(), AuthorityRole.ROLE_SYSTEM.getDesc())
 
-            .antMatchers("/v2/api/Admin/adminTest", "/v2/api/CompanySetting/**", "/v2/api/Policy/**", "/v2/api/Payment/**")
+            .antMatchers("/v2/api/Admin/adminTest", "/v2/api/CompanySetting/**", "/v2/api/DynamicUser/**", "/v2/api/Policy/**", "/v2/api/Payment/**", "/v2/api/DynamicUser/privacyUserOpen")
                 .hasAnyAuthority(AuthorityRole.ROLE_ADMIN.getDesc(), AuthorityRole.ROLE_MASTER.getDesc(), AuthorityRole.ROLE_SYSTEM.getDesc())
 
             .antMatchers("/v2/api/Admin/userTest", "/v2/api/Admin/create", "/v2/api/ApiKey/**", "/v2/api/Admin/**", "/v2/api/History/**", "/v2/api/Email/**",
-                    "/v2/api/Company/addCategoryList", "/v2/api/DynamicUser/**",
+                    "/v2/api/Company/addCategoryList", "/v2/api/DynamicUser/tableColumnCall", "/v2/api/DynamicUser/tableBasicList", "/v2/api/DynamicUser/privacyUserSearch",
                     "/v2/api/Policy/policyList", "/v2/api/Policy/policyDetail/**", "/v2/api/Provision/**", "/v2/api/PrivacyHistory/**", "/v2/api/Index/**", "/v2/api/ThirdParty/**")
                 .hasAnyAuthority(AuthorityRole.ROLE_USER.getDesc(), AuthorityRole.ROLE_ADMIN.getDesc(), AuthorityRole.ROLE_MASTER.getDesc(), AuthorityRole.ROLE_SYSTEM.getDesc())
 
@@ -85,6 +85,7 @@ public class SecurityConfig {
 
             .and()
             .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, redisDao), UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 

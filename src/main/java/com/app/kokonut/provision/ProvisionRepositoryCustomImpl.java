@@ -148,11 +148,11 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
                 ));
 
         if(dateType.equals("1")) {
-            // 오늘조회
-            query.where(provision.proStartDate.goe(filterDate).and(provision.proExpDate.loe(filterDate)));
+            // 오늘 모두 속하면 조회
+            query.where(provision.proStartDate.loe(now).and(provision.proExpDate.goe(filterDate)));
         }else if(dateType.equals("2")) {
             // 이번주 조회
-            query.where(provision.proStartDate.loe(filterDate).and(provision.proExpDate.goe(now))); // 날짜 사이값 정의 filterDate < now
+            query.where(provision.proStartDate.loe(now).and(provision.proExpDate.goe(filterDate))); // 날짜 사이값 정의 filterDate < now
         } else {
             // 이번달 조회
             query.where(

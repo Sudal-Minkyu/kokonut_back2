@@ -624,7 +624,7 @@ public class ProvisionService {
 
             // 템플릿 호출을 위한 데이터 세팅
 //            HashMap<String, String> callTemplate = new HashMap<>();
-//            callTemplate.put("template", "KokonutMailTemplate");
+//            callTemplate.put("template", "MailTemplate");
 //            callTemplate.put("title", "개인정보제공 파일암호 알림");
 //            callTemplate.put("content", contents);
 //

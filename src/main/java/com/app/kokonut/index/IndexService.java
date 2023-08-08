@@ -186,6 +186,7 @@ public class IndexService {
 			adminConnectListDto.setKnName(adminConnectListSubDto.getKnName());
 			adminConnectListDto.setRoleCode(adminConnectListSubDto.getRoleCode());
 			adminConnectListDto.setRoleName(adminConnectListSubDto.getRoleName());
+
 			// 최근접속일시
 			if (adminConnectListSubDto.getKnLastLoginDate() != null) {
 //				log.info("현재날짜 있음 : "+now);

@@ -107,6 +107,7 @@ public class AuthApiService {
 
         log.info("paramMap : "+paramMap);
 
+        String kphReason = ""; // 처리사유
         String email = jwtFilterDto.getEmail();
 
         AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
@@ -285,6 +286,8 @@ public class AuthApiService {
                                // result가 true일 경우 존재한다고 판단
                                 log.error("이미 사용중인 아이디입니다.");
                                 return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_10.getCode(),ResponseErrorCode.ERROR_CODE_10.getDesc()));
+                            } else {
+                                kphReason = value.charAt(0) + Utils.starsForString(value) + value.substring(value.length() - 1)+" 님의 개인정보 생성";
                             }
                         }
                         if (encrypts.get(i).equals("암호화")) {
@@ -326,6 +329,23 @@ public class AuthApiService {
                             }
 
                             else if (names.get(i).equals("휴대전화번호")) {
+                                boolean onlyDigits = true;
+
+                                // 문자가 있는지 검사하기
+                                for (char c : value.toCharArray()) {
+                                    if (!Character.isDigit(c)) {
+                                        onlyDigits = false;
+                                        break;
+                                    }
+                                }
+
+                                if (!onlyDigits) {
+                                    log.error("휴대전화번호에 문자 또는 공백이 포함되어 있습니다. "+ names.get(i)+ " : " + value);
+                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_18.getCode(),
+                                            "휴대전화번호에 "+ResponseErrorCode.ERROR_CODE_18.getDesc()+" 보내신 "+
+                                                    names.get(i)+ " : " + value));
+                                }
+
                                 // 휴대전화번호 데이터의 대한 암호화
                                 if(value.length() == 11) {
                                     value = value.substring(0,3) + COLUMN_SEP_TYPE +
@@ -342,6 +362,23 @@ public class AuthApiService {
                             }
 
                             else if (names.get(i).equals("연락처")) {
+                                boolean onlyDigits = true;
+
+                                // 문자가 있는지 검사하기
+                                for (char c : value.toCharArray()) {
+                                    if (!Character.isDigit(c)) {
+                                        onlyDigits = false;
+                                        break;
+                                    }
+                                }
+
+                                if (!onlyDigits) {
+                                    log.error("연락처에 문자 또는 공백이 포함되어 있습니다. "+ names.get(i)+ " : " + value);
+                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_18.getCode(),
+                                            "연락처에 "+ResponseErrorCode.ERROR_CODE_18.getDesc()+" 보내신 "+
+                                                    names.get(i)+ " : " + value));
+                                }
+
                                 // 연락처의 데이터의 대한 암호화
                                 if(value.length() == 9 || value.length() == 10 || value.length() == 11) {
                                     if(value.length() == 9) {
@@ -451,7 +488,7 @@ public class AuthApiService {
             }
 
             // 개인정보 생성로그 저장
-            privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_01, 2, CommonUtil.publicIp(), email);
+            privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_01, 2, kphReason, CommonUtil.publicIp(), email);
 
             // 암호화 횟수 저장
             if(echCount > 0) {

@@ -8,7 +8,6 @@ import com.app.kokonut.awskmshistory.dto.AwsKmsResultDto;
 import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.common.realcomponent.AESGCMcrypto;
-import com.app.kokonut.common.realcomponent.AwsKmsUtil;
 import com.app.kokonut.common.realcomponent.CommonUtil;
 import com.app.kokonut.common.realcomponent.Utils;
 import com.app.kokonut.company.company.Company;
@@ -17,7 +16,6 @@ import com.app.kokonut.company.companydatakey.CompanyDataKeyService;
 import com.app.kokonut.configs.MailSender;
 import com.app.kokonut.history.HistoryService;
 import com.app.kokonut.history.dtos.ActivityCode;
-import com.app.kokonut.history.dtos.HistoryLoginInfoDto;
 import com.app.kokonut.history.extra.encrypcounthistory.EncrypCountHistoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -373,30 +371,24 @@ public class AdminService {
         List<AdminListDto> adminListDtoList = new ArrayList<>();
         AdminListDto adminListDto;
 
-        Page<AdminListSubDto> adminListDtos = adminRepository.findByAdminList(searchText, filterRole, knState, companyId, email, pageable);
+         Page<AdminListSubDto> adminListDtos = adminRepository.findByAdminList(searchText, filterRole, knState, companyId, email, pageable);
         if(adminListDtos.getTotalPages() == 0) {
             log.info("조회된 데이터가 없습니다.");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO003.getCode(), ResponseErrorCode.KO003.getDesc()));
         } else {
-            HistoryLoginInfoDto historyLoginInfoDto;
-//            log.info("adminListDtos.getSize() : "+adminListDtos.getSize());
 
             for(int i=0; i<adminListDtos.getNumberOfElements(); i++) {
                 adminListDto = new AdminListDto();
-
-                historyLoginInfoDto = historyService.findByLoginHistory(adminListDtos.getContent().get(i).getKnEmail());
-//                log.info("historyLoginInfoDto :"+historyLoginInfoDto);
-
-                if(historyLoginInfoDto != null) {
-                    adminListDto.setAh_Insert_date(historyLoginInfoDto.getAh_Insert_date());
-                    adminListDto.setAhIpAddr(historyLoginInfoDto.getAhIpAddr());
-                }
 
                 adminListDto.setKnName(adminListDtos.getContent().get(i).getKnName());
                 adminListDto.setKnEmail(adminListDtos.getContent().get(i).getKnEmail());
                 adminListDto.setKnState(adminListDtos.getContent().get(i).getKnState());
                 adminListDto.setKnRoleDesc(adminListDtos.getContent().get(i).getKnRoleDesc());
                 adminListDto.setKnRoleCode(adminListDtos.getContent().get(i).getKnRoleCode());
+
+                adminListDto.setKnLastLoginDate(adminListDtos.getContent().get(i).getKnLastLoginDate());
+                adminListDto.setKnIpAddr(adminListDtos.getContent().get(i).getKnIpAddr());
+
                 adminListDto.setKnIsEmailAuth(adminListDtos.getContent().get(i).getKnIsEmailAuth());
                 adminListDto.setInsertName(adminListDtos.getContent().get(i).getInsertName());
                 adminListDto.setInsert_date(adminListDtos.getContent().get(i).getInsert_date());
@@ -425,9 +417,6 @@ public class AdminService {
         String email = jwtFilterDto.getEmail();
 
         String roleCode;
-//        if(choseRole.equals("대표관리자")) {
-//            roleCode = "ROLE_MASTER";
-//        } else
         if(choseRole.equals("최고관리자")) {
             roleCode = "ROLE_ADMIN";
         } else if(choseRole.equals("관리자")) {
@@ -458,7 +447,7 @@ public class AdminService {
             AwsKmsResultDto awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(companyCode);
             byte[] ivBytes = AESGCMcrypto.generateIV();
 
-//            String title = ReqUtils.filter("관리자 등록 알림1");
+//            String title = ReqUtils.filter("관리자 등록 인증 알림");
 //            String contents = ReqUtils.unFilter("" +
 //                    "관리자등록 요청되었습니다. <br>" +
 //                    "해당 링크를 통해 가입을 이어서 해주시길 바랍니다.<br>" +
@@ -467,7 +456,7 @@ public class AdminService {
 //            // 템플릿 호출을 위한 데이터 세팅
 //            HashMap<String, String> callTemplate = new HashMap<>();
 //            callTemplate.put("template", "MailTemplate");
-//            callTemplate.put("title", "관리자 등록 알림2");
+//            callTemplate.put("title", "관리자 등록 인증메일 입니다.");
 //            callTemplate.put("content", contents);
 //
 //            // 템플릿 TODO 템플릿 디자인 추가되면 수정
@@ -475,15 +464,14 @@ public class AdminService {
 //            String reciverName = "kokonut";
 
             // 이메일인증코드
-            // -> 레디스서버에 24시간동안 보관
             String knEmailAuthCode = AESGCMcrypto.encrypt(userEmail.getBytes(StandardCharsets.UTF_8), awsKmsResultDto.getSecretKey(), ivBytes);
 
             String ivKo = Base64.getEncoder().encodeToString(ivBytes);
 
             // 관리자 등록메일 보내기
-            String title = "관리자 등록 알림";
+            String title = "관리자등록 인증 알림";
             // TODO : 답변 내용을 HTML 태그를 붙여서 메일로 전송해준다. 화면단과 개발할 때 추가 개발해야함.
-            String contents = "관리자등록 요청되었습니다. <br>해당 링크를 통해 가입을 이어서 해주시길 바랍니다.<br>링크 : "+
+            String contents = "관리자등록 요청 되었습니다. <br>해당 링크를 통해 가입을 이어서 해주시길 바랍니다.<br>링크 : "+
             "<a href=\""+frontServerDomainIp+"/#/create?" +
                     "evKo="+ companyId +"&" +
                     "ivKo="+ivKo +"&" +
@@ -497,7 +485,9 @@ public class AdminService {
                 log.info("### 메일전송 성공했습니다. reciver Email : "+ userEmail);
 
                 // 인증번호 레디스에 담기
-                redisDao.setValues("EV: " + userEmail, knEmailAuthCode, Duration.ofMillis((long)1000*60*60*24)); // 제한시간 3분
+                // -> 레디스서버에 24시간동안 보관
+                redisDao.setValues("EV: " + userEmail, knEmailAuthCode, Duration.ofMillis((long)1000*60*60*24)); // 제한시간 24시간
+//                redisDao.setValues("EV: " + userEmail, knEmailAuthCode, Duration.ofMillis((long)1000*60)); // 제한시간 1분
 
                 Admin admin = new Admin();
                 admin.setKnEmail(userEmail);
@@ -534,6 +524,99 @@ public class AdminService {
 
         return ResponseEntity.ok(res.success(data));
     }
+
+    // 관리자등록 인증메일 재전송
+    @Transactional
+    public ResponseEntity<Map<String, Object>> createMailAgain(String userEmail, JwtFilterDto jwtFilterDto) throws Exception {
+        log.info("createMailAgain 호출");
+
+        log.info("userEmail : "+userEmail);
+        log.info("jwtFilterDto : "+jwtFilterDto);
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+        String email = jwtFilterDto.getEmail();
+
+        AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+        Long adminId = adminCompanyInfoDto.getAdminId();
+        Long companyId = adminCompanyInfoDto.getCompanyId();
+        String companyCode = adminCompanyInfoDto.getCompanyCode();
+
+        // 활동 코드
+        ActivityCode activityCode = ActivityCode.AC_05;
+        String ip = CommonUtil.publicIp();
+
+        if(jwtFilterDto.getRole().getCode().equals("ROLE_SYSTEM") || jwtFilterDto.getRole().getCode().equals("ROLE_MASTER")) {
+            log.info("관리자등록 재인증 시작");
+
+            // 관리자추가 저장 -> 비정상 모드
+            Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
+                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+
+            AwsKmsResultDto awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(companyCode);
+            byte[] ivBytes = AESGCMcrypto.generateIV();
+
+//            String title = ReqUtils.filter("관리자 등록 재인증 알림");
+//            String contents = ReqUtils.unFilter("" +
+//                    "관리자등록 요청되었습니다. <br>" +
+//                    "해당 링크를 통해 가입을 이어서 해주시길 바랍니다.<br>" +
+//                    "링크 : "+frontServerDomainIp+"/#/join");
+//
+//            // 템플릿 호출을 위한 데이터 세팅
+//            HashMap<String, String> callTemplate = new HashMap<>();
+//            callTemplate.put("template", "MailTemplate");
+//            callTemplate.put("title", "관리자 등록 알림");
+//            callTemplate.put("content", contents);
+//
+//            // 템플릿 TODO 템플릿 디자인 추가되면 수정
+//            contents = mailSender.getHTML5(callTemplate);
+//            String reciverName = "kokonut";
+
+            // 이메일인증코드
+            String knEmailAuthCode = AESGCMcrypto.encrypt(userEmail.getBytes(StandardCharsets.UTF_8), awsKmsResultDto.getSecretKey(), ivBytes);
+
+            String ivKo = Base64.getEncoder().encodeToString(ivBytes);
+
+            // 관리자 등록메일 보내기
+            String title = "관리자등록 재인증 알림";
+            // TODO : 답변 내용을 HTML 태그를 붙여서 메일로 전송해준다. 화면단과 개발할 때 추가 개발해야함.
+            String contents = "관리자등록 재요청 되었습니다. <br>해당 링크를 통해 가입을 이어서 해주시길 바랍니다.<br>링크 : "+
+                    "<a href=\""+frontServerDomainIp+"/#/create?" +
+                    "evKo="+ companyId +"&" +
+                    "ivKo="+ivKo +"&" +
+                    "kvKo="+knEmailAuthCode+"\" target=\"_blank\">"+
+                    "이어서 가입하기"+
+                    "</a>";
+            log.info("toEmail" + userEmail + ", toName" + "코코넛");
+
+            String mailSenderResult = mailSender.sendKokonutMail(userEmail, "", title, contents);
+            if(mailSenderResult != null) {
+                log.info("### 메일전송 성공했습니다. reciver Email : "+ userEmail);
+
+                // 인증번호 레디스에 담기
+                // -> 레디스서버에 24시간동안 보관
+                redisDao.setValues("EV: " + userEmail, knEmailAuthCode, Duration.ofMillis((long)1000*60*60*24)); // 제한시간 24시간
+//                redisDao.setValues("EV: " + userEmail, knEmailAuthCode, Duration.ofMillis((long)1000*60)); // 제한시간 1분
+
+                // 암호화 횟수 저장
+                encrypCountHistoryService.encrypCountHistorySave(companyCode, 1);
+
+                historyService.updateHistory(activityHistoryId,
+                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+            }else{
+                log.error("### 해당 메일 전송에 실패했습니다. 관리자에게 문의하세요. reciverEmail : "+ userEmail);
+                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO041.getCode(), ResponseErrorCode.KO041.getDesc()));
+            }
+
+        } else{
+            log.error("접근 권한이 없습니다.");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO001.getCode(),ResponseErrorCode.KO001.getDesc()));
+        }
+
+        return ResponseEntity.ok(res.success(data));
+    }
+
 
     // 내부제공, 외부제공 관리자목록 리스트 호출
     public ResponseEntity<Map<String, Object>> offerAdminList(String type, JwtFilterDto jwtFilterDto) {

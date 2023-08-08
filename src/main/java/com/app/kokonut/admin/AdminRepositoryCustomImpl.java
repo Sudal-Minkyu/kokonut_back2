@@ -169,11 +169,14 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
                         admin.knRoleCode,
                         admin.knRoleCode,
                         InsertAdmin.knName,
+                        admin.knLastLoginDate,
+                        new CaseBuilder()
+                                .when(admin.knIpAddr.isNotNull()).then(admin.knIpAddr)
+                                .otherwise(""),
                         admin.insert_date,
                         admin.knIsEmailAuth,
                         admin.knState
                 ));
-
         if(!searchText.equals("")) {
             query.where(admin.knName.like("%"+ searchText +"%").or(admin.knEmail.like("%"+ searchText +"%")));
         }
