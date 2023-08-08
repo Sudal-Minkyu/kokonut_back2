@@ -388,9 +388,9 @@ public class AuthService {
 
         admin.setKnPassword(passwordEncoder.encode(adminPasswordChangeDto.getKnPassword()));
         admin.setKnPwdChangeDate(LocalDateTime.now());
+        admin.setKnPwdErrorCount(0);
         admin.setModify_email(adminPasswordChangeDto.getKnEmail());
         admin.setModify_date(LocalDateTime.now());
-
         adminRepository.save(admin);
 
         return ResponseEntity.ok(res.success(data));
