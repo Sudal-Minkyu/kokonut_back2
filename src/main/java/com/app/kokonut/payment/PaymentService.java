@@ -399,7 +399,11 @@ public class PaymentService {
 			log.error("companyPaymentInfo : 회사가 조회되지 않음");
 		}
 
+		Integer nowpay = 0;
+
+
 		data.put("paymentInfo", companyPaymentInfoDto);
+		data.put("nowpay", nowpay); // 현재 결제해야될 금액
 
 		return ResponseEntity.ok(res.success(data));
 	}
