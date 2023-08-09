@@ -61,14 +61,18 @@ public class CompanyPaymentRepositoryCustomImpl extends QuerydslRepositorySuppor
         QCompanyTable companyTable = QCompanyTable.companyTable;
         QCompany company = QCompany.company;
 
+        QAdmin admin = QAdmin.admin;
+
         JPQLQuery<CompanyPaymentReservationListDto> query = from(companyPayment)
-                .where(companyPayment.cpiValidStart.loe(date))
+//                .where(companyPayment.cpiValidStart.loe(date))
                 .innerJoin(companyTable).on(companyTable.cpCode.eq(companyPayment.cpCode))
                 .innerJoin(company).on(company.cpCode.eq(companyPayment.cpCode))
+                .innerJoin(admin).on(admin.companyId.eq(company.companyId).and(admin.masterId.eq(0L).and(admin.knUserType.eq(1)))) // 왕관 최고관리자의 이메일을 가져오기 위함
                 .where(companyTable.ctTableCount.eq("1").and(companyTable.ctDesignation.eq("기본")))
                 .select(Projections.constructor(CompanyPaymentReservationListDto.class,
                         companyPayment.cpCode,
                         companyTable.ctName,
+                        admin.knEmail,
                         companyPayment.cpiPayType,
                         companyPayment.cpiBillingKey,
                         companyPayment.cpiValidStart,

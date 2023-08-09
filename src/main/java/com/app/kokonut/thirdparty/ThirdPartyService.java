@@ -187,7 +187,7 @@ public class ThirdPartyService {
 		return ResponseEntity.ok(res.success(data));
 	}
 
-	// 알림톡전송 코코넛API 호출 -> Kokonut Kokonut API 사용
+	// 알림톡전송 코코넛API 호출 -> Kokonut API 사용
 	@Transactional
 	public ResponseEntity<Map<String, Object>> alimTalkSend(HashMap<String, Object> paramMap, JwtFilterDto jwtFilterDto) {
 		log.info("alimTalkSend 호출");
@@ -367,8 +367,7 @@ public class ThirdPartyService {
 					}
 					log.info("searchQuery : "+searchQuery);
 
-					List<Map<String, Object>> alimTalkSendUserList =
-							kokonutUserService.selectBasicTableList(searchQuery.toString());
+					List<Map<String, Object>> alimTalkSendUserList = kokonutUserService.selectBasicTableList(searchQuery.toString());
 
 					if(alimTalkSendUserList == null) {
 						// 보낼대상이 존재하지 않을때 처리

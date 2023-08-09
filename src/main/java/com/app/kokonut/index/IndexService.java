@@ -7,6 +7,7 @@ import com.app.kokonut.email.email.EmailRepository;
 import com.app.kokonut.email.email.dtos.EmailSendCountDto;
 import com.app.kokonut.email.email.dtos.EmailSendInfoDto;
 import com.app.kokonut.history.extra.apicallhistory.ApiCallHistoryRepository;
+import com.app.kokonut.history.extra.apicallhistory.ApiCallHistoryService;
 import com.app.kokonut.index.dtos.ApiCallHistoryCountDto;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import com.app.kokonut.common.AjaxResponse;
@@ -62,6 +63,7 @@ public class IndexService {
 	private final HistoryService historyService;
 	private final BootPayService bootPayService;
 	private final KeyGenerateService keyGenerateService;
+	private final ApiCallHistoryService apiCallHistoryService;
 
 	private final AdminRepository adminRepository;
 	private final CompanyRepository companyRepository;
@@ -89,7 +91,7 @@ public class IndexService {
 
 	@Autowired
 	public IndexService(HistoryService historyService, MailSender mailSender, BootPayService bootPayService, KeyGenerateService keyGenerateService,
-						AdminRepository adminRepository, CompanyRepository companyRepository, CompanySettingRepository companySettingRepository,
+						ApiCallHistoryService apiCallHistoryService, AdminRepository adminRepository, CompanyRepository companyRepository, CompanySettingRepository companySettingRepository,
 						CompanySettingAccessIPRepository companySettingAccessIPRepository, PaymentRepository paymentRepository,
 						PaymentErrorRepository paymentErrorRepository, ProvisionRepository provisionRepository,
 						ProvisionRosterRepository provisionRosterRepository, CompanyPaymentRepository companyPaymentRepository,
@@ -103,6 +105,7 @@ public class IndexService {
 		this.mailSender = mailSender;
 		this.bootPayService = bootPayService;
 		this.keyGenerateService = keyGenerateService;
+		this.apiCallHistoryService = apiCallHistoryService;
 		this.adminRepository = adminRepository;
 		this.companyRepository = companyRepository;
 		this.companySettingRepository = companySettingRepository;
@@ -268,7 +271,7 @@ public class IndexService {
 	}
 
 	// 3. 개인정보 제공 건수 데이터(기업내 내부제공건수, 외부제공건수 + 내가 반은 건수) - 개인+기업, 금일 개인정보 제공건수(외부건, 내부건)
-	public ResponseEntity<Map<String, Object>> provisionIndexCount(String dateType, JwtFilterDto jwtFilterDto) {
+	public ResponseEntity<Map<String, Object>> provisionIndexCount(String callType, String dateType, JwtFilterDto jwtFilterDto) {
 		log.info("provisionIndexCount 호출");
 
 		// dateType - 1 : 당일, 2 : 저번주(금일로부터 7일전), 3 : 이번달(금월의 모든날)
@@ -332,6 +335,11 @@ public class IndexService {
 
 		provisionIndexDto.setOfferInsideCount(offerInsideCount);
 		provisionIndexDto.setOfferOutsideCount(offerOutsideCount);
+
+		if(callType.equals("2")) {
+			// API 호출 로그 저장
+			apiCallHistoryService.apiCallHistorySave(cpCode, "/v3/api/Index/provisionIndexCount");
+		}
 
 		data.put("provisionIndexDto", provisionIndexDto);
 
@@ -483,6 +491,9 @@ public class IndexService {
 
 		data.put("count", count);
 
+		// API 호출 로그 저장
+		apiCallHistoryService.apiCallHistorySave(cpCode, "/v3/api/Index/apiCount");
+
 		return ResponseEntity.ok(res.success(data));
 	}
 
@@ -511,11 +522,14 @@ public class IndexService {
 		data.put("encount", encount);
 		data.put("decount", decount);
 
+		// API 호출 로그 저장
+		apiCallHistoryService.apiCallHistorySave(cpCode, "/v3/api/Index/endeCount");
+
 		return ResponseEntity.ok(res.success(data));
 	}
 
-	// 6. 개인정보 항목(암호화 항목, 고유식별정보 항목, 민감정보 항목)의 추가 카운팅 수 데이터
-	public ResponseEntity<Map<String, Object>> privacyItemCount(JwtFilterDto jwtFilterDto) {
+	// 6. 개인정보 항목(암호화 항목, 고유식별정보 항목, 민감정보 항목)의 추가 카운팅 수 데이터 -> Kokonut API 사용
+	public ResponseEntity<Map<String, Object>> privacyItemCount(String callType, JwtFilterDto jwtFilterDto) {
 		log.info("privacyItemCount 호출");
 
 		AjaxResponse res = new AjaxResponse();
@@ -537,6 +551,12 @@ public class IndexService {
 		}
 
 		data.put("privacyItemCount", privacyItemCountDto);
+
+		if(callType.equals("2")) {
+			// API 호출 로그 저장
+			apiCallHistoryService.apiCallHistorySave(cpCode, "/v3/api/Index/privacyItemCount");
+		}
+
 		return ResponseEntity.ok(res.success(data));
 
 	}
@@ -643,7 +663,7 @@ public class IndexService {
 		return emailRepository.emailSendReceptionCount(cpCode, emType, dateType, now, filterDate);
 	}
 
-	// KokonutAPI_01. 이메일 현황정보를 호출한다. -> Kokonut Kokonut API 사용
+	// KokonutAPI_01. 이메일 현황정보를 호출한다. -> Kokonut API 사용
 	public ResponseEntity<Map<String, Object>> emailSendInfo(String dateType, JwtFilterDto jwtFilterDto) {
 		log.info("emailSendInfo 호출");
 
@@ -697,6 +717,9 @@ public class IndexService {
 		emailSendInfoDto.setReservationCount(Integer.parseInt(String.valueOf(reservationCount)));
 		emailSendInfoDto.setReceptionCount(receptionCount);
 		emailSendInfoDto.setSendAmount(sendAmount);
+
+		// API 호출 로그 저장
+		apiCallHistoryService.apiCallHistorySave(cpCode, "/v3/api/Index/emailSendInfo");
 
 		data.put("emailSendInfoDto", emailSendInfoDto);
 

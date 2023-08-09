@@ -62,7 +62,7 @@ public class ApiKeyService {
     // API Key 중복체크 함수
     public String checkApiKey(String akKey) throws NoSuchAlgorithmException {
         boolean keyCheck = apiKeyRepository.existsByAkKey(akKey);
-        log.info("keyCheck : "+keyCheck);
+//        log.info("keyCheck : "+keyCheck);
         if(keyCheck) {
             akKey =  keyGenerate(128);
             checkApiKey(akKey);
@@ -156,7 +156,7 @@ public class ApiKeyService {
         String ip = CommonUtil.publicIp();
         Long activityHistoryId;
 
-        Optional<ApiKey> optionalApiKey = apiKeyRepository.findApiKeyByAdminIdAndCompanyId(adminId, companyId);
+        Optional<ApiKey> optionalApiKey = apiKeyRepository.findApiKeyByCompanyId(companyId);
         if(optionalApiKey.isPresent()) {
 //            log.info("현재 API Key가 존재한다.");
 //            AC_24("AC_24", "API KEY 발급"),
@@ -237,7 +237,7 @@ public class ApiKeyService {
         ActivityCode activityCode = ActivityCode.AC_33;
         String ip = CommonUtil.publicIp();
 
-        Optional<ApiKey> optionalApiKey = apiKeyRepository.findApiKeyByAdminIdAndCompanyId(adminId, companyId);
+        Optional<ApiKey> optionalApiKey = apiKeyRepository.findApiKeyByCompanyId(companyId);
         if(optionalApiKey.isPresent()) {
 
             // 활동이력 저장 -> 비정상 모드
@@ -328,7 +328,7 @@ public class ApiKeyService {
         ActivityCode activityCode = ActivityCode.AC_34;
         String ip = CommonUtil.publicIp();
 
-        Optional<ApiKey> optionalApiKey = apiKeyRepository.findApiKeyByAdminIdAndCompanyId(adminId, companyId);
+        Optional<ApiKey> optionalApiKey = apiKeyRepository.findApiKeyByCompanyId(companyId);
         if(optionalApiKey.isPresent()) {
 
             // 활동이력 저장 -> 비정상 모드

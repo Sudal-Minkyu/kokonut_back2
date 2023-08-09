@@ -194,11 +194,12 @@ public class PaymentService {
 
 
 
-			int payCloudAmount = awsRDSCloud + awsS3Cloud + awsKMSClound;
+			int payCloudAmount;
+			payCloudAmount = awsRDSCloud + awsS3Cloud + awsKMSClound;
 
 			// 서비스 금액 호출
 			int payServiceAmount = 0;
-			if(companyPaymentReservationListDto.getCpiPayType().equals("0")) {
+			if(companyPaymentReservationListDto.getCpiPayType().equals("0") && !companyPaymentReservationListDto.getCpiValidStart().isBefore(localDate)) {
 				payServiceAmount = Utils.kokonutMonthPrice(paymentPrivacyCountMonthAverageDto.getMonthAverageCount());
 
 				// 만약 구독해지한 기업일 경우 부분 결제
@@ -210,7 +211,14 @@ public class PaymentService {
 					LocalDate cpiValidStart = companyPaymentReservationListDto.getCpiValidStart();
 					log.info("kokonutPay 호출 - 해지날짜 : " + cpiValidStart);
 
-					long dateCount = ChronoUnit.DAYS.between(dateToCheckWithoutTime, localDate);
+					long dateCount;
+
+					// cpiValidStart와 cpSubscribeDate가 같은 년도와 월인지 확인
+					if (cpiValidStart.getYear() == dateToCheckWithoutTime.getYear() && cpiValidStart.getMonth() == dateToCheckWithoutTime.getMonth()) {
+						dateCount = ChronoUnit.DAYS.between(dateToCheckWithoutTime, cpiValidStart);
+					} else {
+						dateCount = ChronoUnit.DAYS.between(dateToCheckWithoutTime, localDate);
+					}
 
 					payServiceAmount = Utils.calculateUsedAmount(payServiceAmount, localDate, (int)dateCount);
 					log.info("kokonutPay 호출 - 해지후 중간결제 금액 : " + payServiceAmount);
@@ -221,34 +229,34 @@ public class PaymentService {
 			int payEmailAmount = 0;
 
 
-
 			// 결제 할 금액
 			payAmount = payCloudAmount + payServiceAmount + payEmailAmount;
 			log.info("결제 할 금액 : "+payAmount);
 
-			String orderId = keyGenerateService.keyGenerate("kn_payment", cpCode+LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMM")), "KokonutSystem");
-			log.info("orderId : "+orderId);
+			if(payAmount > 100 && !companyPaymentReservationListDto.getCpiValidStart().isBefore(localDate)) {
+				String orderId = keyGenerateService.keyGenerate("kn_payment", cpCode+LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMM")), "KokonutSystem");
+				log.info("orderId : "+orderId);
 
-			PaymentReservationResultDto paymentReservationResultDto = bootPayService.kokonutReservationPayment(
-					orderId, payAmount, "월간 사용료 예약결제", companyPaymentReservationListDto.getCpiBillingKey(), payDayTime);
-//			log.info("paymentReservationResultDto : "+paymentReservationResultDto);
+				PaymentReservationResultDto paymentReservationResultDto = bootPayService.kokonutReservationPayment(
+						orderId, payAmount, "월간 사용료 예약결제", companyPaymentReservationListDto.getCpiBillingKey(), payDayTime);
 
-			if(paymentReservationResultDto != null) {
-				// 결제 내역 저장
-				payment.setPayOrderid(orderId);
-				payment.setCpCode(cpCode);
-				payment.setPayAmount(payAmount);
-				payment.setPayCloudAmount(payCloudAmount);
-				payment.setPayServiceAmount(payServiceAmount);
-				payment.setPayEmailAmount(payEmailAmount);
-				payment.setPayState("2");
-				payment.setPayMethod("0");
-				payment.setPayPrivacyCount(paymentPrivacyCountMonthAverageDto.getMonthAverageCount());
-				payment.setPayBillingStartDate(paymentPrivacyCountMonthAverageDto.getLowDate());
-				payment.setPayBillingEndDate(paymentPrivacyCountMonthAverageDto.getBigDate());
-				payment.setPayReserveId(paymentReservationResultDto.getPayReserveId());
-				payment.setPayReserveExecuteDate(paymentReservationResultDto.getPayReserveExecuteDate());
-				paymentList.add(payment);
+				if(paymentReservationResultDto != null) {
+					// 결제 내역 저장
+					payment.setPayOrderid(orderId);
+					payment.setCpCode(cpCode);
+					payment.setPayAmount(payAmount);
+					payment.setPayCloudAmount(payCloudAmount);
+					payment.setPayServiceAmount(payServiceAmount);
+					payment.setPayEmailAmount(payEmailAmount);
+					payment.setPayState("2");
+					payment.setPayMethod("0");
+					payment.setPayPrivacyCount(paymentPrivacyCountMonthAverageDto.getMonthAverageCount());
+					payment.setPayBillingStartDate(paymentPrivacyCountMonthAverageDto.getLowDate());
+					payment.setPayBillingEndDate(paymentPrivacyCountMonthAverageDto.getBigDate());
+					payment.setPayReserveId(paymentReservationResultDto.getPayReserveId());
+					payment.setPayReserveExecuteDate(paymentReservationResultDto.getPayReserveExecuteDate());
+					paymentList.add(payment);
+				}
 			}
 
 			if(companyPaymentReservationListDto.getSubscribeCheck().equals("1")) {

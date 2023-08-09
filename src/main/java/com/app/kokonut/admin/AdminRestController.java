@@ -99,7 +99,7 @@ public class AdminRestController {
     }
 
     @PostMapping("/create")
-    @ApiOperation(value = "관리자 등록" , notes = "1. 대표관리자, 최고관리자만 할 수 있는 권한" +
+    @ApiOperation(value = "관리자 등록(24시간후 만료)" , notes = "1. 대표관리자, 최고관리자만 할 수 있는 권한" +
             "2. 이메일중복체크후 해당 관리자의 권한을 선택후 등록을 누른다." +
             "3. 입력한 이메일로 인증메일을 전송한다." +
             "4. 해당메일의 링크를 통해 사용할 비밀번호를 입력하여 비밀번호를 등록한다." +
@@ -112,13 +112,20 @@ public class AdminRestController {
     }
 
     @PostMapping("/createMailAgain")
-    @ApiOperation(value = "관리자등록 인증메일 재전송")
+    @ApiOperation(value = "관리자등록 인증메일 재전송(24시간후 만료)")
     @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> createMailAgain(@RequestParam(value="userEmail", defaultValue = "") String userEmail) throws Exception {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return adminService.createMailAgain(userEmail, jwtFilterDto);
     }
 
+    @PostMapping("/passwordChangeMail")
+    @ApiOperation(value = "비밀번호변경 메일전송(24시간후 만료)")
+    @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    public ResponseEntity<Map<String,Object>> passwordChangeMail(@RequestParam(value="userEmail", defaultValue = "") String userEmail) throws Exception {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return adminService.passwordChangeMail(userEmail, jwtFilterDto);
+    }
 
 
     @GetMapping("/authorityCheck")

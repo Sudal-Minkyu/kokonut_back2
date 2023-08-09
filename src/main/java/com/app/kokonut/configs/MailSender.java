@@ -201,7 +201,9 @@ public class MailSender {
 
 	public String getHTML5(HashMap<String, String> callTemplate) throws IOException {
 
-		String htmlURL = frontServerDomainIp+"/src/template/mail/"+callTemplate.get("template")+".html";
+//		String htmlURL = frontServerDomainIp+"/src/template/mail/"+callTemplate.get("template")+".html";
+		String htmlURL = frontServerDomainIp+"/#/"+callTemplate.get("template")+"?title="+callTemplate.get("title")+"&content="+callTemplate.get("content");
+
 		// htmlURL -> http://127.0.0.1:5173/src/template/mail/MailTemplate.html
 		log.info("htmlURL : "+htmlURL);
 

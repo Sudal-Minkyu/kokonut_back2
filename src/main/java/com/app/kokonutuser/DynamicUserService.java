@@ -1932,19 +1932,19 @@ public class DynamicUserService {
 
 			searchQuery.append(optionalCompanyTable.get().getCtName());
 			searchQuery.append(" WHERE 1=1");
-//			log.info("searchQuery : "+ searchQuery);
+			log.info("searchQuery : "+ searchQuery);
 
 			List<Map<String, Object>> basicTableList = kokonutUserService.selectBasicTableList(searchQuery.toString());
 			if(awsKmsResultDto != null) {
 				for(Map<String, Object> map : basicTableList) {
 					for (String headerName : headerNames) {
-//						log.info("headerNames.get(i) : " + headerName);
+						log.info("headerNames.get(i) : " + headerName);
 
 						Object key = map.get(headerName);
 						if (key != null) {
 
 							String[] value = String.valueOf(key).split("\\|\\|__\\|\\|");
-//							log.info("구분자단위로 끊은 값 value : "+ Arrays.toString(value));
+							log.info("구분자단위로 끊은 값 value : "+ Arrays.toString(value));
 
 							Map<String, Object> securityResultValue = null; // 복호화된 데이터의 마스킹처리
 
@@ -1966,7 +1966,7 @@ public class DynamicUserService {
 				decrypCountHistoryService.decrypCountHistorySave(companyCode, dchCount);
 			}
 
-//			log.info("basicTableList : "+basicTableList);
+			log.info("basicTableList : "+basicTableList);
 			data.put("basicTableList",basicTableList);
 		}
 
@@ -2582,7 +2582,7 @@ public class DynamicUserService {
 				cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason, ip, 0, email);
 
 		String fileName = LocalDate.now()+"_개인정보열람파일";
-		String sheetName = paramMap.get(0).get("아이디")+"의 개인정보";
+		String sheetName = paramMap.get(0).get("아이디(1_id)")+"의 개인정보";
 
 		// 파일암호 전송
 		// 파일암호(숫자6자리) 생성

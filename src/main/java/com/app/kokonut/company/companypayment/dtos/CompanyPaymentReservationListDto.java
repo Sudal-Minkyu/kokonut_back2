@@ -22,6 +22,8 @@ public class CompanyPaymentReservationListDto {
 
     private String ctName; // 조회된 테이블명
 
+    private String knEmail; // 왕관 최고관리자 이메일
+
     private String cpiPayType; // 결제타입 - '0' : 월 정기구독, '1' : 연 정기구독
 
     private String cpiBillingKey; // 카드(빌링키)

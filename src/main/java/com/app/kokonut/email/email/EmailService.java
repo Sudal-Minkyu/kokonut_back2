@@ -171,7 +171,7 @@ public class EmailService {
         }
     }
 
-    // 이메일발송 호출
+    // 이메일 발송 호출
     public ResponseEntity<Map<String, Object>> sendEmailService(EmailSendDto emailSendDto, JwtFilterDto jwtFilterDto) throws Exception {
         log.info("sendEmailService 호출");
 
@@ -370,12 +370,12 @@ public class EmailService {
             String contents = ReqUtils.unFilter(emailSendDto.getEmContents()); // &lt;br&gt;이메일내용 --> <br>이메일내용, html 화면에 뿌리기 위해 특수문자를 치환
             log.info("contents : "+contents);
 
-            HashMap<String, String> callTemplate = new HashMap<>();
-            callTemplate.put("template", "MailTemplate"); // 고객용 템플릿 MailTemplateOld, 코코넛용 템플릿 MailTemplate
-            callTemplate.put("title", emTitle);
-            callTemplate.put("content", contents);
-
-            contents = mailSender.getHTML5(callTemplate);
+//            HashMap<String, String> callTemplate = new HashMap<>();
+//            callTemplate.put("template", "MailTemplate"); // 고객용 템플릿 MailTemplateOld, 코코넛용 템플릿 MailTemplate
+//            callTemplate.put("title", emTitle);
+//            callTemplate.put("content", contents);
+//
+//            contents = mailSender.getHTML5(callTemplate);
 
 //            List<String> testSendEmail = new ArrayList<>(); // sendEmailList
 //            testSendEmail.add("brian20@nate.com");

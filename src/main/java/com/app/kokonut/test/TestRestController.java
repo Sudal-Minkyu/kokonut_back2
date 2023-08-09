@@ -51,14 +51,13 @@ public class TestRestController {
         HashMap<String, Object> data = new HashMap<>();
 
         // 인증번호 메일전송
-        String title = ReqUtils.filter("메일전송을 완료했습니다. - 1");
-        String contents = ReqUtils.unFilter("메일내용 : 쌸라쌸라");
+        String title = ReqUtils.filter("메일전송을 완료했습니다1.");
+        String contents = ReqUtils.unFilter("메일내용");
 
         // 템플릿 호출을 위한 데이터 세팅
 		HashMap<String, String> callTemplate = new HashMap<>();
 		callTemplate.put("template", "MailTemplate");
-		callTemplate.put("title", "메일전송을 완료했습니다. - 2");
-
+		callTemplate.put("title", title);
 		callTemplate.put("content", contents);
 
 //		// 템플릿 TODO 템플릿 디자인 추가되면 수정

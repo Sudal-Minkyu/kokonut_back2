@@ -17,6 +17,9 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 public class AdminCreateDto {
 
+    @NotBlank(message = "sendType 값은 필수값 입니다.")
+    private String sendType;
+
     @NotBlank(message = "evKoData 값은 필수값 입니다.")
     private String evKoData;
 

@@ -438,7 +438,7 @@ public class AdminService {
         ActivityCode activityCode = ActivityCode.AC_04;
         String ip = CommonUtil.publicIp();
 
-        if(jwtFilterDto.getRole().getCode().equals("ROLE_SYSTEM") || jwtFilterDto.getRole().getCode().equals("ROLE_MASTER")) {
+        if(jwtFilterDto.getRole().getCode().equals("ROLE_SYSTEM") || jwtFilterDto.getRole().getCode().equals("ROLE_MASTER") || jwtFilterDto.getRole().getCode().equals("ROLE_ADMIN")) {
             log.info("관리자 등록 시작");
 
             // 관리자추가 저장 -> 비정상 모드
@@ -447,22 +447,6 @@ public class AdminService {
 
             AwsKmsResultDto awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(companyCode);
             byte[] ivBytes = AESGCMcrypto.generateIV();
-
-//            String title = ReqUtils.filter("관리자 등록 인증 알림");
-//            String contents = ReqUtils.unFilter("" +
-//                    "관리자등록 요청되었습니다. <br>" +
-//                    "해당 링크를 통해 가입을 이어서 해주시길 바랍니다.<br>" +
-//                    "링크 : "+frontServerDomainIp+"/#/join");
-//
-//            // 템플릿 호출을 위한 데이터 세팅
-//            HashMap<String, String> callTemplate = new HashMap<>();
-//            callTemplate.put("template", "MailTemplate");
-//            callTemplate.put("title", "관리자 등록 인증메일 입니다.");
-//            callTemplate.put("content", contents);
-//
-//            // 템플릿 TODO 템플릿 디자인 추가되면 수정
-//            contents = mailSender.getHTML5(callTemplate);
-//            String reciverName = "kokonut";
 
             // 이메일인증코드
             String knEmailAuthCode = AESGCMcrypto.encrypt(userEmail.getBytes(StandardCharsets.UTF_8), awsKmsResultDto.getSecretKey(), ivBytes);
@@ -474,6 +458,7 @@ public class AdminService {
             // TODO : 답변 내용을 HTML 태그를 붙여서 메일로 전송해준다. 화면단과 개발할 때 추가 개발해야함.
             String contents = "관리자등록 요청 되었습니다. <br>해당 링크를 통해 가입을 이어서 해주시길 바랍니다.<br>링크 : "+
             "<a href=\""+frontServerDomainIp+"/#/create?" +
+                    "send=1&" +
                     "evKo="+ companyId +"&" +
                     "ivKo="+ivKo +"&" +
                     "kvKo="+knEmailAuthCode+"\" target=\"_blank\">"+
@@ -481,7 +466,20 @@ public class AdminService {
                     "</a>";
             log.info("toEmail" + userEmail + ", toName" + "코코넛");
 
-            String mailSenderResult = mailSender.sendKokonutMail(userEmail, "", title, contents);
+//            title = ReqUtils.filter("관리자 등록 재인증 알림");
+//            contents = ReqUtils.unFilter(contents);
+//
+//            // 템플릿 호출을 위한 데이터 세팅
+//            HashMap<String, String> callTemplate = new HashMap<>();
+//            callTemplate.put("template", "MailTemplate");
+//            callTemplate.put("title", title);
+//            callTemplate.put("content", contents);
+//
+//            // 템플릿 TODO 템플릿 디자인 추가되면 수정
+//            contents = mailSender.getHTML5(callTemplate);
+
+            String reciverName = "kokonut";
+            String mailSenderResult = mailSender.sendKokonutMail(userEmail, reciverName, title, contents);
             if(mailSenderResult != null) {
                 log.info("### 메일전송 성공했습니다. reciver Email : "+ userEmail);
 
@@ -548,7 +546,7 @@ public class AdminService {
         ActivityCode activityCode = ActivityCode.AC_05;
         String ip = CommonUtil.publicIp();
 
-        if(jwtFilterDto.getRole().getCode().equals("ROLE_SYSTEM") || jwtFilterDto.getRole().getCode().equals("ROLE_MASTER")) {
+        if(jwtFilterDto.getRole().getCode().equals("ROLE_SYSTEM") || jwtFilterDto.getRole().getCode().equals("ROLE_MASTER") || jwtFilterDto.getRole().getCode().equals("ROLE_ADMIN")) {
             log.info("관리자등록 재인증 시작");
 
             // 관리자추가 저장 -> 비정상 모드
@@ -557,22 +555,6 @@ public class AdminService {
 
             AwsKmsResultDto awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(companyCode);
             byte[] ivBytes = AESGCMcrypto.generateIV();
-
-//            String title = ReqUtils.filter("관리자 등록 재인증 알림");
-//            String contents = ReqUtils.unFilter("" +
-//                    "관리자등록 요청되었습니다. <br>" +
-//                    "해당 링크를 통해 가입을 이어서 해주시길 바랍니다.<br>" +
-//                    "링크 : "+frontServerDomainIp+"/#/join");
-//
-//            // 템플릿 호출을 위한 데이터 세팅
-//            HashMap<String, String> callTemplate = new HashMap<>();
-//            callTemplate.put("template", "MailTemplate");
-//            callTemplate.put("title", "관리자 등록 알림");
-//            callTemplate.put("content", contents);
-//
-//            // 템플릿 TODO 템플릿 디자인 추가되면 수정
-//            contents = mailSender.getHTML5(callTemplate);
-//            String reciverName = "kokonut";
 
             // 이메일인증코드
             String knEmailAuthCode = AESGCMcrypto.encrypt(userEmail.getBytes(StandardCharsets.UTF_8), awsKmsResultDto.getSecretKey(), ivBytes);
@@ -584,6 +566,7 @@ public class AdminService {
             // TODO : 답변 내용을 HTML 태그를 붙여서 메일로 전송해준다. 화면단과 개발할 때 추가 개발해야함.
             String contents = "관리자등록 재요청 되었습니다. <br>해당 링크를 통해 가입을 이어서 해주시길 바랍니다.<br>링크 : "+
                     "<a href=\""+frontServerDomainIp+"/#/create?" +
+                    "send=1&" +
                     "evKo="+ companyId +"&" +
                     "ivKo="+ivKo +"&" +
                     "kvKo="+knEmailAuthCode+"\" target=\"_blank\">"+
@@ -591,7 +574,21 @@ public class AdminService {
                     "</a>";
             log.info("toEmail" + userEmail + ", toName" + "코코넛");
 
-            String mailSenderResult = mailSender.sendKokonutMail(userEmail, "", title, contents);
+//            title = ReqUtils.filter("관리자 등록 재인증 알림");
+//            contents = ReqUtils.unFilter(contents);
+//
+//            // 템플릿 호출을 위한 데이터 세팅
+//            HashMap<String, String> callTemplate = new HashMap<>();
+//            callTemplate.put("template", "MailTemplate");
+//            callTemplate.put("title", title);
+//            callTemplate.put("content", contents);
+//
+//            // 템플릿 TODO 템플릿 디자인 추가되면 수정
+//            contents = mailSender.getHTML5(callTemplate);
+
+            String reciverName = "kokonut";
+
+            String mailSenderResult = mailSender.sendKokonutMail(userEmail, reciverName, title, contents);
             if(mailSenderResult != null) {
                 log.info("### 메일전송 성공했습니다. reciver Email : "+ userEmail);
 
@@ -618,7 +615,6 @@ public class AdminService {
         return ResponseEntity.ok(res.success(data));
     }
 
-
     // 내부제공, 외부제공 관리자목록 리스트 호출
     public ResponseEntity<Map<String, Object>> offerAdminList(String type, JwtFilterDto jwtFilterDto) {
         log.info("offerAdminList 호출");
@@ -637,4 +633,94 @@ public class AdminService {
         return ResponseEntity.ok(res.success(data));
     }
 
+    // 비밀번호변경 메일전송(24시간후 만료)
+    public ResponseEntity<Map<String, Object>> passwordChangeMail(String userEmail, JwtFilterDto jwtFilterDto) throws Exception {
+        log.info("passwordChangeMail 호출");
+
+        log.info("userEmail : "+userEmail);
+        log.info("jwtFilterDto : "+jwtFilterDto);
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+        String email = jwtFilterDto.getEmail();
+
+        AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+        Long adminId = adminCompanyInfoDto.getAdminId();
+        Long companyId = adminCompanyInfoDto.getCompanyId();
+        String companyCode = adminCompanyInfoDto.getCompanyCode();
+
+        // 활동 코드
+        ActivityCode activityCode = ActivityCode.AC_05;
+        String ip = CommonUtil.publicIp();
+
+        if(jwtFilterDto.getRole().getCode().equals("ROLE_SYSTEM") || jwtFilterDto.getRole().getCode().equals("ROLE_MASTER") || jwtFilterDto.getRole().getCode().equals("ROLE_ADMIN")) {
+            log.info("비밀번호변경 시작");
+
+            // 관리자추가 저장 -> 비정상 모드
+            Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
+                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+
+            AwsKmsResultDto awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(companyCode);
+            byte[] ivBytes = AESGCMcrypto.generateIV();
+
+            // 이메일인증코드
+            String knEmailAuthCode = AESGCMcrypto.encrypt(userEmail.getBytes(StandardCharsets.UTF_8), awsKmsResultDto.getSecretKey(), ivBytes);
+
+            String ivKo = Base64.getEncoder().encodeToString(ivBytes);
+
+            // 관리자 등록메일 보내기
+            String title = "비밀번호 변경 알림";
+            // TODO : 답변 내용을 HTML 태그를 붙여서 메일로 전송해준다. 화면단과 개발할 때 추가 개발해야함.
+            String contents = "비밀번호 변경 요청 되었습니다. <br>해당 링크를 통해 변경을 이어서 해주시길 바랍니다.<br>링크 : "+
+                    "<a href=\""+frontServerDomainIp+"/#/create?" +
+                    "send=2&" +
+                    "evKo="+ companyId +"&" +
+                    "ivKo="+ivKo +"&" +
+                    "kvKo="+knEmailAuthCode+"\" target=\"_blank\">"+
+                    "비밀번호 변경하기"+
+                    "</a>";
+
+            log.info("toEmail" + userEmail + ", toName" + "코코넛");
+
+//            title = ReqUtils.filter("관리자 등록 재인증 알림");
+//            contents = ReqUtils.unFilter(contents);
+//
+//            // 템플릿 호출을 위한 데이터 세팅
+//            HashMap<String, String> callTemplate = new HashMap<>();
+//            callTemplate.put("template", "MailTemplate");
+//            callTemplate.put("title", title);
+//            callTemplate.put("content", contents);
+//
+//            // 템플릿 TODO 템플릿 디자인 추가되면 수정
+//            contents = mailSender.getHTML5(callTemplate);
+
+            String reciverName = "kokonut";
+
+            String mailSenderResult = mailSender.sendKokonutMail(userEmail, reciverName, title, contents);
+            if(mailSenderResult != null) {
+                log.info("### 메일전송 성공했습니다. reciver Email : "+ userEmail);
+
+                // 인증번호 레디스에 담기
+                // -> 레디스서버에 24시간동안 보관
+                redisDao.setValues("EV: " + userEmail, knEmailAuthCode, Duration.ofMillis((long)1000*60*60*24)); // 제한시간 24시간
+//                redisDao.setValues("EV: " + userEmail, knEmailAuthCode, Duration.ofMillis((long)1000*60)); // 제한시간 1분
+
+                // 암호화 횟수 저장
+                encrypCountHistoryService.encrypCountHistorySave(companyCode, 1);
+
+                historyService.updateHistory(activityHistoryId,
+                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+            }else{
+                log.error("### 해당 메일 전송에 실패했습니다. 관리자에게 문의하세요. reciverEmail : "+ userEmail);
+                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO041.getCode(), ResponseErrorCode.KO041.getDesc()));
+            }
+
+        } else{
+            log.error("접근 권한이 없습니다.");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO001.getCode(),ResponseErrorCode.KO001.getDesc()));
+        }
+
+        return ResponseEntity.ok(res.success(data));
+    }
 }

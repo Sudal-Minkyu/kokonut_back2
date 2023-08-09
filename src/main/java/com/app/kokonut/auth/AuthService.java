@@ -6,10 +6,7 @@ import com.app.kokonut.admin.AdminService;
 import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
 import com.app.kokonut.admin.dtos.AdminCompanySettingDto;
 import com.app.kokonut.admin.enums.AuthorityRole;
-import com.app.kokonut.auth.dtos.AdminCreateDto;
-import com.app.kokonut.auth.dtos.AdminGoogleOTPDto;
-import com.app.kokonut.auth.dtos.AdminPasswordChangeDto;
-import com.app.kokonut.auth.dtos.CompanyEncryptDto;
+import com.app.kokonut.auth.dtos.*;
 import com.app.kokonut.auth.jwt.been.JwtTokenProvider;
 import com.app.kokonut.auth.jwt.dto.AuthRequestDto;
 import com.app.kokonut.auth.jwt.dto.AuthResponseDto;
@@ -995,24 +992,38 @@ public class AuthService {
                     log.error("존재하지 않은 유저");
                     return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(),"해당 유저가 "+ResponseErrorCode.KO004.getDesc()));
                 } else {
-                    if(optionalAdmin.get().getKnIsEmailAuth().equals("Y")) {
-                        log.error("이미 가입된 관리자 입니다.");
-                        return ResponseEntity.ok(res.fail(ResponseErrorCode.KO086.getCode(), ResponseErrorCode.KO086.getDesc()));
+                    String pagetext = "";
+                    if(adminCreateDto.getSendType().equals("1")) {
+                        if(optionalAdmin.get().getKnIsEmailAuth().equals("Y")) {
+                            log.error("이미 가입된 관리자 입니다.");
+                            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO086.getCode(), ResponseErrorCode.KO086.getDesc()));
+                        } else {
+                            pagetext = "관리자 등록";
+                        }
                     } else {
-                        data.put("userEmail", email);
-                        log.info("검증완료");
-
-                        // 복호화 횟수 저장
-                        decrypCountHistoryService.decrypCountHistorySave(companyEncryptDto.getCpCode(), 1);
+                        pagetext = "비밀번호 변경";
                     }
+
+                    data.put("pagetext", pagetext);
+                    data.put("userEmail", email);
+
+                    // 복호화 횟수 저장
+                    decrypCountHistoryService.decrypCountHistorySave(companyEncryptDto.getCpCode(), 1);
+
+                    log.info("검증완료");
                 }
             } else {
                 log.error("이메일 인증이 맞지 않습니다.");
                 return ResponseEntity.ok(res.fail(ResponseErrorCode.KO084.getCode(), ResponseErrorCode.KO084.getDesc()));
             }
         } else {
-            log.error("만료된 페이지 입니다.");
-            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO085.getCode(), ResponseErrorCode.KO085.getDesc()));
+            if(adminCreateDto.getSendType().equals("1")) {
+                log.error("관리자 등록 인증 - 만료된 페이지 입니다.");
+                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO085_1.getCode(), ResponseErrorCode.KO085_1.getDesc()));
+            } else {
+                log.error("비밀번호변경 인증 - 만료된 페이지 입니다.");
+                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO085_2.getCode(), ResponseErrorCode.KO085_2.getDesc()));
+            }
         }
 
         return ResponseEntity.ok(res.success(data));
@@ -1066,12 +1077,52 @@ public class AuthService {
             optionalAdmin.get().setKnIsEmailAuth("Y");
             optionalAdmin.get().setKnEmailAuthCode(null);
             optionalAdmin.get().setModify_email(kokonutCreateUser.getUserEmail());
-            optionalAdmin.get().setInsert_date(LocalDateTime.now());
+            optionalAdmin.get().setModify_date(LocalDateTime.now());
 
             adminRepository.save(optionalAdmin.get());
+
+            // 레디스 데이터 제거
+            redisDao.deleteValues("EV: " + kokonutCreateUser.getUserEmail());
         }
 
         return ResponseEntity.ok(res.success(data));
     }
+
+    // 관리자 비밀번호 변경
+    @Transactional
+    public ResponseEntity<Map<String, Object>> passwordChange(AdminPwdChagneMailDto adminPwdChagneMailDto) {
+        log.info("passwordChange 호출");
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+        // 비밀번호 일치한지 체크
+        if (!adminPwdChagneMailDto.getKnPassword().equals(adminPwdChagneMailDto.getKnPasswordConfirm())) {
+            log.error("입력하신 비밀번호가 서로 일치하지 않습니다.");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO013.getCode(), ResponseErrorCode.KO013.getDesc()));
+        }
+
+        log.info("관리자 비밀번호변경 시작");
+        Optional<Admin> optionalAdmin = adminRepository.findByKnEmail(adminPwdChagneMailDto.getUserEmail());
+        if (optionalAdmin.isEmpty()) {
+            log.error("존재하지 않은 유저");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(),"해당 유저가 "+ResponseErrorCode.KO004.getDesc()));
+        } else {
+            log.info("관리자 비밀번호변경 완료");
+
+            optionalAdmin.get().setKnPassword(passwordEncoder.encode(adminPwdChagneMailDto.getKnPassword()));
+            optionalAdmin.get().setKnPwdErrorCount(0);
+            optionalAdmin.get().setModify_email(adminPwdChagneMailDto.getUserEmail());
+            optionalAdmin.get().setModify_date(LocalDateTime.now());
+
+            adminRepository.save(optionalAdmin.get());
+
+            // 레디스 데이터 제거
+            redisDao.deleteValues("EV: " + adminPwdChagneMailDto.getUserEmail());
+        }
+
+        return ResponseEntity.ok(res.success(data));
+    }
+
 
 }

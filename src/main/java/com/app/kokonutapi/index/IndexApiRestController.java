@@ -55,7 +55,7 @@ public class IndexApiRestController {
     @ApiImplicitParam(name ="x-api-key", required = true, dataTypeClass = String.class, paramType = "header")
     public ResponseEntity<Map<String,Object>> privacyItemCount(HttpServletRequest request) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwtOrApiKey(request);
-        return indexService.privacyItemCount(jwtFilterDto);
+        return indexService.privacyItemCount("2", jwtFilterDto);
     }
 
     @ApiOperation(value="개인정보 제공의 금일 건수와 데이트타입의 따라 건수를 가져온다.", notes="")
@@ -64,7 +64,7 @@ public class IndexApiRestController {
     public ResponseEntity<Map<String,Object>> provisionCount(@RequestParam(value="dateType", defaultValue = "1") String dateType,
                                                                   HttpServletRequest request) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwtOrApiKey(request);
-        return indexService.provisionIndexCount(dateType, jwtFilterDto);
+        return indexService.provisionIndexCount("2", dateType, jwtFilterDto);
     }
 
     @ApiOperation(value="이메일 발송 완료 및 예약 건수 + 수신건수와 청구금액을 가져온다.", notes="")

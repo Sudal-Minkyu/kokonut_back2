@@ -302,7 +302,7 @@ public class NiceIdService {
 					data.put("joinPhone", knPhoneNumber);
 					Utils.cookieSave("joinPhone", knPhoneNumber, 1000 * 60 * 30, response); // 쿠키 제한시간 30분
 				}
-			} else if(state.equals("2") || state.equals("3") || state.equals("4")) {
+			} else if(state.equals("2") || state.equals("3") || state.equals("4") || state.equals("7")) {
 				// 이름과 번호를 통해 찾기?
 				Optional<Admin> optionalAdmin = adminRepository.findAdminByKnNameAndKnPhoneNumber(knName, knPhoneNumber);
 
@@ -320,11 +320,13 @@ public class NiceIdService {
 						redisDao.setValues("KE: " + keyEmail, knEmail, Duration.ofMillis(5000)); // 제한시간 5초
 						log.info("레디스에 인증번호 저장성공");
 						data.put("keyEmail", keyEmail);
-					}else if(state.equals("3")) {
+					} else if(state.equals("3")) {
 						log.info("비밀번호찾기 본인인증");
 						data.put("keyEmail", knEmail); // -> 입력한 이메일과 DB데이터 이메일과 일치할 경우 임시비밀번호 메일전송 + 업데이트
-					}else {
+					} else if(state.equals("4")) {
 						log.info("OTP변경 본인인증");
+					} else {
+						log.info("비밀번호변경 본인인증");
 					}
 				}
 			} else if(state.equals("5")) {

@@ -57,7 +57,7 @@ public class IndexRestController {
     public ResponseEntity<Map<String,Object>> provisionIndexCount(@RequestParam(value="dateType", defaultValue = "1") String dateType) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         if(!jwtFilterDto.getRole().equals(AuthorityRole.ROLE_SYSTEM)) {
-            return indexService.provisionIndexCount(dateType, jwtFilterDto);
+            return indexService.provisionIndexCount("1", dateType, jwtFilterDto);
         } else {
             // 시스템관리자일 경우 제외
             return null;
@@ -90,7 +90,7 @@ public class IndexRestController {
     @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> privacyItemCount() {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
-        return indexService.privacyItemCount(jwtFilterDto);
+        return indexService.privacyItemCount("1", jwtFilterDto);
     }
 
     @ApiOperation(value="요금정보를 가져온다.", notes="")

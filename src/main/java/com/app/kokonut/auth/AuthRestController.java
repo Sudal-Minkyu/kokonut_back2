@@ -3,6 +3,7 @@ package com.app.kokonut.auth;
 import com.app.kokonut.auth.dtos.AdminCreateDto;
 import com.app.kokonut.auth.dtos.AdminGoogleOTPDto;
 import com.app.kokonut.auth.dtos.AdminPasswordChangeDto;
+import com.app.kokonut.auth.dtos.AdminPwdChagneMailDto;
 import com.app.kokonut.auth.jwt.dto.AuthRequestDto;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -92,6 +93,16 @@ public class AuthRestController {
             "5. 또 일치할시 해당 비밀번호로 업데이트한다.")
     public ResponseEntity<Map<String,Object>> passwordUpdate(@RequestBody AdminPasswordChangeDto adminPasswordChangeDto) {
         return authService.passwordUpdate(adminPasswordChangeDto);
+    }
+
+    // 비밀번호 변경 기능
+    @PostMapping(value = "/passwordChange")
+    @ApiOperation(value = "메일로받은 비밀번호변경하는 기능" , notes = "1. 관리자에게 비밀번호메일을 받는다." +
+            "2. 받은 관리자는 메일을 확인한다." +
+            "3. 링크를 통해 들어간 페이지에서 본인인증을 한다." +
+            "4. 변경할 비밀번호를 입력후 해당 함수를 호출한다.")
+    public ResponseEntity<Map<String,Object>> passwordChange(@RequestBody AdminPwdChagneMailDto adminPwdChagneMailDto) {
+        return authService.passwordChange(adminPwdChagneMailDto);
     }
 
     // 관리자 등록하기전 키 검증

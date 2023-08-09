@@ -58,6 +58,14 @@ public class PrivacyHistoryRepositoryCustomImpl extends QuerydslRepositorySuppor
         // 조회한 기업의 한해서만 조회되야함
         query.where(admin.companyId.eq(privacyHistorySearchDto.getCompanyId())).orderBy(privacyHistory.kphId.desc());;
 
+        if(!privacyHistorySearchDto.getSearchText().equals("")) {
+            query.where(admin.knEmail.like("%"+ privacyHistorySearchDto.getSearchText() +"%").or(admin.knName.like("%"+ privacyHistorySearchDto.getSearchText() +"%")));
+        }
+
+        if(privacyHistorySearchDto.getStimeStart() != null && privacyHistorySearchDto.getStimeEnd() != null) {
+            query.where(privacyHistory.insert_date.goe(privacyHistorySearchDto.getStimeStart()).and(privacyHistory.insert_date.loe(privacyHistorySearchDto.getStimeEnd())));
+        }
+
         if(!privacyHistorySearchDto.getFilterState().equals("")) {
             query.where(privacyHistory.privacyHistoryCode.eq(PrivacyHistoryCode.valueOf(privacyHistorySearchDto.getFilterState())));
         }
