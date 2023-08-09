@@ -363,24 +363,16 @@ public class AdminService {
         Long companyId = adminCompanyInfoDto.getCompanyId();
 
         Integer knState;
-        if(filterState.equals("정지")) {
-            knState = 0;
-        } else if(filterState.equals("정상")) {
-            knState = 1;
-        } else if(filterState.equals("로그인제한")) {
-            knState = 2;
-        } else if(filterState.equals("탈퇴")) {
-            knState = 3;
-        } else if(filterState.equals("휴면")) {
-            knState = 4;
-        } else {
+        if(filterState.equals("")) {
             knState = null;
+        } else {
+            knState = Integer.parseInt(filterState);
         }
 
         List<AdminListDto> adminListDtoList = new ArrayList<>();
         AdminListDto adminListDto;
 
-         Page<AdminListSubDto> adminListDtos = adminRepository.findByAdminList(searchText, filterRole, knState, companyId, email, pageable);
+        Page<AdminListSubDto> adminListDtos = adminRepository.findByAdminList(searchText, filterRole, knState, companyId, email, pageable);
         if(adminListDtos.getTotalPages() == 0) {
             log.info("조회된 데이터가 없습니다.");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO003.getCode(), ResponseErrorCode.KO003.getDesc()));
