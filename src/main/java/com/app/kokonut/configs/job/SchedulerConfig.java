@@ -111,12 +111,41 @@ public class SchedulerConfig {
     @Scheduled(cron = "0 */5 * * * *") // 매일 5분마다 실행 이메일발송건 업데이트
     public void kokonutSendEmailUpdateSchedul() {
         try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH시 mm분 ss초");
+            LocalDateTime now = LocalDateTime.now();
+
+            if (now.getMinute() > 4) { // 정각부터 4분까지는 바로 리턴
+
+                log.info("이메일발송건 업데이트 스케줄러 실행");
+
+                // 정각부터 4분까지는 바로 리턴
+                JobParameters jobParameters = new JobParametersBuilder()
+                        .addString("requestDate", now.format(formatter))
+                        .toJobParameters();
+
+                jobLauncher.run(kokonutSendEmailUpdateJob, jobParameters);
+            }
+
+        } catch (Exception e) {
+            log.error("예외 : "+e);
+            log.error("예외내용 : "+e.getMessage());
+            log.error("이메일발송건 업데이트 실행 에러");
+        }
+    }
+
+    @Scheduled(cron = "0 1 * * * *") // 매시 정각 1분에 실행
+    public void kokonutSendEmailUpdateSchedul2() {
+        try {
             log.info("이메일발송건 업데이트 스케줄러 실행");
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH시 mm분 ss초");
+            LocalDateTime now = LocalDateTime.now();
+
             JobParameters jobParameters = new JobParametersBuilder()
-                    .addString("requestDate", LocalDateTime.now().format(formatter))
+                    .addString("requestDate", now.format(formatter))
                     .toJobParameters();
+
             jobLauncher.run(kokonutSendEmailUpdateJob, jobParameters);
+
         } catch (Exception e) {
             log.error("예외 : "+e);
             log.error("예외내용 : "+e.getMessage());

@@ -123,16 +123,7 @@ public class KokonutUserService {
 		log.info("selectBasicTableList 호출");
 
 //		log.info("searchQuery : "+searchQuery);
-
-		List<Map<String, Object>> result = dynamicUserRepositoryCustom.selectUserList(searchQuery);
-//		log.info("result : "+result);
-
-		if(result == null || result.size() == 0) {
-			log.info("기본 테이블에 개인정보가 존재하지 않습니다.");
-			return null;
-		}
-
-		return result;
+		return dynamicUserRepositoryCustom.selectUserList(searchQuery);
 	}
 
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

@@ -1552,7 +1552,8 @@ public class DynamicUserService {
 		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(jwtFilterDto.getEmail());
 		String cpCode = adminCompanyInfoDto.getCompanyCode();
 
-		List<KokonutUserFieldDto> kokonutUserFieldDtos = kokonutUserService.getColumns(cpCode+"_1");
+		String ctName = cpCode+"_1";
+		List<KokonutUserFieldDto> kokonutUserFieldDtos = kokonutUserService.getColumns(ctName);
 //		log.info("kokonutUserFieldDtos : "+kokonutUserFieldDtos);
 
 		List<KokonutUserFieldListDto> kokonutUserFieldListDtos = new ArrayList<>();
@@ -1593,6 +1594,8 @@ public class DynamicUserService {
 		}
 
 		data.put("fieldList",kokonutUserFieldListDtos);
+
+
 		return ResponseEntity.ok(res.success(data));
 	}
 
