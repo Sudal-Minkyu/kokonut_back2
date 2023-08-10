@@ -51,7 +51,7 @@ public class TestRestController {
         HashMap<String, Object> data = new HashMap<>();
 
         // 인증번호 메일전송
-        String title = ReqUtils.filter("메일전송을 완료했습니다1.");
+        String title = ReqUtils.filter("메일전송을 완료했습니다.");
         String contents = ReqUtils.unFilter("메일내용");
 
         // 템플릿 호출을 위한 데이터 세팅

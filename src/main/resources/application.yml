@@ -5,7 +5,6 @@ server:
 #  enabled: true
 #  key-store: classpath:${KOKONUT_AWS_ssl_SECRET_ARM}
 
-
 # JPA Setting
 spring:
   datasource:

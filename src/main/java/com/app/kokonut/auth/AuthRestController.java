@@ -201,26 +201,4 @@ public class AuthRestController {
         return authService.saveOTP(googleOtpSave);
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

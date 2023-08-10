@@ -482,7 +482,7 @@ public class PaymentService {
 
 		List<PaymentPrivacyCountDayDto> paymentPrivacyCountDayListDtos = paymentPrivacyCountRepository.findByDayPrivacyCount
 				(firstDayOfLastMonth, lastDayOfLastMonth);
-		log.info("paymentPrivacyCountDayListDtos : "+paymentPrivacyCountDayListDtos);
+//		log.info("paymentPrivacyCountDayListDtos : "+paymentPrivacyCountDayListDtos);
 
 		data.put("dayList", paymentPrivacyCountDayListDtos);
 
