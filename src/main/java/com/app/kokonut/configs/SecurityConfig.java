@@ -71,6 +71,9 @@ public class SecurityConfig {
             .antMatchers("/v2/api/Admin/masterTest")
                 .hasAnyAuthority(AuthorityRole.ROLE_MASTER.getDesc(), AuthorityRole.ROLE_SYSTEM.getDesc())
 
+            .antMatchers("/v2/api/CompanySetting/settingInfo")
+                .hasAnyAuthority(AuthorityRole.ROLE_USER.getDesc(), AuthorityRole.ROLE_ADMIN.getDesc(), AuthorityRole.ROLE_MASTER.getDesc(), AuthorityRole.ROLE_SYSTEM.getDesc())
+
             .antMatchers("/v2/api/Admin/adminTest", "/v2/api/CompanySetting/**", "/v2/api/Payment/**",
                     "/v2/api/DynamicUser/tableColumnAdd", "/v2/api/DynamicUser/tableColumnDelete", "/v2/api/DynamicUser/privacyUserOpen", "/v2/api/DynamicUser/privacyUserDownloadExcel")
                 .hasAnyAuthority(AuthorityRole.ROLE_ADMIN.getDesc(), AuthorityRole.ROLE_MASTER.getDesc(), AuthorityRole.ROLE_SYSTEM.getDesc())
