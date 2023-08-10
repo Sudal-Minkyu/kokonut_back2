@@ -201,10 +201,7 @@ public class MailSender {
 
 	public String getHTML5(HashMap<String, String> callTemplate) throws IOException {
 
-//		String htmlURL = frontServerDomainIp+"/src/template/mail/"+callTemplate.get("template")+".html";
-		String htmlURL = frontServerDomainIp+"/#/"+callTemplate.get("template")+"?title="+callTemplate.get("title")+"&content="+callTemplate.get("content");
-
-		// htmlURL -> http://127.0.0.1:5173/src/template/mail/MailTemplate.html
+		String htmlURL = frontServerDomainIp+"/src/template/mail/"+callTemplate.get("template")+".html";
 		log.info("htmlURL : "+htmlURL);
 
 		URL url = new URL(htmlURL);
@@ -215,21 +212,32 @@ public class MailSender {
 		log.info("여기까지왔니? - 2");
 		log.info("conn : "+conn);
 		log.info("conn.getInputStream() : "+conn.getInputStream());
-		InputStream is = conn.getInputStream();
-		log.info("여기까지왔니? - 3");
-		String renaderdHtml = IOUtils.toString(is, StandardCharsets.UTF_8);
-		log.info("여기까지왔니? - 4");
-		Set<String>keySet = callTemplate.keySet();
-		log.info("여기까지왔니? - 5");
-		for ( String key : keySet){
-			log.info("key : "+key);
 
-			renaderdHtml = renaderdHtml.replace("{"+key+"}", callTemplate.get(key));
-			log.info("여기까지왔니? - 6");
+		try {
+			InputStream is = conn.getInputStream();
+			log.info("여기까지왔니? - 3");
+			String renaderdHtml = IOUtils.toString(is, StandardCharsets.UTF_8);
+			log.info("여기까지왔니? - 4");
+			Set<String>keySet = callTemplate.keySet();
+			log.info("여기까지왔니? - 5");
+			for ( String key : keySet){
+				log.info("key : "+key);
+
+				renaderdHtml = renaderdHtml.replace("{"+key+"}", callTemplate.get(key));
+				log.info("여기까지왔니? - 6");
+			}
+
+			log.info("이메일발송!!!!!!!!!!!");
+
+			return renaderdHtml;
+
+		} catch (IOException e) {
+			e.printStackTrace();
+			log.error("예외 e : "+e.getMessage());
 		}
-		log.info("이메일발송");
 
-		return renaderdHtml;
+		return "";
+
 	}
 
 }

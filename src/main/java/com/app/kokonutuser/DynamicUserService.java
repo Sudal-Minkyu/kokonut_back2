@@ -2294,14 +2294,13 @@ public class DynamicUserService {
 							selectQuery.append(", ");
 						}
 
-						if (!value.equals("")) {
+						if (!value.replaceAll("'","").equals("")) {
 							if (isWhereQueryNotEmpty) {
 								whereQuery.append("AND ");
 							}
-							whereQuery.append(asName).append(".").append(companyTableColumnInfoCheck.getCtciName()).append(" LIKE '%").append(value).append("%' ");
+							whereQuery.append(asName).append(".").append(companyTableColumnInfoCheck.getCtciName()).append(" LIKE '%").append(value.replaceAll("'","")).append("%' ");
 							isWhereQueryNotEmpty = true;
 						}
-
 					}
 				}
 //			}
