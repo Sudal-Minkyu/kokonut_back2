@@ -24,6 +24,7 @@ public class HistorySearchDto {
     private Long companyId;
 
     private String searchText;
+    private String filterRole;
     private List<ActivityCode> activityCodeList; // 선택한 활동
 
 

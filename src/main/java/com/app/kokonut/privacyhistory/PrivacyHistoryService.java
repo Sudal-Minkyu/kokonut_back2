@@ -106,14 +106,14 @@ public class PrivacyHistoryService {
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO077.getCode(), ResponseErrorCode.KO077.getDesc()));
         }
 
-        Page<PrivacyHistoryListDto> historyListDtos = privacyHistoryRepository.findByPrivacyHistoryPage(privacyHistorySearchDto, pageable);
+        Page<PrivacyHistoryListDto> privacyHistoryListDtos = privacyHistoryRepository.findByPrivacyHistoryPage(privacyHistorySearchDto, pageable);
 
-        if(historyListDtos.getTotalPages() == 0) {
+        if(privacyHistoryListDtos.getTotalPages() == 0) {
             log.info("조회된 데이터가 없습니다.");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO003.getCode(), ResponseErrorCode.KO003.getDesc()));
         }
 
-        return ResponseEntity.ok(res.ResponseEntityPage(historyListDtos));
+        return ResponseEntity.ok(res.ResponseEntityPage(privacyHistoryListDtos));
     }
 
     // 개인정보 처리 활동이력 엑셀다운로드

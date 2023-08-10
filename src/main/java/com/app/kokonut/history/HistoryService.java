@@ -55,12 +55,13 @@ public class HistoryService {
     }
 
     // 관리자 활동이력 리스트 ahType => "2"
-    public ResponseEntity<Map<String,Object>> activityList(String email, String searchText, String stime, String actvityType, Pageable pageable) {
+    public ResponseEntity<Map<String,Object>> activityList(String email, String searchText, String stime, String filterRole, String actvityType, Pageable pageable) {
         log.info("actvityList 호출");
 
         log.info("email : "+email);
         log.info("searchText : "+searchText);
         log.info("stime : "+stime);
+        log.info("filterRole : "+filterRole);
         log.info("actvityType : "+actvityType);
 
         AjaxResponse res = new AjaxResponse();
@@ -71,7 +72,7 @@ public class HistoryService {
         HistorySearchDto historySearchDto = new HistorySearchDto();
         historySearchDto.setCompanyId(adminCompanyInfoDto.getCompanyId());
         historySearchDto.setSearchText(searchText);
-
+        historySearchDto.setFilterRole(filterRole);
         if(!actvityType.equals("")) {
             List<ActivityCode> activityCodeList = new ArrayList<>();
             String[] employeeNamesSplit = actvityType.split(",");

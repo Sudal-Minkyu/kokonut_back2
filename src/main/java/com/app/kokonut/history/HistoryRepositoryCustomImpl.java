@@ -1,6 +1,7 @@
 package com.app.kokonut.history;
 
 import com.app.kokonut.admin.QAdmin;
+import com.app.kokonut.admin.enums.AuthorityRole;
 import com.app.kokonut.company.companysetting.QCompanySetting;
 import com.app.kokonut.history.dtos.ActivityCode;
 import com.app.kokonut.history.dtos.HistoryExcelDownloadListDto;
@@ -72,6 +73,10 @@ public class HistoryRepositoryCustomImpl extends QuerydslRepositorySupport imple
 
         if(historySearchDto.getStimeStart() != null && historySearchDto.getStimeEnd() != null) {
             query.where(history.insert_date.goe(historySearchDto.getStimeStart()).and(history.insert_date.loe(historySearchDto.getStimeEnd())));
+        }
+
+        if(!historySearchDto.getFilterRole().equals("")) {
+            query.where(admin.knRoleCode.eq(AuthorityRole.valueOf(historySearchDto.getFilterRole())));
         }
 
         final List<HistoryListDto> historyListDtos = Objects.requireNonNull(getQuerydsl()).applyPagination(pageable, query).fetch();

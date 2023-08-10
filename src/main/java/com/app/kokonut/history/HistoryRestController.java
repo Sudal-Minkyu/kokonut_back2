@@ -38,10 +38,11 @@ public class HistoryRestController {
     @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> activityList(@RequestParam(value="searchText", defaultValue = "") String searchText,
                                                            @RequestParam(value="stime", defaultValue = "") String stime,
+                                                           @RequestParam(value="filterRole", defaultValue = "") String filterRole,
                                                            @RequestParam(value="actvityType", defaultValue = "") String actvityType,
                                                            @PageableDefault Pageable pageable) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
-        return historyService.activityList(jwtFilterDto.getEmail(), searchText, stime, actvityType, pageable);
+        return historyService.activityList(jwtFilterDto.getEmail(), searchText, stime, filterRole, actvityType, pageable);
     }
 
     @PostMapping("/activityDownloadExcel")
