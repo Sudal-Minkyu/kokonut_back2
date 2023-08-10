@@ -282,6 +282,7 @@ public class IndexService {
 		String email = jwtFilterDto.getEmail();
 
 		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+		Long adminId = adminCompanyInfoDto.getAdminId();
 		String cpCode = adminCompanyInfoDto.getCompanyCode();
 
 		if(dateType.equals("")) {
@@ -328,10 +329,10 @@ public class IndexService {
 
 		// 회사의 내부건수 외부건수 - 필터 : 오늘(디폴트), 이번주, 이번달(하단)
 		// 제공날짜의 기준
-		Long offerInsideCount = offerCount(cpCode, 0, dateType, now, filterDate);
-		Long offerOutsideCount = offerCount(cpCode, 1, dateType, now, filterDate);
-//		log.info("제공 가능한 내부건수 : " + offerInsideCount);
-//		log.info("제공 가능한 외부건수 : " + offerOutsideCount);
+		Long offerInsideCount = offerCount(cpCode, 0, callType, adminId, dateType, now, filterDate);
+		Long offerOutsideCount = offerCount(cpCode, 1, callType, adminId, dateType, now, filterDate);
+		log.info("제공 가능한 내부건수 : " + offerInsideCount);
+		log.info("제공 가능한 외부건수 : " + offerOutsideCount);
 
 		provisionIndexDto.setOfferInsideCount(offerInsideCount);
 		provisionIndexDto.setOfferOutsideCount(offerOutsideCount);
@@ -352,8 +353,12 @@ public class IndexService {
 	}
 
 	// 3-2. 제공 가능한 개인정보제공 건수 반환함수(3번에서 사용)
-	public Long offerCount(String cpCode, Integer type, String dateType, LocalDate now, LocalDate filterDate) {
-		return provisionRepository.findByProvisionIndexOfferCount(cpCode, type, dateType, now, filterDate);
+	public Long offerCount(String cpCode, Integer type, String callType, Long adminId, String dateType, LocalDate now, LocalDate filterDate) {
+		if(callType.equals("1")) {
+			return provisionRepository.findByProvisionIndexOfferCountType1(cpCode, type, adminId, dateType, now, filterDate);
+		} else {
+			return provisionRepository.findByProvisionIndexOfferCountType2(cpCode, type, dateType, now, filterDate);
+		}
 	}
 
 	// 4. 인덱스에 표출할 개인정보 수 데이터를 가져온다.

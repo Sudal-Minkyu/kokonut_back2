@@ -316,7 +316,7 @@ public class ProvisionService {
 
     // 개인정보제공 리스트 조회
     public ResponseEntity<Map<String, Object>> provisionList(String searchText, String stime,
-                                                             String filterDownload, String filterState, JwtFilterDto jwtFilterDto, Pageable pageable) throws IOException {
+                                                             String filterOfferType, String filterState, JwtFilterDto jwtFilterDto, Pageable pageable) throws IOException {
         log.info("provisionList 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -333,7 +333,7 @@ public class ProvisionService {
         provisionSearchDto.setAdminId(adminId);
         provisionSearchDto.setCpCode(cpCode);
         provisionSearchDto.setSearchText(searchText);
-        provisionSearchDto.setFilterDownload(filterDownload);
+        provisionSearchDto.setFilterOfferType(filterOfferType);
         provisionSearchDto.setFilterState(filterState);
 
         if(!stime.equals("")) {

@@ -9,6 +9,7 @@ import com.app.kokonut.provision.provisionroster.QProvisionRoster;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
@@ -76,8 +77,8 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
                 .where(provision.insert_date.goe(provisionSearchDto.getStimeStart()).and(provision.insert_date.loe(provisionSearchDto.getStimeEnd())))
                 .innerJoin(admin).on(admin.knEmail.eq(provision.insert_email))
                 .innerJoin(InsertAdmin).on(InsertAdmin.adminId.eq(admin.adminId))
-                .innerJoin(provisionRoster).on(provisionRoster.proCode.eq(provision.proCode))
-//                .innerJoin(provisionRoster).on(provisionRoster.proCode.eq(provision.proCode).and(provisionRoster.adminId.eq(provisionSearchDto.getAdminId())))
+//                .innerJoin(provisionRoster).on(provisionRoster.proCode.eq(provision.proCode))
+                .innerJoin(provisionRoster).on(provisionRoster.proCode.eq(provision.proCode).and(provisionRoster.adminId.eq(provisionSearchDto.getAdminId())))
                 .innerJoin(provisionRosterCnt).on(provisionRosterCnt.proCode.eq(provision.proCode)).groupBy(provisionRosterCnt.proCode)
                 .select(Projections.constructor(ProvisionListDto.class,
 //                        provision.proId,
@@ -89,10 +90,10 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
                         provision.proExpDate,
                         provision.proDownloadYn,
                         provisionRosterCnt.count(),
-                        downloadHistoryCountSubQuery
-//                        new CaseBuilder()
-//                                .when(InsertAdmin.adminId.eq(provisionSearchDto.getAdminId())).then("1")
-//                                .otherwise("2") // 자신이 제공한건이면 "1", 받은건이면 "2"로 반환
+                        downloadHistoryCountSubQuery,
+                        new CaseBuilder()
+                                .when(InsertAdmin.adminId.eq(provisionSearchDto.getAdminId())).then("1")
+                                .otherwise("2") // 자신이 제공한건이면 "1", 받은건이면 "2"로 반환
                 ));
 
         if(!provisionSearchDto.getSearchText().equals("")) {
@@ -113,8 +114,12 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
             query.where(statePredicate);
         }
 
-        if(!provisionSearchDto.getFilterDownload().equals("")) {
-            query.where(provision.proDownloadYn.eq(Integer.parseInt(provisionSearchDto.getFilterDownload())));
+        if(!provisionSearchDto.getFilterOfferType().equals("")) {
+            if(provisionSearchDto.getFilterOfferType().equals("1")) {
+                query.where(InsertAdmin.adminId.ne(provisionSearchDto.getAdminId()));
+            } else {
+                query.where(InsertAdmin.adminId.eq(provisionSearchDto.getAdminId()));
+            }
         }
 
         final List<ProvisionListDto>  provisionListDtos = Objects.requireNonNull(getQuerydsl()).applyPagination(pageable, query).fetch();
@@ -137,7 +142,39 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
         return query.fetchOne();
     }
 
-    public Long findByProvisionIndexOfferCount(String cpCode, Integer type, String dateType, LocalDate now, LocalDate filterDate) {
+    // 현재 나의 제공 카운팅가져오기
+    public Long findByProvisionIndexOfferCountType1(String cpCode, Integer type, long adminId, String dateType, LocalDate now, LocalDate filterDate) {
+
+        QProvision provision = QProvision.provision;
+        QProvisionRoster provisionRoster = QProvisionRoster.provisionRoster;
+
+        JPQLQuery<Long> query = from(provision)
+                .where(provision.proProvide.eq(type).and(provision.cpCode.eq(cpCode)))
+                .innerJoin(provisionRoster).on(provisionRoster.proCode.eq(provision.proCode).and(provisionRoster.adminId.eq(adminId)))
+                .select(Projections.constructor(Long.class,
+                        provision.count()
+                ));
+
+        if(dateType.equals("1")) {
+            // 오늘 모두 속하면 조회
+            query.where(provision.proStartDate.loe(now).and(provision.proExpDate.goe(filterDate)));
+        }else if(dateType.equals("2")) {
+            // 이번주 조회
+            query.where(provision.proStartDate.loe(now).and(provision.proExpDate.goe(filterDate))); // 날짜 사이값 정의 filterDate < now
+        } else {
+            // 이번달 조회
+            query.where(
+                    provision.proStartDate.year().eq(filterDate.getYear()).and(provision.proStartDate.month().eq(filterDate.getMonthValue()))
+                            .or(provision.proExpDate.year().eq(filterDate.getYear()).and(provision.proExpDate.month().eq(filterDate.getMonthValue())))
+                            .or(provision.proStartDate.loe(filterDate).and(provision.proExpDate.goe(filterDate)))
+            );
+        }
+
+        return query.fetchOne();
+    }
+
+    // 현재 회사의 제공 카운팅가져오기
+    public Long findByProvisionIndexOfferCountType2(String cpCode, Integer type, String dateType, LocalDate now, LocalDate filterDate) {
 
         QProvision provision = QProvision.provision;
 

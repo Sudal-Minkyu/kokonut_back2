@@ -25,7 +25,7 @@ public class ProvisionSearchDto {
 
     private String searchText;
 
-    private String filterDownload;
+    private String filterOfferType;
     private String filterState;
 
 }

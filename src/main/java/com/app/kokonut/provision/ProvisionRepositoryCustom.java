@@ -20,7 +20,9 @@ public interface ProvisionRepositoryCustom {
 
     Long findByProvisionIndexTodayCount(String cpCode, Integer type, LocalDate now);
 
-    Long findByProvisionIndexOfferCount(String cpCode, Integer type, String dateType, LocalDate now, LocalDate filterDate);
+    Long findByProvisionIndexOfferCountType1(String cpCode, Integer type, long adminId, String dateType, LocalDate now, LocalDate filterDate);
+
+    Long findByProvisionIndexOfferCountType2(String cpCode, Integer type, String dateType, LocalDate now, LocalDate filterDate);
 
     ProvisionDownloadCheckDto findByProvisionDownloadCheck(String cpCode, String proCode, Integer proDownloadYn);
 

@@ -71,11 +71,11 @@ public class ProvisionRestController {
             "")
     public ResponseEntity<Map<String, Object>> provisionList(@RequestParam(value="searchText", defaultValue = "") String searchText,
                                                            @RequestParam(value="stime", defaultValue = "") String stime,
-                                                           @RequestParam(value="filterDownload", defaultValue = "") String filterDownload,
+                                                           @RequestParam(value="filterOfferType", defaultValue = "") String filterOfferType,
                                                            @RequestParam(value="filterState", defaultValue = "") String filterState,
                                                            @PageableDefault Pageable pageable) throws IOException {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
-        return provisionService.provisionList(searchText, stime, filterDownload, filterState, jwtFilterDto, pageable);
+        return provisionService.provisionList(searchText, stime, filterOfferType, filterState, jwtFilterDto, pageable);
     }
 
     @GetMapping("/provisionDownloadList")
