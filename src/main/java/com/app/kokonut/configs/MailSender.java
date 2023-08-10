@@ -209,6 +209,9 @@ public class MailSender {
 		log.info("url : "+url);
 
 		URLConnection conn = url.openConnection();
+		conn.setConnectTimeout(5000);  // 5초 내에 연결이 되지 않으면 예외 발생
+		conn.setReadTimeout(10000);   // 데이터를 10초 내에 읽지 못하면 예외 발생
+		
 		log.info("여기까지왔니? - 2");
 		log.info("conn : "+conn);
 		log.info("conn.getInputStream() : "+conn.getInputStream());
