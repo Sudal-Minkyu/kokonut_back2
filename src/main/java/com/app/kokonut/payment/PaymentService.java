@@ -761,27 +761,15 @@ public class PaymentService {
 
 				if(optionalCompanyPayment.isPresent()) {
 
-					String billingKey = optionalCompanyPayment.get().getCpiBillingKey();
-					boolean result = bootPayService.billingKeyDelete(billingKey);
-					if(!result) {
-						log.error("구독해지를 실패 했습니다. 코코넛으로 문의해 주시길 바랍니다.");
+					log.error("구독해지를 성공 했습니다.");
 
-						historyService.updateHistory(activityHistoryId,
-								cpCode+" - "+activityCode.getDesc()+"시도 실패 이력", "구독해지를 실패했습니다.", 1);
+					// 해지날짜 기록
+					optionalCompany.get().setCpSubscribe("2");
+					optionalCompany.get().setCpSubscribeDate(LocalDateTime.now());
+					companyRepository.save(optionalCompany.get());
 
-						return ResponseEntity.ok(res.fail(ResponseErrorCode.KO100_1.getCode(), ResponseErrorCode.KO100_1.getDesc()));
-					}
-					else {
-						log.error("구독해지를 성공 했습니다.");
-
-						// 해지날짜 기록
-						optionalCompany.get().setCpSubscribe("2");
-						optionalCompany.get().setCpSubscribeDate(LocalDateTime.now());
-						companyRepository.save(optionalCompany.get());
-
-						historyService.updateHistory(activityHistoryId,
-								cpCode+" - "+activityCode.getDesc()+"시도 성공 이력", reason, 1);
-					}
+					historyService.updateHistory(activityHistoryId,
+							cpCode+" - "+activityCode.getDesc()+"시도 성공 이력", reason, 1);
 				} else {
 					log.error("등록된 빌링키 정보가 존재하지 않습니다.");
 				}
@@ -821,27 +809,15 @@ public class PaymentService {
 
 				if(optionalCompanyPayment.isPresent()) {
 
-					String billingKey = optionalCompanyPayment.get().getCpiBillingKey();
-					boolean result = bootPayService.billingKeyDelete(billingKey);
-					if(!result) {
-						log.error("구독해지 취소를 실패 했습니다. 코코넛으로 문의해 주시길 바랍니다.");
+					log.error("구독해지 취소를 성공 했습니다.");
 
-						historyService.updateHistory(activityHistoryId,
-								cpCode+" - "+activityCode.getDesc()+"시도 실패 이력", "구독해지 취소를 실패했습니다.", 1);
+					// 해지날짜 기록
+					optionalCompany.get().setCpSubscribe("1");
+					optionalCompany.get().setCpSubscribeDate(null);
+					companyRepository.save(optionalCompany.get());
 
-						return ResponseEntity.ok(res.fail(ResponseErrorCode.KO100_2.getCode(), ResponseErrorCode.KO100_2.getDesc()));
-					} else {
-
-						log.error("구독해지 취소를 성공 했습니다.");
-
-						// 해지날짜 기록
-						optionalCompany.get().setCpSubscribe("1");
-						optionalCompany.get().setCpSubscribeDate(null);
-						companyRepository.save(optionalCompany.get());
-
-						historyService.updateHistory(activityHistoryId,
-								cpCode+" - "+activityCode.getDesc()+"시도 성공 이력", "", 1);
-					}
+					historyService.updateHistory(activityHistoryId,
+							cpCode+" - "+activityCode.getDesc()+"시도 성공 이력", "", 1);
 				} else {
 					log.error("등록된 빌링키 정보가 존재하지 않습니다.");
 				}
