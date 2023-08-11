@@ -424,7 +424,7 @@ public class EmailService {
                 saveEmail.setEmRequestId(emailSendResult);
                 saveEmail.setEmSendAllCount(emSendAllCount);
 
-                saveEmail.setEmYyyymm(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMm")));
+                saveEmail.setEmYyyymm(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMM")));
                 saveEmail.setInsert_email(email);
                 saveEmail.setInsert_date(LocalDateTime.now());
 

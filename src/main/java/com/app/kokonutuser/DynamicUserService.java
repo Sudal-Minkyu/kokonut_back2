@@ -1969,7 +1969,7 @@ public class DynamicUserService {
 				decrypCountHistoryService.decrypCountHistorySave(companyCode, dchCount);
 			}
 
-			log.info("basicTableList : "+basicTableList);
+//			log.info("basicTableList : "+basicTableList);
 			data.put("basicTableList",basicTableList);
 		}
 

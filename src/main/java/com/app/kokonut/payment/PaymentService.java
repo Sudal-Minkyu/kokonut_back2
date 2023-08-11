@@ -145,7 +145,7 @@ public class PaymentService {
 		// 결제예약할 리스트 불러오기 (조건 : 현재 날짜로부터 일일 개인정보 수의 값이 하나이상 존재하는지,
 		// 익일 5일 오후 12시 결제예약 걸기
 		LocalDate yesterday = localDate.minusDays(1);  // 어제의 날짜를 구합니다.
-		String yyyymm = yesterday.format(DateTimeFormatter.ofPattern("yyyyMm")); // 어제날짜의 yyyymm을 가져온다.
+		String yyyymm = yesterday.format(DateTimeFormatter.ofPattern("yyyyMM")); // 어제날짜의 yyyymm을 가져온다.
 //		log.info("yesterday : "+yesterday);
 //		log.info("yyyymm : "+yyyymm);
 
