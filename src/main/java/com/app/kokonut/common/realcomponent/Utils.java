@@ -155,10 +155,18 @@ public class Utils {
 	// 쿠키 저장함수 -> 옵션 고정 : HttpOnly = true, Secure = true, Path = "/"
 	public static void cookieSave(String cookieName, String cookieValue, Integer maxAge, HttpServletResponse response) {
 		Cookie cookieRefreshToken = new Cookie(cookieName, cookieValue);
-		cookieRefreshToken.setMaxAge(maxAge); // 쿠키 값을 30일로 셋팅
+		cookieRefreshToken.setMaxAge(maxAge);
 		cookieRefreshToken.setPath("/");
 		cookieRefreshToken.setHttpOnly(true);
 		cookieRefreshToken.setSecure(true);
+		response.addCookie(cookieRefreshToken);
+	}
+
+	// 쿠키제거 함수
+	public static void cookieDelete(String cookieName, HttpServletResponse response) {
+		Cookie cookieRefreshToken = new Cookie(cookieName, "");
+		cookieRefreshToken.setMaxAge(0);  // 유효 시간을 0으로 설정
+		cookieRefreshToken.setPath("/"); // 필요한 경우 경로를 설정하세요
 		response.addCookie(cookieRefreshToken);
 	}
 

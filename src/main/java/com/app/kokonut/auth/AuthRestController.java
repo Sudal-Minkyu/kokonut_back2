@@ -121,9 +121,9 @@ public class AuthRestController {
             "2. 해당 링크의 키를 통해 검증한다." +
             "3. 휴대폰인증을한다." +
             "4. 사용할 비밀번호를 입력하여 등록한다.")
-    public ResponseEntity<Map<String,Object>> createUser(@RequestBody AuthRequestDto.KokonutCreateUser kokonutCreateUser, HttpServletRequest request) {
+    public ResponseEntity<Map<String,Object>> createUser(@RequestBody AuthRequestDto.KokonutCreateUser kokonutCreateUser, HttpServletRequest request, HttpServletResponse response) {
         log.info("사업자 회원가입 API 호출");
-        return authService.createUser(kokonutCreateUser, request);
+        return authService.createUser(kokonutCreateUser, request, response);
     }
 
     // 코코넛 회원가입
@@ -132,9 +132,11 @@ public class AuthRestController {
             "2. 이메일 중복체크를 한다." +
             "3. 이메일 인증체크를 한다." +
             "4. 회원가입 완료후 메일을 보낸다.")
-    public ResponseEntity<Map<String,Object>> kokonutSignUp(@RequestBody AuthRequestDto.KokonutSignUp kokonutSignUp) {
+    public ResponseEntity<Map<String,Object>> kokonutSignUp(@RequestBody AuthRequestDto.KokonutSignUp kokonutSignUp,
+                                                            HttpServletRequest request,
+                                                            HttpServletResponse response) {
         log.info("사업자 회원가입 API 호출");
-        return authService.kokonutSignUp(kokonutSignUp);
+        return authService.kokonutSignUp(kokonutSignUp, request, response);
     }
 
     @GetMapping(value = "/cookieTest")

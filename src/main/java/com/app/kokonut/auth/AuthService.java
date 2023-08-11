@@ -12,8 +12,6 @@ import com.app.kokonut.auth.jwt.dto.AuthRequestDto;
 import com.app.kokonut.auth.jwt.dto.AuthResponseDto;
 import com.app.kokonut.auth.jwt.dto.GoogleOtpGenerateDto;
 import com.app.kokonut.auth.jwt.dto.RedisDao;
-import com.app.kokonut.awskmshistory.AwsKmsHistory;
-import com.app.kokonut.awskmshistory.AwsKmsHistoryRepository;
 import com.app.kokonut.awskmshistory.AwsKmsHistoryService;
 import com.app.kokonut.awskmshistory.dto.AwsKmsResultDto;
 import com.app.kokonut.common.AjaxResponse;
@@ -62,7 +60,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -402,7 +399,7 @@ public class AuthService {
 
     // 코코넛 회원가입 기능
     @Transactional
-    public ResponseEntity<Map<String, Object>> kokonutSignUp(AuthRequestDto.KokonutSignUp kokonutSignUp) {
+    public ResponseEntity<Map<String, Object>> kokonutSignUp(AuthRequestDto.KokonutSignUp kokonutSignUp, HttpServletRequest request, HttpServletResponse response) {
         log.info("kokonutSignUp 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -424,28 +421,34 @@ public class AuthService {
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO013.getCode(), ResponseErrorCode.KO013.getDesc()));
         }
 
-        log.info("회원가입 시작");
-        log.info("받아온 핸드폰번호 : " + kokonutSignUp.getKnPhoneNumber());
+        String joinPhone = "";
+        String joinName = "";
 
-//        if (!kokonutSignUp.getKnEmail().equals("kokonut@kokonut.me")) { // 테스트일 경우 패스
-//            String joinPhone = "";
-//            Cookie[] cookies = request.getCookies();
-//            if (cookies != null) {
-//                log.info("현재 쿠키값들 : " + Arrays.toString(cookies));
-//                for (Cookie c : cookies) {
-//                    if (c.getName().equals("joinPhone")) {
-//                        joinPhone = c.getValue();
-//                        log.info("본인인증 된 핸드폰번호 : " + joinPhone);
-//
-//                    }
-//                }
-//            }
-//            // 본인인증 체크
-//            if (!kokonutSignUp.getKnPhoneNumber().equals(joinPhone)) {
-//                log.info("본인인증으로 입력된 핸드폰 번호가 아닙니다. 본인인증을 완료해주세요.");
-//                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO033.getCode(), ResponseErrorCode.KO033.getDesc()));
-//            }
-//        }
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            log.info("현재 쿠키값들 : " + Arrays.toString(cookies));
+            for (Cookie c : cookies) {
+                if (c.getName().equals("joinPhone")) {
+                    joinPhone = c.getValue();
+                    log.info("본인인증 된 핸드폰번호 : " + joinPhone);
+                } else if(c.getName().equals("joinName")) {
+                    joinName = c.getValue();
+                    log.info("본인인증 된 이름 : " + joinName);
+                }
+            }
+        }
+
+        // 본인인증 체크
+        if (!kokonutSignUp.getKnPhoneNumber().equals(joinPhone) || !kokonutSignUp.getKnName().equals(joinName)) {
+            log.error("본인인증된 명의 및 휴대전화번호가 아닙니다. 본인인증을 다시해주세요.");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO033.getCode(), ResponseErrorCode.KO033.getDesc()));
+        }else {
+            // 인증 쿠키제거
+            Utils.cookieDelete("joinName", response);
+            Utils.cookieDelete("joinPhone", response);
+        }
+
+        log.info("회원가입 시작");
 
         // 저장할 KMS 암호화키 생성
         String dataKey;
@@ -1048,7 +1051,7 @@ public class AuthService {
     }
 
     // 관리자 등록 최종
-    public ResponseEntity<Map<String, Object>> createUser(AuthRequestDto.KokonutCreateUser kokonutCreateUser, HttpServletRequest request) {
+    public ResponseEntity<Map<String, Object>> createUser(AuthRequestDto.KokonutCreateUser kokonutCreateUser, HttpServletRequest request, HttpServletResponse response) {
         log.info("createUser 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -1063,23 +1066,31 @@ public class AuthService {
         log.info("관리자등록 시작");
         log.info("받아온 값 kokonutCreateUser : " + kokonutCreateUser);
 
-        if (!kokonutCreateUser.getUserEmail().equals("kokonut@kokonut.me")) { // 테스트일 경우 패스
-            String joinPhone = "";
-            Cookie[] cookies = request.getCookies();
-            if (cookies != null) {
-//                log.info("현재 쿠키값들 : " + Arrays.toString(cookies));
-                for (Cookie c : cookies) {
-                    if (c.getName().equals("joinPhone")) {
-                        joinPhone = c.getValue();
-//                        log.info("본인인증 된 핸드폰번호 : " + joinPhone);
-                    }
+        String joinPhone = "";
+        String joinName = "";
+
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            log.info("현재 쿠키값들 : " + Arrays.toString(cookies));
+            for (Cookie c : cookies) {
+                if (c.getName().equals("joinPhone")) {
+                    joinPhone = c.getValue();
+                    log.info("본인인증 된 핸드폰번호 : " + joinPhone);
+                } else if(c.getName().equals("joinName")) {
+                    joinName = c.getValue();
+                    log.info("본인인증 된 이름 : " + joinName);
                 }
             }
-            // 본인인증 체크
-            if (!kokonutCreateUser.getKnPhoneNumber().equals(joinPhone)) {
-                log.info("본인인증으로 입력된 핸드폰 번호가 아닙니다. 본인인증을 완료해주세요.");
-                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO033.getCode(), ResponseErrorCode.KO033.getDesc()));
-            }
+        }
+
+        // 본인인증 체크
+        if (!kokonutCreateUser.getKnPhoneNumber().equals(joinPhone) || !kokonutCreateUser.getKnName().equals(joinName)) {
+            log.error("본인인증된 명의 및 휴대전화번호가 아닙니다. 본인인증을 다시해주세요.");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO033.getCode(), ResponseErrorCode.KO033.getDesc()));
+        }else {
+            // 인증 쿠키제거
+            Utils.cookieDelete("joinName", response);
+            Utils.cookieDelete("joinPhone", response);
         }
 
         Optional<Admin> optionalAdmin = adminRepository.findByKnEmail(kokonutCreateUser.getUserEmail());
