@@ -37,6 +37,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -422,6 +423,8 @@ public class EmailService {
 
                 saveEmail.setEmRequestId(emailSendResult);
                 saveEmail.setEmSendAllCount(emSendAllCount);
+
+                saveEmail.setEmYyyymm(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMm")));
                 saveEmail.setInsert_email(email);
                 saveEmail.setInsert_date(LocalDateTime.now());
 
@@ -490,6 +493,18 @@ public class EmailService {
 
         return ResponseEntity.ok(res.success(data));
     }
+
+    // 익월 사용금액 가져오기 -> 한 건당 0.5원
+    public int emailSendMonthPrice(String cpCode, String yyyymm) {
+        int result = emailRepository.findByMonthSendPrice(cpCode, yyyymm);
+        log.info("총 발송건수 : "+result);
+        if(result != 0) {
+            return (int) Math.round(result*0.5);
+        } else {
+            return 0;
+        }
+    }
+
 
 
 }

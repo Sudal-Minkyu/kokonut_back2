@@ -79,6 +79,10 @@ public class Email {
     @Column(name = "em_send_fail_count")
     private Integer emSendFailCount;
 
+    @ApiModelProperty("발송날짜 yyyymm")
+    @Column(name = "em_yyyymm")
+    private String emYyyymm;
+
     @ApiModelProperty("발송자 email")
     @Column(name = "insert_email", nullable = false)
     private String insert_email;

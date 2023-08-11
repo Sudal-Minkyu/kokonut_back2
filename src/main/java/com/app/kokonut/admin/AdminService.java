@@ -310,7 +310,7 @@ public class AdminService {
 
             data.put("csAutoLogoutSetting",adminInfoDto.getCsAutoLogoutSetting());
 
-            LocalDateTime compareDate = adminInfoDto.getCompareDate();
+            LocalDateTime compareDate = adminInfoDto.getCompareDate(); // 비밀번호 변경날짜 : 만약 null일 경우 insert_date 값을 가져온다.
             long monthsBetween = ChronoUnit.MONTHS.between(compareDate, LocalDateTime.now());
 //            log.info("monthsBetween : "+monthsBetween);  // 변경날짜와 현재날짜의 월수 차이
             if(adminInfoDto.getCsPasswordChangeSetting() <= monthsBetween) {

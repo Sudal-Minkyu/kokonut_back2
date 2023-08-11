@@ -187,4 +187,21 @@ public class EmailRepositoryCustomImpl extends QuerydslRepositorySupport impleme
         return query;
     }
 
+    @Override
+    public Integer findByMonthSendPrice(String cpCode, String emYyyymm) {
+
+        QEmail email = QEmail.email;
+
+        Integer query = from(email)
+                .select(email.emSendAllCount.sum())
+                .where(email.cpCode.eq(cpCode), email.emYyyymm.eq(emYyyymm))
+                .fetchOne();
+
+        if (query == null) {
+            query = 0;
+        }
+
+        return query;
+    }
+
 }

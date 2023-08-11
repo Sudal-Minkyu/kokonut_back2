@@ -7,6 +7,7 @@ import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.common.component.ReqUtils;
 import com.app.kokonut.common.realcomponent.CommonUtil;
 import com.app.kokonut.configs.MailSender;
+import com.app.kokonut.email.email.EmailService;
 import com.app.kokonut.navercloud.NaverCloudPlatformService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,12 +32,14 @@ import java.util.Map;
 public class TestRestController {
 
     private final MailSender mailSender;
+    private final EmailService emailService;
     private final NaverCloudPlatformService naverCloudPlatformService;
     private final AlimtalkSendService alimtalkSendService;
 
     @Autowired
-    public TestRestController(MailSender mailSender, NaverCloudPlatformService naverCloudPlatformService, AlimtalkSendService alimtalkSendService){
+    public TestRestController(MailSender mailSender, EmailService emailService, NaverCloudPlatformService naverCloudPlatformService, AlimtalkSendService alimtalkSendService){
         this.mailSender = mailSender;
+        this.emailService = emailService;
         this.naverCloudPlatformService = naverCloudPlatformService;
         this.alimtalkSendService = alimtalkSendService;
     }
@@ -77,6 +79,19 @@ public class TestRestController {
         return ResponseEntity.ok(res.success(data));
     }
 
+    @ApiOperation(value = "현재 원화가치 호출하기")
+    @GetMapping(value = "/wonPriceGet")
+    public ResponseEntity<Map<String,Object>> wonPriceGet() {
+        log.info("wonPriceGet 호출");
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+        int wonPrice = CommonUtil.wonPriceGet();
+        log.info("원화가치(USD기준) : "+wonPrice);
+
+        return ResponseEntity.ok(res.success(data));
+    }
 
     @ApiOperation(value = "공인IP 호출 테스트용")
     @GetMapping(value = "/publicIpGet")

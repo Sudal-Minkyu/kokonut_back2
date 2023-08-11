@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @EqualsAndHashCode(of = "akhIdx")
@@ -24,18 +24,16 @@ public class AwsKmsHistory {
     @Column(name = "cp_code")
     private String cpCode;
 
-    /**
-     * 호출 타입
-     */
-    @Column(name = "akh_type")
-    @ApiModelProperty("호출 타입")
-    private String akhType;
+    @Column(name = "akh_count")
+    @ApiModelProperty("KMS 호출 카운팅")
+    private Long akhCount;
 
-    /**
-     * 호출 날짜
-     */
-    @ApiModelProperty("호출 날짜")
-    @Column(name = "akh_regdate", nullable = false)
-    private LocalDateTime akhRegdate;
+    @ApiModelProperty("년월(yyyymm)")
+    @Column(name = "akh_yyyymm")
+    private String akhYyyymm;
+
+    @ApiModelProperty("최근 호출한 날짜")
+    @Column(name = "modify_date")
+    private LocalDate modify_date;
 
 }

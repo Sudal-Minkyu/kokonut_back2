@@ -1,7 +1,8 @@
 package com.app.kokonut.common.realcomponent;
 
 import lombok.extern.slf4j.Slf4j;
-import org.json.simple.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,7 @@ import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -89,6 +91,35 @@ public class CommonUtil {
 
         return ip;
     }
+
+	// 현재 원화가치 가져오기 -> USD 기준
+	public static int wonPriceGet() {
+		int wonPrice = 0;
+
+		try {
+			URL url = new URL("https://quotation-api-cdn.dunamu.com/v1/forex/recent?codes=FRX.KRWUSD");
+
+			// 응답 데이터 얻기
+			BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+			StringBuilder sb = new StringBuilder();
+
+			String line;
+			while ((line = br.readLine()) != null) {
+				sb.append(line);
+			}
+
+			br.close();
+
+			// JSON 파싱
+			JSONArray jsonArray = new JSONArray(sb.toString());
+			JSONObject jsonObject = jsonArray.getJSONObject(0);
+			wonPrice = jsonObject.getInt("basePrice");
+		} catch (IOException e) {
+			log.error("원화 환율 가져오기 실패");
+		}
+
+		return wonPrice;
+	}
 
 //
 //    /**

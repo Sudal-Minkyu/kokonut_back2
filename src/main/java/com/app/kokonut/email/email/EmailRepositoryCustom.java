@@ -24,4 +24,6 @@ public interface EmailRepositoryCustom {
 
     Integer emailSendReceptionCount(String cpCode, String emType, String dateType, LocalDate now, LocalDate filterDate);
 
+    Integer findByMonthSendPrice(String cpCode, String emYyyymm); // 월 발송횟수가져오기 -> 발송금액계산용
+
 }

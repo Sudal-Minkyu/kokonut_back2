@@ -7,7 +7,6 @@ import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.app.kokonut.keydata.KeyDataService;
 import lombok.extern.slf4j.Slf4j;
 import org.imgscalr.Scalr;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Date;
 import java.util.Objects;
@@ -37,9 +39,8 @@ public class AwsS3Util {
     private final AmazonS3 s3Client;
 
     @Autowired
-    public AwsS3Util(KeyDataService keyDataService, AmazonS3 s3Client) {
+    public AwsS3Util(AmazonS3 s3Client) {
         this.s3Client = s3Client;
-//        this.AWSBUCKET = keyDataService.findByKeyValue("aws_s3_bucket");
     }
 
     // AWS 사진 파일 업로드

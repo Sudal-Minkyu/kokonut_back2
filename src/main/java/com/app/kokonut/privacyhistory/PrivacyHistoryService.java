@@ -118,7 +118,7 @@ public class PrivacyHistoryService {
 
     // 개인정보 처리 활동이력 엑셀다운로드
     public ResponseEntity<Map<String, Object>> privacyHistoryDownloadExcel(String searchText, String stime, String filterRole, String filterState, String otpValue, String downloadReason, JwtFilterDto jwtFilterDto) throws IOException {
-        log.info("activityDownloadExcel 호출");
+        log.info("privacyHistoryDownloadExcel 호출");
 
         log.info("searchText : "+searchText);
         log.info("stime : "+stime);
@@ -185,6 +185,7 @@ public class PrivacyHistoryService {
             privacyHistoryExcelDownloadData.put("관리자이메일", privacyHistoryExcelDownloadListDto.getKnEmail());
             privacyHistoryExcelDownloadData.put("관리자 등급", privacyHistoryExcelDownloadListDto.getKnRoleDesc());
             privacyHistoryExcelDownloadData.put("처리내역", privacyHistoryExcelDownloadListDto.getPrivacyHistoryCode());
+            privacyHistoryExcelDownloadData.put("처리내용", privacyHistoryExcelDownloadListDto.getKphReason());
             privacyHistoryExcelDownloadData.put("활동일시", privacyHistoryExcelDownloadListDto.getInsert_date());
             privacyHistoryExcelDownloadData.put("접속IP", privacyHistoryExcelDownloadListDto.getKphIpAddr());
 

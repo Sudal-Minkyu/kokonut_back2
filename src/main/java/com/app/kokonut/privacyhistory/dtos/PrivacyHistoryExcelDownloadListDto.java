@@ -26,6 +26,8 @@ public class PrivacyHistoryExcelDownloadListDto {
 
     private PrivacyHistoryCode privacyHistoryCode;
 
+    private String kphReason; // 처리내용
+
     private LocalDateTime insert_date;
 
     private String kphIpAddr;

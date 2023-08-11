@@ -149,7 +149,7 @@ public class ThirdPartyService {
 			thirdPartyBizm.setTsId(saveThirdParty.getTsId());
 
 			thirdPartyBizm.setTsBizmReceiverNumCode(tsBizmReceiverNumCode);
-			thirdPartyBizm.setTsBizmAppUserIdCode(tsBizmReceiverNumCode);
+			thirdPartyBizm.setTsBizmAppUserIdCode(tsBizmAppUserIdCode);
 
 			thirdPartyBizm.setInsert_email(email);
 			thirdPartyBizm.setInsert_date(LocalDateTime.now());

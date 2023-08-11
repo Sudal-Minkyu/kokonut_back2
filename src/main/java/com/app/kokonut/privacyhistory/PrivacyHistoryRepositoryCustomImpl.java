@@ -90,6 +90,7 @@ public class PrivacyHistoryRepositoryCustomImpl extends QuerydslRepositorySuppor
                         admin.knEmail,
                         admin.knRoleCode,
                         privacyHistory.privacyHistoryCode,
+                        privacyHistory.kphReason,
                         privacyHistory.insert_date,
                         privacyHistory.kphIpAddr
                 ));

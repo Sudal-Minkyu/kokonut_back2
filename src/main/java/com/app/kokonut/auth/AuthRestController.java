@@ -132,9 +132,9 @@ public class AuthRestController {
             "2. 이메일 중복체크를 한다." +
             "3. 이메일 인증체크를 한다." +
             "4. 회원가입 완료후 메일을 보낸다.")
-    public ResponseEntity<Map<String,Object>> kokonutSignUp(@RequestBody AuthRequestDto.KokonutSignUp kokonutSignUp, HttpServletRequest request) {
+    public ResponseEntity<Map<String,Object>> kokonutSignUp(@RequestBody AuthRequestDto.KokonutSignUp kokonutSignUp) {
         log.info("사업자 회원가입 API 호출");
-        return authService.kokonutSignUp(kokonutSignUp, request);
+        return authService.kokonutSignUp(kokonutSignUp);
     }
 
     @GetMapping(value = "/cookieTest")

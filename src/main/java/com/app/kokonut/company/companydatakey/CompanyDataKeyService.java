@@ -1,14 +1,12 @@
 package com.app.kokonut.company.companydatakey;
 
-import com.app.kokonut.awskmshistory.AwsKmsHistory;
-import com.app.kokonut.awskmshistory.AwsKmsHistoryRepository;
+import com.app.kokonut.awskmshistory.AwsKmsHistoryService;
 import com.app.kokonut.awskmshistory.dto.AwsKmsResultDto;
 import com.app.kokonut.common.realcomponent.AwsKmsUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 /**
@@ -24,13 +22,13 @@ public class CompanyDataKeyService {
     private final AwsKmsUtil awsKmsUtil;
 
     private final CompanyDataKeyRepository companyDataKeyRepository;
-    private final AwsKmsHistoryRepository awsKmsHistoryRepository;
+    private final AwsKmsHistoryService awsKmsHistoryService;
     @Autowired
     public CompanyDataKeyService(AwsKmsUtil awsKmsUtil, CompanyDataKeyRepository companyDataKeyRepository,
-                                 AwsKmsHistoryRepository awsKmsHistoryRepository){
+                                 AwsKmsHistoryService awsKmsHistoryService){
         this.awsKmsUtil = awsKmsUtil;
         this.companyDataKeyRepository = companyDataKeyRepository;
-        this.awsKmsHistoryRepository = awsKmsHistoryRepository;
+        this.awsKmsHistoryService = awsKmsHistoryService;
     }
 
     /**
@@ -55,14 +53,8 @@ public class CompanyDataKeyService {
             if(awsKmsResultDto.getResult().equals("success")) {
                 log.info("KMS 암복호화 성공");
 
-                /* 복호화 후 이력저장 */
-                log.info("KMS 복호화 이력 저장 로직 시작");
-                AwsKmsHistory awsKmsHistory = new AwsKmsHistory();
-                awsKmsHistory.setCpCode(cpCode);
-                awsKmsHistory.setAkhType("DEC");
-                awsKmsHistory.setAkhRegdate(LocalDateTime.now());
-                AwsKmsHistory saveAwsKmsHistory =  awsKmsHistoryRepository.save(awsKmsHistory);
-                log.info("KMS 복호화 이력 저장 saveAwsKmsHistory : "+saveAwsKmsHistory.getAkhIdx());
+                // AWS 호출 카운팅
+                awsKmsHistoryService.awskmsHistoryCount(cpCode);
 
                 return awsKmsResultDto;
             }

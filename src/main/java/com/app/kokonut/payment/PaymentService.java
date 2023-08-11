@@ -3,6 +3,7 @@ package com.app.kokonut.payment;
 import com.app.kokonut.admin.AdminRepository;
 import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
+import com.app.kokonut.awskmshistory.AwsKmsHistoryService;
 import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.common.realcomponent.BootPayService;
@@ -22,6 +23,7 @@ import com.app.kokonut.company.companypaymentinfo.dtos.CompanyPaymentInfoDto;
 import com.app.kokonut.configs.GoogleOTP;
 import com.app.kokonut.configs.KeyGenerateService;
 import com.app.kokonut.configs.MailSender;
+import com.app.kokonut.email.email.EmailService;
 import com.app.kokonut.history.HistoryService;
 import com.app.kokonut.history.dtos.ActivityCode;
 import com.app.kokonut.payment.dtos.PaymentListDto;
@@ -63,6 +65,8 @@ public class PaymentService {
 	private final HistoryService historyService;
 	private final BootPayService bootPayService;
 	private final KeyGenerateService keyGenerateService;
+	private final EmailService emailService;
+	private final AwsKmsHistoryService awsKmsHistoryService;
 
 	private final AdminRepository adminRepository;
 	private final CompanyRepository companyRepository;
@@ -76,7 +80,8 @@ public class PaymentService {
 
 	@Autowired
 	public PaymentService(HistoryService historyService, MailSender mailSender, GoogleOTP googleOTP, BootPayService bootPayService, KeyGenerateService keyGenerateService,
-						  AdminRepository adminRepository, CompanyRepository companyRepository, PaymentRepository paymentRepository,
+						  EmailService emailService, AwsKmsHistoryService awsKmsHistoryService, AdminRepository adminRepository,
+						  CompanyRepository companyRepository, PaymentRepository paymentRepository,
 						  PaymentErrorRepository paymentErrorRepository, CompanyPaymentRepository companyPaymentRepository, CompanyPaymentInfoRepository companyPaymentInfoRepository,
 						  PaymentPrivacyCountRepository paymentPrivacyCountRepository, DynamicUserRepositoryCustom dynamicUserRepositoryCustom) {
 		this.historyService = historyService;
@@ -84,6 +89,8 @@ public class PaymentService {
 		this.googleOTP = googleOTP;
 		this.bootPayService = bootPayService;
 		this.keyGenerateService = keyGenerateService;
+		this.emailService = emailService;
+		this.awsKmsHistoryService = awsKmsHistoryService;
 		this.adminRepository = adminRepository;
 		this.companyRepository = companyRepository;
 		this.paymentRepository = paymentRepository;
@@ -138,7 +145,9 @@ public class PaymentService {
 		// 결제예약할 리스트 불러오기 (조건 : 현재 날짜로부터 일일 개인정보 수의 값이 하나이상 존재하는지,
 		// 익일 5일 오후 12시 결제예약 걸기
 		LocalDate yesterday = localDate.minusDays(1);  // 어제의 날짜를 구합니다.
+		String yyyymm = yesterday.format(DateTimeFormatter.ofPattern("yyyyMm")); // 어제날짜의 yyyymm을 가져온다.
 //		log.info("yesterday : "+yesterday);
+//		log.info("yyyymm : "+yyyymm);
 
 		LocalDate firstDayOfLastMonth = yesterday.withDayOfMonth(1);  // 어제가 속한 월의 첫 날을 구합니다.
 		LocalDate lastDayOfLastMonth = yesterday.withDayOfMonth(yesterday.lengthOfMonth()); // 어제가 속한 월의 마지막 날을 구합니다.
@@ -166,7 +175,9 @@ public class PaymentService {
 			String cpCode = companyPaymentReservationListDto.getCpCode();
 			String ctName = companyPaymentReservationListDto.getCtName();
 
-			int price = 0;
+			// 원화가치 가져오기
+			int wonPrice = CommonUtil.wonPriceGet();
+			log.info("wonPrice : "+wonPrice);
 
 			// 월 평균 개인정보 수 계산하기
 			PaymentPrivacyCountMonthAverageDto paymentPrivacyCountMonthAverageDto =
@@ -177,25 +188,25 @@ public class PaymentService {
 //			PaymentPayDto paymentPayDto = new PaymentPayDto();
 //			log.info("paymentPayDto : "+paymentPayDto);
 
-			int payAmount = 0;
+			int payAmount;
 
-			// AWS RDS 클라우드 금액 호출(아웃바운드 트래픽)
+			// AWS RDS 클라우드 금액 호출(아웃바운드 트래픽?)
 			int awsRDSCloud = 0;
-			
+			log.info("awsRDSCloud : "+awsRDSCloud);
 
 
 			// AWS S3 금액 호출
 			int awsS3Cloud = 0;
-
+			log.info("awsS3Cloud : "+awsS3Cloud);
 
 
 			// AWS KMS 금액 호출
-			int awsKMSClound = 0;
-
+			double awsKMSClound = awsKmsHistoryService.findByMonthKmsPrice(cpCode, yyyymm); // 당월 호출 금액 구하기
+			log.info("awsKMSClound : "+awsKMSClound);
 
 
 			int payCloudAmount;
-			payCloudAmount = awsRDSCloud + awsS3Cloud + awsKMSClound;
+			payCloudAmount = (int) Math.round((awsRDSCloud + awsS3Cloud + awsKMSClound)* wonPrice);
 
 			// 서비스 금액 호출
 			int payServiceAmount = 0;
@@ -226,11 +237,13 @@ public class PaymentService {
 			}
 
 			// 이메일이용 금액 호출
-			int payEmailAmount = 0;
-
+			int payEmailAmount = emailService.emailSendMonthPrice(cpCode, yyyymm); // 당월 호출 금액 구하기
+			log.info("payEmailAmount : "+payEmailAmount);
 
 			// 결제 할 금액
 			payAmount = payCloudAmount + payServiceAmount + payEmailAmount;
+			payAmount = (payAmount / 10) * 10; // 1원 단위 0으로 수정
+
 			log.info("결제 할 금액 : "+payAmount);
 
 			if(payAmount > 100 && !companyPaymentReservationListDto.getCpiValidStart().isBefore(localDate)) {
@@ -244,10 +257,10 @@ public class PaymentService {
 					// 결제 내역 저장
 					payment.setPayOrderid(orderId);
 					payment.setCpCode(cpCode);
-					payment.setPayAmount(payAmount);
-					payment.setPayCloudAmount(payCloudAmount);
-					payment.setPayServiceAmount(payServiceAmount);
-					payment.setPayEmailAmount(payEmailAmount);
+					payment.setPayAmount(payAmount); // 총 결제금액
+					payment.setPayCloudAmount(payCloudAmount); // AWS 결제금액
+					payment.setPayServiceAmount(payServiceAmount); // 서비스 결제금액
+					payment.setPayEmailAmount(payEmailAmount); // 이메일 결제금액
 					payment.setPayState("2");
 					payment.setPayMethod("0");
 					payment.setPayPrivacyCount(paymentPrivacyCountMonthAverageDto.getMonthAverageCount());

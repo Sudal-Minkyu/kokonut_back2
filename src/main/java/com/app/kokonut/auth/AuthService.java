@@ -12,6 +12,9 @@ import com.app.kokonut.auth.jwt.dto.AuthRequestDto;
 import com.app.kokonut.auth.jwt.dto.AuthResponseDto;
 import com.app.kokonut.auth.jwt.dto.GoogleOtpGenerateDto;
 import com.app.kokonut.auth.jwt.dto.RedisDao;
+import com.app.kokonut.awskmshistory.AwsKmsHistory;
+import com.app.kokonut.awskmshistory.AwsKmsHistoryRepository;
+import com.app.kokonut.awskmshistory.AwsKmsHistoryService;
 import com.app.kokonut.awskmshistory.dto.AwsKmsResultDto;
 import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.ResponseErrorCode;
@@ -59,6 +62,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -83,6 +87,7 @@ public class AuthService {
     private final WhoisUtil whoisUtil;
     private final KeyGenerateService keyGenerateService;
     private final AdminRepository adminRepository;
+    private final AwsKmsHistoryService awsKmsHistoryService;
 
     private final CompanyRepository companyRepository;
     private final CompanyDataKeyRepository companyDataKeyRepository;
@@ -104,7 +109,8 @@ public class AuthService {
     @Autowired
     public AuthService(AdminService adminService, HistoryService historyService,
                        KokonutUserService kokonutUserService, DecrypCountHistoryService decrypCountHistoryService, AdminRepository adminRepository,
-                       AwsKmsUtil awsKmsUtil, WhoisUtil whoisUtil, KeyGenerateService keyGenerateService, CompanyRepository companyRepository,
+                       AwsKmsUtil awsKmsUtil, WhoisUtil whoisUtil, KeyGenerateService keyGenerateService,
+                       AwsKmsHistoryService awsKmsHistoryService, CompanyRepository companyRepository,
                        CompanyDataKeyRepository companyDataKeyRepository, CompanyTableRepository companyTableRepository,
                        CompanyTableColumnInfoRepository companyTableColumnInfoRepository,
                        CompanySettingRepository companySettingRepository, CompanySettingAccessIPRepository companySettingAccessIPRepository,
@@ -119,6 +125,7 @@ public class AuthService {
         this.awsKmsUtil = awsKmsUtil;
         this.whoisUtil = whoisUtil;
         this.keyGenerateService = keyGenerateService;
+        this.awsKmsHistoryService = awsKmsHistoryService;
         this.companyRepository = companyRepository;
         this.companyDataKeyRepository = companyDataKeyRepository;
         this.companyTableRepository = companyTableRepository;
@@ -395,7 +402,7 @@ public class AuthService {
 
     // 코코넛 회원가입 기능
     @Transactional
-    public ResponseEntity<Map<String, Object>> kokonutSignUp(AuthRequestDto.KokonutSignUp kokonutSignUp, HttpServletRequest request) {
+    public ResponseEntity<Map<String, Object>> kokonutSignUp(AuthRequestDto.KokonutSignUp kokonutSignUp) {
         log.info("kokonutSignUp 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -448,7 +455,6 @@ public class AuthService {
             dataKey = awsKmsResultDto.getDataKey();
         } else {
             // 리턴처리를 어떻게해야 할지 내용 정하기 - 2022/12/22 to.woody
-
             log.error("암호화 키 생성 실패");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO036.getCode(), ResponseErrorCode.KO036.getDesc()));
         }
@@ -538,6 +544,9 @@ public class AuthService {
             companySetting.setInsert_email(kokonutSignUp.getKnEmail());
             companySetting.setInsert_date(LocalDateTime.now());
             companySettingRepository.save(companySetting);
+
+            // 호출 카운팅 올리기
+            awsKmsHistoryService.awskmsHistoryCount(cpCode);
         }
 
         log.info("사업자 정보 저장 saveAdmin : "+saveAdmin.getAdminId());
@@ -635,8 +644,11 @@ public class AuthService {
                             if(companySettingCheckDto.getCsOverseasBlockSetting().equals("1")) {
                                 // 로그인사람이 해외인지 체크
                                 log.info("서비스 로그인 위치가 해외인지 체크");
+
                                 // 오픈API 라이브러리를 통해 체킹하기
                                 String countryCode = whoisUtil.whoisAPI(publicIp);
+                                log.info("countryCode : "+countryCode);
+
                                 if(countryCode != null) {
                                     log.info("로그인 국가코드 : "+countryCode);
                                     if(!countryCode.equals("KR")) {
@@ -650,6 +662,7 @@ public class AuthService {
                                         data.put("blockAbroadMsg", "해외로그인이 차단되어 본인인증해주시길 바랍니다.");
                                     }
                                 } else {
+                                    log.error("whois library 호출오류");
                                     historyService.insertHistory(4, adminId, activityCode,
                                             companyCode+" - "+activityCode.getDesc()+" 시도 이력", "whois library 호출오류", publicIp, 0, knEmail);
                                 }
@@ -960,6 +973,7 @@ public class AuthService {
     }
 
     // 관리자 등록하기전 키 검증
+    @Transactional
     public ResponseEntity<Map<String, Object>> createCheck(AdminCreateDto adminCreateDto) throws Exception {
         log.info("createCheck 호출");
 
@@ -975,6 +989,7 @@ public class AuthService {
         String iv = adminCreateDto.getIvKoData();
 
         CompanyEncryptDto companyEncryptDto = companyRepository.findByDataKey(ev);
+        String cpCode = companyEncryptDto.getCpCode();
 
         AwsKmsResultDto awsKmsResultDto = awsKmsUtil.dataKeyDecrypt(companyEncryptDto.getDataKey());
         String email = AESGCMcrypto.decrypt(kv,awsKmsResultDto.getSecretKey(), iv);
@@ -1007,8 +1022,11 @@ public class AuthService {
                     data.put("pagetext", pagetext);
                     data.put("userEmail", email);
 
+                    // AWS 호출 카운팅
+                    awsKmsHistoryService.awskmsHistoryCount(cpCode);
+
                     // 복호화 횟수 저장
-                    decrypCountHistoryService.decrypCountHistorySave(companyEncryptDto.getCpCode(), 1);
+                    decrypCountHistoryService.decrypCountHistorySave(cpCode, 1);
 
                     log.info("검증완료");
                 }
