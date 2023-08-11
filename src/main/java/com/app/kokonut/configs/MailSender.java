@@ -199,7 +199,7 @@ public class MailSender {
 		return IOUtils.toString(is, StandardCharsets.UTF_8);
 	}
 
-	public String getHTML5(HashMap<String, String> callTemplate) throws IOException {
+	public String getHTML5(HashMap<String, String> callTemplate) {
 
 //		String htmlURL = frontServerDomainIp+"/src/template/mail/"+callTemplate.get("template")+".html";
 //		String htmlURL = "https://localhost:8050/src/template/mail/"+callTemplate.get("template")+".html";
@@ -221,43 +221,35 @@ public class MailSender {
 //			InputStream is = conn.getInputStream();
 //			log.info("여기까지왔니? - 3");
 //			String renaderdHtml = IOUtils.toString(is, StandardCharsets.UTF_8);
-			String renaderdHtml = "<div style=\"display:inline-block;overflow:hidden;width:600px;height:auto;position:relative;\">\n" +
-					"\t<div style=\"width:100%;position:relative;margin-top:80px;background: #00CA94; height: 60px; padding: 0;\"></div>\n" +
-					"\t<div style=\"display: block; margin-top: 40px;\">\n" +
-					"\t\t<strong style=\"display:block;text-align:left;margin-bottom:24px;color: #222;font-family: Pretendard, sans-serif;font-size: 23px;font-style: normal;font-weight: 700;line-height: 40px;\">{title}</strong>\n" +
-					"\t\t<dl style=\"display:block;text-align:left;color: #666;font-family: Pretendard, sans-serif;font-size: 18px;font-style: normal;font-weight: 500;line-height: 28px;\">\n" +
-					"\t\t\t{content}\n" +
-					"\t\t</dl>\n" +
-					"\t</div>\n" +
-					"\t<div style=\"width:100%;position:relative;margin-top:80px;padding:20px 24px;background: #F7F8F9;\">\n" +
-					"\t\t<div style=\"word-break: break-word;color: #666;font-family: Pretendard, sans-serif;font-size: 14px;font-style: normal;font-weight: 400;line-height: 24px;\">\n" +
-					"\t\t\t본 메일은 발신전용 입니다.\n" +
-					"\t\t</div>\n" +
-					"\t</div>\n" +
-					"</div>\n";
-			log.info("여기까지왔니? - 4");
-			Set<String>keySet = callTemplate.keySet();
-			log.info("여기까지왔니? - 5");
-			for ( String key : keySet){
-				log.info("key : "+key);
+		String renaderdHtml = "<div style=\"display:inline-block;overflow:hidden;width:600px;height:auto;position:relative;\">\n" +
+				"\t<div style=\"width:100%;position:relative;margin-top:80px;background: #00CA94; height: 60px; padding: 0;\">\n" +
+				"\t\t<a href=\"https://beta.kokonut.me:8888\" class=\"logo\">\n" +
+				"\t\t\t<img src=\"https://beta.kokonut.me:8888/public/assets/images/logo/kokonut_white.png\" alt=\"logo\" style=\"width:30%;\"/>\n" +
+				"\t\t</a>\n" +
+				"\t</div>\n" +
+				"\t<div style=\"display: block; margin-top: 40px;\">\n" +
+				"\t\t<strong style=\"display:block;text-align:left;margin-bottom:24px;color: #222;font-family: Pretendard, sans-serif;font-size: 23px;font-style: normal;font-weight: 700;line-height: 40px;\">\n" +
+				"\t\t\t{title}\n" +
+				"\t\t</strong>\n" +
+				"\t\t<dl style=\"display:block;text-align:left;color: #666;font-family: Pretendard, sans-serif;font-size: 18px;font-style: normal;font-weight: 500;line-height: 28px;\">\n" +
+				"\t\t\t{content}\n" +
+				"\t\t</dl>\n" +
+				"\t</div>\n" +
+				"\t<div style=\"width:100%;position:relative;margin-top:80px;padding:20px 24px;background: #F7F8F9;\">\n" +
+				"\t\t<div style=\"word-break: break-word;color: #666;font-family: Pretendard, sans-serif;font-size: 14px;font-style: normal;font-weight: 400;line-height: 24px;\">\n" +
+				"\t\t\ttest.<br>\n" +
+				"\t\t\tⓒ2023. Everyfeb. All Rights Reserved.<br>\n" +
+				"\t\t\t<img src=\"https://beta.kokonut.me:8888/public/assets/images/logo/kokonut_gray.png\" alt=\"logo\" style=\"width:30%;padding: 20px 0 0 0;\"/>\n" +
+				"\t\t</div>\n" +
+				"\t</div>\n" +
+				"</div>";
 
-				renaderdHtml = renaderdHtml.replace("{"+key+"}", callTemplate.get(key));
-				log.info("여기까지왔니? - 6");
-			}
+		Set<String>keySet = callTemplate.keySet();
+		for ( String key : keySet){
+			renaderdHtml = renaderdHtml.replace("{"+key+"}", callTemplate.get(key));
+		}
 
-			log.info("이메일발송!!!!!!!!!!!");
-
-			log.info("renaderdHtml : "+renaderdHtml);
-
-			return renaderdHtml;
-
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//			log.error("예외 e : "+e.getMessage());
-//		}
-
-//		return "";
-
+		return renaderdHtml;
 	}
 
 }

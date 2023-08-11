@@ -44,7 +44,7 @@ public class TestRestController {
 
     @ApiOperation(value = "메일전송 테스트용")
     @GetMapping(value = "/mailSendTest")
-    public ResponseEntity<Map<String,Object>> mailSendTest() throws IOException {
+    public ResponseEntity<Map<String,Object>> mailSendTest() {
         log.info("mailSendTest 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -56,7 +56,7 @@ public class TestRestController {
 
         // 템플릿 호출을 위한 데이터 세팅
 		HashMap<String, String> callTemplate = new HashMap<>();
-		callTemplate.put("template", "MailTemplate");
+//		callTemplate.put("template", "MailTemplate");
 		callTemplate.put("title", title);
 		callTemplate.put("content", contents);
 
