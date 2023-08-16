@@ -424,29 +424,29 @@ public class AuthService {
         String joinPhone = "";
         String joinName = "";
 
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            log.info("현재 쿠키값들 : " + Arrays.toString(cookies));
-            for (Cookie c : cookies) {
-                if (c.getName().equals("joinPhone")) {
-                    joinPhone = c.getValue();
-                    log.info("본인인증 된 핸드폰번호 : " + joinPhone);
-                } else if(c.getName().equals("joinName")) {
-                    joinName = c.getValue();
-                    log.info("본인인증 된 이름 : " + joinName);
-                }
-            }
-        }
+//        Cookie[] cookies = request.getCookies();
+//        if (cookies != null) {
+//            log.info("현재 쿠키값들 : " + Arrays.toString(cookies));
+//            for (Cookie c : cookies) {
+//                if (c.getName().equals("joinPhone")) {
+//                    joinPhone = c.getValue();
+//                    log.info("본인인증 된 핸드폰번호 : " + joinPhone);
+//                } else if(c.getName().equals("joinName")) {
+//                    joinName = c.getValue();
+//                    log.info("본인인증 된 이름 : " + joinName);
+//                }
+//            }
+//        }
 
-        // 본인인증 체크
-        if (!kokonutSignUp.getKnPhoneNumber().equals(joinPhone) || !kokonutSignUp.getKnName().equals(joinName)) {
-            log.error("본인인증된 명의 및 휴대전화번호가 아닙니다. 본인인증을 다시해주세요.");
-            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO033.getCode(), ResponseErrorCode.KO033.getDesc()));
-        }else {
-            // 인증 쿠키제거
-            Utils.cookieDelete("joinName", response);
-            Utils.cookieDelete("joinPhone", response);
-        }
+//        // 본인인증 체크
+//        if (!kokonutSignUp.getKnPhoneNumber().equals(joinPhone) || !kokonutSignUp.getKnName().equals(joinName)) {
+//            log.error("본인인증된 명의 및 휴대전화번호가 아닙니다. 본인인증을 다시해주세요.");
+//            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO033.getCode(), ResponseErrorCode.KO033.getDesc()));
+//        }else {
+//            // 인증 쿠키제거
+//            Utils.cookieDelete("joinName", response);
+//            Utils.cookieDelete("joinPhone", response);
+//        }
 
         log.info("회원가입 시작");
 
@@ -1069,29 +1069,29 @@ public class AuthService {
         String joinPhone = "";
         String joinName = "";
 
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            log.info("현재 쿠키값들 : " + Arrays.toString(cookies));
-            for (Cookie c : cookies) {
-                if (c.getName().equals("joinPhone")) {
-                    joinPhone = c.getValue();
-                    log.info("본인인증 된 핸드폰번호 : " + joinPhone);
-                } else if(c.getName().equals("joinName")) {
-                    joinName = c.getValue();
-                    log.info("본인인증 된 이름 : " + joinName);
-                }
-            }
-        }
+//        Cookie[] cookies = request.getCookies();
+//        if (cookies != null) {
+//            log.info("현재 쿠키값들 : " + Arrays.toString(cookies));
+//            for (Cookie c : cookies) {
+//                if (c.getName().equals("joinPhone")) {
+//                    joinPhone = c.getValue();
+//                    log.info("본인인증 된 핸드폰번호 : " + joinPhone);
+//                } else if(c.getName().equals("joinName")) {
+//                    joinName = c.getValue();
+//                    log.info("본인인증 된 이름 : " + joinName);
+//                }
+//            }
+//        }
 
-        // 본인인증 체크
-        if (!kokonutCreateUser.getKnPhoneNumber().equals(joinPhone) || !kokonutCreateUser.getKnName().equals(joinName)) {
-            log.error("본인인증된 명의 및 휴대전화번호가 아닙니다. 본인인증을 다시해주세요.");
-            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO033.getCode(), ResponseErrorCode.KO033.getDesc()));
-        }else {
-            // 인증 쿠키제거
-            Utils.cookieDelete("joinName", response);
-            Utils.cookieDelete("joinPhone", response);
-        }
+//        // 본인인증 체크
+//        if (!kokonutCreateUser.getKnPhoneNumber().equals(joinPhone) || !kokonutCreateUser.getKnName().equals(joinName)) {
+//            log.error("본인인증된 명의 및 휴대전화번호가 아닙니다. 본인인증을 다시해주세요.");
+//            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO033.getCode(), ResponseErrorCode.KO033.getDesc()));
+//        }else {
+//            // 인증 쿠키제거
+//            Utils.cookieDelete("joinName", response);
+//            Utils.cookieDelete("joinPhone", response);
+//        }
 
         Optional<Admin> optionalAdmin = adminRepository.findByKnEmail(kokonutCreateUser.getUserEmail());
         if (optionalAdmin.isEmpty()) {

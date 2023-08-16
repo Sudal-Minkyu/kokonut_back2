@@ -168,8 +168,8 @@ public class NiceIdService {
 
 					data.put("joinName", knName);
 					data.put("joinPhone", knPhoneNumber);
-					Utils.cookieSave("joinName", knName, 600, response); // 쿠키 제한시간 10분
-					Utils.cookieSave("joinPhone", knPhoneNumber, 600, response); // 쿠키 제한시간 10분
+//					Utils.cookieSave("joinName", knName, 600, response); // 쿠키 제한시간 10분
+//					Utils.cookieSave("joinPhone", knPhoneNumber, 600, response); // 쿠키 제한시간 10분
 				}
 			} else if(state.equals("2") || state.equals("3") || state.equals("4") || state.equals("7")) {
 				// 이름과 번호를 통해 찾기?
