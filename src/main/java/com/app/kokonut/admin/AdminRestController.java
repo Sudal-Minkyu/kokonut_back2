@@ -51,7 +51,7 @@ public class AdminRestController {
             @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
     })
     public ResponseEntity<Map<String,Object>> phoneChange(@RequestParam(value="knName", defaultValue = "") String knName,
-                                                          @RequestParam(value="knPhoneNumber", defaultValue = "") String knPhoneNumber) throws IOException {
+                                                          @RequestParam(value="knPhoneNumber", defaultValue = "") String knPhoneNumber) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return adminService.phoneChange(knName, knPhoneNumber, jwtFilterDto);
     }
@@ -126,7 +126,6 @@ public class AdminRestController {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return adminService.passwordChangeMail(userEmail, jwtFilterDto);
     }
-
 
     @GetMapping("/authorityCheck")
     @ApiOperation(value = "JWT토큰 호출 기본정보 호출" , notes = "1. 로그인한 유저의 기본정보를 가져오는 API")

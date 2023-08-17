@@ -7,6 +7,7 @@ import com.app.kokonut.auth.jwt.dto.RedisDao;
 import com.app.kokonut.awskmshistory.dto.AwsKmsResultDto;
 import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.ResponseErrorCode;
+import com.app.kokonut.common.component.ReqUtils;
 import com.app.kokonut.common.realcomponent.AESGCMcrypto;
 import com.app.kokonut.common.realcomponent.CommonUtil;
 import com.app.kokonut.common.realcomponent.Utils;
@@ -27,6 +28,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -99,7 +102,7 @@ public class AdminService {
     // 휴대전화번호 변경
     @Transactional
     public ResponseEntity<Map<String, Object>> phoneChange(String knName, String knPhoneNumber, JwtFilterDto jwtFilterDto) {
-        log.info("phoneChange 호출");
+        log.info("phoneChange 호출!");
 
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
@@ -466,17 +469,17 @@ public class AdminService {
                     "</a>";
             log.info("toEmail" + userEmail + ", toName" + "코코넛");
 
-//            title = ReqUtils.filter("관리자 등록 재인증 알림");
-//            contents = ReqUtils.unFilter(contents);
-//
-//            // 템플릿 호출을 위한 데이터 세팅
-//            HashMap<String, String> callTemplate = new HashMap<>();
-//            callTemplate.put("template", "MailTemplate");
-//            callTemplate.put("title", title);
-//            callTemplate.put("content", contents);
-//
-//            // 템플릿 TODO 템플릿 디자인 추가되면 수정
-//            contents = mailSender.getHTML5(callTemplate);
+            title = ReqUtils.filter("관리자 등록 재인증 알림");
+            contents = ReqUtils.unFilter(contents);
+
+            // 템플릿 호출을 위한 데이터 세팅
+            HashMap<String, String> callTemplate = new HashMap<>();
+            callTemplate.put("template", "MailTemplate");
+            callTemplate.put("title", title);
+            callTemplate.put("content", contents);
+
+            // 템플릿 TODO 템플릿 디자인 추가되면 수정
+            contents = mailSender.getHTML6(callTemplate);
 
             String reciverName = "kokonut";
             String mailSenderResult = mailSender.sendKokonutMail(userEmail, reciverName, title, contents);
@@ -574,17 +577,16 @@ public class AdminService {
                     "</a>";
             log.info("toEmail" + userEmail + ", toName" + "코코넛");
 
-//            title = ReqUtils.filter("관리자 등록 재인증 알림");
-//            contents = ReqUtils.unFilter(contents);
-//
-//            // 템플릿 호출을 위한 데이터 세팅
-//            HashMap<String, String> callTemplate = new HashMap<>();
-//            callTemplate.put("template", "MailTemplate");
-//            callTemplate.put("title", title);
-//            callTemplate.put("content", contents);
-//
-//            // 템플릿 TODO 템플릿 디자인 추가되면 수정
-//            contents = mailSender.getHTML5(callTemplate);
+            title = ReqUtils.filter("관리자 등록 재인증 알림");
+            contents = ReqUtils.unFilter(contents);
+
+            // 템플릿 호출을 위한 데이터 세팅
+            HashMap<String, String> callTemplate = new HashMap<>();
+            callTemplate.put("title", title);
+            callTemplate.put("content", contents);
+
+            // 템플릿 TODO 템플릿 디자인 추가되면 수정
+            contents = mailSender.getHTML6(callTemplate);
 
             String reciverName = "kokonut";
 
@@ -670,8 +672,8 @@ public class AdminService {
             String ivKo = Base64.getEncoder().encodeToString(ivBytes);
 
             // 관리자 등록메일 보내기
-            String title = "비밀번호 변경 알림";
             // TODO : 답변 내용을 HTML 태그를 붙여서 메일로 전송해준다. 화면단과 개발할 때 추가 개발해야함.
+            String title = "비밀번호 변경 알림";
             String contents = "비밀번호 변경 요청 되었습니다. <br>해당 링크를 통해 변경을 이어서 해주시길 바랍니다.<br>링크 : "+
                     "<a href=\""+frontServerDomainIp+"/#/create?" +
                     "send=2&" +
@@ -683,17 +685,16 @@ public class AdminService {
 
             log.info("toEmail" + userEmail + ", toName" + "코코넛");
 
-//            title = ReqUtils.filter("관리자 등록 재인증 알림");
-//            contents = ReqUtils.unFilter(contents);
-//
+            contents = ReqUtils.unFilter(contents);
+
 //            // 템플릿 호출을 위한 데이터 세팅
-//            HashMap<String, String> callTemplate = new HashMap<>();
+            HashMap<String, String> callTemplate = new HashMap<>();
 //            callTemplate.put("template", "MailTemplate");
-//            callTemplate.put("title", title);
-//            callTemplate.put("content", contents);
-//
-//            // 템플릿 TODO 템플릿 디자인 추가되면 수정
-//            contents = mailSender.getHTML5(callTemplate);
+            callTemplate.put("title", title);
+            callTemplate.put("content", contents);
+
+            // 템플릿 TODO 템플릿 디자인 추가되면 수정
+            contents = mailSender.getHTML6(callTemplate);
 
             String reciverName = "kokonut";
 

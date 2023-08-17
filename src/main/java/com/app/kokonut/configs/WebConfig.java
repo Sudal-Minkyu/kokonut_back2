@@ -83,7 +83,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .exposedHeaders("Authorization")
                 .allowedMethods(HttpMethod.GET.name(), HttpMethod.POST.name())
                 .allowCredentials(true)
-                .maxAge(900); // 타임아웃 15분으로 설정
+                .maxAge(300); // 타임아웃 5분으로 설정
     }
 
     @Bean

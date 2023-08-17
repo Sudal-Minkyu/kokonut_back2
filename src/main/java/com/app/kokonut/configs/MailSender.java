@@ -35,7 +35,7 @@ public class MailSender {
 	public String frontServerDomainIp;
 
 	@Value("${kokonut.mail.host}")
-	public String mailHost; // 보내는 사람의 이메일
+	public String mailHost; // 보내는 사람의 이메일(contact@kokonut.me)
 
 	@Value("${kokonut.otp.hostUrl}")
 	public String myHost; // otp_url
@@ -199,28 +199,41 @@ public class MailSender {
 		return IOUtils.toString(is, StandardCharsets.UTF_8);
 	}
 
-	public String getHTML5(HashMap<String, String> callTemplate) {
+	public String getHTML5(HashMap<String, String> callTemplate) throws IOException {
 
-//		String htmlURL = frontServerDomainIp+"/src/template/mail/"+callTemplate.get("template")+".html";
-//		String htmlURL = "https://localhost:8050/src/template/mail/"+callTemplate.get("template")+".html";
-//		log.info("htmlURL : "+htmlURL);
+		String htmlURL = frontServerDomainIp+"/src/template/mail/"+callTemplate.get("template")+".html";
+		log.info("htmlURL : "+htmlURL);
 
-//		URL url = new URL(htmlURL);
-//		log.info("여기까지왔니? - 1");
-//		log.info("url : "+url);
+		URL url = new URL(htmlURL);
+		log.info("여기까지왔니? - 1");
+		log.info("url : "+url);
 
-//		URLConnection conn = url.openConnection();
-//		conn.setConnectTimeout(5000);  // 5초 내에 연결이 되지 않으면 예외 발생
-//		conn.setReadTimeout(10000);   // 데이터를 10초 내에 읽지 못하면 예외 발생
-//
-//		log.info("여기까지왔니? - 2");
-//		log.info("conn : "+conn);
-//		log.info("conn.getInputStream() : "+conn.getInputStream());
+		URLConnection conn = url.openConnection();
+		conn.setConnectTimeout(5000);  // 5초 내에 연결이 되지 않으면 예외 발생
+		conn.setReadTimeout(10000);   // 데이터를 10초 내에 읽지 못하면 예외 발생
 
-//		try {
-//			InputStream is = conn.getInputStream();
-//			log.info("여기까지왔니? - 3");
-//			String renaderdHtml = IOUtils.toString(is, StandardCharsets.UTF_8);
+		log.info("여기까지왔니? - 2");
+		log.info("conn : "+conn);
+		log.info("conn.getInputStream() : "+conn.getInputStream());
+
+		try {
+			InputStream is = conn.getInputStream();
+			log.info("여기까지왔니? - 3");
+			String renaderdHtml = IOUtils.toString(is, StandardCharsets.UTF_8);
+
+			Set<String> keySet = callTemplate.keySet();
+			for (String key : keySet) {
+				renaderdHtml = renaderdHtml.replace("{" + key + "}", callTemplate.get(key));
+			}
+
+			return renaderdHtml;
+		} catch (Exception e) {
+			return "";
+		}
+	}
+
+	public String getHTML6(HashMap<String, String> callTemplate) {
+
 		String renaderdHtml = "<div style=\"display:inline-block;overflow:hidden;width:600px;height:auto;position:relative;\">\n" +
 				"\t<div style=\"width:100%;position:relative;margin-top:80px;background: #00CA94; height: 60px; padding: 0;\">\n" +
 				"\t\t<a href=\"https://beta.kokonut.me:8888\" class=\"logo\">\n" +
@@ -228,16 +241,16 @@ public class MailSender {
 				"\t\t</a>\n" +
 				"\t</div>\n" +
 				"\t<div style=\"display: block; margin-top: 40px;\">\n" +
-				"\t\t<strong style=\"display:block;text-align:left;margin-bottom:24px;color: #222;font-family: Pretendard, sans-serif;font-size: 23px;font-style: normal;font-weight: 700;line-height: 40px;\">\n" +
+				"\t\t<strong style=\"display:block;padding: 0 0 0 10px;text-align:left;margin-bottom:24px;color: #222;font-family: Pretendard, sans-serif;font-size: 23px;font-style: normal;font-weight: 700;line-height: 40px;\">\n" +
 				"\t\t\t{title}\n" +
 				"\t\t</strong>\n" +
-				"\t\t<dl style=\"display:block;text-align:left;color: #666;font-family: Pretendard, sans-serif;font-size: 18px;font-style: normal;font-weight: 500;line-height: 28px;\">\n" +
+				"\t\t<span style=\"display:block;padding: 0 0 0 10px;text-align:left;color: #666;font-family: Pretendard, sans-serif;font-size: 18px;font-style: normal;font-weight: 500;line-height: 28px;\">\n" +
 				"\t\t\t{content}\n" +
-				"\t\t</dl>\n" +
+				"\t\t</span>\n" +
 				"\t</div>\n" +
-				"\t<div style=\"width:100%;position:relative;margin-top:80px;padding:20px 24px;background: #F7F8F9;\">\n" +
+				"\t<div style=\"width:100%;position:relative;margin-top:80px;margin-bottom:80px;padding:20px 24px;background: #F7F8F9;\">\n" +
 				"\t\t<div style=\"word-break: break-word;color: #666;font-family: Pretendard, sans-serif;font-size: 14px;font-style: normal;font-weight: 400;line-height: 24px;\">\n" +
-				"\t\t\ttest.<br>\n" +
+				"\t\t\t본 메일은 발신전용 입니다.<br>\n" +
 				"\t\t\tⓒ2023. Everyfeb. All Rights Reserved.<br>\n" +
 				"\t\t\t<img src=\"https://beta.kokonut.me:8888/public/assets/images/logo/kokonut_gray.png\" alt=\"logo\" style=\"width:30%;padding: 20px 0 0 0;\"/>\n" +
 				"\t\t</div>\n" +
@@ -251,5 +264,6 @@ public class MailSender {
 
 		return renaderdHtml;
 	}
+
 
 }

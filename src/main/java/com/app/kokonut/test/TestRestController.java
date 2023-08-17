@@ -63,7 +63,7 @@ public class TestRestController {
 		callTemplate.put("content", contents);
 
 //		// 템플릿 TODO 템플릿 디자인 추가되면 수정
-		contents = mailSender.getHTML5(callTemplate);
+		contents = mailSender.getHTML6(callTemplate);
         String reciverName = "kokonut";
 
         String mailSenderResult = mailSender.sendKokonutMail("woody@kokonut.me", reciverName, title, contents);

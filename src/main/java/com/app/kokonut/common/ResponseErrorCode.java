@@ -153,6 +153,8 @@ public enum ResponseErrorCode {
     KO115("KO115", "활동이력 데이터가 존재하지 않습니다."),
     KO116("KO116", "개인정보 데이터가 존재하지 않습니다."),
 
+    KO117("KO117", "이미 인증된 관리자 입니다."),
+
     ERROR_CODE_API("ERROR_CODE_API", "API 내용"),
     ERROR_CODE_00("ERROR_CODE_00", "파라미터 데이터가 없습니다."),
     ERROR_CODE_01("ERROR_CODE_01", "지정되지 않은 값입니다. 고유코드를 확인해주시고 메뉴얼대로 호출해주시길 바랍니다."),

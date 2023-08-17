@@ -57,6 +57,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.time.Duration;
@@ -213,12 +214,12 @@ public class AuthService {
 
         // 템플릿 호출을 위한 데이터 세팅
         HashMap<String, String> callTemplate = new HashMap<>();
-        callTemplate.put("template", "MailTemplate");
+//        callTemplate.put("template", "MailTemplate");
         callTemplate.put("title", "인증번호 알림");
         callTemplate.put("content", contents);
 
         // 템플릿 TODO 템플릿 디자인 추가되면 수정
-//        contents = mailSender.getHTML5(callTemplate);
+        contents = mailSender.getHTML6(callTemplate);
         String reciverEmail = knEmail;
         String reciverName = "kokonut";
 
@@ -335,13 +336,13 @@ public class AuthService {
         String contents = ReqUtils.unFilter("임시비밀번호 : "+tempPassword);
 
 //        // 템플릿 호출을 위한 데이터 세팅
-//        HashMap<String, String> callTemplate = new HashMap<>();
+        HashMap<String, String> callTemplate = new HashMap<>();
 //        callTemplate.put("template", "KokonutMailTemplate");
-//        callTemplate.put("title", "인증번호 알림");
-//        callTemplate.put("content", contents);
-//
-//        // 템플릿 TODO 템플릿 디자인 추가되면 수정
-//        contents = mailSender.getHTML5(callTemplate);
+        callTemplate.put("title", "인증번호 알림");
+        callTemplate.put("content", contents);
+
+        // 템플릿 TODO 템플릿 디자인 추가되면 수정
+        contents = mailSender.getHTML6(callTemplate);
         String reciverName = "kokonut";
 
         String mailSenderResult = mailSender.sendKokonutMail(knEmail, reciverName, title, contents);
@@ -364,35 +365,55 @@ public class AuthService {
 
     // 비밀번호 찾기(사용할 비밀번호로 변경하는) 기능
     @Transactional
-    public ResponseEntity<Map<String, Object>> passwordUpdate(AdminPasswordChangeDto adminPasswordChangeDto) {
-        log.info("passwordUpdate 호출");
+    public ResponseEntity<Map<String, Object>> passwordUpdate(AdminPasswordChangeDto adminPasswordChangeDto, HttpServletRequest request, HttpServletResponse response) {
+        log.info("passwordUpdate 호출!");
 
 //        log.info("adminPasswordChangeDto : "+adminPasswordChangeDto);
 
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
 
-        Admin admin = adminRepository.findByKnEmail(adminPasswordChangeDto.getKnEmail())
-                .orElseThrow(() -> new UsernameNotFoundException("해당하는 유저를 찾을 수 없습니다. : " + adminPasswordChangeDto.getKnEmail()));
+        // 본인인증 거치는 함수호출
+        AuthPhoneCheckDto authPhoneCheckDto = Utils.authPhoneCheck(request);
 
-        // 임시비밀번호 일치한지 체크
-        if (!passwordEncoder.matches(adminPasswordChangeDto.getTempPwd(), admin.getKnPassword())){
-            log.error("보내드린 임시 비밀번호가 일치하지 않습니다.");
-            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO078.getCode(), ResponseErrorCode.KO078.getDesc()));
+        log.info("비밀번호 찾기 시작");
+        Optional<Admin> optionalAdmin = adminRepository.findByKnEmail(adminPasswordChangeDto.getKnEmail());
+        if (optionalAdmin.isEmpty()) {
+            log.error("존재하지 않은 유저");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(),"해당 유저가 "+ResponseErrorCode.KO004.getDesc()));
+        } else {
+            String knName = optionalAdmin.get().getKnName();
+            String knPhoneNumber = optionalAdmin.get().getKnPhoneNumber();
+
+            // 본인인증 체크
+            if (!knPhoneNumber.equals(authPhoneCheckDto.getJoinPhone()) || !knName.equals(authPhoneCheckDto.getJoinName())) {
+                log.error("본인인증된 명의 및 휴대전화번호가 아닙니다. 본인인증을 다시해주세요.");
+                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO033.getCode(), ResponseErrorCode.KO033.getDesc()));
+            }else {
+                // 인증 쿠키제거
+                Utils.cookieDelete("joinName", response);
+                Utils.cookieDelete("joinPhone", response);
+            }
+
+            // 임시비밀번호 일치한지 체크
+            if (!passwordEncoder.matches(adminPasswordChangeDto.getTempPwd(), optionalAdmin.get().getKnPassword())){
+                log.error("보내드린 임시 비밀번호가 일치하지 않습니다.");
+                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO078.getCode(), ResponseErrorCode.KO078.getDesc()));
+            }
+
+            // 비밀번호 일치한지 체크
+            if (!adminPasswordChangeDto.getKnPassword().equals(adminPasswordChangeDto.getKnPasswordConfirm())) {
+                log.error("입력하신 비밀번호가 서로 일치하지 않습니다.");
+                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO013.getCode(), ResponseErrorCode.KO013.getDesc()));
+            }
+
+            optionalAdmin.get().setKnPassword(passwordEncoder.encode(adminPasswordChangeDto.getKnPassword()));
+            optionalAdmin.get().setKnPwdChangeDate(LocalDateTime.now());
+            optionalAdmin.get().setKnPwdErrorCount(0);
+            optionalAdmin.get().setModify_email(adminPasswordChangeDto.getKnEmail());
+            optionalAdmin.get().setModify_date(LocalDateTime.now());
+            adminRepository.save(optionalAdmin.get());
         }
-
-        // 비밀번호 일치한지 체크
-        if (!adminPasswordChangeDto.getKnPassword().equals(adminPasswordChangeDto.getKnPasswordConfirm())) {
-            log.error("입력하신 비밀번호가 서로 일치하지 않습니다.");
-            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO013.getCode(), ResponseErrorCode.KO013.getDesc()));
-        }
-
-        admin.setKnPassword(passwordEncoder.encode(adminPasswordChangeDto.getKnPassword()));
-        admin.setKnPwdChangeDate(LocalDateTime.now());
-        admin.setKnPwdErrorCount(0);
-        admin.setModify_email(adminPasswordChangeDto.getKnEmail());
-        admin.setModify_date(LocalDateTime.now());
-        adminRepository.save(admin);
 
         return ResponseEntity.ok(res.success(data));
     }
@@ -400,10 +421,13 @@ public class AuthService {
     // 코코넛 회원가입 기능
     @Transactional
     public ResponseEntity<Map<String, Object>> kokonutSignUp(AuthRequestDto.KokonutSignUp kokonutSignUp, HttpServletRequest request, HttpServletResponse response) {
-        log.info("kokonutSignUp 호출");
+        log.info("kokonutSignUp 호출!");
 
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
+
+        // 본인인증 거치는 함수호출
+        AuthPhoneCheckDto authPhoneCheckDto = Utils.authPhoneCheck(request);
 
         if (adminRepository.existsByKnEmail(kokonutSignUp.getKnEmail())) {
             log.error("이미 회원가입된 이메일입니다.");
@@ -421,32 +445,15 @@ public class AuthService {
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO013.getCode(), ResponseErrorCode.KO013.getDesc()));
         }
 
-        String joinPhone = "";
-        String joinName = "";
-
-//        Cookie[] cookies = request.getCookies();
-//        if (cookies != null) {
-//            log.info("현재 쿠키값들 : " + Arrays.toString(cookies));
-//            for (Cookie c : cookies) {
-//                if (c.getName().equals("joinPhone")) {
-//                    joinPhone = c.getValue();
-//                    log.info("본인인증 된 핸드폰번호 : " + joinPhone);
-//                } else if(c.getName().equals("joinName")) {
-//                    joinName = c.getValue();
-//                    log.info("본인인증 된 이름 : " + joinName);
-//                }
-//            }
-//        }
-
-//        // 본인인증 체크
-//        if (!kokonutSignUp.getKnPhoneNumber().equals(joinPhone) || !kokonutSignUp.getKnName().equals(joinName)) {
-//            log.error("본인인증된 명의 및 휴대전화번호가 아닙니다. 본인인증을 다시해주세요.");
-//            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO033.getCode(), ResponseErrorCode.KO033.getDesc()));
-//        }else {
-//            // 인증 쿠키제거
-//            Utils.cookieDelete("joinName", response);
-//            Utils.cookieDelete("joinPhone", response);
-//        }
+        // 본인인증 체크
+        if (!kokonutSignUp.getKnPhoneNumber().equals(authPhoneCheckDto.getJoinPhone()) || !kokonutSignUp.getKnName().equals(authPhoneCheckDto.getJoinName())) {
+            log.error("본인인증된 명의 및 휴대전화번호가 아닙니다. 본인인증을 다시해주세요.");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO033.getCode(), ResponseErrorCode.KO033.getDesc()));
+        }else {
+            // 인증 쿠키제거
+            Utils.cookieDelete("joinName", response);
+            Utils.cookieDelete("joinPhone", response);
+        }
 
         log.info("회원가입 시작");
 
@@ -607,7 +614,7 @@ public class AuthService {
                     // Login ID/PW 를 기반으로 Authentication 객체 생성 -> 아아디 / 비번 검증
                     // 이때 authentication은 인증 여부를 확인하는 authenticated 값이 false
                     UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                            login.getKnEmail(), decryptData(login.getKnPassword(), request.getHeader("keyBufferSto"), request.getHeader("ivSto")));
+                            login.getKnEmail(), Utils.decryptData(login.getKnPassword(), request.getHeader("keyBufferSto"), request.getHeader("ivSto")));
 
 
                     if(optionalAdmin.get().getKnOtpKey() == null){ // 시스템관리자 일 경우 제외
@@ -746,23 +753,6 @@ public class AuthService {
                     return ResponseEntity.ok(res.fail(ResponseErrorCode.KO016.getCode(),ResponseErrorCode.KO016.getDesc()));
                 }
             }
-        }
-    }
-
-    // 로그인 비밀번호 -> 복호화 체크 함수
-    public static String decryptData(String encryptedData, String keyBuffer, String iv) {
-        try {
-            byte[] decodedKey = Base64.getDecoder().decode(keyBuffer);
-            SecretKey secretKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-
-            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-            GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(128, Base64.getDecoder().decode(iv));
-            cipher.init(Cipher.DECRYPT_MODE, secretKey, gcmParameterSpec);
-
-            byte[] decryptedTextBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedData));
-            return new String(decryptedTextBytes, StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -936,7 +926,7 @@ public class AuthService {
 
     // 구글 OTPKey 등록(3번)
     @Transactional
-    public ResponseEntity<Map<String, Object>> saveOTP(AdminGoogleOTPDto.GoogleOtpSave googleOtpSave) {
+    public ResponseEntity<Map<String, Object>> saveOTP(AdminGoogleOTPDto.GoogleOtpSave googleOtpSave, HttpServletRequest request, HttpServletResponse response) {
         log.info("saveOTP 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -949,6 +939,22 @@ public class AuthService {
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(),"해당 유저가 "+ResponseErrorCode.KO004.getDesc()));
         }
         else {
+
+            // 본인인증 거치는 함수호출
+            AuthPhoneCheckDto authPhoneCheckDto = Utils.authPhoneCheck(request);
+
+            String knName = optionalAdmin.get().getKnName();
+            String knPhoneNumber = optionalAdmin.get().getKnPhoneNumber();
+
+            // 본인인증 체크
+            if (!knPhoneNumber.equals(authPhoneCheckDto.getJoinPhone()) || !knName.equals(authPhoneCheckDto.getJoinName())) {
+                log.error("본인인증된 명의 및 휴대전화번호가 아닙니다. 본인인증을 다시해주세요.");
+                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO033.getCode(), ResponseErrorCode.KO033.getDesc()));
+            }else {
+                // 인증 쿠키제거
+                Utils.cookieDelete("joinName", response);
+                Utils.cookieDelete("joinPhone", response);
+            }
 
             log.info("OTP Key 등록 할 이메일 : " + optionalAdmin.get().getKnEmail());
 
@@ -1057,6 +1063,18 @@ public class AuthService {
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
 
+        // 본인인증 거치는 함수호출
+        AuthPhoneCheckDto authPhoneCheckDto = Utils.authPhoneCheck(request);
+        // 본인인증 체크
+        if (!kokonutCreateUser.getKnPhoneNumber().equals(authPhoneCheckDto.getJoinPhone()) || !kokonutCreateUser.getKnName().equals(authPhoneCheckDto.getJoinName())) {
+            log.error("본인인증된 명의 및 휴대전화번호가 아닙니다. 본인인증을 다시해주세요.");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO033.getCode(), ResponseErrorCode.KO033.getDesc()));
+        }else {
+            // 인증 쿠키제거
+            Utils.cookieDelete("joinName", response);
+            Utils.cookieDelete("joinPhone", response);
+        }
+
         // 비밀번호 일치한지 체크
         if (!kokonutCreateUser.getKnPassword().equals(kokonutCreateUser.getKnPasswordConfirm())) {
             log.error("입력하신 비밀번호가 서로 일치하지 않습니다.");
@@ -1065,34 +1083,6 @@ public class AuthService {
 
         log.info("관리자등록 시작");
         log.info("받아온 값 kokonutCreateUser : " + kokonutCreateUser);
-
-        String joinPhone = "";
-        String joinName = "";
-
-//        Cookie[] cookies = request.getCookies();
-//        if (cookies != null) {
-//            log.info("현재 쿠키값들 : " + Arrays.toString(cookies));
-//            for (Cookie c : cookies) {
-//                if (c.getName().equals("joinPhone")) {
-//                    joinPhone = c.getValue();
-//                    log.info("본인인증 된 핸드폰번호 : " + joinPhone);
-//                } else if(c.getName().equals("joinName")) {
-//                    joinName = c.getValue();
-//                    log.info("본인인증 된 이름 : " + joinName);
-//                }
-//            }
-//        }
-
-//        // 본인인증 체크
-//        if (!kokonutCreateUser.getKnPhoneNumber().equals(joinPhone) || !kokonutCreateUser.getKnName().equals(joinName)) {
-//            log.error("본인인증된 명의 및 휴대전화번호가 아닙니다. 본인인증을 다시해주세요.");
-//            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO033.getCode(), ResponseErrorCode.KO033.getDesc()));
-//        }else {
-//            // 인증 쿠키제거
-//            Utils.cookieDelete("joinName", response);
-//            Utils.cookieDelete("joinPhone", response);
-//        }
-
         Optional<Admin> optionalAdmin = adminRepository.findByKnEmail(kokonutCreateUser.getUserEmail());
         if (optionalAdmin.isEmpty()) {
             log.error("존재하지 않은 유저");
@@ -1100,18 +1090,27 @@ public class AuthService {
         } else {
             log.info("관리자 최종등록 완료");
 
-            optionalAdmin.get().setKnName(kokonutCreateUser.getKnName());
-            optionalAdmin.get().setKnPhoneNumber(kokonutCreateUser.getKnPhoneNumber());
-            optionalAdmin.get().setKnPassword(passwordEncoder.encode(kokonutCreateUser.getKnPassword()));
-            optionalAdmin.get().setKnIsEmailAuth("Y");
-            optionalAdmin.get().setKnEmailAuthCode(null);
-            optionalAdmin.get().setModify_email(kokonutCreateUser.getUserEmail());
-            optionalAdmin.get().setModify_date(LocalDateTime.now());
+            String knName = optionalAdmin.get().getKnName();
+            String knLoginAuth = optionalAdmin.get().getKnIsLoginAuth();
 
-            adminRepository.save(optionalAdmin.get());
+            if(knLoginAuth.equals("N") && knName.equals("미가입")) {
+                log.error("이미 인증된 관리자 입니다.");
+                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO117.getCode(), ResponseErrorCode.KO117.getDesc()));
+            }
+            else {
+                optionalAdmin.get().setKnName(kokonutCreateUser.getKnName());
+                optionalAdmin.get().setKnPhoneNumber(kokonutCreateUser.getKnPhoneNumber());
+                optionalAdmin.get().setKnPassword(passwordEncoder.encode(kokonutCreateUser.getKnPassword()));
+                optionalAdmin.get().setKnIsEmailAuth("Y");
+                optionalAdmin.get().setKnEmailAuthCode(null);
+                optionalAdmin.get().setModify_email(kokonutCreateUser.getUserEmail());
+                optionalAdmin.get().setModify_date(LocalDateTime.now());
 
-            // 레디스 데이터 제거
-            redisDao.deleteValues("EV: " + kokonutCreateUser.getUserEmail());
+                adminRepository.save(optionalAdmin.get());
+
+                // 레디스 데이터 제거
+                redisDao.deleteValues("EV: " + kokonutCreateUser.getUserEmail());
+            }
         }
 
         return ResponseEntity.ok(res.success(data));
@@ -1119,11 +1118,14 @@ public class AuthService {
 
     // 관리자 비밀번호 변경
     @Transactional
-    public ResponseEntity<Map<String, Object>> passwordChange(AdminPwdChagneMailDto adminPwdChagneMailDto) {
-        log.info("passwordChange 호출");
+    public ResponseEntity<Map<String, Object>> passwordChange(AdminPwdChagneMailDto adminPwdChagneMailDto, HttpServletRequest request, HttpServletResponse response) {
+        log.info("passwordChange 호출!");
 
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
+
+        // 본인인증 거치는 함수호출
+        AuthPhoneCheckDto authPhoneCheckDto = Utils.authPhoneCheck(request);
 
         // 비밀번호 일치한지 체크
         if (!adminPwdChagneMailDto.getKnPassword().equals(adminPwdChagneMailDto.getKnPasswordConfirm())) {
@@ -1137,6 +1139,20 @@ public class AuthService {
             log.error("존재하지 않은 유저");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(),"해당 유저가 "+ResponseErrorCode.KO004.getDesc()));
         } else {
+
+            String knName = optionalAdmin.get().getKnName();
+            String knPhoneNumber = optionalAdmin.get().getKnPhoneNumber();
+
+            // 본인인증 체크
+            if (!knPhoneNumber.equals(authPhoneCheckDto.getJoinPhone()) || !knName.equals(authPhoneCheckDto.getJoinName())) {
+                log.error("본인인증된 명의 및 휴대전화번호가 아닙니다. 본인인증을 다시해주세요.");
+                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO033.getCode(), ResponseErrorCode.KO033.getDesc()));
+            }else {
+                // 인증 쿠키제거
+                Utils.cookieDelete("joinName", response);
+                Utils.cookieDelete("joinPhone", response);
+            }
+
             log.info("관리자 비밀번호변경 완료");
 
             optionalAdmin.get().setKnPassword(passwordEncoder.encode(adminPwdChagneMailDto.getKnPassword()));

@@ -1,16 +1,21 @@
 package com.app.kokonut.common.realcomponent;
 
+import com.app.kokonut.auth.dtos.AuthPhoneCheckDto;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -438,6 +443,47 @@ public class Utils {
 			name = originalName + count;
 		}
 		return name;
+	}
+
+	// 휴대폰인증된 쿠키의 이름과 번호 반환함수
+	public static AuthPhoneCheckDto authPhoneCheck(HttpServletRequest request) {
+		Cookie[] cookies = request.getCookies();
+
+		String joinPhone = "";
+		String joinName = "";
+		if (cookies != null) {
+			for (Cookie c : cookies) {
+				if (c.getName().equals("joinPhone")) {
+					joinPhone = URLDecoder.decode(c.getValue(), StandardCharsets.UTF_8);
+					log.info("본인인증 된 핸드폰번호 : " + joinPhone);
+				} else if(c.getName().equals("joinName")) {
+					joinName = URLDecoder.decode(c.getValue(), StandardCharsets.UTF_8);
+					log.info("본인인증 된 이름 : " + joinName);
+				}
+			}
+		}
+
+		return AuthPhoneCheckDto.builder()
+				.joinName(joinName)
+				.joinPhone(joinPhone)
+				.build();
+	}
+
+	// 프론트암호화값 -> 복호화 체크 함수
+	public static String decryptData(String encryptedData, String keyBuffer, String iv) {
+		try {
+			byte[] decodedKey = Base64.getDecoder().decode(keyBuffer);
+			SecretKey secretKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+
+			Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+			GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(128, Base64.getDecoder().decode(iv));
+			cipher.init(Cipher.DECRYPT_MODE, secretKey, gcmParameterSpec);
+
+			byte[] decryptedTextBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedData));
+			return new String(decryptedTextBytes, StandardCharsets.UTF_8);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 }

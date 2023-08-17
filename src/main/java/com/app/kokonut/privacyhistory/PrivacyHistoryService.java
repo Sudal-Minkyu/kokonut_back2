@@ -212,13 +212,13 @@ public class PrivacyHistoryService {
         String contents = ReqUtils.unFilter("파일암호 : "+filePassword);
 
         // 템플릿 호출을 위한 데이터 세팅
-//        HashMap<String, String> callTemplate = new HashMap<>();
+        HashMap<String, String> callTemplate = new HashMap<>();
 //        callTemplate.put("template", "KokonutMailTemplate");
-//        callTemplate.put("title", "활동이력 파일암호 알림");
-//        callTemplate.put("content", contents);
-//
-//        // 템플릿 TODO 템플릿 디자인 추가되면 수정
-//        contents = mailSender.getHTML5(callTemplate);
+        callTemplate.put("title", "활동이력 파일암호 알림");
+        callTemplate.put("content", contents);
+
+        // 템플릿 TODO 템플릿 디자인 추가되면 수정
+        contents = mailSender.getHTML6(callTemplate);
         String reciverName = "kokonut";
 
         String mailSenderResult = mailSender.sendKokonutMail(email, reciverName, title, contents);

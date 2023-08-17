@@ -26,6 +26,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -158,20 +159,36 @@ public class NiceIdService {
 			String knName = jsonObject.getString("name");
 			String knPhoneNumber = jsonObject.getString("mobileno");
 
-			if(state.equals("1")) {
-				if(adminRepository.existsByKnPhoneNumber(knPhoneNumber)) {
-					log.error("이미 회원가입된 핸드폰번호 입니다.");
-					return ResponseEntity.ok(res.fail(ResponseErrorCode.KO034.getCode(),ResponseErrorCode.KO034.getDesc()));
-				} else {
-					log.info("회원가입 본인인증");
-					// 회원가입떄 사용 -> 핸드폰번호 일치한지 확인하기위해서 사용됨
+			log.info("휴대폰 본인인증 state : "+state);
+			if(state.equals("1") || state.equals("5") || state.equals("6")) {
 
+				if(state.equals("1")) {
+					Utils.cookieSave("joinName", URLEncoder.encode(knName, StandardCharsets.UTF_8), 180, response); // 쿠키 제한시간 3분
+					Utils.cookieSave("joinPhone", URLEncoder.encode(knPhoneNumber, StandardCharsets.UTF_8), 180, response); // 쿠키 제한시간 3분
+
+					if(adminRepository.existsByKnPhoneNumber(knPhoneNumber)) {
+						log.error("이미 회원가입된 핸드폰번호 입니다.");
+						return ResponseEntity.ok(res.fail(ResponseErrorCode.KO034.getCode(),ResponseErrorCode.KO034.getDesc()));
+					} else {
+						log.info("회원가입 본인인증");
+						// 회원가입떄 사용 -> 핸드폰번호 일치한지 확인하기위해서 사용됨
+
+						data.put("joinName", knName);
+						data.put("joinPhone", knPhoneNumber);
+					}
+				} else {
+					if(state.equals("5")) {
+						log.info("휴대전화번호 변경 본인인증");
+					}
+					else {
+						log.info("해외로그인 본인인증");
+					}
 					data.put("joinName", knName);
 					data.put("joinPhone", knPhoneNumber);
-//					Utils.cookieSave("joinName", knName, 600, response); // 쿠키 제한시간 10분
-//					Utils.cookieSave("joinPhone", knPhoneNumber, 600, response); // 쿠키 제한시간 10분
 				}
-			} else if(state.equals("2") || state.equals("3") || state.equals("4") || state.equals("7")) {
+
+			}
+			else if(state.equals("2") || state.equals("3") || state.equals("4") || state.equals("7")) {
 				// 이름과 번호를 통해 찾기?
 				Optional<Admin> optionalAdmin = adminRepository.findAdminByKnNameAndKnPhoneNumber(knName, knPhoneNumber);
 
@@ -189,24 +206,21 @@ public class NiceIdService {
 						redisDao.setValues("KE: " + keyEmail, knEmail, Duration.ofMillis(5000)); // 제한시간 5초
 						log.info("레디스에 인증번호 저장성공");
 						data.put("keyEmail", keyEmail);
-					} else if(state.equals("3")) {
-						log.info("비밀번호찾기 본인인증");
-						data.put("keyEmail", knEmail); // -> 입력한 이메일과 DB데이터 이메일과 일치할 경우 임시비밀번호 메일전송 + 업데이트
-					} else if(state.equals("4")) {
-						log.info("OTP변경 본인인증");
 					} else {
-						log.info("비밀번호변경 본인인증");
+						if(state.equals("3")) {
+							log.info("비밀번호찾기 본인인증");
+						} else if(state.equals("4")) {
+							log.info("OTP변경 본인인증");
+						} else { // state.equals("7")
+							log.info("비밀번호변경 본인인증");
+						}
+
+						Utils.cookieSave("joinName", URLEncoder.encode(knName, StandardCharsets.UTF_8), 180, response); // 쿠키 제한시간 3분
+						Utils.cookieSave("joinPhone", URLEncoder.encode(knPhoneNumber, StandardCharsets.UTF_8), 180, response); // 쿠키 제한시간 3분
 					}
 				}
-			} else if(state.equals("5")) {
-				log.info("휴대전화번호 변경 본인인증");
-				data.put("joinName", knName);
-				data.put("joinPhone", knPhoneNumber);
-			} else if(state.equals("6")) {
-				log.info("해외로그인 본인인증");
-				data.put("joinName", knName);
-				data.put("joinPhone", knPhoneNumber);
-			} else {
+			}
+			else {
 				log.info("그 외 본인인증");
 			}
 

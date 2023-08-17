@@ -91,8 +91,9 @@ public class AuthRestController {
             "3. 해당 사용자의 비밀번호와 받은 임시비밀번호와 비교한다." +
             "4. 일치할시 사용할 비밀번호와, 비밀번호체크를 체크한다." +
             "5. 또 일치할시 해당 비밀번호로 업데이트한다.")
-    public ResponseEntity<Map<String,Object>> passwordUpdate(@RequestBody AdminPasswordChangeDto adminPasswordChangeDto) {
-        return authService.passwordUpdate(adminPasswordChangeDto);
+    public ResponseEntity<Map<String,Object>> passwordUpdate(@RequestBody AdminPasswordChangeDto adminPasswordChangeDto,
+                                                             HttpServletRequest request, HttpServletResponse response) {
+        return authService.passwordUpdate(adminPasswordChangeDto, request, response);
     }
 
     // 비밀번호 변경 기능
@@ -101,8 +102,10 @@ public class AuthRestController {
             "2. 받은 관리자는 메일을 확인한다." +
             "3. 링크를 통해 들어간 페이지에서 본인인증을 한다." +
             "4. 변경할 비밀번호를 입력후 해당 함수를 호출한다.")
-    public ResponseEntity<Map<String,Object>> passwordChange(@RequestBody AdminPwdChagneMailDto adminPwdChagneMailDto) {
-        return authService.passwordChange(adminPwdChagneMailDto);
+    public ResponseEntity<Map<String,Object>> passwordChange(@RequestBody AdminPwdChagneMailDto adminPwdChagneMailDto,
+                                                             HttpServletRequest request,
+                                                             HttpServletResponse response) {
+        return authService.passwordChange(adminPwdChagneMailDto, request, response);
     }
 
     // 관리자 등록하기전 키 검증
@@ -199,8 +202,10 @@ public class AuthRestController {
     @ApiOperation(value = "구글 OTP 등록" , notes = "1. 인증된 OTP값과 Key,Value+ 이메일, 비밀번호를 받는다." +
             "2. 받은 값을 통해 체크한다." +
             "3. 체크된 OTP를 등록한다.")
-    public ResponseEntity<Map<String,Object>> saveOTP(@Validated AdminGoogleOTPDto.GoogleOtpSave googleOtpSave) {
-        return authService.saveOTP(googleOtpSave);
+    public ResponseEntity<Map<String,Object>> saveOTP(@Validated AdminGoogleOTPDto.GoogleOtpSave googleOtpSave,
+                                                      HttpServletRequest request,
+                                                      HttpServletResponse response) {
+        return authService.saveOTP(googleOtpSave, request, response);
     }
 
 }
