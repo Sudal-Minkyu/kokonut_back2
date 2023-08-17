@@ -63,7 +63,7 @@ public class AuthApiService {
     }
 
     // API용 개인정보(고객의 고객) 로그인
-    public ResponseEntity<Map<String, Object>> apiLogin(AuthApiLoginDto authApiLoginDto, JwtFilterDto jwtFilterDto) {
+    public ResponseEntity<Map<String, Object>>  apiLogin(AuthApiLoginDto authApiLoginDto, JwtFilterDto jwtFilterDto) {
         log.info("apiLogin 호출");
 
         AjaxResponse res = new AjaxResponse();

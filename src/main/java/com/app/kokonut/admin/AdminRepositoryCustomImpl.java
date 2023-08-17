@@ -110,6 +110,8 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
                         admin.knName,
                         company.cpName,
                         admin.knPhoneNumber,
+                        admin.knRoleCode,
+
                         new CaseBuilder()
                                 .when(company.cpElectronic.isNull()).then(0)
                                 .otherwise(company.cpElectronic),

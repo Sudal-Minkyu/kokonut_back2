@@ -290,7 +290,7 @@ public class AdminService {
             data.put("knName",adminInfoDto.getKnName());
             data.put("cpName",adminInfoDto.getCpName());
             data.put("knEmail",email);
-            data.put("role",jwtFilterDto.getRole().getCode());
+            data.put("role",adminInfoDto.getKnRoleCode());
 
             data.put("knPhoneNumber",adminInfoDto.getKnPhoneNumber());
 

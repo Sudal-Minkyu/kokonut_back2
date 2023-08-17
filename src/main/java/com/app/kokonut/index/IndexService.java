@@ -2,8 +2,11 @@ package com.app.kokonut.index;
 
 import com.app.kokonut.admin.AdminRepository;
 import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
+import com.app.kokonut.awskmshistory.AwsKmsHistoryService;
+import com.app.kokonut.common.realcomponent.CommonUtil;
 import com.app.kokonut.company.companytable.CompanyTableRepository;
 import com.app.kokonut.email.email.EmailRepository;
+import com.app.kokonut.email.email.EmailService;
 import com.app.kokonut.email.email.dtos.EmailSendCountDto;
 import com.app.kokonut.email.email.dtos.EmailSendInfoDto;
 import com.app.kokonut.history.extra.apicallhistory.ApiCallHistoryRepository;
@@ -41,9 +44,11 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.NumberFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
@@ -63,6 +68,8 @@ public class IndexService {
 	private final HistoryService historyService;
 	private final BootPayService bootPayService;
 	private final KeyGenerateService keyGenerateService;
+	private final AwsKmsHistoryService awsKmsHistoryService;
+	private final EmailService emailService;
 	private final ApiCallHistoryService apiCallHistoryService;
 
 	private final AdminRepository adminRepository;
@@ -91,7 +98,8 @@ public class IndexService {
 
 	@Autowired
 	public IndexService(HistoryService historyService, MailSender mailSender, BootPayService bootPayService, KeyGenerateService keyGenerateService,
-						ApiCallHistoryService apiCallHistoryService, AdminRepository adminRepository, CompanyRepository companyRepository, CompanySettingRepository companySettingRepository,
+						AwsKmsHistoryService awsKmsHistoryService, EmailService emailService, ApiCallHistoryService apiCallHistoryService, AdminRepository adminRepository,
+						CompanyRepository companyRepository, CompanySettingRepository companySettingRepository,
 						CompanySettingAccessIPRepository companySettingAccessIPRepository, PaymentRepository paymentRepository,
 						PaymentErrorRepository paymentErrorRepository, ProvisionRepository provisionRepository,
 						ProvisionRosterRepository provisionRosterRepository, CompanyPaymentRepository companyPaymentRepository,
@@ -105,6 +113,8 @@ public class IndexService {
 		this.mailSender = mailSender;
 		this.bootPayService = bootPayService;
 		this.keyGenerateService = keyGenerateService;
+		this.awsKmsHistoryService = awsKmsHistoryService;
+		this.emailService = emailService;
 		this.apiCallHistoryService = apiCallHistoryService;
 		this.adminRepository = adminRepository;
 		this.companyRepository = companyRepository;
@@ -567,8 +577,8 @@ public class IndexService {
 	}
 
 	// 7. 요금정보를 가져온다. (dateType - "1" : "이번달", "2" : "저번달")
-	public ResponseEntity<Map<String, Object>> peymentInfo(String dateType, JwtFilterDto jwtFilterDto) {
-		log.info("peymentInfo 호출");
+	public ResponseEntity<Map<String, Object>> paymentInfo(String dateType, JwtFilterDto jwtFilterDto) {
+		log.info("paymentInfo 호출");
 
 		AjaxResponse res = new AjaxResponse();
 		HashMap<String, Object> data = new HashMap<>();
@@ -581,30 +591,70 @@ public class IndexService {
 		if(dateType.equals("")) {
 			dateType = "1";
 		}
-//		log.info("dateType : "+dateType);
-
-//		PrivacyIndexDto privacyIndexDto = new PrivacyIndexDto();
+		log.info("dateType : "+dateType);
 
 		LocalDate now = LocalDate.now();
 		LocalDate filterDate;
-
 		if(dateType.equals("2")) {
 			// 저번달
 			filterDate = now.withDayOfMonth(2);
 		}
 		else {
-			dateType = "1";
 			// 이번달
 			filterDate = now.withDayOfMonth(1);
 		}
-		log.info("filterDate : "+filterDate);
+
+		String yyyymm = filterDate.format(DateTimeFormatter.ofPattern("yyyyMM"));
+
+//		log.info("filterDate : "+filterDate);
+//		log.info("yyyymm : "+yyyymm);
+
+		// 원화가치 가져오기
+		int wonPrice = CommonUtil.wonPriceGet();
+//		log.info("wonPrice : "+wonPrice);
+
+		int serviceAmount = 0;
+		int cloudAmount;
+		int emailAmount;
 
 		// 코코넛서비스 요금정보
+		// 서비스시작 기간이 아닐시 0원으로 측정한다.
+		// 서비스시작 기간이 넘어갈시 해당 일자부터 다음달 결제할 금액이 쌓인다.
+
+
 
 		// AWS 사용데이터 요금정보
+		double awsRDSCloud = 0;
+
+		double awsS3Cloud = 0;
+
+		double awsKMSClound = awsKmsHistoryService.findByMonthKmsPrice(cpCode, yyyymm); // 당월 호출 금액 구하기
+//		log.info("awsKMSClound : "+awsKMSClound);
+
+		cloudAmount = (int) Math.round((awsRDSCloud + awsS3Cloud + awsKMSClound)* wonPrice);
+
+		if(cloudAmount > 0) {
+			cloudAmount = (cloudAmount / 10) * 10; // 1원 단위 0으로 수정
+		} else {
+			cloudAmount = 0;
+		}
 
 		// 이메일 요금정보
+		emailAmount = emailService.emailSendMonthPrice(cpCode, yyyymm); // 당월 호출 금액 구하기
 
+		if(emailAmount > 0) {
+			emailAmount = (emailAmount / 10) * 10; // 1원 단위 0으로 수정
+		} else {
+			emailAmount = 0;
+		}
+
+//		log.info("serviceAmount : "+serviceAmount);
+//		log.info("cloudAmount : "+cloudAmount);
+//		log.info("emailAmount : "+emailAmount);
+
+		data.put("serviceAmount", NumberFormat.getInstance().format(serviceAmount));
+		data.put("cloudAmount", NumberFormat.getInstance().format(cloudAmount));
+		data.put("emailAmount", NumberFormat.getInstance().format(emailAmount));
 
 		return ResponseEntity.ok(res.success(data));
 	}

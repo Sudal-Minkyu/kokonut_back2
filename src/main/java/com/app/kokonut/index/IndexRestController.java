@@ -94,11 +94,11 @@ public class IndexRestController {
     }
 
     @ApiOperation(value="요금정보를 가져온다.", notes="")
-    @GetMapping(value = "/peymentInfo")
+    @GetMapping(value = "/paymentInfo")
     @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> peymentInfo(@RequestParam(value="dateType", defaultValue = "1") String dateType) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
-        return indexService.peymentInfo(dateType, jwtFilterDto);
+        return indexService.paymentInfo(dateType, jwtFilterDto);
     }
 
     @ApiOperation(value="이메일 발송 완료 및 예약 건수를 가져온다.", notes="")

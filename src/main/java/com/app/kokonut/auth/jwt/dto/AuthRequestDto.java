@@ -1,9 +1,6 @@
 package com.app.kokonut.auth.jwt.dto;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,9 +19,7 @@ import javax.validation.constraints.Pattern;
 public class AuthRequestDto {
 
     // 리뉴얼 회원가입Dto
-    @Getter
-    @Setter
-    @NoArgsConstructor
+    @Data
     public static class KokonutSignUp {
 
         @NotBlank(message = "소속(회사명)은 필수 입력값 입니다.")
@@ -42,20 +37,11 @@ public class AuthRequestDto {
         @NotBlank(message = "비밀번호는 필수 입력값 입니다.")
         private String knPassword;
 
+        @NotBlank(message = "비밀번호확인는 필수 입력값 입니다.")
         private String knPasswordConfirm; // 비밀번호 체크
 
+        @NotBlank(message = "이메일인증 여부는 필수 입력값 입니다.")
         private Boolean knEmailCheck; // 이메일인증 여부
-
-        @Builder
-        public KokonutSignUp(String cpName, String knName, String knPhoneNumber, String knEmail, String knPassword, String knPasswordConfirm, Boolean knEmailCheck) {
-            this.cpName = cpName;
-            this.knName = knName;
-            this.knPhoneNumber = knPhoneNumber;
-            this.knEmail = knEmail;
-            this.knPassword = knPassword;
-            this.knPasswordConfirm = knPasswordConfirm;
-            this.knEmailCheck = knEmailCheck;
-        }
 
     }
 

@@ -1,5 +1,6 @@
 package com.app.kokonut.admin.dtos;
 
+import com.app.kokonut.admin.enums.AuthorityRole;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,6 +25,8 @@ public class AdminInfoDto {
 
     private String knPhoneNumber; // 휴대폰번호
 
+    private AuthorityRole knRoleCode;
+
     private Integer cpElectronic;
 
     private LocalDate cpElectronicDate;
@@ -38,6 +41,10 @@ public class AdminInfoDto {
     private String emailSendSettingState; // 이메일발송 셋팅 여부
 
     private LocalDateTime cpSubscribeDate;
+
+    public String getKnRoleCode() {
+        return knRoleCode.getCode();
+    }
 
     public long getCsPasswordChangeSetting() {
         return Long.parseLong(csPasswordChangeSetting);
