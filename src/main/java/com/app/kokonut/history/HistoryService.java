@@ -55,6 +55,7 @@ public class HistoryService {
     }
 
     // 관리자 활동이력 리스트 ahType => "2"
+    @Transactional
     public ResponseEntity<Map<String,Object>> activityList(String email, String searchText, String stime, String filterRole, String actvityType, Pageable pageable) {
         log.info("actvityList 호출");
 
@@ -68,9 +69,12 @@ public class HistoryService {
 
         // 접속한 사용자 인덱스
         AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+        long adminId = adminCompanyInfoDto.getAdminId();
+        long companyId = adminCompanyInfoDto.getCompanyId();
+        String cpCode = adminCompanyInfoDto.getCompanyCode();
 
         HistorySearchDto historySearchDto = new HistorySearchDto();
-        historySearchDto.setCompanyId(adminCompanyInfoDto.getCompanyId());
+        historySearchDto.setCompanyId(companyId);
         historySearchDto.setSearchText(searchText);
         historySearchDto.setFilterRole(filterRole);
         if(!actvityType.equals("")) {
@@ -94,7 +98,18 @@ public class HistoryService {
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO077.getCode(), ResponseErrorCode.KO077.getDesc()));
         }
 
+        // 활동이력 조회 코드
+        ActivityCode activityCode = ActivityCode.AC_07_1;
+        String ip = CommonUtil.publicIp();
+        Long activityHistoryId;
+
+        // 활동이력 저장 -> 비정상 모드
+        activityHistoryId = insertHistory(2, adminId, activityCode,
+                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+
         Page<HistoryListDto> historyListDtos = historyRepository.findByHistoryPage(historySearchDto, pageable);
+
+        updateHistory(activityHistoryId, cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
 
         if(historyListDtos.getTotalPages() == 0) {
             log.info("조회된 데이터가 없습니다.");
@@ -105,6 +120,7 @@ public class HistoryService {
     }
 
     // 관리자 활동이력 엑셀다운로드 ahType => "2"
+    @Transactional
     public ResponseEntity<Map<String,Object>> activityDownloadExcel(String email, String searchText, String stime, String actvityType, String otpValue, String downloadReason) throws IOException {
         log.info("activityDownloadExcel 호출");
 
@@ -189,7 +205,7 @@ public class HistoryService {
         }
 
         // 활동이력 다운로드 코드
-        ActivityCode activityCode = ActivityCode.AC_07;
+        ActivityCode activityCode = ActivityCode.AC_07_2;
         String ip = CommonUtil.publicIp();
         Long activityHistoryId;
 
@@ -293,6 +309,7 @@ public class HistoryService {
     }
 
     // 활동이력 인서트
+    @Transactional
     public Long insertHistory(int ahType, Long adminId, ActivityCode activityCode,
                                       String ahActivityDetail, String ahReason, String ahPublicIpAddr, int ahState, String email) {
 
@@ -313,6 +330,7 @@ public class HistoryService {
     }
 
     // 활동이력 수정
+    @Transactional
     public void updateHistory(Long ahId, String activityDetail, String ahReason, int ahState) {
         History history = historyRepository.findById(ahId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않은 'activityCode' 입니다."));

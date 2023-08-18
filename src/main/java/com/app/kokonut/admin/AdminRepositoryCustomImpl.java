@@ -4,9 +4,11 @@ import com.app.kokonut.admin.dtos.*;
 import com.app.kokonut.admin.enums.AuthorityRole;
 import com.app.kokonut.company.company.QCompany;
 import com.app.kokonut.company.companysetting.QCompanySetting;
+import com.app.kokonut.history.QHistory;
 import com.app.kokonut.index.dtos.AdminConnectListSubDto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import org.qlrm.mapper.JpaResultMapper;
 import org.springframework.data.domain.Page;
@@ -15,6 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -252,20 +256,28 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
     // 관리자 접속현황 리스트 호출 함수
     @Override
     public List<AdminConnectListSubDto> findByAdminConnectList(Long companyId) {
-
         QAdmin admin = QAdmin.admin;
+        QHistory history = QHistory.history;
+        QHistory subHistory = new QHistory("subHistory"); // 서브쿼리를 위한 인스턴스
+
+        // 최근 history의 insert_date를 가져오는 서브쿼리
+        JPQLQuery<LocalDateTime> subQuery = JPAExpressions.select(subHistory.insert_date.max())
+                .from(subHistory)
+                .where(subHistory.adminId.eq(admin.adminId));
 
         JPQLQuery<AdminConnectListSubDto> query = from(admin)
+                .leftJoin(history).on(history.adminId.eq(admin.adminId).and(history.insert_date.eq(subQuery).and(history.ahState.eq(1))))
                 .where(admin.companyId.eq(companyId))
                 .select(Projections.constructor(AdminConnectListSubDto.class,
                         admin.knRoleCode,
                         admin.adminId,
                         admin.knRoleCode,
                         admin.knName,
-                        admin.knLastLoginDate
+                        history.insert_date
                 ));
 
         return query.fetch();
     }
+
 
 }
