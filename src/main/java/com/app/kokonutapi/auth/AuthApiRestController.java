@@ -36,25 +36,38 @@ public class AuthApiRestController {
     // 아이디 중복확인 API
 
 
-    @PostMapping("/login")
-    @ApiOperation(value="API용 개인정보(고객의 고객) 로그인", notes="" +
-            "1. 아이디와 비밀번호를 받는다.<br/>" +
-            "2. 해당 개인정보의 아이디와 비밀번호를 확인한다.<br/>" +
-            "3. 로그인 성공시 200을 보낸다.")
-    @ApiImplicitParam(name ="x-api-key", required = true, dataTypeClass = String.class, paramType = "header")
-    public ResponseEntity<Map<String,Object>> apiLogin(@RequestBody AuthApiLoginDto authApiLoginDto, HttpServletRequest request) {
-        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwtOrApiKey(request);
-        if(jwtFilterDto == null) {
-            return null;
-        } else {
-            return authApiService.apiLogin(authApiLoginDto, jwtFilterDto);
-        }
-    }
+//    @PostMapping("/login")
+//    @ApiOperation(value="API용 개인정보(고객의 고객) 로그인", notes="" +
+//            "1. 아이디와 비밀번호를 받는다.<br/>" +
+//            "2. 해당 개인정보의 아이디와 비밀번호를 확인한다.<br/>" +
+//            "3. 로그인 성공시 200을 보낸다.")
+//    @ApiImplicitParam(name ="x-api-key", required = true, dataTypeClass = String.class, paramType = "header")
+//    public ResponseEntity<Map<String,Object>> apiLogin(@RequestBody AuthApiLoginDto authApiLoginDto, HttpServletRequest request) {
+//        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwtOrApiKey(request);
+//        if(jwtFilterDto == null) {
+//            return null;
+//        } else {
+//            return authApiService.apiLogin(authApiLoginDto, jwtFilterDto);
+//        }
+//    }
 
     @ApiOperation(value="API용 개인정보(고객의 개인정보) 회원가입", notes="" +
-            "1. 기본테이블의 키와 벨류값을 가져온다." +
-            "2. 해당 키를 통해 컬럼값을 조회하고 해당 값을 인서트할 쿼리문에 추가한다." +
-            "3. 로그인 성공시 200을 보낸다.")
+            "<br>1. 등록할 회원정보를 받는다.<br>" +
+            "2. 등록 성공시 생성된 IDX 값을 반환한다.<br>" +
+            "<br>" +
+            "* 모의해킹 테스트용 호출 데이터(아래) *<br><br>" +
+            "x-api-key <br>" +
+            "2a40c544978b48b374dfc91a2d2dfc72<br><br>" +
+            "pramMap의 key는 추가된 항목의 고유번호며, value는 해당 필드에 저장할 데이터입니다." +
+            "paramMap : <br>" +
+            "{\n" +
+            "\"1_id\": \"테스트id\",\n" +
+            "\"1_pw\": \"테스트pw\",\n" +
+            "\"1_30\": \"testemail@kokonut.me\",\n" +
+            "\"1_31\": \"테스트\",\n" +
+            "\"1_32\": \"서울특별시\",\n" +
+            "\"1_33\": \"01011112222\" - \"참고사항 : (해당 내용은 제외하고 호출할것 : 본인 휴대폰번호넣어야 알림톡 테스트할때 알림을 받아볼 수 있음 - '/v3/api/ThirdParty/alimTalkSend')\"\n" +
+            "}")
     @PostMapping("/register")
     @ApiImplicitParam(name ="x-api-key", required = true, dataTypeClass = String.class, paramType = "header")
     public ResponseEntity<Map<String,Object>> apiRegister(@RequestBody HashMap<String, Object> paramMap, HttpServletRequest request) throws Exception {

@@ -351,7 +351,7 @@ public class ThirdPartyService {
 
 					// 알림톡전송하기
 					StringBuilder searchQuery = new StringBuilder();
-					searchQuery.append("SELECT ");
+					searchQuery.append("SELECT kokonut_IDX");
 					for(int i=0; i<fieldNameChk.size(); i++) {
 						if(!fieldNameChk.get(i).equals("pass") && !designationChk.get(i).equals("pass") && !securityChk.get(i).equals("pass")) {
 							searchQuery.append(", COALESCE(").append(fieldNameChk.get(i)).append(", '없음') as ").append(codeListKeys.get(i)).append(" ");
