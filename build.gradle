@@ -49,8 +49,8 @@ jacocoTestReport {
     dependsOn test
 }
 
-group 'com.app'
-version '1.0.1-SNAPSHOT-' + new Date().format("yyyyMMddHHmmss")
+group = 'com.app'
+version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
 
 configurations {
