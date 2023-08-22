@@ -21,7 +21,7 @@ import java.util.List;
 @Table(name="kn_admin")
 public class Admin implements UserDetails {
 
-    /**
+    /**test
      * 키
      */
 
