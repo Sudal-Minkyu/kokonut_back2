@@ -52,8 +52,8 @@ public class InquiryService {
 		if(state.equals(1)){
 //			System.out.println("협업문의 입니다.");
 //			inquiryName = field +" - 협업문의 : ";
-			inquiryName = field +" - 문의 : ";
-			contents = mailSender.getHTML2("/mail/emailForm/" + "1:1 협의문의 메일이 도착했습니다.<br>협의 내용: ?data=" + mailData);
+//			inquiryName = field +" - 문의 : ";
+//			contents = mailSender.getHTML2("/mail/emailForm/" + "1:1 협의문의 메일이 도착했습니다.<br>협의 내용: ?data=" + mailData);
 		}
 //		else if(state.equals("2")){
 //			System.out.println("도입문의 입니다.");

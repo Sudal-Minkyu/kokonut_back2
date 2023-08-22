@@ -37,8 +37,8 @@ public class MailSender {
 	@Value("${kokonut.mail.host}")
 	public String mailHost; // 보내는 사람의 이메일(contact@kokonut.me)
 
-	@Value("${kokonut.otp.hostUrl}")
-	public String myHost; // otp_url
+//	@Value("${kokonut.otp.hostUrl}")
+//	public String myHost; // otp_url
 
 	private final NaverCloudPlatformService naverCloudPlatformService;
 	private final ContactEmailHistoryRepository contactEmailHistoryRepository;
@@ -187,17 +187,17 @@ public class MailSender {
 	}
 
 
-	// TODO 메일 유형에 따라 발송시 HTML 화면으로 만들어줌.
-	public String getHTML2(String viewURL) throws IOException {
-		log.info("viewURL : "+viewURL);
-		String mailViewURL = "http://"+myHost + viewURL;
-		log.info("mailViewURL : "+mailViewURL);
-
-		URL url = new URL(mailViewURL);
-		URLConnection conn = url.openConnection();
-		InputStream is = conn.getInputStream();
-		return IOUtils.toString(is, StandardCharsets.UTF_8);
-	}
+//	// TODO 메일 유형에 따라 발송시 HTML 화면으로 만들어줌.
+//	public String getHTML2(String viewURL) throws IOException {
+//		log.info("viewURL : "+viewURL);
+//		String mailViewURL = "http://"+myHost + viewURL;
+//		log.info("mailViewURL : "+mailViewURL);
+//
+//		URL url = new URL(mailViewURL);
+//		URLConnection conn = url.openConnection();
+//		InputStream is = conn.getInputStream();
+//		return IOUtils.toString(is, StandardCharsets.UTF_8);
+//	}
 
 	public String getHTML5(HashMap<String, String> callTemplate) throws IOException {
 
