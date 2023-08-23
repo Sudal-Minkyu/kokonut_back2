@@ -49,16 +49,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.GCMParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -1094,10 +1087,6 @@ public class AuthService {
             String knLoginAuth = optionalAdmin.get().getKnIsLoginAuth();
 
             if(knLoginAuth.equals("N") && knName.equals("미가입")) {
-                log.error("이미 인증된 관리자 입니다.");
-                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO117.getCode(), ResponseErrorCode.KO117.getDesc()));
-            }
-            else {
                 optionalAdmin.get().setKnName(kokonutCreateUser.getKnName());
                 optionalAdmin.get().setKnPhoneNumber(kokonutCreateUser.getKnPhoneNumber());
                 optionalAdmin.get().setKnPassword(passwordEncoder.encode(kokonutCreateUser.getKnPassword()));
@@ -1110,6 +1099,10 @@ public class AuthService {
 
                 // 레디스 데이터 제거
                 redisDao.deleteValues("EV: " + kokonutCreateUser.getUserEmail());
+            }
+            else {
+                log.error("이미 인증된 관리자 입니다.");
+                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO117.getCode(), ResponseErrorCode.KO117.getDesc()));
             }
         }
 
