@@ -89,7 +89,14 @@ public class CommonUtil {
 			}
 		}
 
-        return ip;
+		if (ip != null) {
+			String[] ips = ip.split(",");
+			if (ips.length > 0) {
+				ip = ips[0].trim(); // 첫 번째 IP만 반환
+			}
+		}
+
+		return ip;
     }
 
 	// 현재 원화가치 가져오기 -> USD 기준
