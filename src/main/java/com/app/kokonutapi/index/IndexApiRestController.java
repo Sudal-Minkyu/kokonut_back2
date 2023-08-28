@@ -34,9 +34,7 @@ public class IndexApiRestController {
         this.indexService = indexService;
     }
 
-    @ApiOperation(value="금일 API 호출수를 호출한다.", notes="<br>" +
-            "호출 데이터<br>" +
-            "x-api-key : 2a40c544978b48b374dfc91a2d2dfc72<br>")
+    @ApiOperation(value="금일 API 호출수를 호출한다.")
     @GetMapping(value = "/apiCount")
     @ApiImplicitParam(name ="x-api-key", required = true, dataTypeClass = String.class, paramType = "header")
     public ResponseEntity<Map<String,Object>> apiCount(HttpServletRequest request) {
@@ -44,9 +42,7 @@ public class IndexApiRestController {
         return indexService.apiCount(jwtFilterDto);
     }
 
-    @ApiOperation(value="금일 암호화, 복호화 수를 호출한다.", notes="<br>" +
-            "호출 데이터<br>" +
-            "x-api-key : 2a40c544978b48b374dfc91a2d2dfc72<br>")
+    @ApiOperation(value="금일 암호화, 복호화 수를 호출한다.")
     @GetMapping(value = "/endeCount")
     @ApiImplicitParam(name ="x-api-key", required = true, dataTypeClass = String.class, paramType = "header")
     public ResponseEntity<Map<String,Object>> endeCount(HttpServletRequest request) {
@@ -54,9 +50,7 @@ public class IndexApiRestController {
         return indexService.endeCount(jwtFilterDto);
     }
 
-    @ApiOperation(value="개인정보 항목(암호화 항목, 고유식별정보 항목, 민감정보 항목)의 추가 카운팅 수 데이터를 가져온다.", notes="<br>" +
-            "호출 데이터<br>" +
-            "x-api-key : 2a40c544978b48b374dfc91a2d2dfc72<br>")
+    @ApiOperation(value="개인정보 항목(암호화 항목, 고유식별정보 항목, 민감정보 항목)의 추가 카운팅 수 데이터를 가져온다.")
     @GetMapping(value = "/privacyItemCount")
     @ApiImplicitParam(name ="x-api-key", required = true, dataTypeClass = String.class, paramType = "header")
     public ResponseEntity<Map<String,Object>> privacyItemCount(HttpServletRequest request) {
@@ -64,9 +58,7 @@ public class IndexApiRestController {
         return indexService.privacyItemCount("2", jwtFilterDto);
     }
 
-    @ApiOperation(value="개인정보 제공의 금일 건수와 데이트타입의 따라 건수를 가져온다.", notes="<br>" +
-            "호출 데이터<br>" +
-            "x-api-key : 2a40c544978b48b374dfc91a2d2dfc72<br>")
+    @ApiOperation(value="개인정보 제공의 금일 건수와 데이트타입의 따라 건수를 가져온다.")
     @GetMapping(value = "/provisionCount")
     @ApiImplicitParam(name ="x-api-key", required = true, dataTypeClass = String.class, paramType = "header")
     public ResponseEntity<Map<String,Object>> provisionCount(@RequestParam(value="dateType", defaultValue = "1") String dateType,
@@ -75,9 +67,7 @@ public class IndexApiRestController {
         return indexService.provisionIndexCount("2", dateType, jwtFilterDto);
     }
 
-    @ApiOperation(value="이메일 발송 완료 및 예약 건수 + 수신건수와 청구금액을 가져온다.", notes="<br>" +
-            "호출 데이터<br>" +
-            "x-api-key : 2a40c544978b48b374dfc91a2d2dfc72<br>")
+    @ApiOperation(value="이메일 발송 완료 및 예약 건수 + 수신건수와 청구금액을 가져온다.")
     @GetMapping(value = "/emailSendInfo")
     @ApiImplicitParam(name ="x-api-key", required = true, dataTypeClass = String.class, paramType = "header")
     public ResponseEntity<Map<String,Object>> emailSendInfo(@RequestParam(value="dateType", defaultValue = "1") String dateType,
@@ -85,10 +75,5 @@ public class IndexApiRestController {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwtOrApiKey(request);
         return indexService.emailSendInfo(dateType, jwtFilterDto);
     }
-
-
-
-
-
 
 }
