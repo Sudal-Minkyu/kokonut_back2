@@ -347,14 +347,16 @@ public class IndexService {
 		provisionIndexDto.setOfferInsideCount(offerInsideCount);
 		provisionIndexDto.setOfferOutsideCount(offerOutsideCount);
 
+		data.put("provisionIndexDto", provisionIndexDto);
+
 		if(callType.equals("2")) {
 			// API 호출 로그 저장
 			apiCallHistoryService.apiCallHistorySave(cpCode, "/v3/api/Index/provisionIndexCount");
+			return ResponseEntity.ok(res.apisuccess(data));
+		} else {
+			return ResponseEntity.ok(res.success(data));
 		}
 
-		data.put("provisionIndexDto", provisionIndexDto);
-
-		return ResponseEntity.ok(res.success(data));
 	}
 
 	// 3-1. 오늘 등록된 개인정보제공 건수 반환함수(3번에서 사용)
@@ -509,7 +511,7 @@ public class IndexService {
 		// API 호출 로그 저장
 		apiCallHistoryService.apiCallHistorySave(cpCode, "/v3/api/Index/apiCount");
 
-		return ResponseEntity.ok(res.success(data));
+		return ResponseEntity.ok(res.apisuccess(data));
 	}
 
 	// 5-2. 금일 암호화, 복호화 수를 호출한다. -> Kokonut API 사용
@@ -540,7 +542,7 @@ public class IndexService {
 		// API 호출 로그 저장
 		apiCallHistoryService.apiCallHistorySave(cpCode, "/v3/api/Index/endeCount");
 
-		return ResponseEntity.ok(res.success(data));
+		return ResponseEntity.ok(res.apisuccess(data));
 	}
 
 	// 6. 개인정보 항목(암호화 항목, 고유식별정보 항목, 민감정보 항목)의 추가 카운팅 수 데이터 -> Kokonut API 사용
@@ -570,9 +572,11 @@ public class IndexService {
 		if(callType.equals("2")) {
 			// API 호출 로그 저장
 			apiCallHistoryService.apiCallHistorySave(cpCode, "/v3/api/Index/privacyItemCount");
-		}
 
-		return ResponseEntity.ok(res.success(data));
+			return ResponseEntity.ok(res.apisuccess(data));
+		} else {
+			return ResponseEntity.ok(res.success(data));
+		}
 
 	}
 
@@ -597,7 +601,7 @@ public class IndexService {
 		LocalDate filterDate;
 		if(dateType.equals("2")) {
 			// 저번달
-			filterDate = now.withDayOfMonth(2);
+			filterDate = now.minusMonths(1).withDayOfMonth(1);
 		}
 		else {
 			// 이번달
@@ -606,8 +610,8 @@ public class IndexService {
 
 		String yyyymm = filterDate.format(DateTimeFormatter.ofPattern("yyyyMM"));
 
-//		log.info("filterDate : "+filterDate);
-//		log.info("yyyymm : "+yyyymm);
+		log.info("filterDate : "+filterDate);
+		log.info("yyyymm : "+yyyymm);
 
 		// 원화가치 가져오기
 		int wonPrice = CommonUtil.wonPriceGet();
@@ -629,7 +633,7 @@ public class IndexService {
 		double awsS3Cloud = 0;
 
 		double awsKMSClound = awsKmsHistoryService.findByMonthKmsPrice(cpCode, yyyymm); // 당월 호출 금액 구하기
-//		log.info("awsKMSClound : "+awsKMSClound);
+		log.info("awsKMSClound : "+awsKMSClound);
 
 		cloudAmount = (int) Math.round((awsRDSCloud + awsS3Cloud + awsKMSClound)* wonPrice);
 
@@ -648,9 +652,9 @@ public class IndexService {
 			emailAmount = 0;
 		}
 
-//		log.info("serviceAmount : "+serviceAmount);
-//		log.info("cloudAmount : "+cloudAmount);
-//		log.info("emailAmount : "+emailAmount);
+		log.info("serviceAmount : "+serviceAmount);
+		log.info("cloudAmount : "+cloudAmount);
+		log.info("emailAmount : "+emailAmount);
 
 		data.put("serviceAmount", NumberFormat.getInstance().format(serviceAmount));
 		data.put("cloudAmount", NumberFormat.getInstance().format(cloudAmount));
@@ -778,7 +782,7 @@ public class IndexService {
 
 		data.put("emailSendInfoDto", emailSendInfoDto);
 
-		return ResponseEntity.ok(res.success(data));
+		return ResponseEntity.ok(res.apisuccess(data));
 	}
 
 	// 9. 서드파티 연동현황을 가져온다.

@@ -61,7 +61,7 @@ public class SwaggerConfig {
                 .version("1.0").build();
 
         return new Docket(DocumentationType.SWAGGER_2)
-                .groupName("ApiKey 필요")
+                .groupName("3. ApiKey 필요")
                 .apiInfo(apiInfo)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.app"))

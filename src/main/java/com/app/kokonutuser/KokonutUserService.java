@@ -3,7 +3,6 @@ package com.app.kokonutuser;
 import com.app.kokonut.commonfield.dtos.CommonFieldDto;
 import com.app.kokonut.commonfield.CommonFieldRepositoryCustom;
 import com.app.kokonutuser.dtos.*;
-import com.app.kokonutuser.dtos.use.KokonutUserAlimTalkFieldDto;
 import com.app.kokonutuser.dtos.use.KokonutUserEmailFieldDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -394,14 +393,34 @@ public class KokonutUserService {
 		return dynamicUserRepositoryCustom.selectCountByThisMonth(searchQuery);
 	}
 
-	// 유저 ID를 통해 IDX를 조회
-	public Long selectUserIdx(String companyCode, String id) {
+	// 유저 ID 중복확인
+	public Long selectUserIdx(String ctName, String id) {
 		log.info("selectUserIdx 호출");
 
-		String searchQuery = "SELECT IDX FROM `" + companyCode + "` WHERE `ID` = '"+id+"'";
-//		log.info("searchQuery : "+searchQuery);
+		String searchQuery = "SELECT COUNT(*) FROM `" + ctName + "` WHERE `ID_1_id` = '"+id+"'";
+		log.info("searchQuery : "+searchQuery);
 		return dynamicUserRepositoryCustom.selectUserIdx(searchQuery);
 	}
+
+	/**
+	 * tableName 테이블에 회원정보 삭제
+	 * @param ctName : 테이블 명
+	 * @return boolean
+	 * 기존 코코넛 : DeleteUserTable
+	 */
+	public void deleteUserTable(String ctName, String kokonut_IDX) {
+		log.info("deleteUserTable 호출");
+
+		try {
+			String userDeleteQuery = "DELETE FROM "+ctName+" WHERE kokonut_IDX = '"+kokonut_IDX+"'";
+//			log.info("userDeleteQuery : "+userDeleteQuery);
+			dynamicUserRepositoryCustom.userCommonTable(userDeleteQuery);
+
+		} catch (Exception e) {
+			log.error("유저삭제 에러 e.getMessage() : "+e.getMessage());
+		}
+	}
+
 
 	// 유저테이블의 필드명을 통해 Comment 조회
 	public String selectUserColumnComment(String companyCode, String fieldName) {
@@ -829,49 +848,13 @@ public class KokonutUserService {
 	}
 
 	/**
-	 * tableName 테이블에 회원정보 삭제
-	 * @param companyCode : 테이블 명
-	 * @param idx 회원 IDX
-	 * @return boolean
-	 * 기존 코코넛 : DeleteUserTable
-	 */
-	@Transactional
-	public boolean deleteUserTable(String companyCode, Long idx) {
-		log.info("deleteUserTable 호출");
-
-		log.info("companyCode : "+companyCode);
-		log.info("idx : "+idx);
-
-		boolean isSuccess = false;
-
-		try {
-			String userDeleteQuery = "DELETE FROM `"+companyCode+"` WHERE `IDX` = "+idx;
-//			log.info("userDeleteQuery : "+userDeleteQuery);
-			dynamicUserRepositoryCustom.userCommonTable(userDeleteQuery);
-
-			log.info("유저삭제 성공 : "+companyCode);
-			isSuccess = true;
-		} catch (Exception e) {
-			log.error("유저삭제 에러 : "+companyCode);
-		}
-
-		return isSuccess;
-
-	}
-
-
-	/**
-	 * 유저의 현재 비밀번호를 검증하는 메서드
-	 * @param companyCode 테이블 이름
-	 * @param id 아이디
-	 * @param pw 검증 할 비밀번호
-	 * @return String
+	 * 비밀번호 확인함수
 	 */
 	public String passwordConfirm(String companyCode, String id, String pw) {
 		log.info("passwordConfirm 호출");
 
-		String searchQuery = "SELECT kokonut_IDX, PASSWORD_1_pw FROM `"+companyCode+"` WHERE `ID_1_id`='"+id+"'";
-//		log.info("searchQuery : "+searchQuery);
+		String searchQuery = "SELECT kokonut_IDX, PASSWORD_1_pw FROM "+companyCode+" WHERE ID_1_id='"+id+"'";
+		log.info("searchQuery : "+searchQuery);
 
 		List<KokonutUserPwInfoDto> nowpw = dynamicUserRepositoryCustom.findByNowPw(searchQuery);
 
@@ -879,11 +862,11 @@ public class KokonutUserService {
 			log.error("존재하지 않은 ID 입니다. 입력한 : "+id);
 			return "";
 		} else {
-			if(!passwordEncoder.matches(pw,nowpw.get(0).getPASSWORD_1_pw())) {
+			if(!pw.equals(nowpw.get(0).getPASSWORD_1_pw())) {
 				log.error("입력한 비밀번호와 현재비밀번호가 같지 않음");
 				return "none";
 			} else {
-				log.info("입력한 비밀번호와 현재비밀번호가 같음 - 비밀번호 변경 시작");
+				log.info("입력한 비밀번호와 현재비밀번호가 같음");
 				return nowpw.get(0).getKokonut_IDX();
 			}
 		}
@@ -921,29 +904,23 @@ public class KokonutUserService {
 
 	/**
 	 * 로그인할 경우 로그인 일시 업데이트
-	 * @param companyCode 테이블 이름
-	 * @param IDX 변경할 IDX
-	 * @return boolean
-	 * 기존 코코넛 : UpdateLastLoginDate
+	 *
+	 * @param ctName 테이블 이름
 	 */
-	public boolean updateLastLoginDate(String companyCode, Long IDX) {
+	public void updateLastLoginDate(String ctName, String kokonut_IDX) {
 		log.info("updateLastLoginDate 호출");
 
-		boolean isSuccess = false;
 		try {
-			String userPwUpdateQuery = "UPDATE `"+companyCode+"` set LAST_LOGIN_DATE=NOW() WHERE IDX="+IDX;
+			String userPwUpdateQuery = "UPDATE `"+ctName+"` set kokonut_LAST_LOGIN_DATE=NOW() WHERE kokonut_IDX='"+kokonut_IDX+"'";
 			log.info("userPwUpdateQuery : "+userPwUpdateQuery);
 			dynamicUserRepositoryCustom.userCommonTable(userPwUpdateQuery);
 
 			log.info("최근 로그인 업데이트 성공");
-
-			isSuccess = true;
 		}catch (Exception e){
 			log.info("최근 로그인 업데이트 실패");
 			log.error("e : "+e.getMessage());
 		}
 
-		return isSuccess;
 	}
 
 	// 정상사용자 리스트 조회

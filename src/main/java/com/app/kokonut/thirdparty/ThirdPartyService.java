@@ -510,7 +510,7 @@ public class ThirdPartyService {
 			return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_00.getCode(),ResponseErrorCode.ERROR_CODE_00.getDesc()));
 		}
 
-		return ResponseEntity.ok(res.success(data));
+		return ResponseEntity.ok(res.apisuccess(data));
 	}
 
 }

@@ -62,36 +62,79 @@ public class AuthApiService {
         this.decrypCountHistoryService = decrypCountHistoryService;
     }
 
+    // 아이디 중복확인
+    public ResponseEntity<Map<String, Object>> checkId(String kokonutId, JwtFilterDto jwtFilterDto) {
+        log.info("checkId 호출");
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+//        log.info("kokonutId : "+kokonutId);
+
+        if(kokonutId.equals("")) {
+            return ResponseEntity.ok(res.apifail(ResponseErrorCode.ERROR_CODE_23.getCode(),ResponseErrorCode.ERROR_CODE_23.getDesc()));
+        }
+
+        String email = jwtFilterDto.getEmail();
+
+        AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+        String cpCode = adminCompanyInfoDto.getCompanyCode();
+        String basicTable = cpCode+"_1";
+
+        Long result = kokonutUserService.selectUserIdx(basicTable, kokonutId);
+//        log.info("result : "+result);
+
+        if(result == 0) {
+            data.put("result","사용가능한 아이디 입니다.");
+        } else {
+            data.put("result","이미 사용중인 아이디 입니다.");
+        }
+
+        return ResponseEntity.ok(res.apisuccess(data));
+    }
+
     // API용 개인정보(고객의 고객) 로그인
-    public ResponseEntity<Map<String, Object>>  apiLogin(AuthApiLoginDto authApiLoginDto, JwtFilterDto jwtFilterDto) {
+    public ResponseEntity<Map<String, Object>> apiLogin(AuthApiLoginDto authApiLoginDto, JwtFilterDto jwtFilterDto) throws Exception {
         log.info("apiLogin 호출");
 
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
 
-        log.info("authApiLoginDto : "+authApiLoginDto);
+//        log.info("authApiLoginDto : "+authApiLoginDto);
+        if(authApiLoginDto.getKokonutId() == null) {
+            return ResponseEntity.ok(res.apifail(ResponseErrorCode.ERROR_CODE_19.getCode(),ResponseErrorCode.ERROR_CODE_19.getDesc()));
+        }
+
+        if(authApiLoginDto.getKokonutPw() == null) {
+            return ResponseEntity.ok(res.apifail(ResponseErrorCode.ERROR_CODE_20.getCode(),ResponseErrorCode.ERROR_CODE_20.getDesc()));
+        }
+
         String email = jwtFilterDto.getEmail();
 
         AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
-//        Long adminId = adminCompanyInfoDto.getAdminId();
-        String companyCode = adminCompanyInfoDto.getCompanyCode();
-//        log.info("adminId : "+adminId);
-//        log.info("companyCode : "+companyCode);
-        String basicTable = companyCode+"_1";
+        String cpCode = adminCompanyInfoDto.getCompanyCode();
+        String basicTable = cpCode+"_1";
 
-        if(authApiLoginDto.getKokonutId() == null) {
-            return ResponseEntity.ok(res.apifail("KOKONUT_01", "아이디를 입력해주세요."));
-        }
+//        log.info("authApiLoginDto.getKokonutId() : "+authApiLoginDto.getKokonutId());
+//        log.info("authApiLoginDto.getKokonutPw() : "+authApiLoginDto.getKokonutPw());
 
-        String result = kokonutUserService.passwordConfirm(basicTable, authApiLoginDto.getKokonutId(), authApiLoginDto.getKokonutPw());
-        log.info("result : "+result);
-        data.put("IDX", result);
+        // 암호화 처리하기
+        AwsKmsResultDto awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(cpCode);
+        String kokonutPw = AESGCMcrypto.encrypt(authApiLoginDto.getKokonutPw().getBytes(StandardCharsets.UTF_8), awsKmsResultDto.getSecretKey(),
+                Base64.getDecoder().decode(awsKmsResultDto.getIvKey()));
+
+        String result = kokonutUserService.passwordConfirm(basicTable, authApiLoginDto.getKokonutId(), kokonutPw);
+//        log.info("result : "+result);
 
         if(result.equals("none")) {
-            return ResponseEntity.ok(res.apifail("KOKONUT_03", "입력한 비밀번호가 맞지 않습니다."));
+            return ResponseEntity.ok(res.apifail(ResponseErrorCode.ERROR_CODE_21.getCode(),ResponseErrorCode.ERROR_CODE_21.getDesc()));
         } else if(result.equals("")) {
-            return ResponseEntity.ok(res.apifail("KOKONUT_02", "존재하지 않은 아이디 입니다."));
+            return ResponseEntity.ok(res.apifail(ResponseErrorCode.ERROR_CODE_22.getCode(),ResponseErrorCode.ERROR_CODE_22.getDesc()));
         } else {
+
+            // 최근 로그인 일시 업데이트처리
+            kokonutUserService.updateLastLoginDate(basicTable, result);
+
             return ResponseEntity.ok(res.apisuccess(data));
         }
 
@@ -174,8 +217,8 @@ public class AuthApiService {
                 // 내용 : 회원가입 할 경우에만 호출할 수 있는 테이블입니다. 회원가입에 필요한 필수사항을 살펴보신 후 호출하신 고유코드를 재확인 해주시길 바랍니다.
                 if(trigger == 0 && !groupKey.equals("1")) {
                     // 내용 : 회원가입 고유코드가 하나라도 존재하지 않을 경우
-                    log.error("");
-                    return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_01.getCode(),ResponseErrorCode.ERROR_CODE_01.getDesc()));
+                    log.error("지정되지 않은 값입니다. 고유코드를 확인해주시고 메뉴얼대로 호출해주시길 바랍니다.");
+                    return ResponseEntity.ok(res.apifail(ResponseErrorCode.ERROR_CODE_01.getCode(),ResponseErrorCode.ERROR_CODE_01.getDesc()));
                 }
 
                 String saveTable = cpCode+"_"+groupKey;
@@ -199,7 +242,7 @@ public class AuthApiService {
                     if(trigger != 2) {
                         // 내용 : 필수항목을 넣지 않거나, 중복전송을 하셨습니다. "1_id"와"1_pw"는 하나씩만 보내주시길 바랍니다.
                         log.error("필수항목을 넣지 않거나, 중복전송을 하셨습니다. '1_id'와 '1_pw'는 하나씩만 보내주시길 바랍니다.");
-                        return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_03.getCode(),ResponseErrorCode.ERROR_CODE_03.getDesc()));
+                        return ResponseEntity.ok(res.apifail(ResponseErrorCode.ERROR_CODE_03.getCode(),ResponseErrorCode.ERROR_CODE_03.getDesc()));
                     }
                 }
 
@@ -209,7 +252,7 @@ public class AuthApiService {
 
                 if(verifiResult == 0) {
                     log.error("존재하지 않은 테이블입니다. 존재하는 고유코드인지 확인해주세요.");
-                    return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_02.getCode(),ResponseErrorCode.ERROR_CODE_02.getDesc()+" 고유코드 : "+groupEntry.getValue()));
+                    return ResponseEntity.ok(res.apifail(ResponseErrorCode.ERROR_CODE_02.getCode(),ResponseErrorCode.ERROR_CODE_02.getDesc()+" 고유코드 : "+groupEntry.getValue()));
                 }
                 else {
                     log.info("인서트 시작");
@@ -267,7 +310,7 @@ public class AuthApiService {
 
                         if (confirm == 0) {
                             log.error("존재하지 않은 고유코드 입니다. 고유코드를 확인 해주세요. 고유코드 : " + key);
-                            return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_04.getCode(),
+                            return ResponseEntity.ok(res.apifail(ResponseErrorCode.ERROR_CODE_04.getCode(),
                                     ResponseErrorCode.ERROR_CODE_04.getDesc() + " 고유코드 : " + key));
                         }
                     }
@@ -285,7 +328,7 @@ public class AuthApiService {
                             if(result) {
                                // result가 true일 경우 존재한다고 판단
                                 log.error("이미 사용중인 아이디입니다.");
-                                return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_10.getCode(),ResponseErrorCode.ERROR_CODE_10.getDesc()));
+                                return ResponseEntity.ok(res.apifail(ResponseErrorCode.ERROR_CODE_10.getCode(),ResponseErrorCode.ERROR_CODE_10.getDesc()));
                             } else {
                                 kphReason = value.charAt(0) + Utils.starsForString(value) + value.substring(value.length() - 1)+" 님의 개인정보 생성";
                             }
@@ -341,7 +384,7 @@ public class AuthApiService {
 
                                 if (!onlyDigits) {
                                     log.error("휴대전화번호에 문자 또는 공백이 포함되어 있습니다. "+ names.get(i)+ " : " + value);
-                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_18.getCode(),
+                                    return ResponseEntity.ok(res.apifail(ResponseErrorCode.ERROR_CODE_18.getCode(),
                                             "휴대전화번호에 "+ResponseErrorCode.ERROR_CODE_18.getDesc()+" 보내신 "+
                                                     names.get(i)+ " : " + value));
                                 }
@@ -355,7 +398,7 @@ public class AuthApiService {
                                 } else {
                                     log.error(names.get(i)+" 형식과 맞지 않습니다. (-)를 제거하고 보내주세요. 보내신 "+
                                             names.get(i)+ " : " + value);
-                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_11.getCode(),
+                                    return ResponseEntity.ok(res.apifail(ResponseErrorCode.ERROR_CODE_11.getCode(),
                                             names.get(i)+ResponseErrorCode.ERROR_CODE_11.getDesc()+" 보내신 "+
                                                     names.get(i)+ " : " + value));
                                 }
@@ -374,7 +417,7 @@ public class AuthApiService {
 
                                 if (!onlyDigits) {
                                     log.error("연락처에 문자 또는 공백이 포함되어 있습니다. "+ names.get(i)+ " : " + value);
-                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_18.getCode(),
+                                    return ResponseEntity.ok(res.apifail(ResponseErrorCode.ERROR_CODE_18.getCode(),
                                             "연락처에 "+ResponseErrorCode.ERROR_CODE_18.getDesc()+" 보내신 "+
                                                     names.get(i)+ " : " + value));
                                 }
@@ -409,7 +452,7 @@ public class AuthApiService {
                                 } else {
                                     log.error(names.get(i)+" 형식과 맞지 않습니다. (-)를 제거하고 보내주세요. 보내신 "+
                                             names.get(i)+ " : " + value);
-                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_11.getCode(),
+                                    return ResponseEntity.ok(res.apifail(ResponseErrorCode.ERROR_CODE_11.getCode(),
                                             names.get(i)+ResponseErrorCode.ERROR_CODE_11.getDesc()+" 보내신 "+
                                                     names.get(i)+ " : " + value));
                                 }
@@ -427,19 +470,36 @@ public class AuthApiService {
                                             emailAddress[1];
                                 } else {
                                     log.error("이메일주소 형식과 맞지 않습니다. 다시 한번 확인해주시길 바랍니다. 보내신 이메일주소 : " + value);
-                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_09.getCode(),
+                                    return ResponseEntity.ok(res.apifail(ResponseErrorCode.ERROR_CODE_09.getCode(),
                                             ResponseErrorCode.ERROR_CODE_09.getDesc() + " 보내신 이메일주소 : " + value));
                                 }
                             }
 
                             // 주민등록번호 or 거소신고번호 or 외국인등록번호
                             else if (names.get(i).equals("주민등록번호") || names.get(i).equals("거소신고번호") || names.get(i).equals("외국인등록번호")) {
+                                boolean onlyDigits = true;
+
+                                // 문자가 있는지 검사하기
+                                for (char c : value.toCharArray()) {
+                                    if (!Character.isDigit(c)) {
+                                        onlyDigits = false;
+                                        break;
+                                    }
+                                }
+
+                                if (!onlyDigits) {
+                                    log.error(names.get(i)+"에 문자 또는 공백이 포함되어 있습니다. "+ names.get(i)+ " : " + value);
+                                    return ResponseEntity.ok(res.apifail(ResponseErrorCode.ERROR_CODE_18.getCode(),
+                                            names.get(i)+"에 "+ResponseErrorCode.ERROR_CODE_18.getDesc()+" 보내신 "+
+                                                    names.get(i)+ " : " + value));
+                                }
+
                                 if(value.length() == 13) {
                                     value = value.substring(0,6)+COLUMN_SEP_TYPE+AESGCMcrypto.encrypt(value.substring(6).getBytes(StandardCharsets.UTF_8), awsKmsResultDto.getSecretKey(),
                                             Base64.getDecoder().decode(awsKmsResultDto.getIvKey()));
                                 } else {
                                     log.error(names.get(i)+" 형식과 맞지 않습니다. (-)를 제외하여 보내주시길 바랍니다. 보내신 "+names.get(i)+" : " + value);
-                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_11.getCode(),
+                                    return ResponseEntity.ok(res.apifail(ResponseErrorCode.ERROR_CODE_11.getCode(),
                                             names.get(i)+ResponseErrorCode.ERROR_CODE_11.getDesc() + " 보내신 "+names.get(i)+" : " + value));
                                 }
                             }
@@ -502,12 +562,52 @@ public class AuthApiService {
 
         } else {
             log.error("파라미터 데이터가 없습니다.");
-            return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_00.getCode(),ResponseErrorCode.ERROR_CODE_00.getDesc()));
+            return ResponseEntity.ok(res.apifail(ResponseErrorCode.ERROR_CODE_00.getCode(),ResponseErrorCode.ERROR_CODE_00.getDesc()));
         }
 
-        return ResponseEntity.ok(res.success(data));
+        return ResponseEntity.ok(res.apisuccess(data));
     }
 
+    // 회원탈퇴
+    public ResponseEntity<Map<String, Object>> secession(String kokonutIdx, JwtFilterDto jwtFilterDto) {
+        log.info("secession 호출");
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+        log.info("kokonutIdx : "+kokonutIdx);
+
+        if(kokonutIdx.equals("")) {
+            log.error("탈퇴할 회원을 선택해주세요.");
+            return ResponseEntity.ok(res.apifail(ResponseErrorCode.ERROR_CODE_24.getCode(),ResponseErrorCode.ERROR_CODE_24.getDesc()));
+        }
+
+        String email = jwtFilterDto.getEmail();
+
+        AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+        String cpCode = adminCompanyInfoDto.getCompanyCode();
+        String basicTable = cpCode+"_1";
+
+        kokonutUserService.deleteUserTable(basicTable, kokonutIdx);
+        data.put("result","회원탈퇴를 완료했습니다.");
+
+        return ResponseEntity.ok(res.apisuccess(data));
+    }
+
+    // 마이페이지
+    public ResponseEntity<Map<String, Object>> mypage(String kokonutIdx, JwtFilterDto jwtFilterDto) {
+        log.info("mypage 호출");
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+        log.info("kokonutIdx : "+kokonutIdx);
+
+        String email = jwtFilterDto.getEmail();
+
+        AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+        String cpCode = adminCompanyInfoDto.getCompanyCode();
+        String basicTable = cpCode+"_1";
 
 
 
@@ -518,5 +618,31 @@ public class AuthApiService {
 
 
 
+
+
+        return ResponseEntity.ok(res.apisuccess(data));
+    }
+
+    // 내정보 수정
+    public ResponseEntity<Map<String, Object>> update(HashMap<String, Object> paramMap, JwtFilterDto jwtFilterDto) {
+        log.info("update 호출");
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+
+        String email = jwtFilterDto.getEmail();
+
+        AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+        String cpCode = adminCompanyInfoDto.getCompanyCode();
+        String basicTable = cpCode+"_1";
+
+
+
+
+
+
+        return ResponseEntity.ok(res.apisuccess(data));
+    }
 
 }

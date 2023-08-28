@@ -176,6 +176,12 @@ public enum ResponseErrorCode {
     ERROR_CODE_16("ERROR_CODE_16", "변수로 요청된 고유코드가 존재하지 않습니다. 보내신 고유코드를 다시 한번 확인해주시길 바랍니다."),
     ERROR_CODE_17("ERROR_CODE_17", "알림톡 보낼 대상이 존재하지 않습니다."),
     ERROR_CODE_18("ERROR_CODE_18", "문자 또는 공백이 포함되어 있습니다."),
+    ERROR_CODE_19("ERROR_CODE_19", "아이디를 입력해주세요."),
+    ERROR_CODE_20("ERROR_CODE_20", "비밀번호를 입력해주세요."),
+    ERROR_CODE_21("ERROR_CODE_21", "존재하지 않은 아이디 입니다."),
+    ERROR_CODE_22("ERROR_CODE_22", "비밀번호가 일치하지 않습니다."),
+    ERROR_CODE_23("ERROR_CODE_23", "중복확인 할 아이디를 입력해주세요."),
+    ERROR_CODE_24("ERROR_CODE_24", "탈퇴할 회원을 선택해주세요."),
 
     ERROR_KOKONUT("ERROR_KOKONUT", "알 수 없는 에러가 발생했습니다. 코코넛에게 해당 상황을 피드백 해주세요!"),
     ERROR_CODE_96("ERROR_CODE_96", "헤더에 APIKey가 존재하지 않습니다. APIKey를 담아 보내주세요."), // 400

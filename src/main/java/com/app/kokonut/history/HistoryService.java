@@ -104,7 +104,7 @@ public class HistoryService {
         Long activityHistoryId;
 
         // 활동이력 저장 -> 비정상 모드
-        activityHistoryId = insertHistory(2, adminId, activityCode,
+        activityHistoryId = insertHistory(4, adminId, activityCode,
                 cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
 
         Page<HistoryListDto> historyListDtos = historyRepository.findByHistoryPage(historySearchDto, pageable);

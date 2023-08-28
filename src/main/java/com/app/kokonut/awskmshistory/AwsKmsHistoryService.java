@@ -53,7 +53,7 @@ public class AwsKmsHistoryService {
 
     // AWS 호출금액 -> 한 건당 0.03$
     public double findByMonthKmsPrice(String cpCode, String akhYyyymm) {
-        log.info("awskmsHistoryCount 호출");
+        log.info("findByMonthKmsPrice 호출");
 
         Long result = awsKmsHistoryRepository.findByMonthKmsPrice(cpCode, akhYyyymm);
         log.info("KMS 총 호출 수 : "+result);
