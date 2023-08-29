@@ -209,6 +209,7 @@ public class NiceIdService {
 					} else {
 						if(state.equals("3")) {
 							log.info("비밀번호찾기 본인인증");
+							data.put("keyEmail", knEmail);
 						} else if(state.equals("4")) {
 							log.info("OTP변경 본인인증");
 						} else { // state.equals("7")
