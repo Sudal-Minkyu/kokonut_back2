@@ -11,7 +11,6 @@ import com.app.kokonut.common.realcomponent.CommonUtil;
 import com.app.kokonut.common.realcomponent.Utils;
 import com.app.kokonut.company.companydatakey.CompanyDataKeyService;
 import com.app.kokonut.history.extra.apicallhistory.ApiCallHistoryService;
-import com.app.kokonut.history.extra.decrypcounthistory.DecrypCountHistoryService;
 import com.app.kokonut.history.extra.encrypcounthistory.EncrypCountHistoryService;
 import com.app.kokonut.privacyhistory.PrivacyHistoryService;
 import com.app.kokonut.privacyhistory.dtos.PrivacyHistoryCode;
@@ -48,10 +47,12 @@ public class AuthApiService {
 
     private final ApiCallHistoryService apiCallHistoryService;
     private final EncrypCountHistoryService encrypCountHistoryService;
-    private final DecrypCountHistoryService decrypCountHistoryService;
 
     @Autowired
-    public AuthApiService(AdminRepository adminRepository, CompanyDataKeyService companyDataKeyService, KokonutUserService kokonutUserService, PrivacyHistoryService privacyHistoryService, DynamicUserRepositoryCustom dynamicUserRepositoryCustom, ApiCallHistoryService apiCallHistoryService, EncrypCountHistoryService encrypCountHistoryService, DecrypCountHistoryService decrypCountHistoryService){
+    public AuthApiService(AdminRepository adminRepository, CompanyDataKeyService companyDataKeyService,
+                          KokonutUserService kokonutUserService, PrivacyHistoryService privacyHistoryService,
+                          DynamicUserRepositoryCustom dynamicUserRepositoryCustom, ApiCallHistoryService apiCallHistoryService,
+                          EncrypCountHistoryService encrypCountHistoryService){
         this.adminRepository = adminRepository;
         this.companyDataKeyService = companyDataKeyService;
         this.dynamicUserRepositoryCustom = dynamicUserRepositoryCustom;
@@ -59,7 +60,6 @@ public class AuthApiService {
         this.privacyHistoryService = privacyHistoryService;
         this.apiCallHistoryService = apiCallHistoryService;
         this.encrypCountHistoryService = encrypCountHistoryService;
-        this.decrypCountHistoryService = decrypCountHistoryService;
     }
 
     // 아이디 중복확인
@@ -69,17 +69,20 @@ public class AuthApiService {
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
 
-//        log.info("kokonutId : "+kokonutId);
-
-        if(kokonutId.equals("")) {
-            return ResponseEntity.ok(res.apifail(ResponseErrorCode.ERROR_CODE_23.getCode(),ResponseErrorCode.ERROR_CODE_23.getDesc()));
-        }
-
         String email = jwtFilterDto.getEmail();
 
         AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
         String cpCode = adminCompanyInfoDto.getCompanyCode();
         String basicTable = cpCode+"_1";
+
+        // API 호출 로그 저장
+        apiCallHistoryService.apiCallHistorySave(cpCode, "/v3/api/Auth/checkId");
+
+//        log.info("kokonutId : "+kokonutId);
+
+        if(kokonutId.equals("")) {
+            return ResponseEntity.ok(res.apifail(ResponseErrorCode.ERROR_CODE_23.getCode(),ResponseErrorCode.ERROR_CODE_23.getDesc()));
+        }
 
         Long result = kokonutUserService.selectUserIdx(basicTable, kokonutId);
 //        log.info("result : "+result);
@@ -100,6 +103,15 @@ public class AuthApiService {
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
 
+        String email = jwtFilterDto.getEmail();
+
+        AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+        String cpCode = adminCompanyInfoDto.getCompanyCode();
+        String basicTable = cpCode+"_1";
+
+        // API 호출 로그 저장
+        apiCallHistoryService.apiCallHistorySave(cpCode, "/v3/api/Auth/apiLogin");
+
 //        log.info("authApiLoginDto : "+authApiLoginDto);
         if(authApiLoginDto.getKokonutId() == null) {
             return ResponseEntity.ok(res.apifail(ResponseErrorCode.ERROR_CODE_19.getCode(),ResponseErrorCode.ERROR_CODE_19.getDesc()));
@@ -108,12 +120,6 @@ public class AuthApiService {
         if(authApiLoginDto.getKokonutPw() == null) {
             return ResponseEntity.ok(res.apifail(ResponseErrorCode.ERROR_CODE_20.getCode(),ResponseErrorCode.ERROR_CODE_20.getDesc()));
         }
-
-        String email = jwtFilterDto.getEmail();
-
-        AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
-        String cpCode = adminCompanyInfoDto.getCompanyCode();
-        String basicTable = cpCode+"_1";
 
 //        log.info("authApiLoginDto.getKokonutId() : "+authApiLoginDto.getKokonutId());
 //        log.info("authApiLoginDto.getKokonutPw() : "+authApiLoginDto.getKokonutPw());
@@ -575,18 +581,21 @@ public class AuthApiService {
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
 
-        log.info("kokonutIdx : "+kokonutIdx);
-
-        if(kokonutIdx.equals("")) {
-            log.error("탈퇴할 회원을 선택해주세요.");
-            return ResponseEntity.ok(res.apifail(ResponseErrorCode.ERROR_CODE_24.getCode(),ResponseErrorCode.ERROR_CODE_24.getDesc()));
-        }
-
         String email = jwtFilterDto.getEmail();
 
         AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
         String cpCode = adminCompanyInfoDto.getCompanyCode();
         String basicTable = cpCode+"_1";
+
+//        log.info("kokonutIdx : "+kokonutIdx);
+
+        // API 호출 로그 저장
+        apiCallHistoryService.apiCallHistorySave(cpCode, "/v3/api/Auth/secession");
+
+        if(kokonutIdx.equals("")) {
+            log.error("탈퇴할 회원을 선택해주세요.");
+            return ResponseEntity.ok(res.apifail(ResponseErrorCode.ERROR_CODE_24.getCode(),ResponseErrorCode.ERROR_CODE_24.getDesc()));
+        }
 
         kokonutUserService.deleteUserTable(basicTable, kokonutIdx);
         data.put("result","회원탈퇴를 완료했습니다.");
@@ -609,6 +618,8 @@ public class AuthApiService {
         String cpCode = adminCompanyInfoDto.getCompanyCode();
         String basicTable = cpCode+"_1";
 
+        // API 호출 로그 저장
+        apiCallHistoryService.apiCallHistorySave(cpCode, "/v3/api/Auth/mypage");
 
 
 
@@ -616,11 +627,11 @@ public class AuthApiService {
 
 
 
+        log.error("존재하지 않은 'kokonut_IDX' 입니다.");
+        return ResponseEntity.ok(res.apifail(ResponseErrorCode.ERROR_CODE_25.getCode(),ResponseErrorCode.ERROR_CODE_25.getDesc()));
 
 
-
-
-        return ResponseEntity.ok(res.apisuccess(data));
+//        return ResponseEntity.ok(res.apisuccess(data));
     }
 
     // 내정보 수정
@@ -630,19 +641,26 @@ public class AuthApiService {
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
 
-
         String email = jwtFilterDto.getEmail();
 
         AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
         String cpCode = adminCompanyInfoDto.getCompanyCode();
         String basicTable = cpCode+"_1";
 
+        // API 호출 로그 저장
+        apiCallHistoryService.apiCallHistorySave(cpCode, "/v3/api/Auth/update");
 
 
 
 
+        log.error("'kokonut_IDX'가 존재하지 않습니다.");
+        return ResponseEntity.ok(res.apifail(ResponseErrorCode.ERROR_CODE_26.getCode(),ResponseErrorCode.ERROR_CODE_26.getDesc()));
 
-        return ResponseEntity.ok(res.apisuccess(data));
+//        log.error("수정할 데이터가 존재하지 않습니다.");
+//        return ResponseEntity.ok(res.apifail(ResponseErrorCode.ERROR_CODE_27.getCode(),ResponseErrorCode.ERROR_CODE_27.getDesc()));
+
+
+//        return ResponseEntity.ok(res.apisuccess(data));
     }
 
 }
