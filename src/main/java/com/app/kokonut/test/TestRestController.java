@@ -37,7 +37,8 @@ public class TestRestController {
     private final AlimtalkSendService alimtalkSendService;
 
     @Autowired
-    public TestRestController(MailSender mailSender, EmailService emailService, NaverCloudPlatformService naverCloudPlatformService, AlimtalkSendService alimtalkSendService){
+    public TestRestController(MailSender mailSender, EmailService emailService,
+                              NaverCloudPlatformService naverCloudPlatformService, AlimtalkSendService alimtalkSendService){
         this.mailSender = mailSender;
         this.emailService = emailService;
         this.naverCloudPlatformService = naverCloudPlatformService;

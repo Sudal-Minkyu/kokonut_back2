@@ -28,68 +28,37 @@ public class Inquiry {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long iqId;
 
-    /**
-     * 1 : 협업문의 ,2 : 도입문의
-     */
-    @Column(name = "iq_state")
-    @ApiModelProperty("1 : 협업문의 ,2 : 도입문의")
-    private Integer iqState;
-
-    /**
-     * 제목
-     */
-    @ApiModelProperty("제목")
-    @Column(name = "iq_title")
-    private String iqTitle;
-
-    /**
-     * 분야 - 1 : 스타트업, 2 : 중소기업, 3 : 중견기업/대기업, 4 : 소상공인, 5 : 단체/협회, 6 : 기타
-     */
-    @ApiModelProperty("분야 - 1 : 스타트업, 2 : 중소기업, 3 : 중견기업/대기업, 4 : 소상공인, 5 : 단체/협회, 6 : 기타")
-    @Column(name = "iq_field", nullable = false)
-    private Integer iqField;
-
-    /**
-     * 작성자
-     */
     @Column(name = "iq_writer")
     @ApiModelProperty("작성자")
     private String iqWriter;
 
-    /**
-     * 이메일
-     */
+    @Column(name = "iq_state")
+    @ApiModelProperty("선호 온보딩 방식  -> 1. 오프라인 미팅 2. 온라인 교육 3. 상관없음")
+    private Integer iqState;
+
+    @ApiModelProperty("회사명")
+    @Column(name = "iq_company")
+    private String iqCompany;
+
+    @ApiModelProperty("서비스명")
+    @Column(name = "iq_service")
+    private Integer iqService;
+
+    @Column(name = "iq_phone")
+    @ApiModelProperty("연락처(휴대전화)")
+    private String iqPhone;
+
     @Column(name = "iq_email")
     @ApiModelProperty("이메일")
     private String iqEmail;
 
-    /**
-     * 내용
-     */
     @Lob
     @Column(columnDefinition = "LONGTEXT", name="iq_contents")
-    @ApiModelProperty("내용")
+    @ApiModelProperty("온보딩 진행 시 요청사항 (이전에 내용칸 활용)")
     private String iqContents;
 
-    /**
-     * 등록 날짜
-     */
     @ApiModelProperty("등록 날짜")
     @Column(name = "insert_date", nullable = false)
     private LocalDateTime insert_date;
-
-    /**
-     * 수정자 이름
-     */
-    @ApiModelProperty("수정자 email")
-    @Column(name = "modify_email")
-    private String modify_email;
-
-    /**
-     * 수정 날짜
-     */
-    @ApiModelProperty("수정 날짜")
-    @Column(name = "modify_date")
-    private LocalDateTime modify_date;
 
 }

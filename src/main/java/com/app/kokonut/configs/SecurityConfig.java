@@ -37,7 +37,7 @@ public class SecurityConfig {
             .antMatchers(
                 // 필터 제외항목 API : JWT, ApiKey 모두 불필요한 API
                 "/favicon", "/swagger*/**", "/v2/api-docs", "/webjars/**",
-                "/v1/api/Auth/**", "/v1/api/NiceId/**", "/v1/api/Test/**"
+                "/v1/api/Auth/**", "/v1/api/NiceId/**", "/v1/api/Test/**", "/v1/api/Inquiry/send"
                 // 임시 제외항목 API : JWT, ApiKey 모두 필요한 API
 //                "/v2/api/**"
             );

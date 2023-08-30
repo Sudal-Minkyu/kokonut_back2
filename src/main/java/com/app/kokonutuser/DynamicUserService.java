@@ -2320,6 +2320,10 @@ public class DynamicUserService {
 			resultQuery.append("GROUP BY kokonut.kokonut_IDX");
 			log.info("resultQuery : "+resultQuery);
 
+			// 검색 쿼리의 총합호출
+			int totalCount = dynamicUserRepositoryCustom.privacyListTotal("SELECT COUNT(*) FROM ("+ resultQuery +") as totalCount");
+			log.info("totalCount : "+totalCount);
+
 			// 검색 쿼리호출
 			if(kokonutSearchDto.getLimitNum() > 0) {
 				resultQuery.append(" LIMIT ").append(kokonutSearchDto.getLimitNum()).append(" OFFSET ").append(offset);
@@ -2327,10 +2331,6 @@ public class DynamicUserService {
 
 			List<Map<String, Object>> privacyList = dynamicUserRepositoryCustom.privacyListPagedData(String.valueOf(resultQuery));
 			log.info("privacyList : "+privacyList);
-
-			// 검색 쿼리의 총합호출
-			int totalCount = dynamicUserRepositoryCustom.privacyListTotal("SELECT COUNT(*) FROM ("+ resultQuery +") as totalCount");
-			log.info("totalCount : "+totalCount);
 
 			kphReason.append("총 ").append(totalCount).append("건");
 

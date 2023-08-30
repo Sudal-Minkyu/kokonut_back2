@@ -10,6 +10,6 @@ import org.springframework.stereotype.Repository;
  * Remark :
  */
 @Repository
-public interface InquiryRepository extends JpaRepository<Inquiry, Long>, InquiryRepositoryCustom {
+public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
 
 }

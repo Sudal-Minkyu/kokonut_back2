@@ -6,6 +6,7 @@ import com.app.kokonut.admin.AdminService;
 import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
 import com.app.kokonut.admin.dtos.AdminCompanySettingDto;
 import com.app.kokonut.admin.enums.AuthorityRole;
+import com.app.kokonut.alimtalk.AlimtalkSendService;
 import com.app.kokonut.auth.dtos.*;
 import com.app.kokonut.auth.jwt.been.JwtTokenProvider;
 import com.app.kokonut.auth.jwt.dto.AuthRequestDto;
@@ -38,6 +39,7 @@ import com.app.kokonut.history.dtos.ActivityCode;
 import com.app.kokonut.history.extra.decrypcounthistory.DecrypCountHistoryService;
 import com.app.kokonutuser.KokonutUserService;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -69,10 +71,12 @@ import java.util.regex.Pattern;
 @Service
 public class AuthService {
 
+
     private final AdminService adminService;
     private final HistoryService historyService;
     private final KokonutUserService kokonutUserService;
     private final DecrypCountHistoryService decrypCountHistoryService;
+    private final AlimtalkSendService alimtalkSendService;
 
     private final AwsKmsUtil awsKmsUtil;
     private final WhoisUtil whoisUtil;
@@ -99,7 +103,8 @@ public class AuthService {
 
     @Autowired
     public AuthService(AdminService adminService, HistoryService historyService,
-                       KokonutUserService kokonutUserService, DecrypCountHistoryService decrypCountHistoryService, AdminRepository adminRepository,
+                       KokonutUserService kokonutUserService, DecrypCountHistoryService decrypCountHistoryService,
+                       AlimtalkSendService alimtalkSendService, AdminRepository adminRepository,
                        AwsKmsUtil awsKmsUtil, WhoisUtil whoisUtil, KeyGenerateService keyGenerateService,
                        AwsKmsHistoryService awsKmsHistoryService, CompanyRepository companyRepository,
                        CompanyDataKeyRepository companyDataKeyRepository, CompanyTableRepository companyTableRepository,
@@ -112,6 +117,7 @@ public class AuthService {
         this.historyService = historyService;
         this.kokonutUserService = kokonutUserService;
         this.decrypCountHistoryService = decrypCountHistoryService;
+        this.alimtalkSendService = alimtalkSendService;
         this.adminRepository = adminRepository;
         this.awsKmsUtil = awsKmsUtil;
         this.whoisUtil = whoisUtil;
@@ -550,6 +556,32 @@ public class AuthService {
 
             // 호출 카운팅 올리기
             awsKmsHistoryService.awskmsHistoryCount(cpCode);
+
+            String randomStr = Utils.getAlphabetStr(5);
+            String app_user_id = "app_user_id_"+randomStr; // app_user_id 변수
+
+            List<JSONObject> bottonJsonList = new ArrayList<>();
+            JSONObject bottonJson = new JSONObject();
+            bottonJson.put("name", "온보딩 신청하기");
+            bottonJson.put("type", "WL");
+            bottonJson.put("url_pc", "https://kokonut.me/#/landing");
+            bottonJson.put("url_mobile", "https://kokonut.me/#/landing");
+            bottonJsonList.add(bottonJson);
+
+            // 알림톡전송
+            alimtalkSendService.kokonutAlimtalkSend("f1d0081b74b59cedc2648ea2da6fa6788e26c181", "kokonut_template_02", "[안내]\n" +
+                    saveAdmin.getKnName()+" 님, 코코넛에 오신 것을 환영합니다!\n" +
+                    "\n" +
+                    "코코넛은 개인정보보호법을 제대로 준수할 수 있도록\n" +
+                    "1) 수집한 개인정보를 법에 맞게 제대로 관리하는 기능\n" +
+                    "2) 수집한 개인정보를 안전하게 보호하는 기술적인 보안\n" +
+                    "을 모두 제공하는 구독형 서비스입니다.\n" +
+                    "\n" +
+                    "처음이라 어렵다면?! 코코넛 온보딩을 진행하고 있습니다!\n" +
+                    "차근차근 도와드릴게요!", saveAdmin.getKnPhoneNumber(), app_user_id, "1", bottonJsonList);
+
+            // 슬랙 메세지전송
+            SlackUtil.registerAlarmSend(saveAdmin.getKnName()+"님이 '"+LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))+"' 에 회원가입 하셨습니다.");
         }
 
         log.info("사업자 정보 저장 saveAdmin : "+saveAdmin.getAdminId());

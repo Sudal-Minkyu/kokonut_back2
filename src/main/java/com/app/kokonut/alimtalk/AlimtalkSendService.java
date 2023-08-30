@@ -275,17 +275,118 @@ public class AlimtalkSendService {
 
             // JSON 을 활용한 body data 생성
             JSONObject bodyJson = new JSONObject();
-            bodyJson.put("profile_key", profileKey);
+            bodyJson.put("profile_key", profileKey); // 프로파일키
             bodyJson.put("msgid", "알림톡전송_" + Utils.getRamdomStr(5));
             bodyJson.put("message_type", "AT");
-            bodyJson.put("template_code", templateCode);
-            bodyJson.put("message", message);
+            bodyJson.put("template_code", templateCode); // 템플릿코드
+            bodyJson.put("message", message); // 메세지
             bodyJson.put("reserved_time", "00000000000000");
+
             if(receiver_num != null) {
-                bodyJson.put("receiver_num", receiver_num);
+                bodyJson.put("receiver_num", receiver_num); // 전송할번호
             }
             if(app_user_id != null) {
-                bodyJson.put("app_user_id", app_user_id);
+                bodyJson.put("app_user_id", app_user_id); // 메세지
+            }
+
+            // JSON 객체를 배열에 추가
+            JSONArray jsonArray = new JSONArray();
+            jsonArray.put(bodyJson);
+
+            String body = jsonArray.toString();
+
+            DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
+            wr.write(body.getBytes());
+            wr.flush();
+            wr.close();
+
+            // 응답 데이터 얻기
+            BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder();
+
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+
+            int responseCode = conn.getResponseCode();
+            String data = sb.toString();
+
+            br.close();
+            conn.disconnect();
+
+            log.info("responseCode: {}, data: {}", responseCode, data);
+
+            if (responseCode == 200) {
+                JSONArray data_jsonArray = new JSONArray(data);
+
+                // "result" 값 추출
+                String result = data_jsonArray.getJSONObject(0).getString("result");
+                log.info("result : "+result);
+
+                if(!result.equals("N")) {
+                    log.info("알림톡전송 성공");
+                    return "Success";
+                }else {
+                    log.info("알림톡전송 실패");
+                    return "Fail";
+                }
+
+            }else {
+                log.info("알림톡전송 실패");
+                return "Fail";
+            }
+        } catch (Exception e) {
+            log.error("예외처리 : "+e);
+            log.error("예외처리 메세지 : "+e.getMessage());
+        }
+
+        return null;
+    }
+
+
+    // 코코넛전용 알림톡 전송
+    public String kokonutAlimtalkSend(String profileKey, String templateCode, String message, String receiver_num, String app_user_id,
+                                      String bottonCheck, List<JSONObject> bottonJsonList) {
+        log.info("kokonutAlimtalkSend 호출");
+
+        String url = alimHost + "/v2/" + profileKey + "/sendMessage";
+        log.info("url : " + url);
+
+        try {
+            URL apiurl = new URL(url);
+
+            HttpURLConnection conn = (HttpURLConnection) apiurl.openConnection();
+
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-type", "application/json");
+            conn.setRequestProperty("userId", userId);
+            conn.setUseCaches(false);
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+
+            // JSON 을 활용한 body data 생성
+            JSONObject bodyJson = new JSONObject();
+            bodyJson.put("profile_key", profileKey); // 프로파일키
+            bodyJson.put("msgid", "알림톡전송_" + Utils.getRamdomStr(5));
+            bodyJson.put("message_type", "AT");
+            bodyJson.put("template_code", templateCode); // 템플릿코드
+            bodyJson.put("message", message); // 메세지
+            bodyJson.put("reserved_time", "00000000000000");
+
+            if(bottonCheck.equals("1")) {
+                int num = 1;
+                for (JSONObject jsonObject : bottonJsonList) {
+                    bodyJson.put("button"+num, jsonObject);
+                    num++;
+                }
+            }
+
+            if(receiver_num != null) {
+                bodyJson.put("receiver_num", receiver_num); // 전송할번호
+            }
+            if(app_user_id != null) {
+                bodyJson.put("app_user_id", app_user_id); // 메세지
             }
 
             // JSON 객체를 배열에 추가

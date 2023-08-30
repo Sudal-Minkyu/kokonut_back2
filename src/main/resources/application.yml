@@ -128,3 +128,7 @@ kokonut:
     userId: ${KOKONUT_HAPPYTALK_USERID}
     alimHost: ${KOKONUT_HAPPYTALK_ALIMHOST}
     bizHost: ${KOKONUT_HAPPYTALK_BIZHOST}
+
+  slack:
+    token: ${KOKONUT_SLACK_TOKEN}
+    channel: ${KOKONUT_SLACK_CHANNEL}

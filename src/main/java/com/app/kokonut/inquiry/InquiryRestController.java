@@ -23,11 +23,8 @@ public class InquiryRestController {
 		this.inquiryService = inquiryService;
 	}
 
-	/**
-	 * 도입문의 및 협업문의 저장
-	 */
 	@PostMapping(value = "/send")
-	public ResponseEntity<Map<String,Object>> send(@RequestBody InquirySaveDto inquirySaveDto) throws IOException {
+	public ResponseEntity<Map<String,Object>> send(@RequestBody InquirySaveDto inquirySaveDto) {
 		return inquiryService.send(inquirySaveDto);
 	}
 
