@@ -211,7 +211,7 @@ public class PaymentService {
 			// 서비스 금액 호출
 			int payServiceAmount = 0;
 			if(companyPaymentReservationListDto.getCpiPayType().equals("0") && !companyPaymentReservationListDto.getCpiValidStart().isBefore(localDate)) {
-				payServiceAmount = Utils.kokonutMonthPrice(paymentPrivacyCountMonthAverageDto.getMonthAverageCount());
+				payServiceAmount = CommonUtil.kokonutMonthPrice(paymentPrivacyCountMonthAverageDto.getMonthAverageCount());
 
 				// 만약 구독해지한 기업일 경우 부분 결제
 				if(companyPaymentReservationListDto.getSubscribeCheck().equals("1")) {
@@ -231,7 +231,7 @@ public class PaymentService {
 						dateCount = ChronoUnit.DAYS.between(dateToCheckWithoutTime, localDate);
 					}
 
-					payServiceAmount = Utils.calculateUsedAmount(payServiceAmount, localDate, (int)dateCount);
+					payServiceAmount = CommonUtil.calculateUsedAmount(payServiceAmount, localDate, (int)dateCount);
 					log.info("kokonutPay 호출 - 해지후 중간결제 금액 : " + payServiceAmount);
 				}
 			}

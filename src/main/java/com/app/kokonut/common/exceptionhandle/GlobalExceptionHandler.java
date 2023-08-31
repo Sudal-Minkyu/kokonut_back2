@@ -5,6 +5,7 @@ import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.configs.exception.KokonutAPIException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -43,12 +44,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity.ok(res.fail(e.getErrorCode().getCode(),e.getErrorCode().getDesc()));
     }
 
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> handleKokonutAPIHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+        AjaxResponse res = new AjaxResponse();
+        log.error("에러내용 : JSON 데이터가 잘못 기입됐습니다. 확인해주시고 다시 호출해주세요.");
+        return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_KOKONUT_02.getCode(),ResponseErrorCode.ERROR_KOKONUT_02.getDesc()));
+    }
+
     // 무슨에러가 발생했는지 모를때
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleKokonutException(){
         AjaxResponse res = new AjaxResponse();
-        log.error("에러내용 : "+ResponseErrorCode.ERROR_KOKONUT.getDesc());
-        return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_KOKONUT.getCode(),ResponseErrorCode.ERROR_KOKONUT.getDesc()));
+        log.error("에러내용 : "+ResponseErrorCode.ERROR_KOKONUT_01.getDesc());
+        return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_KOKONUT_01.getCode(),ResponseErrorCode.ERROR_KOKONUT_01.getDesc()));
     }
 
     @ExceptionHandler(AccessDeniedException.class)

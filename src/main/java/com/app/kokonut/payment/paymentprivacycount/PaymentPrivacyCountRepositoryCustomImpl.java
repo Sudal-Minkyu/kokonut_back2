@@ -30,7 +30,6 @@ public class PaymentPrivacyCountRepositoryCustomImpl extends QuerydslRepositoryS
         super(PaymentPrivacyCount.class);
     }
 
-
     @Override
     public PaymentPrivacyCountMonthAverageDto findByMonthPrivacyCount(String cpCode, String ctName, LocalDate firstDate, LocalDate lastDate) {
 
