@@ -1,4 +1,4 @@
-package com.app.kokonut.common.realcomponent;
+package com.app.kokonut.common;
 
 import com.app.kokonut.auth.dtos.AuthPhoneCheckDto;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -21,9 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.SecureRandom;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;

@@ -1,30 +1,27 @@
 package com.app.kokonut.configs;
 
-import com.app.kokonut.common.AjaxResponse;
 import lombok.extern.slf4j.Slf4j;
+import net.lingala.zip4j.io.outputstream.ZipOutputStream;
+import net.lingala.zip4j.model.ZipParameters;
+import net.lingala.zip4j.model.enums.CompressionMethod;
+import net.lingala.zip4j.model.enums.EncryptionMethod;
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFDataFormat;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import net.lingala.zip4j.ZipFile;
-import net.lingala.zip4j.model.ZipParameters;
-import net.lingala.zip4j.model.enums.EncryptionMethod;
-import net.lingala.zip4j.model.enums.CompressionMethod;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import net.lingala.zip4j.io.outputstream.ZipOutputStream;
+
 import static org.apache.poi.ss.usermodel.FillPatternType.SOLID_FOREGROUND;
 
 @Slf4j

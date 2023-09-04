@@ -5,7 +5,7 @@ import com.app.kokonut.admin.AdminRepository;
 import com.app.kokonut.auth.jwt.dto.RedisDao;
 import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.ResponseErrorCode;
-import com.app.kokonut.common.realcomponent.Utils;
+import com.app.kokonut.common.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;

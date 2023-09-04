@@ -1,4 +1,4 @@
-package com.app.kokonut.common.realcomponent;
+package com.app.kokonut.common;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.HttpMethod;
@@ -147,7 +147,6 @@ public class AwsS3Util {
 
         return preSignedURL;
     }
-
 
 
 }

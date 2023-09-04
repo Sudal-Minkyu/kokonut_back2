@@ -65,17 +65,6 @@ public class AjaxResponse {
 
     // Pages 형태의 조회 API 반환 함수
     // 리스트를 출력해야한다는 상황에 해당 함수사용
-    public Map<String, Object> ResponseSuccessPage(HashMap<String,Object> sendData){
-        res.clear();
-        res.put("sendData",sendData);
-        res.put("status",200);
-        res.put("timestamp", new Timestamp(System.currentTimeMillis()));
-        res.put("message", "SUCCESS");
-        return this.res;
-    }
-
-    // Pages 형태의 조회 API 반환 함수
-    // 리스트를 출력해야한다는 상황에 해당 함수사용
     public Map<String, Object> ResponseEntityPage(Page pages){
         res.clear();
         res.put("status",200);

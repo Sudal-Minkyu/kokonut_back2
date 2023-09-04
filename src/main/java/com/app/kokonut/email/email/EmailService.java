@@ -6,15 +6,14 @@ import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import com.app.kokonut.awskmshistory.dto.AwsKmsResultDto;
 import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.ResponseErrorCode;
-import com.app.kokonut.common.component.ReqUtils;
-import com.app.kokonut.common.realcomponent.AESGCMcrypto;
-import com.app.kokonut.common.realcomponent.CommonUtil;
-import com.app.kokonut.common.realcomponent.Utils;
+import com.app.kokonut.common.AESGCMcrypto;
+import com.app.kokonut.common.CommonUtil;
+import com.app.kokonut.common.ReqUtils;
+import com.app.kokonut.common.Utils;
 import com.app.kokonut.company.companydatakey.CompanyDataKeyService;
 import com.app.kokonut.company.companysetting.CompanySettingRepository;
 import com.app.kokonut.company.companysetting.dtos.CompanySettingEmailDto;
 import com.app.kokonut.configs.MailSender;
-import com.app.kokonut.email.email.dtos.EmailCheckDto;
 import com.app.kokonut.email.email.dtos.EmailListDto;
 import com.app.kokonut.email.email.dtos.EmailSearchDto;
 import com.app.kokonut.email.email.dtos.EmailSendDto;
@@ -29,7 +28,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -72,51 +70,6 @@ public class EmailService {
         this.mailSender = mailSender;
         this.companySettingRepository = companySettingRepository;
         this.decrypCountHistoryService = decrypCountHistoryService;
-    }
-
-    // 매일 5분마다 실행
-    // 이메일발송건 업데이트 처리
-    @Transactional
-    public void kokonutSendEmailUpdate(LocalDate localDate) throws Exception {
-        log.info("kokonutSendEmailUpdate 호출");
-
-        log.info("현재날짜 : "+localDate);
-
-        List<Email> emailList = emailRepository.findEmails(Arrays.asList("1", "2"), LocalDateTime.now()); // 미발송 or 발송준비중이면서 현재시간보다 낮은 상태인 메일만 조회
-//        log.info("emailList : "+emailList);
-//        log.info("emailList.size() : "+emailList.size());
-
-        List<Email> updateEmailList = new ArrayList<>();
-
-        for(Email email : emailList) {
-
-            String requestId = email.getEmRequestId();
-            if(requestId != null && !requestId.equals("")) {
-//                log.info("requestId : "+requestId);
-
-                EmailCheckDto emailCheckDto = mailSender.sendEmailCheck(requestId);
-//                log.info("emailCheckDto : "+emailCheckDto);
-
-                if(emailCheckDto != null) {
-                    if(emailCheckDto.getFailCount() == emailCheckDto.getRequestCount()) {
-                        // 발송실패
-                        email.setEmState("4");
-                    } else if(emailCheckDto.getFailCount() > 0){
-                        // 일부실패
-                        email.setEmState("3");
-                    } else {
-                        // 발송성공
-                        email.setEmState("5");
-                    }
-                    email.setEmSendAllCount(emailCheckDto.getRequestCount());
-                    email.setEmSendSucCount(emailCheckDto.getSentCount());
-                    email.setEmSendFailCount(emailCheckDto.getFailCount());
-                    updateEmailList.add(email);
-                }
-            }
-        }
-
-        emailRepository.saveAll(updateEmailList);
     }
 
     // 이메일 목록 조회

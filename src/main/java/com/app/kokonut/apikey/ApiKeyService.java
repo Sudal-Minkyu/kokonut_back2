@@ -12,7 +12,7 @@ import com.app.kokonut.apikey.dtos.ApiKeyIpDeleteDto;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.ResponseErrorCode;
-import com.app.kokonut.common.realcomponent.CommonUtil;
+import com.app.kokonut.common.CommonUtil;
 import com.app.kokonut.configs.GoogleOTP;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

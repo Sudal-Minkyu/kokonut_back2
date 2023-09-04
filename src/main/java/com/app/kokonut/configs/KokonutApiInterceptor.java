@@ -3,17 +3,16 @@ package com.app.kokonut.configs;
 import com.app.kokonut.apikey.ApiKeyService;
 import com.app.kokonut.apikey.dtos.ApiKeyInfoDto;
 import com.app.kokonut.common.ResponseErrorCode;
-import com.app.kokonut.common.realcomponent.CommonUtil;
+import com.app.kokonut.common.CommonUtil;
 import com.app.kokonut.configs.exception.KokonutAPIException;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
 
 /**
  * @author Woody
@@ -32,7 +31,7 @@ public class KokonutApiInterceptor implements AsyncHandlerInterceptor {
 	private ApiKeyService apiKeyService;
 
 	@Override
-	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+	public boolean preHandle(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler) throws Exception {
         log.info("APIKey 인터셉터 읽음");
 
 		String token = request.getHeader(BEARER_TYPE);
@@ -75,18 +74,6 @@ public class KokonutApiInterceptor implements AsyncHandlerInterceptor {
 			}
 		}
 		return AsyncHandlerInterceptor.super.preHandle(request, response, handler);
-	}
-
-	public void sendErrorAsJson(HttpServletResponse response, int status, String message) throws IOException {
-		response.setStatus(status);
-		response.setContentType("application/json");
-		response.setCharacterEncoding("UTF-8");
-
-		String errorResponse = String.format("{\"error\": \"%s\"}", message);
-
-		PrintWriter out = response.getWriter();
-		out.print(errorResponse);
-		out.flush();
 	}
 
 }

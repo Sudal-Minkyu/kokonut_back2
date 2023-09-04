@@ -1,4 +1,4 @@
-package com.app.kokonut.common.component;
+package com.app.kokonut.common;
 
 public class ReqUtils {
 

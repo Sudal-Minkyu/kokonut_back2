@@ -1,4 +1,4 @@
-package com.app.kokonut.common.realcomponent;
+package com.app.kokonut.common;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

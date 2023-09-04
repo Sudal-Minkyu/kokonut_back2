@@ -6,7 +6,7 @@ import com.app.kokonut.admin.dtos.AdminOtpKeyDto;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.ResponseErrorCode;
-import com.app.kokonut.common.realcomponent.CommonUtil;
+import com.app.kokonut.common.CommonUtil;
 import com.app.kokonut.company.companysetting.dtos.CompanySettingInfoDto;
 import com.app.kokonut.company.companysettingaccessip.CompanySettingAccessIP;
 import com.app.kokonut.company.companysettingaccessip.CompanySettingAccessIPRepository;

@@ -2,7 +2,7 @@ package com.app.kokonut.company.companydatakey;
 
 import com.app.kokonut.awskmshistory.AwsKmsHistoryService;
 import com.app.kokonut.awskmshistory.dto.AwsKmsResultDto;
-import com.app.kokonut.common.realcomponent.AwsKmsUtil;
+import com.app.kokonut.common.AwsKmsUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

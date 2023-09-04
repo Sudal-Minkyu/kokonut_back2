@@ -10,7 +10,7 @@ import com.app.kokonut.category.categoryitem.CategoryItemRepository;
 import com.app.kokonut.category.categoryitem.dtos.CategoryItemListDto;
 import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.ResponseErrorCode;
-import com.app.kokonut.common.realcomponent.CommonUtil;
+import com.app.kokonut.common.CommonUtil;
 import com.app.kokonut.company.company.Company;
 import com.app.kokonut.company.company.CompanyRepository;
 import com.app.kokonut.company.companyitem.dtos.CompanyItemListDto;

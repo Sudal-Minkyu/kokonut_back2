@@ -1,19 +1,17 @@
-package com.app.kokonut.common.realcomponent;
+package com.app.kokonut.common;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
+@Slf4j
 @Service
 public class AriaUtil {
-	
-	private Logger logger = LoggerFactory.getLogger(AriaUtil.class);	
 
-	private int[][] S = {
+	private final int[][] S = {
 			// S-box type 1
 			{  0x63,  0x7c,  0x77,  0x7b,  0xf2,
 					 0x6b,  0x6f,  0xc5,  0x30,
@@ -275,7 +273,7 @@ public class AriaUtil {
 					 0x4c,  0x11,  0x33,  0x03,
 					 0xa2,  0xac,  0x60 } };
 
-	private  int[][] KRK = {
+	private final int[][] KRK = {
 			{  0x51,  0x7c,  0xc1,  0xb7,  0x27,
 					 0x22,  0x0a,  0x94,  0xfe,
 					 0x13,  0xab,  0xe8,  0xfa,
@@ -289,8 +287,8 @@ public class AriaUtil {
 					 0x24,  0x97,  0x75,  0x04,
 					 0xe8,  0xc9,  0x0e } };
 
-	private  int[] m_MasterKey = new int[32];
-	
+	private final int[] m_MasterKey = new int[32];
+
 	public AriaUtil()
 	{
 		String key = "kokonut2022";
@@ -326,21 +324,21 @@ public class AriaUtil {
 		int T;
 
 		T =  (i[iIndex + 3] ^ i[iIndex + 4] ^ i[iIndex + 9] ^ i[iIndex + 14]);
-		o[oIndex + 0] =  (i[iIndex + 6] ^ i[iIndex + 8] ^ i[iIndex + 13] ^ T);
+		o[oIndex] =  (i[iIndex + 6] ^ i[iIndex + 8] ^ i[iIndex + 13] ^ T);
 		o[oIndex + 5] =  (i[iIndex + 1] ^ i[iIndex + 10] ^ i[iIndex + 15] ^ T);
 		o[oIndex + 11] =  (i[iIndex + 2] ^ i[iIndex + 7] ^ i[iIndex + 12] ^ T);
-		o[oIndex + 14] =  (i[iIndex + 0] ^ i[iIndex + 5] ^ i[iIndex + 11] ^ T);
+		o[oIndex + 14] =  (i[iIndex] ^ i[iIndex + 5] ^ i[iIndex + 11] ^ T);
 		T =  (i[iIndex + 2] ^ i[iIndex + 5] ^ i[iIndex + 8] ^ i[iIndex + 15]);
 		o[oIndex + 1] =  (i[iIndex + 7] ^ i[iIndex + 9] ^ i[iIndex + 12] ^ T);
-		o[oIndex + 4] =  (i[iIndex + 0] ^ i[iIndex + 11] ^ i[iIndex + 14] ^ T);
+		o[oIndex + 4] =  (i[iIndex] ^ i[iIndex + 11] ^ i[iIndex + 14] ^ T);
 		o[oIndex + 10] =  (i[iIndex + 3] ^ i[iIndex + 6] ^ i[iIndex + 13] ^ T);
 		o[oIndex + 15] =  (i[iIndex + 1] ^ i[iIndex + 4] ^ i[iIndex + 10] ^ T);
 		T =  (i[iIndex + 1] ^ i[iIndex + 6] ^ i[iIndex + 11] ^ i[iIndex + 12]);
 		o[oIndex + 2] =  (i[iIndex + 4] ^ i[iIndex + 10] ^ i[iIndex + 15] ^ T);
 		o[oIndex + 7] =  (i[iIndex + 3] ^ i[iIndex + 8] ^ i[iIndex + 13] ^ T);
-		o[oIndex + 9] =  (i[iIndex + 0] ^ i[iIndex + 5] ^ i[iIndex + 14] ^ T);
+		o[oIndex + 9] =  (i[iIndex] ^ i[iIndex + 5] ^ i[iIndex + 14] ^ T);
 		o[oIndex + 12] =  (i[iIndex + 2] ^ i[iIndex + 7] ^ i[iIndex + 9] ^ T);
-		T =  (i[iIndex + 0] ^ i[iIndex + 7] ^ i[iIndex + 10] ^ i[iIndex + 13]);
+		T =  (i[iIndex] ^ i[iIndex + 7] ^ i[iIndex + 10] ^ i[iIndex + 13]);
 		o[oIndex + 3] =  (i[iIndex + 5] ^ i[iIndex + 11] ^ i[iIndex + 14] ^ T);
 		o[oIndex + 6] =  (i[iIndex + 2] ^ i[iIndex + 9] ^ i[iIndex + 12] ^ T);
 		o[oIndex + 8] =  (i[iIndex + 1] ^ i[iIndex + 4] ^ i[iIndex + 15] ^ T);
@@ -360,7 +358,7 @@ public class AriaUtil {
 				t[index + (q + i + 1) % 16] ^= (byte) (s[i] << (8 - n));
 		}
 	}
-	
+
 	private void ConvertIntArray(byte[] b, int[] n)
 	{
 		for(int j = 0; j < b.length; j++ )
@@ -371,7 +369,7 @@ public class AriaUtil {
 				n[j] = b[j];
 		}
 	}
-	
+
 	private void ConvertIntArray(int[] n)
 	{
 		for(int j = 0; j < n.length; j++ )
@@ -380,7 +378,7 @@ public class AriaUtil {
 				n[j] = n[j] + 256;
 		}
 	}
-	
+
 	private void ConvertByteArray(int[] n, byte[] b)
 	{
 		for(int j = 0; j < n.length; j++ )
@@ -391,34 +389,30 @@ public class AriaUtil {
 
 	// Encryption round key generation rountine
 	// w0 : master key, e : encryption round keys
-	private  int EncKeySetup(int[] w0, int[] e, int keyBits) {
-		int i, R = (keyBits + 256) / 32, q;
+	private  int EncKeySetup(int[] w0, int[] e) {
+		int i, R = (256 + 256) / 32, q;
 		int[] t = new int[16];
 		int[] w1 = new int[16];
 		int[] w2 = new int[16];
 		int[] w3 = new int[16];
 
-		q = (keyBits - 128) / 64;
+		q = (256 - 128) / 64;
 		for (i = 0; i < 16; i++)
 		{
 			t[i] = S[i % 4][ KRK[q][i] ^ w0[i]];
 		}
 		DL(t, w1);
-		if (R == 14)
-			for (i = 0; i < 8; i++)
-				w1[i] ^= w0[16 + i];
-		else if (R == 16)
-			for (i = 0; i < 16; i++)
-				w1[i] ^= w0[16 + i];
+		for (i = 0; i < 16; i++)
+			w1[i] ^= w0[16 + i];
 
-		q = (q == 2) ? 0 : (q + 1);
+		q = 0;
 		for (i = 0; i < 16; i++)
 			t[i] = S[(2 + i) % 4][KRK[q][i] ^ w1[i]];
 		DL(t, w2);
 		for (i = 0; i < 16; i++)
 			w2[i] ^= w0[i];
 
-		q = (q == 2) ? 0 : (q + 1);
+		q = q + 1;
 		for (i = 0; i < 16; i++)
 			t[i] = S[i % 4][KRK[q][i] ^ w2[i]];
 		DL(t, w3);
@@ -453,28 +447,24 @@ public class AriaUtil {
 		RotXOR(w0, 67, e, 176);
 		RotXOR(w0, 0, e, 192);
 		RotXOR(w1, 97, e, 192);
-		if (R > 12) {
-			RotXOR(w1, 0, e, 208);
-			RotXOR(w2, 97, e, 208);
-			RotXOR(w2, 0, e, 224);
-			RotXOR(w3, 97, e, 224);
-		}
-		if (R > 14) {
-			RotXOR(w3, 0, e, 240);
-			RotXOR(w0, 97, e, 240);
-			RotXOR(w0, 0, e, 256);
-			RotXOR(w1, 109, e, 256);
-		}
+		RotXOR(w1, 0, e, 208);
+		RotXOR(w2, 97, e, 208);
+		RotXOR(w2, 0, e, 224);
+		RotXOR(w3, 97, e, 224);
+		RotXOR(w3, 0, e, 240);
+		RotXOR(w0, 97, e, 240);
+		RotXOR(w0, 0, e, 256);
+		RotXOR(w1, 109, e, 256);
 		return R;
 	}
 
 	// Decryption round key generation rountine
 	// w0 : maskter key, d : decryption round keys
-	private  int DecKeySetup(int[] w0, int[] d, int keyBits) {
+	private  int DecKeySetup(int[] w0, int[] d) {
 		int i, j, R;
 		int[] t = new int[16];
 
-		R = EncKeySetup(w0, d, keyBits);
+		R = EncKeySetup(w0, d);
 		for (j = 0; j < 16; j++) {
 			t[j] = d[j];
 			d[j] = d[16 * R + j];
@@ -496,7 +486,7 @@ public class AriaUtil {
 
 		for (j = 0; j < 16; j++)
 			c[j] = p[pIndex + j];
-		
+
 		for (i = 0; i < R / 2; i++) {
 			for (j = 0; j < 16; j++)
 				t[j] = S[j % 4][e[index + j] ^ c[j]];
@@ -515,10 +505,10 @@ public class AriaUtil {
 	private  String ToHex(byte[] bin_data) {
 		StringBuilder result = new StringBuilder();
 
-		if (bin_data != null && bin_data.length != 0) {
+		if (bin_data != null) {
 
-			for (int i = 0; i < bin_data.length; i++) {
-				result.append(String.format("%02X", bin_data[i]));
+			for (byte binDatum : bin_data) {
+				result.append(String.format("%02X", binDatum));
 			}
 		}
 
@@ -529,7 +519,7 @@ public class AriaUtil {
 		if (strHex == null || strHex.length() == 0) {
 	        return null;
 	    }
-	 
+
 	    byte[] ba = new byte[strHex.length() / 2];
 	    for (int i = 0; i < ba.length; i++) {
 	        ba[i] = (byte) Integer.parseInt(strHex.substring(2 * i, 2 * i + 2), 16);
@@ -537,33 +527,32 @@ public class AriaUtil {
 	    return ba;
 	}
 
-	public  Boolean CreateMasterKey(String key) {
+	public void CreateMasterKey(String key) {
 		int nSize = key.length();
 
 		if (nSize > 32) {
-			return false;
+			return;
 		}
 
 		byte[] StrByte;
 		try {
 			StrByte = key.getBytes("EUC-KR");
-			
+
 			ConvertIntArray(StrByte, m_MasterKey);
-			
+
 		} catch (UnsupportedEncodingException e) {
-			logger.error(e.getMessage());
+			log.error(e.getMessage());
 		}
 
-		return true;
 	}
 
 	public  String Encrypt(String input) {
-		String strEncrypt = "";
+		StringBuilder strEncrypt = new StringBuilder();
 		int[] rk = new int[16 * 17];
 		int[] c = new int[16];
 		int[] p = new int[256];
 
-		int r = EncKeySetup(m_MasterKey, rk, 256);
+		int r = EncKeySetup(m_MasterKey, rk);
 		
 		ConvertIntArray(rk);
 		int cnt = 0;
@@ -579,7 +568,7 @@ public class AriaUtil {
 			cnt = (int) Math.ceil((double)( (double)sbyte.length / (double)16.0));
 			
 		} catch (UnsupportedEncodingException e) {
-			logger.error(e.getMessage());
+			log.error(e.getMessage());
 		}
 
 		for (int i = 0; i < cnt; i++) {
@@ -587,10 +576,10 @@ public class AriaUtil {
 			Crypt(p, (i * 16), r, rk, c);
 			byte[] b = new byte[c.length];
 			ConvertByteArray(c, b);
-			strEncrypt += ToHex(b);
+			strEncrypt.append(ToHex(b));
 		}
 
-		return strEncrypt;
+		return strEncrypt.toString();
 	}
 
 	public  String Decrypt(String input) {
@@ -607,7 +596,7 @@ public class AriaUtil {
 			ConvertIntArray(b, n);
 		}
 
-		int r = DecKeySetup(m_MasterKey, rk, 256);
+		int r = DecKeySetup(m_MasterKey, rk);
 		ConvertIntArray(rk);
 
 		int cnt = (int) Math.ceil((double) input.length() / 32);
@@ -627,7 +616,7 @@ public class AriaUtil {
 		try {
 			strDecrypt = new String(buffer.array(), "EUC-KR").replace("\0", "");
 		} catch (UnsupportedEncodingException e) {
-			logger.error(e.getMessage());
+			log.error(e.getMessage());
 		}
 
 		return strDecrypt;

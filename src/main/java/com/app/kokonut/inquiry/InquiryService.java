@@ -1,19 +1,14 @@
 package com.app.kokonut.inquiry;
 
 import com.app.kokonut.common.AjaxResponse;
-import com.app.kokonut.common.realcomponent.SlackUtil;
-import com.app.kokonut.configs.MailSender;
+import com.app.kokonut.common.SlackUtil;
 import com.app.kokonut.inquiry.dtos.InquirySaveDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 

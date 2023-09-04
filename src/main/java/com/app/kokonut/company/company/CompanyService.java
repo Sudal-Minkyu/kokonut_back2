@@ -2,7 +2,7 @@ package com.app.kokonut.company.company;
 
 import com.app.kokonut.awskmshistory.AwsKmsHistoryRepository;
 import com.app.kokonut.common.AjaxResponse;
-import com.app.kokonut.common.realcomponent.AwsKmsUtil;
+import com.app.kokonut.common.AwsKmsUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

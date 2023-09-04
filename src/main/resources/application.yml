@@ -42,10 +42,6 @@ spring:
       max-file-size: 21MB
       max-request-size: 21MB
 
-  batch:
-    jdbc:
-      initialize-schema: never
-
 #Custom
 kokonut:
   #코코넛 상태값 가져오기(로컬인지, 운영인지 구분짓기 위해 추가)

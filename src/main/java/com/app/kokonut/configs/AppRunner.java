@@ -26,10 +26,8 @@ import java.time.format.DateTimeFormatter;
 public class AppRunner implements ApplicationRunner {
 
     private final AdminRepository adminRepository;
-
     private final PasswordEncoder passwordEncoder;
     private final KeyGenerateService keyGenerateService;
-
     private final CompanyRepository companyRepository;
     private final CompanySettingRepository companySettingRepository;
 
@@ -45,7 +43,7 @@ public class AppRunner implements ApplicationRunner {
     }
 
     @Override
-    public void run(ApplicationArguments args) throws Exception {
+    public void run(ApplicationArguments args) {
 
         // 시스템관리자 계정생성
         String system_knEmail = "system@kokonut.me";
@@ -99,10 +97,5 @@ public class AppRunner implements ApplicationRunner {
         // 체험하기용 계정생성
 
     }
-
-
-
-
-
 
 }

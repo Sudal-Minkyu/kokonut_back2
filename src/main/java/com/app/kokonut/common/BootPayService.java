@@ -1,11 +1,9 @@
-package com.app.kokonut.common.realcomponent;
+package com.app.kokonut.common;
 
 import com.app.kokonut.company.companypayment.dtos.CompanyPaymentSaveDto;
 import com.app.kokonut.payment.dtos.PaymentReservationResultDto;
 import com.app.kokonut.payment.dtos.PaymentReservationSearchDto;
 import kr.co.bootpay.Bootpay;
-import kr.co.bootpay.model.request.Cancel;
-import kr.co.bootpay.model.request.Subscribe;
 import kr.co.bootpay.model.request.SubscribePayload;
 import kr.co.bootpay.model.request.User;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +11,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.TimeZone;
@@ -236,102 +237,5 @@ public class BootPayService {
 
         return null;
     }
-
-
-
-
-
-    // 토큰발급(사용하지 않음)
-    public void goGetToken() {
-        log.info("토큰 발급받기 함수 실행!");
-        try {
-            Bootpay bootpay = new Bootpay(restKey, privateKey);
-            HashMap<String, Object> res = bootpay.getAccessToken();
-            if (res.get("error_code") == null) { //success
-                log.info("토큰받기 성공: " + res);
-            } else {
-                log.info("토큰받기 실패: " + res);
-            }
-        } catch (Exception e) {
-            log.error("예외처리 : "+e);
-            log.error("예외처리 메세지 : "+e.getMessage());
-        }
-    }
-
-    // 빌링키 발급(사용하지 않음)
-    public void getBillingKey() throws Exception {
-        log.info("빌링키 발급받기 함수 실행!");
-        log.info("restKey : "+restKey);
-        log.info("privateKey : "+privateKey);
-
-        Bootpay bootpay = new Bootpay(restKey, privateKey);
-        bootpay.getAccessToken();
-
-        Subscribe subscribe = new Subscribe();
-        subscribe.orderName = "정기결제 빌링키 발급 테스트";
-        subscribe.subscriptionId = String.valueOf(System.currentTimeMillis() / 1000);
-        subscribe.pg = "나이스페이";
-
-        subscribe.cardNo = "5105545000809043"; //실제 테스트시에는 *** 마스크처리가 아닌 숫자여야 함
-        subscribe.cardPw = "11"; //실제 테스트시에는 *** 마스크처리가 아닌 숫자여야 함
-        subscribe.cardExpireYear = "27"; //실제 테스트시에는 *** 마스크처리가 아닌 숫자여야 함
-        subscribe.cardExpireMonth = "11"; //실제 테스트시에는 *** 마스크처리가 아닌 숫자여야 함
-        subscribe.cardIdentityNo = "3488101536"; //생년월일 또는 사업자 등록번호 (- 없이 입력)
-
-        subscribe.user = new User();
-        subscribe.user.username = "";
-        subscribe.user.phone = "";
-
-        try {
-            HashMap<String, Object> res = bootpay.getBillingKey(subscribe);
-//            JSONObject json =  new JSONObject(res);
-//            System.out.printf( "JSON: %s", json);
-
-            if(res.get("error_code") == null) {
-                log.info("빌링키 발급 성공: " + res);
-                log.info("빌링키 : " + res.get("billing_key"));
-                log.info("빌링 조회키: " + res.get("receipt_id"));
-            } else {
-                log.info("빌링키 발급 실패: " + res);
-            }
-        } catch (Exception e) {
-            log.error("예외처리 : "+e);
-            log.error("예외처리 메세지 : "+e.getMessage());
-        }
-    }
-
-    // 부트페이 결제취소(사용하지 않음)
-    public void goCancel(String receipt_id) {
-        Bootpay bootpay = new Bootpay(restKey, privateKey);
-
-        Cancel cancel = new Cancel();
-        cancel.receiptId = "6100e77a019943003650f4d5";
-        cancel.cancelUsername = "관리자";
-        cancel.cancelMessage = "테스트 결제";
-        //cancel.price = 1000.0; //부분취소 요청시
-        //cancel.cancelId = "12342134"; //부분취소 요청시, 중복 부분취소 요청하는 실수를 방지하고자 할때 지정
-
-        //RefundData refund = new RefundData(); // 가상계좌 환불 요청시, 단 CMS 특약이 되어있어야만 환불요청이 가능하다.
-        //refund.account = "675601012341234"; //환불계좌
-        //refund.accountholder = "홍길동"; //환불계좌주
-        //refund.bankcode = BankCode.getCode("국민은행");//은행코드
-        //cancel.refund = refund;
-
-        try {
-            HashMap<String, Object> res = bootpay.receiptCancel(cancel);
-            if(res.get("error_code") == null) {
-                log.info("결제취소 성공: " + res);
-            } else {
-                log.error("결제취소 실패: " + res);
-            }
-        } catch (Exception e) {
-            log.error("결제취소 에러");
-//            e.printStackTrace();
-        }
-
-    }
-
-
-
 
 }

@@ -1,13 +1,10 @@
 package com.app.kokonutuser;
 
 import com.app.kokonutuser.dtos.*;
-import com.app.kokonutuser.dtos.use.KokonutUserAlimTalkFieldDto;
 import com.app.kokonutuser.dtos.use.KokonutUserEmailFieldDto;
 
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public interface DynamicUserRepositoryCustom {
 

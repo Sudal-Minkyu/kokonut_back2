@@ -1,7 +1,7 @@
 package com.app.kokonut.alimtalk;
 
 import com.app.kokonut.alimtalk.dtos.AlimtalkTemplateInfoDto;
-import com.app.kokonut.common.realcomponent.Utils;
+import com.app.kokonut.common.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;

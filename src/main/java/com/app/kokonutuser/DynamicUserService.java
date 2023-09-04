@@ -7,10 +7,10 @@ import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import com.app.kokonut.awskmshistory.dto.AwsKmsResultDto;
 import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.ResponseErrorCode;
-import com.app.kokonut.common.component.ReqUtils;
-import com.app.kokonut.common.realcomponent.AESGCMcrypto;
-import com.app.kokonut.common.realcomponent.CommonUtil;
-import com.app.kokonut.common.realcomponent.Utils;
+import com.app.kokonut.common.ReqUtils;
+import com.app.kokonut.common.AESGCMcrypto;
+import com.app.kokonut.common.CommonUtil;
+import com.app.kokonut.common.Utils;
 import com.app.kokonut.company.company.CompanyRepository;
 import com.app.kokonut.company.companydatakey.CompanyDataKeyService;
 import com.app.kokonut.company.companysetting.CompanySettingRepository;
@@ -1852,6 +1852,7 @@ public class DynamicUserService {
 
 		int dchCount = 0; // 복호화 카운팅
 		List<String> headerNames = new ArrayList<>();
+		List<String> securityCheckList = new ArrayList<>();
 		Optional<CompanyTable> optionalCompanyTable = companyTableRepository.findCompanyTableByCpCodeAndCtDesignation(companyCode, "기본");
 
 		Map<String, Object> securityNames = new HashMap<>();;
@@ -1888,6 +1889,7 @@ public class DynamicUserService {
 				awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(companyCode);
 				headerNames.add("basicName");
 				securityNames.put("basicName", companyTableColumnNameSearch.getCtciDesignation());
+				securityCheckList.add("1");
 
 				searchQuery.append(", ").append(ctNameStatus).append(" as basicName");
 			}
@@ -1898,6 +1900,7 @@ public class DynamicUserService {
 
 				securityNames.put("basicPhone", companyTableColumnNameSearch.getCtciDesignation());
 				headerNames.add("basicPhone");
+				securityCheckList.add("1");
 
 				searchQuery.append(", ").append(ctPhoneStatus).append(" as basicPhone");
 			}
@@ -1907,6 +1910,8 @@ public class DynamicUserService {
 				securityNames.put("basicGender", companyTableColumnNameSearch.getCtciDesignation());
 
 				headerNames.add("basicGender");
+				securityCheckList.add("0");
+
 				searchQuery.append(", ").append(ctGenderStatus).append(" as basicGender");
 			}
 
@@ -1919,14 +1924,17 @@ public class DynamicUserService {
 				}
 
 				headerNames.add("basicEmail");
+				securityCheckList.add("1");
+
 				searchQuery.append(", ").append(ctEmailStatus).append(" as basicEmail");
 			}
 
 			if(!ctBirthStatus.equals("")) {
-				companyTableColumnNameSearch = companyTableColumnInfoRepository.findByColumnName(ctEmailStatus);
+				companyTableColumnNameSearch = companyTableColumnInfoRepository.findByColumnName(ctBirthStatus);
 
 				securityNames.put("basicBirth", companyTableColumnNameSearch.getCtciDesignation());
 				headerNames.add("basicBirth");
+				securityCheckList.add("0");
 
 				searchQuery.append(", ").append(ctBirthStatus).append(" as basicBirth");
 			}
@@ -1935,30 +1943,32 @@ public class DynamicUserService {
 
 			searchQuery.append(optionalCompanyTable.get().getCtName());
 			searchQuery.append(" WHERE 1=1");
-			log.info("searchQuery : "+ searchQuery);
+//			log.info("searchQuery : "+ searchQuery);
 
 			List<Map<String, Object>> basicTableList = kokonutUserService.selectBasicTableList(searchQuery.toString());
 			if(awsKmsResultDto != null) {
-				for(Map<String, Object> map : basicTableList) {
-					for (String headerName : headerNames) {
-						log.info("headerNames.get(i) : " + headerName);
+				for (Map<String, Object> map : basicTableList) {
+					for (int i=0; i<headerNames.size(); i++) {
+						if(securityCheckList.get(i).equals("1")) {
+							log.info("headerNames.get(i) : " + headerNames.get(i));
 
-						Object key = map.get(headerName);
-						if (key != null) {
+							Object key = map.get(headerNames.get(i));
+							if (key != null) {
 
-							String[] value = String.valueOf(key).split("\\|\\|__\\|\\|");
-							log.info("구분자단위로 끊은 값 value : "+ Arrays.toString(value));
+								String[] value = String.valueOf(key).split("\\|\\|__\\|\\|");
+								log.info("구분자단위로 끊은 값 value : " + Arrays.toString(value));
 
-							Map<String, Object> securityResultValue = null; // 복호화된 데이터의 마스킹처리
+								Map<String, Object> securityResultValue = null; // 복호화된 데이터의 마스킹처리
 
-							String header = (String)securityNames.get(headerName);
-							securityResultValue = Utils.decrypMasking(header, value, awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
+								String header = (String) securityNames.get(headerNames.get(i));
+								securityResultValue = Utils.decrypMasking(header, value, awsKmsResultDto.getSecretKey(), awsKmsResultDto.getIvKey());
 
-							if(securityResultValue.get("dch").equals("1")) {
-								dchCount++;
+								if (securityResultValue.get("dch").equals("1")) {
+									dchCount++;
+								}
+
+								map.put(headerNames.get(i), securityResultValue.get("result"));
 							}
-
-							map.put(headerName, securityResultValue.get("result"));
 						}
 					}
 				}

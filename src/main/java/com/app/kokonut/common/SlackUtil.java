@@ -1,4 +1,4 @@
-package com.app.kokonut.common.realcomponent;
+package com.app.kokonut.common;
 
 import com.slack.api.Slack;
 import lombok.extern.slf4j.Slf4j;

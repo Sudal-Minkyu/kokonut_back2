@@ -1,12 +1,9 @@
 package com.app.kokonut.navercloud;
 
-import com.app.kokonut.common.realcomponent.Converter;
-import com.app.kokonut.common.realcomponent.Utils;
+import com.app.kokonut.common.Converter;
+import com.app.kokonut.common.Utils;
 import com.app.kokonut.email.email.dtos.EmailCheckDto;
 import com.app.kokonut.navercloud.dto.NCloudPlatformMailRequest;
-import com.app.kokonut.navercloud.dto.NaverCloudPlatformResultDto;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -25,16 +22,16 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import javax.net.ssl.HttpsURLConnection;
-import java.io.*;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.Base64;
 
 @Slf4j
 @Service
@@ -54,416 +51,6 @@ public class NaverCloudPlatformService {
 
     @Value("${kokonut.ncloud.categoryCode}")
     public String categoryCode;
-
-    // 비즈메시지 채널 조회
-    public List<HashMap<String, Object>> getChannels() throws Exception {
-		List<HashMap<String, Object>> channelList;
-
-		String hostNameUrl = "https://sens.apigw.ntruss.com";
-        String requestUrl= "/alimtalk/v2/services/";
-        String requestUrlType = "/channels";
-        String method = "GET";
-        String timestamp = Long.toString(System.currentTimeMillis());
-
-        requestUrl += serviceId + requestUrlType;
-        String apiUrl = hostNameUrl + requestUrl;
-        URL url = new URL(apiUrl);
-
-        HttpURLConnection con = (HttpURLConnection)url.openConnection();
-        con.setUseCaches(false);
-        con.setDoOutput(true);
-        con.setDoInput(true);
-        con.setRequestProperty("content-type", "application/json");
-        con.setRequestProperty("x-ncp-apigw-timestamp", timestamp);
-        con.setRequestProperty("x-ncp-iam-access-key", accessKey);
-        con.setRequestProperty("x-ncp-apigw-signature-v2", makeSignature(requestUrl, timestamp, method));
-        con.setRequestMethod(method);
-        con.setDoOutput(true);
-
-        int responseCode = con.getResponseCode();
-        BufferedReader br;
-
-        if(responseCode == 200) {
-            // 정상 호출
-            br = new BufferedReader(new InputStreamReader(con.getInputStream()));
-        } else {
-            // 에러 발생
-            br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
-        }
-
-        String inputLine;
-        StringBuilder response = new StringBuilder();
-        while ((inputLine = br.readLine()) != null) {
-            response.append(inputLine);
-        }
-
-        br.close();
-        channelList = new ObjectMapper().readValue(response.toString(), new TypeReference<>() {
-        });
-        con.disconnect();
-
-		return channelList;
-    }
-
-    /**
-     * 비즈메시지 채널 등록
-     *
-     * @param channelId     카카오 채널 아이디  (required)
-     * @param adminTelNo    관리자 전화번호    (required)
-     */
-    public NaverCloudPlatformResultDto postChannels(String channelId, String adminTelNo) throws Exception {
-
-        NaverCloudPlatformResultDto naverCloudPlatformResultDto = new NaverCloudPlatformResultDto();
-
-    	String hostNameUrl = "https://sens-biz.apigw.ntruss.com";
-        String requestUrl= "/kkobizmsg/v2/services/";
-        String requestUrlType = "/channels";
-        String method = "POST";
-        String timestamp = Long.toString(System.currentTimeMillis());
-
-        requestUrl += serviceId + requestUrlType;
-        String apiUrl = hostNameUrl + requestUrl;
-
-        // JSON 을 활용한 body data 생성
-        JSONObject bodyJson = new JSONObject();
-        bodyJson.put("categoryCode", categoryCode);
-        bodyJson.put("adminTelNo", adminTelNo);
-        bodyJson.put("channelId", channelId);
-        String body = bodyJson.toString();
-
-        URL url = new URL(apiUrl);
-
-        HttpURLConnection con = (HttpURLConnection)url.openConnection();
-        con.setUseCaches(false);
-        con.setDoOutput(true);
-        con.setDoInput(true);
-        con.setRequestProperty("content-type", "application/json");
-        con.setRequestProperty("x-ncp-apigw-api-key", primaryKey);
-        con.setRequestProperty("x-ncp-apigw-timestamp", timestamp);
-        con.setRequestProperty("x-ncp-iam-access-key", accessKey);
-        con.setRequestProperty("x-ncp-apigw-signature-v2", makeSignature(requestUrl, timestamp, method));
-        con.setRequestMethod(method);
-        con.setDoOutput(true);
-
-        DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-        wr.write(body.getBytes());
-        wr.flush();
-        wr.close();
-        int responseCode = con.getResponseCode();
-        BufferedReader br;
-
-        if(responseCode == 200) {
-            // 정상 호출
-            br = new BufferedReader(new InputStreamReader(con.getInputStream()));
-        } else {
-            // 에러 발생
-            br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
-        }
-
-        String inputLine;
-        StringBuilder response = new StringBuilder();
-        while ((inputLine = br.readLine()) != null) {
-            response.append(inputLine);
-        }
-
-        br.close();
-
-        con.disconnect();
-
-        naverCloudPlatformResultDto.setResultCode(responseCode);
-        naverCloudPlatformResultDto.setResultText(String.valueOf(response));
-
-	    return naverCloudPlatformResultDto;
-    }
-
-    /**
-     * 비즈메시지 채널 인증
-     *
-     * @param channelId  카카오 채널 아이디 (required)
-     * @param token 인증번호 (required)
-     */
-	public NaverCloudPlatformResultDto postChannelToken(String channelId, String token) throws Exception {
-
-        NaverCloudPlatformResultDto naverCloudPlatformResultDto = new NaverCloudPlatformResultDto();
-
-		String hostNameUrl = "https://sens-biz.apigw.ntruss.com";
-        String requestUrl= "/kkobizmsg/v2/services/";
-        String requestUrlType = "/channel-token";
-        String method = "POST";
-        String timestamp = Long.toString(System.currentTimeMillis());
-
-        requestUrl += serviceId + requestUrlType;
-        String apiUrl = hostNameUrl + requestUrl;
-
-        // JSON 을 활용한 body data 생성
-        JSONObject bodyJson = new JSONObject();
-        bodyJson.put("channelId", channelId);
-        bodyJson.put("token", token);
-        String body = bodyJson.toString();
-
-        URL url = new URL(apiUrl);
-
-        HttpURLConnection con = (HttpURLConnection)url.openConnection();
-        con.setUseCaches(false);
-        con.setDoOutput(true);
-        con.setDoInput(true);
-        con.setRequestProperty("content-type", "application/json");
-        con.setRequestProperty("x-ncp-apigw-api-key", primaryKey);
-        con.setRequestProperty("x-ncp-apigw-timestamp", timestamp);
-        con.setRequestProperty("x-ncp-iam-access-key", accessKey);
-        con.setRequestProperty("x-ncp-apigw-signature-v2", makeSignature(requestUrl, timestamp, method));
-        con.setRequestMethod(method);
-        con.setDoOutput(true);
-
-        DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-        wr.write(body.getBytes());
-        wr.flush();
-        wr.close();
-        int responseCode = con.getResponseCode();
-        BufferedReader br;
-
-        if(responseCode == 200) {
-            // 정상 호출
-            br = new BufferedReader(new InputStreamReader(con.getInputStream()));
-        } else {
-            // 에러 발생
-            br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
-        }
-
-        String inputLine;
-        StringBuilder response = new StringBuilder();
-        while ((inputLine = br.readLine()) != null) {
-            response.append(inputLine);
-        }
-
-        br.close();
-
-        con.disconnect();
-        naverCloudPlatformResultDto.setResultCode(responseCode);
-        naverCloudPlatformResultDto.setResultText(String.valueOf(response));
-
-        return naverCloudPlatformResultDto;
-    }
-
-    /**
-     * 비즈메시지 채널 상태 변경
-     *
-     * @param channelId  카카오 채널 아이디 (required)
-     * @param status     변경할 상태      (required)
-     */
-	public NaverCloudPlatformResultDto patchChannelStatus(String channelId, String status) throws Exception {
-
-        NaverCloudPlatformResultDto naverCloudPlatformResultDto = new NaverCloudPlatformResultDto();
-
-		allowMethods("PATCH");
-
-		String hostNameUrl = "https://sens-biz.apigw.ntruss.com";
-        String requestUrl= "/kkobizmsg/v2/services/";
-        String requestUrlType = "/channel-status";
-        String method = "PATCH";
-        String timestamp = Long.toString(System.currentTimeMillis());
-
-        requestUrl += serviceId + requestUrlType;
-        String apiUrl = hostNameUrl + requestUrl;
-
-        // JSON 을 활용한 body data 생성
-        JSONObject bodyJson = new JSONObject();
-        bodyJson.put("channelId", channelId);
-        bodyJson.put("status", status);
-        String body = bodyJson.toString();
-
-        URL url = new URL(apiUrl);
-
-        HttpsURLConnection con = (HttpsURLConnection)url.openConnection();
-        con.setUseCaches(false);
-        con.setDoOutput(true);
-        con.setDoInput(true);
-        con.setRequestProperty("content-type", "application/json");
-        con.setRequestProperty("x-ncp-apigw-api-key", primaryKey);
-        con.setRequestProperty("x-ncp-apigw-timestamp", timestamp);
-        con.setRequestProperty("x-ncp-iam-access-key", accessKey);
-        con.setRequestProperty("x-ncp-apigw-signature-v2", makeSignature(requestUrl, timestamp, method));
-        con.setRequestProperty("charset", "utf-8");
-        con.setRequestMethod(method);
-
-        DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-        wr.write(body.getBytes());
-        wr.flush();
-        wr.close();
-        int responseCode = con.getResponseCode();
-        BufferedReader br;
-
-        log.info("responseCode" +" " + responseCode);
-
-        if(responseCode == 200) {
-            // 정상 호출
-            br = new BufferedReader(new InputStreamReader(con.getInputStream()));
-        } else {
-            // 에러 발생
-            br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
-        }
-
-        String inputLine;
-        StringBuilder response = new StringBuilder();
-        while ((inputLine = br.readLine()) != null) {
-            response.append(inputLine);
-        }
-
-        log.info("response" +" " + response);
-
-        br.close();
-
-        con.disconnect();
-
-        naverCloudPlatformResultDto.setResultCode(responseCode);
-        naverCloudPlatformResultDto.setResultText(String.valueOf(response));
-
-        return naverCloudPlatformResultDto;
-	}
-
-    /**
-     * 비즈메시지 채널 삭제
-     *
-     * @param channelId 카카오 채널 아이디 (required)
-     */
-    public NaverCloudPlatformResultDto deleteChannels(String channelId) throws Exception {
-
-        NaverCloudPlatformResultDto naverCloudPlatformResultDto = new NaverCloudPlatformResultDto();
-
-    	String hostNameUrl = "https://sens-biz.apigw.ntruss.com";
-        String requestUrl= "/kkobizmsg/v2/services/";
-        String requestUrlType = "/channels?channelId=";
-        String method = "DELETE";
-        String timestamp = Long.toString(System.currentTimeMillis());
-
-        requestUrl += serviceId + requestUrlType + channelId;
-        String apiUrl = hostNameUrl + requestUrl;
-
-        URL url = new URL(apiUrl);
-
-        HttpURLConnection con = (HttpURLConnection)url.openConnection();
-        con.setUseCaches(false);
-        con.setDoOutput(true);
-        con.setDoInput(true);
-        con.setRequestProperty("content-type", "application/json");
-        con.setRequestProperty("x-ncp-apigw-api-key", primaryKey);
-        con.setRequestProperty("x-ncp-apigw-timestamp", timestamp);
-        con.setRequestProperty("x-ncp-iam-access-key", accessKey);
-        con.setRequestProperty("x-ncp-apigw-signature-v2", makeSignature(requestUrl, timestamp, method));
-        con.setRequestMethod(method);
-        con.setDoOutput(true);
-
-        int responseCode = con.getResponseCode();
-        BufferedReader br;
-
-        if(responseCode == 200) {
-            // 정상 호출
-            br = new BufferedReader(new InputStreamReader(con.getInputStream()));
-        } else {
-            // 에러 발생
-            br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
-        }
-
-        String inputLine;
-        StringBuilder response = new StringBuilder();
-        while ((inputLine = br.readLine()) != null) {
-            response.append(inputLine);
-        }
-
-        br.close();
-        con.disconnect();
-
-        naverCloudPlatformResultDto.setResultCode(responseCode);
-        naverCloudPlatformResultDto.setResultText(String.valueOf(response));
-
-        return naverCloudPlatformResultDto;
-    }
-
-    /**
-     * 알림톡 템플릿 조회
-     */
-	public NaverCloudPlatformResultDto getTemplates(String channelId, String templateCode, String templateName) throws Exception {
-
-        NaverCloudPlatformResultDto naverCloudPlatformResultDto = new NaverCloudPlatformResultDto();
-
-		String hostNameUrl = "https://sens.apigw.ntruss.com";
-        String requestUrl= "/alimtalk/v2/services/";
-        String requestUrlType = "/templates?channelId=";
-        String method = "GET";
-        String timestamp = Long.toString(System.currentTimeMillis());
-
-        requestUrl += serviceId + requestUrlType + channelId;
-        if(!templateCode.equals("")) {
-        	requestUrl += "&templateCode=" + templateCode;
-        }
-        if(!templateCode.equals("")) {
-        	requestUrl += "&templateName=" + templateName;
-        }
-        String apiUrl = hostNameUrl + requestUrl;
-
-        URL url = new URL(apiUrl);
-
-        HttpURLConnection con = (HttpURLConnection)url.openConnection();
-        con.setUseCaches(false);
-        con.setDoOutput(true);
-        con.setDoInput(true);
-        con.setRequestProperty("content-type", "application/json");
-        con.setRequestProperty("x-ncp-apigw-timestamp", timestamp);
-        con.setRequestProperty("x-ncp-iam-access-key", accessKey);
-        con.setRequestProperty("x-ncp-apigw-signature-v2", makeSignature(requestUrl, timestamp, method));
-        con.setRequestMethod(method);
-        con.setDoOutput(true);
-
-        int responseCode = con.getResponseCode();
-        BufferedReader br;
-
-        if(responseCode == 200) {
-            // 정상 호출
-            br = new BufferedReader(new InputStreamReader(con.getInputStream()));
-        } else {
-            // 에러 발생
-            br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
-        }
-
-        String inputLine;
-        StringBuilder response = new StringBuilder();
-        while ((inputLine = br.readLine()) != null) {
-            response.append(inputLine);
-        }
-
-        br.close();
-
-        con.disconnect();
-        naverCloudPlatformResultDto.setResultCode(responseCode);
-        naverCloudPlatformResultDto.setResultText(String.valueOf(response));
-
-        return naverCloudPlatformResultDto;
-    }
-
-	/**
-	 * 메서드 허용
-	 */
-	private void allowMethods(String... methods) {
-		try {
-			Field methodsField = HttpURLConnection.class.getDeclaredField("methods");
-
-			Field modifiersField = Field.class.getDeclaredField("modifiers");
-			modifiersField.setAccessible(true);
-			modifiersField.setInt(methodsField, methodsField.getModifiers() & ~Modifier.FINAL);
-
-			methodsField.setAccessible(true);
-
-			String[] oldMethods = (String[]) methodsField.get(null);
-			Set<String> methodsSet = new LinkedHashSet<>(Arrays.asList(oldMethods));
-			methodsSet.addAll(Arrays.asList(methods));
-			String[] newMethods = methodsSet.toArray(new String[0]);
-
-			methodsField.set(null/*static field*/, newMethods);
-		} catch (NoSuchFieldException | IllegalAccessException e) {
-			throw new IllegalStateException(e);
-		}
-	}
-
 
     // 이메일발송 메서드(API : createMailRequest)
     public String sendMail(NCloudPlatformMailRequest request) {
@@ -591,7 +178,6 @@ public class NaverCloudPlatformService {
         return result;
     }
 
-
     // 발송된 이메일 상태 체크호출(API : getMailRequestStatus)
     public EmailCheckDto sendEmailCheck(String requestId) throws Exception{
 
@@ -659,7 +245,6 @@ public class NaverCloudPlatformService {
 
         return emailCheckDto;
     }
-
 
     // 시그네처 생성 함수
     public String makeSignature(String timestamp, String url, String method) {

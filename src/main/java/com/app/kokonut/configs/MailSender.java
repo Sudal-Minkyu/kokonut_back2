@@ -1,13 +1,8 @@
 package com.app.kokonut.configs;
 
-
-import com.app.kokonut.email.email.dtos.EmailCheckDto;
 import com.app.kokonut.emailcontacthistory.ContactEmailHistory;
 import com.app.kokonut.emailcontacthistory.ContactEmailHistoryRepository;
-import com.app.kokonut.keydata.KeyDataService;
 import com.app.kokonut.navercloud.NaverCloudPlatformService;
-import com.app.kokonut.navercloud.dto.AttachFile;
-import com.app.kokonut.navercloud.dto.NCloudPlatformMailFileRequest;
 import com.app.kokonut.navercloud.dto.NCloudPlatformMailRequest;
 import com.app.kokonut.navercloud.dto.RecipientForRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -15,17 +10,18 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -37,27 +33,13 @@ public class MailSender {
 	@Value("${kokonut.mail.host}")
 	public String mailHost; // 보내는 사람의 이메일(contact@kokonut.me)
 
-//	@Value("${kokonut.otp.hostUrl}")
-//	public String myHost; // otp_url
-
 	private final NaverCloudPlatformService naverCloudPlatformService;
 	private final ContactEmailHistoryRepository contactEmailHistoryRepository;
 
 	@Autowired
-	public MailSender(KeyDataService keyDataService, NaverCloudPlatformService naverCloudPlatformService, ContactEmailHistoryRepository contactEmailHistoryRepository) {
-//		KeyDataMAILDto keyDataMAILDto = keyDataService.mail_key();
-//		this.frontServerDomainIp = keyDataMAILDto.getFRONTSERVERDOMAINIP();
+	public MailSender(NaverCloudPlatformService naverCloudPlatformService, ContactEmailHistoryRepository contactEmailHistoryRepository) {
 		this.naverCloudPlatformService = naverCloudPlatformService;
 		this.contactEmailHistoryRepository = contactEmailHistoryRepository;
-//		this.mailHost = keyDataMAILDto.getMAILHOST();
-//		this.myHost = keyDataMAILDto.getOTPURL();
-	}
-
-	// 발송된 이메일 상태 체크호출
-	public EmailCheckDto sendEmailCheck(String requestId) throws Exception {
-		log.info("sendEmailCheck 호출");
-
-		return naverCloudPlatformService.sendEmailCheck(requestId);
 	}
 
 	// 리뉴얼 이메일발송
@@ -179,25 +161,6 @@ public class MailSender {
 
 		return result;
 	}
-
-
-	// 기존 코코넛 inquiryController에서 사용 중, 해당 기능 아직 리팩토링 전. 추후 변경 예정.
-	public String inquirySendMail(String toEmail, String toName, String title, String contents) {
-		return sendKokonutMail(toEmail, toName, mailHost, "kokonut", title, contents);
-	}
-
-
-//	// TODO 메일 유형에 따라 발송시 HTML 화면으로 만들어줌.
-//	public String getHTML2(String viewURL) throws IOException {
-//		log.info("viewURL : "+viewURL);
-//		String mailViewURL = "http://"+myHost + viewURL;
-//		log.info("mailViewURL : "+mailViewURL);
-//
-//		URL url = new URL(mailViewURL);
-//		URLConnection conn = url.openConnection();
-//		InputStream is = conn.getInputStream();
-//		return IOUtils.toString(is, StandardCharsets.UTF_8);
-//	}
 
 	public String getHTML5(HashMap<String, String> callTemplate) throws IOException {
 

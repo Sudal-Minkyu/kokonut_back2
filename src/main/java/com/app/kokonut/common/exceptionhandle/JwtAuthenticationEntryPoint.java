@@ -1,6 +1,6 @@
 package com.app.kokonut.common.exceptionhandle;
 
-import com.app.kokonut.common.realcomponent.Utils;
+import com.app.kokonut.common.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;

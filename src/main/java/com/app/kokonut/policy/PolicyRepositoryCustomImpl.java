@@ -1,7 +1,7 @@
 package com.app.kokonut.policy;
 
 import com.app.kokonut.admin.QAdmin;
-import com.app.kokonut.common.realcomponent.Utils;
+import com.app.kokonut.common.Utils;
 import com.app.kokonut.policy.dtos.*;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPQLQuery;
@@ -12,8 +12,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 
