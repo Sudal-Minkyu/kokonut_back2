@@ -12,5 +12,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface CategoryItemRepository extends JpaRepository<CategoryItem, Long>, JpaSpecificationExecutor<CategoryItem>, CategoryItemRepositoryCustom {
-
+    boolean existsByCddName(String cddName);
 }

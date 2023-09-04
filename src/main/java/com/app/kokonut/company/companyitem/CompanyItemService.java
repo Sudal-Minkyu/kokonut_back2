@@ -132,7 +132,8 @@ public class CompanyItemService {
         ActivityCode activityCode;
         String ip = CommonUtil.publicIp();
         Long activityHistoryId;
-        if(companyItemRepository.existsByCiNameAndCpCode(ciName, companyCode)) {
+
+        if(companyItemRepository.existsByCiNameAndCpCode(ciName, companyCode) || categoryItemRepository.existsByCddName(ciName)) {
             log.error("이미 등록되어 있는 항목입니다.");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO087.getCode(), ResponseErrorCode.KO087.getDesc()));
         } else {

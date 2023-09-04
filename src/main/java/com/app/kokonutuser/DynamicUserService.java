@@ -1661,7 +1661,7 @@ public class DynamicUserService {
 				companyTableColumnInfo.setInsert_date(LocalDateTime.now());
 
 				Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-						companyCode+" - "+activityCode.getDesc()+" 시도 이력"+ "추가된 컬럼명 : "+kokonutAddColumnListDto.getCiName(), "", ip,0, jwtFilterDto.getEmail());
+						companyCode+" - "+activityCode.getDesc()+"된 컬럼명 : "+kokonutAddColumnListDto.getCiName(), "", ip,0, jwtFilterDto.getEmail());
 
 				String fieldCode = optionalCompanyTable.get().getCtTableCount()+"_"+tableAddColumnCount;
 				companyTableColumnInfo.setCtciCode(fieldCode);
@@ -1719,7 +1719,7 @@ public class DynamicUserService {
 				);
 
 				historyService.updateHistory(activityHistoryId,
-						companyCode+" - "+activityCode.getDesc()+" 시도 이력"+ "추가된 컬럼명 : "+kokonutAddColumnListDto.getCiName(), "", 1);
+						companyCode+" - "+activityCode.getDesc()+"된 컬럼명 : "+kokonutAddColumnListDto.getCiName(), "", 1);
 
 				tableAddColumnCount++;
 				companyTableColumnInfos.add(companyTableColumnInfo);
