@@ -73,6 +73,7 @@ kokonut:
   front:
     server:
       domain: ${KOKONUT_FRONT_SERVER_DOMAIN}
+      domain2: ${KOKONUT_FRONT_SERVER_DOMAIN2}
 
   # 로컬IP
   otp:

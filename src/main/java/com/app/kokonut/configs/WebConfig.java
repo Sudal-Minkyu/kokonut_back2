@@ -29,6 +29,9 @@ public class WebConfig implements WebMvcConfigurer {
     @Value("${kokonut.front.server.domain}")
     public String frontServerDomainIp;
 
+    @Value("${kokonut.front.server.domain2}")
+    public String frontServerDomainIp2;
+
     @Value("${kokonut.aws.s3.access}")
     private String AWSS3ACCESSKEY;
 
@@ -78,7 +81,7 @@ public class WebConfig implements WebMvcConfigurer {
 //        log.info("허용 프론트IP : "+frontServerDomainIp);
         registry
                 .addMapping("/*/api/**")
-                .allowedOriginPatterns(frontServerDomainIp)
+                .allowedOriginPatterns(frontServerDomainIp,frontServerDomainIp2)
                 .allowedHeaders("Authorization", "Content-type", "x-api-key", "keyBufferSto", "ivSto")
                 .exposedHeaders("Authorization")
                 .allowedMethods(HttpMethod.GET.name(), HttpMethod.POST.name())
