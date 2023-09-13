@@ -110,12 +110,6 @@ public class HistoryService {
         Page<HistoryListDto> historyListDtos = historyRepository.findByHistoryPage(historySearchDto, pageable);
 
         updateHistory(activityHistoryId, cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
-
-        if(historyListDtos.getTotalPages() == 0) {
-            log.info("조회된 데이터가 없습니다.");
-            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO003.getCode(), ResponseErrorCode.KO003.getDesc()));
-        }
-
         return ResponseEntity.ok(res.ResponseEntityPage(historyListDtos));
     }
 
@@ -300,11 +294,6 @@ public class HistoryService {
         }
 
         Page<HistoryListDto> historyListDtos = historyRepository.findByHistoryPage(HistorySearchDto, pageable);
-        if(historyListDtos.getTotalPages() == 0) {
-            log.info("조회된 데이터가 없습니다.");
-            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO003.getCode(), ResponseErrorCode.KO003.getDesc()));
-        }
-
         return ResponseEntity.ok(res.ResponseEntityPage(historyListDtos));
     }
 

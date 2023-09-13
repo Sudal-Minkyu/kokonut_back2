@@ -71,12 +71,7 @@ public class QnaService {
         log.info("jwtFilterDto : "+jwtFilterDto);
 
         Page<QnaListDto> qnaListDtos = qnaRepository.findQnaPage(jwtFilterDto, pageable);
-        if(qnaListDtos.getTotalPages() == 0) {
-            log.info("조회된 데이터가 없습니다.");
-            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO003.getCode(), ResponseErrorCode.KO003.getDesc()));
-        } else {
-            return ResponseEntity.ok(res.ResponseEntityPage(qnaListDtos));
-        }
+        return ResponseEntity.ok(res.ResponseEntityPage(qnaListDtos));
     }
 
     // 1:1 문의 등록하기

@@ -158,13 +158,7 @@ public class PolicyService {
 
         historyService.updateHistory(activityHistoryId,
                 cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
-
-        if(policyListDtos.getTotalPages() == 0) {
-            log.info("조회된 데이터가 없습니다.");
-            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO003.getCode(), ResponseErrorCode.KO003.getDesc()));
-        } else {
-            return ResponseEntity.ok(res.ResponseEntityPage(policyListDtos));
-        }
+        return ResponseEntity.ok(res.ResponseEntityPage(policyListDtos));
     }
 
     // 개인정보처리방침 상세내용 조회

@@ -116,13 +116,7 @@ public class EmailService {
 
         historyService.updateHistory(activityHistoryId,
                 cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
-
-        if(emailListDtos.getTotalPages() == 0) {
-            log.info("조회된 데이터가 없습니다.");
-            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO003.getCode(), ResponseErrorCode.KO003.getDesc()));
-        } else {
-            return ResponseEntity.ok(res.ResponseEntityPage(emailListDtos));
-        }
+        return ResponseEntity.ok(res.ResponseEntityPage(emailListDtos));
     }
 
     // 이메일 발송 호출

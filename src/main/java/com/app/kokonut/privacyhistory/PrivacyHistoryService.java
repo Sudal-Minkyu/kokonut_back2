@@ -108,11 +108,6 @@ public class PrivacyHistoryService {
 
         Page<PrivacyHistoryListDto> privacyHistoryListDtos = privacyHistoryRepository.findByPrivacyHistoryPage(privacyHistorySearchDto, pageable);
 
-        if(privacyHistoryListDtos.getTotalPages() == 0) {
-            log.info("조회된 데이터가 없습니다.");
-            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO003.getCode(), ResponseErrorCode.KO003.getDesc()));
-        }
-
         return ResponseEntity.ok(res.ResponseEntityPage(privacyHistoryListDtos));
     }
 

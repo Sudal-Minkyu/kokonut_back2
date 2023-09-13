@@ -70,18 +70,11 @@ public class AjaxResponse {
         res.put("status",200);
         res.put("timestamp", new Timestamp(System.currentTimeMillis()));
         res.put("message", "SUCCESS");
-        if(pages.getTotalElements()> 0 ){
-            res.put("datalist",pages.getContent());
-            res.put("total_page",pages.getTotalPages());
-            res.put("current_page",pages.getNumber() + 1);
-            res.put("total_rows",pages.getTotalElements());
-            res.put("current_rows",pages.getNumberOfElements());
-        }else{
-            res.put("total_page",pages.getTotalPages());
-            res.put("current_page",pages.getNumber() + 1);
-            res.put("total_rows",pages.getTotalElements());
-            res.put("current_rows",pages.getNumberOfElements());
-        }
+        res.put("datalist",pages.getContent());
+        res.put("total_page",pages.getTotalPages());
+        res.put("current_page",pages.getNumber() + 1);
+        res.put("total_rows",pages.getTotalElements());
+        res.put("current_rows",pages.getNumberOfElements());
         return this.res;
     }
 

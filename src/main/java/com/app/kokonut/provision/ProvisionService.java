@@ -359,13 +359,7 @@ public class ProvisionService {
 
         historyService.updateHistory(activityHistoryId,
                 cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
-
-        if(provisionListDtos.getTotalPages() == 0) {
-            log.info("조회된 데이터가 없습니다.");
-            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO003.getCode(), ResponseErrorCode.KO003.getDesc()));
-        } else {
-            return ResponseEntity.ok(res.ResponseEntityPage(provisionListDtos));
-        }
+        return ResponseEntity.ok(res.ResponseEntityPage(provisionListDtos));
     }
 
     // 개인정보제공 다운로드 리스트 조회
@@ -399,13 +393,7 @@ public class ProvisionService {
 
         historyService.updateHistory(activityHistoryId,
                 cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
-
-        if(provisionDownloadList.getTotalPages() == 0) {
-            log.info("조회된 데이터가 없습니다.");
-            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO003.getCode(), ResponseErrorCode.KO003.getDesc()));
-        } else {
-            return ResponseEntity.ok(res.ResponseEntityPage(provisionDownloadList));
-        }
+        return ResponseEntity.ok(res.ResponseEntityPage(provisionDownloadList));
     }
 
     // 개인정보제공 다운로드 API
