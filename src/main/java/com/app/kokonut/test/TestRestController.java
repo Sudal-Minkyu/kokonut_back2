@@ -3,15 +3,16 @@ package com.app.kokonut.test;
 import com.app.kokonut.alimtalk.AlimtalkSendService;
 import com.app.kokonut.alimtalk.dtos.AlimtalkTemplateInfoDto;
 import com.app.kokonut.common.AjaxResponse;
-import com.app.kokonut.common.ResponseErrorCode;
-import com.app.kokonut.common.ReqUtils;
 import com.app.kokonut.common.CommonUtil;
+import com.app.kokonut.common.ReqUtils;
+import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.configs.MailSender;
 import com.app.kokonut.email.email.EmailService;
 import com.app.kokonut.navercloud.NaverCloudPlatformService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,6 +31,9 @@ import java.util.Map;
 @RequestMapping("/v1/api/Test")
 @RestController
 public class TestRestController {
+
+    @Value("${kokonut.happytalk.profilekey}")
+    public String profilekey;
 
     private final MailSender mailSender;
     private final EmailService emailService;
@@ -105,6 +109,9 @@ public class TestRestController {
         log.info("request.getRemoteAddr() : "+request.getRemoteAddr());
         log.info("CommonUtil.publicIp() : "+CommonUtil.publicIp());
         log.info("CommonUtil.getServerIp() : "+ CommonUtil.getServerIp());
+
+        // 테스트하는곳
+
 
         data.put("request.getRemoteAddr()", request.getRemoteAddr());
         data.put("CommonUtil.publicIp()",CommonUtil.publicIp());

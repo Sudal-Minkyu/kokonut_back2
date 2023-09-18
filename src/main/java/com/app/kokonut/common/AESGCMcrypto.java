@@ -11,12 +11,13 @@ import com.amazonaws.services.kms.model.GenerateDataKeyRequest;
 import com.amazonaws.services.kms.model.GenerateDataKeyResult;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.security.*;
-import javax.crypto.*;
-import javax.crypto.spec.*;
-import java.util.Arrays;
+import java.security.SecureRandom;
 import java.util.Base64;
 
 @Slf4j
@@ -38,8 +39,8 @@ public class AESGCMcrypto {
 
     public static void main(String[] args) throws Exception {
 
-//        String dataKey = createDataKey(); // 데이키를 받음
-        String dataKey = "AQIDAHgJGloEIm1LwL4cPWLvM58HeuMmUWjfnn29PPq5/oTojwGR3wb3zCFcINSX4GurQ+BGAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMEDlzIebb1pn56K4FAgEQgDvOlhNkuSVyQ2kjmZlUCMKIUfouVgsWCMlm3DmiGKOoKSuaAftmc+b/ga9dIR5IfE4KZkoLeZCrGCyOPw==";
+        String dataKey = createDataKey(); // 데이키를 받음
+//        String dataKey = "";
         log.info("dataKey : "+dataKey);
 
         SecretKey secretKey = generateDataKey(dataKey);

@@ -77,8 +77,11 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
                 .where(provision.insert_date.goe(provisionSearchDto.getStimeStart()).and(provision.insert_date.loe(provisionSearchDto.getStimeEnd())))
                 .innerJoin(admin).on(admin.knEmail.eq(provision.insert_email))
                 .innerJoin(InsertAdmin).on(InsertAdmin.adminId.eq(admin.adminId))
+
+                .leftJoin(provisionRoster).on(provisionRoster.proCode.eq(provision.proCode).and(provisionRoster.adminId.eq(provisionSearchDto.getAdminId())))
+
 //                .innerJoin(provisionRoster).on(provisionRoster.proCode.eq(provision.proCode))
-                .innerJoin(provisionRoster).on(provisionRoster.proCode.eq(provision.proCode).and(provisionRoster.adminId.eq(provisionSearchDto.getAdminId())))
+//                .innerJoin(provisionRoster).on(provisionRoster.proCode.eq(provision.proCode).and(provisionRoster.adminId.eq(provisionSearchDto.getAdminId())))
                 .innerJoin(provisionRosterCnt).on(provisionRosterCnt.proCode.eq(provision.proCode)).groupBy(provisionRosterCnt.proCode)
                 .select(Projections.constructor(ProvisionListDto.class,
 //                        provision.proId,
@@ -91,6 +94,9 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
                         provision.proDownloadYn,
                         provisionRosterCnt.count(),
                         downloadHistoryCountSubQuery,
+                        new CaseBuilder()
+                                .when(provisionRoster.isNotNull()).then("1")
+                                .otherwise("2"), // 다운로드 가능 "1", 다운로드 불가능 "2"
                         new CaseBuilder()
                                 .when(InsertAdmin.adminId.eq(provisionSearchDto.getAdminId())).then("1")
                                 .otherwise("2") // 자신이 제공한건이면 "1", 받은건이면 "2"로 반환

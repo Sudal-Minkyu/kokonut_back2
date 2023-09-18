@@ -39,6 +39,8 @@ public class ProvisionListDto {
 
     private Long downloadCount;
 
+    private String downloadAccept; // 다운로드 가능 "1", 다운로드 불가능 "2"
+
     private String offerType; // "1" : 제공함, "2" : 제공받음
 
     public String getProDownloadYn() {

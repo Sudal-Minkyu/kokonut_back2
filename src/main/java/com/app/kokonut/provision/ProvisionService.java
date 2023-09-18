@@ -342,7 +342,7 @@ public class ProvisionService {
             provisionSearchDto.setStimeEnd(stimeList.get(1).plusHours(23).plusMinutes(59));
         }
 
-        log.info("provisionSearchDto : "+provisionSearchDto);
+//        log.info("provisionSearchDto : "+provisionSearchDto);
 
         ActivityCode activityCode;
         String ip = CommonUtil.publicIp();
@@ -356,9 +356,13 @@ public class ProvisionService {
                 cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
 
         Page<ProvisionListDto> provisionListDtos = provisionRepository.findByProvisionList(provisionSearchDto, pageable);
+//        for(int i=0 ;i<provisionListDtos.getContent().size(); i++) {
+//            log.info("provisionSearchDto.getDownloadAccept : "+provisionListDtos.getContent().get(i).getDownloadAccept());
+//        }
 
         historyService.updateHistory(activityHistoryId,
                 cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+
         return ResponseEntity.ok(res.ResponseEntityPage(provisionListDtos));
     }
 
