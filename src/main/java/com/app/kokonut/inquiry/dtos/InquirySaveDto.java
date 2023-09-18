@@ -17,7 +17,7 @@ public class InquirySaveDto {
 
     private String iqWriter; // 작성자
 
-    private Integer iqState; // 선호 온보딩 방식  -> 1. 오프라인 미팅 2. 온라인 교육 3. 상관없음
+    private Integer iqState; // 선호 온보딩 방식  -> 1. 오프라인 미팅 2. 온라인 교육
 
     private String iqCompany; // 회사명
 
@@ -27,7 +27,7 @@ public class InquirySaveDto {
 
     private String iqEmail; // 이메일
 
-    private String iqContents; // "온보딩 진행 시 요청사항 (이전에 내용칸 활용)"
+    private String iqContents; // 온보딩 진행 시 요청사항 (이전에 내용칸 활용)
 
 
 }
