@@ -31,6 +31,7 @@ import java.util.Map;
 public class AuthRestController {
 
     private final AuthService authService;
+
     @Autowired
     public AuthRestController(AuthService authService){
         this.authService = authService;

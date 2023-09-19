@@ -42,7 +42,7 @@ public class Inquiry {
 
     @ApiModelProperty("서비스명")
     @Column(name = "iq_service")
-    private Integer iqService;
+    private String iqService;
 
     @Column(name = "iq_phone")
     @ApiModelProperty("연락처(휴대전화)")

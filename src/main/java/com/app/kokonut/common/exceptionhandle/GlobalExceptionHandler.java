@@ -51,13 +51,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_KOKONUT_02.getCode(),ResponseErrorCode.ERROR_KOKONUT_02.getDesc()));
     }
 
-//    // 무슨에러가 발생했는지 모를때
-//    @ExceptionHandler(Exception.class)
-//    public ResponseEntity<Map<String, Object>> handleKokonutException(){
-//        AjaxResponse res = new AjaxResponse();
-//        log.error("에러내용 : "+ResponseErrorCode.ERROR_KOKONUT_01.getDesc());
-//        return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_KOKONUT_01.getCode(),ResponseErrorCode.ERROR_KOKONUT_01.getDesc()));
-//    }
+    // 무슨에러가 발생했는지 모를때
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, Object>> handleKokonutException(){
+        AjaxResponse res = new AjaxResponse();
+        log.error("에러내용 : "+ResponseErrorCode.ERROR_KOKONUT_01.getDesc());
+        return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_KOKONUT_01.getCode(),ResponseErrorCode.ERROR_KOKONUT_01.getDesc()));
+    }
 
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)

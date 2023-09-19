@@ -46,6 +46,9 @@ public class NiceIdService {
 	@Value("${kokonut.front.server.domain}")
 	public String frontServerDomainIp;
 
+	@Value("${kokonut.front.server.domain2}")
+	public String frontServerDomainIp2;
+
 	@Value("${kokonut.nice.id}")
 	public String clientId;
 
@@ -68,7 +71,7 @@ public class NiceIdService {
 	}
 
 	// 본인인증 창 열기
-	public ResponseEntity<Map<String, Object>> open(String state, HttpServletResponse response) {
+	public ResponseEntity<Map<String, Object>> open(String state, HttpServletRequest request, HttpServletResponse response) {
 		log.info("본인인증 open 호출");
 
 		AjaxResponse res = new AjaxResponse();
@@ -91,7 +94,16 @@ public class NiceIdService {
 		byte[] arrHashValue = md.digest();
 		String resultVal = new String(Base64.getEncoder().encode(arrHashValue)).trim();
 
-		String reqData = "{\"returnurl\":\""+frontServerDomainIp+
+		String returnUrl = request.getHeader("Referer");
+		log.info("호출한 URL : "+returnUrl);
+
+		if (returnUrl.startsWith(frontServerDomainIp)) {
+			returnUrl = frontServerDomainIp;
+		} else {
+			returnUrl = frontServerDomainIp2;
+		}
+
+		String reqData = "{\"returnurl\":\""+returnUrl+
 				"/#/niceId/redirect"+
 				"?state="+state+"\", " +
 				"\"sitecode\":\""+cryptoToken.getSiteCode()+"\", \"popupyn\" : \"Y\", \"receivedata\" : \"xxxxdddeee\", \"authtype\":\"M\", \"mobilceco\":\"S\"}";

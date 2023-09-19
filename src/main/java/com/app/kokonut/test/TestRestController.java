@@ -111,7 +111,8 @@ public class TestRestController {
         log.info("CommonUtil.getServerIp() : "+ CommonUtil.getServerIp());
 
         // 테스트하는곳
-
+//        String referrer = request.getHeader("Referer");
+//        log.info("referrer : "+ referrer);
 
         data.put("request.getRemoteAddr()", request.getRemoteAddr());
         data.put("CommonUtil.publicIp()",CommonUtil.publicIp());

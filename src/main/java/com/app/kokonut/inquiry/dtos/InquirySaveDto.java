@@ -21,7 +21,7 @@ public class InquirySaveDto {
 
     private String iqCompany; // 회사명
 
-    private Integer iqService; // 서비스명
+    private String iqService; // 서비스명
 
     private String iqPhone; // 연락처(휴대전화)
 
