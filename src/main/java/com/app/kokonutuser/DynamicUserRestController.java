@@ -55,6 +55,14 @@ public class DynamicUserRestController {
 		return dynamicUserService.tableColumnCall(jwtFilterDto);
 	}
 
+	// 개인정보제공용 기본 테이블의 컬럼조회
+	@GetMapping(value = "/privateTableColumnCall")
+	@ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+	public ResponseEntity<Map<String,Object>> privateTableColumnCall() {
+		JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+		return dynamicUserService.privateTableColumnCall(jwtFilterDto);
+	}
+
 	// 컬럼추가 버튼(오른쪽에 추가)
 	@PostMapping(value = "/tableColumnAdd")
 	@ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")

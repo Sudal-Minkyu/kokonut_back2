@@ -8,6 +8,7 @@ import com.app.kokonut.history.QHistory;
 import com.app.kokonut.index.dtos.AdminConnectListSubDto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import org.qlrm.mapper.JpaResultMapper;
@@ -225,8 +226,10 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
             query.where(admin.knRoleCode.eq(AuthorityRole.ROLE_GUEST));
         }
 
-        // 본인 조회는 제외
-        query.where(admin.knEmail.ne(email));
+        // 본인 조회는 제외 -> 2023/09/22 본인선택 삭제함 -> 내부팀원 리스트 맨위에 소속
+//        query.where(admin.knEmail.ne(email));
+
+        query.orderBy(Expressions.cases().when(admin.knEmail.eq(email)).then(1).otherwise(2).asc());
 
         return query.fetch();
     }

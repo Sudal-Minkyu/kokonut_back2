@@ -155,6 +155,12 @@ public enum ResponseErrorCode {
 
     KO117("KO117", "이미 인증된 관리자 입니다."),
 
+    KO118("KO118", "존재하지 않은 제공건이거나, 이미 종료된 제공건 입니다."),
+    KO119("KO119", "해당 개인정보제공을 종료할 권한이 없습니다."),
+
+
+
+
     ERROR_CODE_API("ERROR_CODE_API", "API 내용"),
     ERROR_CODE_00("ERROR_CODE_00", "파라미터 데이터가 없습니다."),
     ERROR_CODE_01("ERROR_CODE_01", "지정되지 않은 값입니다. 고유코드를 확인해주시고 메뉴얼대로 호출해주시길 바랍니다."),

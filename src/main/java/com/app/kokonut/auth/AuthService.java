@@ -530,16 +530,6 @@ public class AuthService {
         boolean result = kokonutUserService.createTableKokonutUser(ctName, 0);
         log.info("result : "+result);
         if(result) {
-            // 기본컬럼 아이디 저장(1_id)
-            CompanyTableColumnInfo companyTableColumnInfo = new CompanyTableColumnInfo();
-            companyTableColumnInfo.setCtName(cpCode+"_1");
-            companyTableColumnInfo.setCtciName("ID_1_id");
-            companyTableColumnInfo.setCtciCode("1_id");
-            companyTableColumnInfo.setCtciDesignation("아이디");
-            companyTableColumnInfo.setCtciSecuriy("0");
-            companyTableColumnInfo.setInsert_email(kokonutSignUp.getKnEmail());
-            companyTableColumnInfo.setInsert_date(LocalDateTime.now());
-            companyTableColumnInfoRepository.save(companyTableColumnInfo);
 
             // 서비스설정 기본값 저장
             CompanySetting companySetting = new CompanySetting();
@@ -553,9 +543,6 @@ public class AuthService {
             companySetting.setInsert_email(kokonutSignUp.getKnEmail());
             companySetting.setInsert_date(LocalDateTime.now());
             companySettingRepository.save(companySetting);
-
-            // 호출 카운팅 올리기
-            awsKmsHistoryService.awskmsHistoryCount(cpCode);
 
             String randomStr = Utils.getAlphabetStr(5);
             String app_user_id = "app_user_id_"+randomStr; // app_user_id 변수

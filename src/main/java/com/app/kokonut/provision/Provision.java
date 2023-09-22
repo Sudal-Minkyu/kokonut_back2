@@ -49,6 +49,10 @@ public class Provision {
     @Column(name = "pro_exp_date")
     private LocalDate proExpDate;
 
+    @ApiModelProperty("제공종료 여부 : 0: 미종료상태, 1: 종료상태")
+    @Column(name = "pro_exit_state")
+    private Integer proExitState;
+
     @ApiModelProperty("다운로드 유무 - 0: NO, 1:YES")
     @Column(name = "pro_download_yn")
     private Integer proDownloadYn;

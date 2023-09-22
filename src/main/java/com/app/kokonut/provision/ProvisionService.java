@@ -4,11 +4,7 @@ import com.app.kokonut.admin.AdminRepository;
 import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import com.app.kokonut.awskmshistory.dto.AwsKmsResultDto;
-import com.app.kokonut.common.AjaxResponse;
-import com.app.kokonut.common.ResponseErrorCode;
-import com.app.kokonut.common.ReqUtils;
-import com.app.kokonut.common.CommonUtil;
-import com.app.kokonut.common.Utils;
+import com.app.kokonut.common.*;
 import com.app.kokonut.company.companydatakey.CompanyDataKeyService;
 import com.app.kokonut.company.companytablecolumninfo.CompanyTableColumnInfoRepository;
 import com.app.kokonut.company.companytablecolumninfo.dtos.CompanyTableColumnInfoCheck;
@@ -149,7 +145,7 @@ public class ProvisionService {
         Long activityHistoryId;
 
         // 개인정보제공 등록 코드
-        activityCode = ActivityCode.AC_48;
+        activityCode = ActivityCode.AC_48_1;
 
         String nowDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
@@ -162,6 +158,7 @@ public class ProvisionService {
         provision.setProProvide(provisionSaveDto.getProProvide());
         provision.setProStartDate(proStartDate);
         provision.setProExpDate(proExpDate);
+        provision.setProExitState(0);
         provision.setProDownloadYn(provisionSaveDto.getProDownloadYn());
         provision.setProDownloadCount(0);
 
@@ -192,8 +189,6 @@ public class ProvisionService {
                 }
                 provisionRosters.add(provisionRoster);
             }
-
-            List<ProvisionEntry> provisionEntries = new ArrayList<>();
 
             ProvisionEntry provisionEntry = new ProvisionEntry();
             // 제공 할 테이블+컬럼 저장 -> 모든 항목일 경우 저장하지 않음
@@ -535,16 +530,20 @@ public class ProvisionService {
             // 쿼리 기본셋팅
             resultQuery.append("SELECT ");
 
-            selectQuery.append("kokonut_IDX as kokonut_IDX ");
-
-            // 셀렉트 기본셋팅
-            selectQuery.append(
-                    ", DATE_FORMAT(kokonut_REGISTER_DATE, '%Y-%m-%d %H시') as 회원가입일시, " +
-                            "COALESCE(DATE_FORMAT(kokonut_LAST_LOGIN_DATE, '%Y-%m-%d %H시'), '없음') as 마지막로그인일시 ");
+//            selectQuery.append("kokonut_IDX as kokonut_IDX ");
+//
+//            // 셀렉트 기본셋팅
+//            selectQuery.append(
+//                    ", DATE_FORMAT(kokonut_REGISTER_DATE, '%Y-%m-%d %H시') as 회원가입일시, " +
+//                            "COALESCE(DATE_FORMAT(kokonut_LAST_LOGIN_DATE, '%Y-%m-%d %H시'), '없음') as 마지막로그인일시 ");
 
             for(int i=0; i<targetList.size(); i++) {
                 if(!targetList.get(i).equals("pass") && !securityList.get(i).equals("pass") && !headerName.get(i).equals("pass")) {
-                    selectQuery.append(", COALESCE(").append(targetList.get(i)).append(", '없음') as ").append(headerName.get(i)).append(" ");
+                    if(i==targetList.size()-1) {
+                        selectQuery.append("COALESCE(").append(targetList.get(i)).append(", '없음') as ").append(headerName.get(i)).append(" ");
+                    } else {
+                        selectQuery.append("COALESCE(").append(targetList.get(i)).append(", '없음') as ").append(headerName.get(i)).append(", ");
+                    }
                 }
             }
 
@@ -555,8 +554,8 @@ public class ProvisionService {
                     .append(ctName)
                     .append(whereQuery);
 
-//            log.info("ctName : "+ctName);
-//            log.info("resultQuery : "+resultQuery);
+            log.info("ctName : "+ctName);
+            log.info("resultQuery : "+resultQuery);
 
             List<Map<String, Object>> privacyInfo = dynamicUserRepositoryCustom.privacyOpenInfoData(String.valueOf(resultQuery));
 
@@ -683,6 +682,54 @@ public class ProvisionService {
         HashMap<String, Object> data = new HashMap<>();
 
         log.info("proCode : " + proCode);
+
+        return ResponseEntity.ok(res.success(data));
+    }
+
+    // 개인정보제공 종료 API
+    public ResponseEntity<Map<String, Object>> provisionExit(String proCode, JwtFilterDto jwtFilterDto) {
+        log.info("provisionExit 호출");
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+//        log.info("proCode : " + proCode);
+
+        String email = jwtFilterDto.getEmail();
+//        log.info("email : " + email);
+
+        Optional<Provision> optionalProvision = provisionRepository.findProvisionByProCodeAndProExitState(proCode, 0);
+        if(optionalProvision.isPresent()) {
+
+            if(optionalProvision.get().getInsert_email().equals(email)) {
+                AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+
+                long adminId = adminCompanyInfoDto.getAdminId();
+                String cpCode = adminCompanyInfoDto.getCompanyCode();
+
+                ActivityCode activityCode;
+                String ip = CommonUtil.publicIp();
+                Long activityHistoryId;
+
+                activityCode = ActivityCode.AC_48_2;
+
+                // 활동이력 저장 -> 비정상 모드
+                activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
+                        cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+
+                optionalProvision.get().setProExitState(1);
+                optionalProvision.get().setModify_email(email);
+                optionalProvision.get().setModify_date(LocalDateTime.now());
+                provisionRepository.save(optionalProvision.get());
+
+                historyService.updateHistory(activityHistoryId,
+                        cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+            } else {
+                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO119.getCode(), ResponseErrorCode.KO119.getDesc()));
+            }
+        } else {
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO118.getCode(), ResponseErrorCode.KO118.getDesc()));
+        }
 
         return ResponseEntity.ok(res.success(data));
     }

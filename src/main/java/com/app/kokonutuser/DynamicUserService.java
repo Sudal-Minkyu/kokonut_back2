@@ -1580,6 +1580,7 @@ public class DynamicUserService {
 						kokonutUserFieldListDto.setFieldCategory(commentText[3]);
 						kokonutUserFieldListDto.setFieldColor(commentText[4]);
 						kokonutUserFieldListDto.setFieldCode(commentText[5]);
+
 						if(key.equals("MUL")) {
 							kokonutUserFieldListDto.setIndexType("1");
 						} else if(key.equals("UNI")) {
@@ -1595,6 +1596,70 @@ public class DynamicUserService {
 
 		data.put("fieldList",kokonutUserFieldListDtos);
 
+		return ResponseEntity.ok(res.success(data));
+	}
+
+	// 개인정보제공용 기본 테이블의 컬럼조회
+	public ResponseEntity<Map<String, Object>> privateTableColumnCall(JwtFilterDto jwtFilterDto) {
+		log.info("privateTableColumnCall 호출");
+
+		AjaxResponse res = new AjaxResponse();
+		HashMap<String, Object> data = new HashMap<>();
+
+		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(jwtFilterDto.getEmail());
+		String cpCode = adminCompanyInfoDto.getCompanyCode();
+
+		String ctName = cpCode+"_1";
+		List<KokonutUserFieldDto> kokonutUserFieldDtos = kokonutUserService.getColumns(ctName);
+//		log.info("kokonutUserFieldDtos : "+kokonutUserFieldDtos);
+
+		List<KokonutUserFieldListDto> kokonutUserFieldListDtos = new ArrayList<>();
+		KokonutUserFieldListDto kokonutUserFieldListDto;
+		for (KokonutUserFieldDto kokonutUserFieldDto : kokonutUserFieldDtos) {
+			kokonutUserFieldListDto = new KokonutUserFieldListDto();
+			String field = kokonutUserFieldDto.getField();
+			if(!field.equals("kokonut_PERSONAL_INFO_AGREE") && !field.equals("kokonut_OFFER_INFO_AGREE") &&
+					!field.equals("kokonut_SEND_MAIL_DATE") && !field.equals("kokonut_REGDATE") &&
+					!field.equals("kokonut_MODIFY_DATE") && !field.equals("kokonut_DELETE_DATE") && !field.equals("PASSWORD_1_pw")
+			) { // 23/07/31 -> 개인정보제공할떄 비밀번호는 제공하지않는다. to. woody
+				String comment = kokonutUserFieldDto.getComment();
+				String key = kokonutUserFieldDto.getKey();
+				if (comment != null) {
+					String[] commentText = comment.split(",");
+
+					if(commentText.length == 6) {
+						kokonutUserFieldListDto.setFieldName(field);
+
+						if (commentText[1].equals("암호화")) {
+							kokonutUserFieldListDto.setFieldSecrity(1);
+						} else {
+							kokonutUserFieldListDto.setFieldSecrity(0);
+						}
+
+						kokonutUserFieldListDto.setFieldComment(commentText[0]);
+						kokonutUserFieldListDto.setFieldCategory(commentText[3]);
+						kokonutUserFieldListDto.setFieldColor(commentText[4]);
+
+//						if(field.equals("kokonut_IDX") || field.equals("kokonut_REGISTER_DATE") || field.equals("kokonut_LAST_LOGIN_DATE")) {
+//							kokonutUserFieldListDto.setFieldCode("");
+//						} else {
+							kokonutUserFieldListDto.setFieldCode(commentText[5]);
+//						}
+
+						if(key.equals("MUL")) {
+							kokonutUserFieldListDto.setIndexType("1");
+						} else if(key.equals("UNI")) {
+							kokonutUserFieldListDto.setIndexType("2");
+						} else {
+							kokonutUserFieldListDto.setIndexType("0");
+						}
+					}
+				}
+				kokonutUserFieldListDtos.add(kokonutUserFieldListDto);
+			}
+		}
+
+		data.put("fieldList",kokonutUserFieldListDtos);
 
 		return ResponseEntity.ok(res.success(data));
 	}

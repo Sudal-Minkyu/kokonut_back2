@@ -62,9 +62,9 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
         LocalDate today = LocalDate.now();
 
         Expression<String> proState = Expressions.cases()
+                .when(provision.proExitState.eq(1)).then("3")
                 .when(provision.proStartDate.gt(today)).then("0")
                 .when(provision.proStartDate.loe(today).and(provision.proExpDate.goe(today))).then("1")
-//                .when(provision.proExpDate.lt(today)).then("2")
                 .otherwise("2");
 
         JPQLQuery<Long> downloadHistoryCountSubQuery = JPAExpressions
@@ -95,8 +95,9 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
                         provisionRosterCnt.count(),
                         downloadHistoryCountSubQuery,
                         new CaseBuilder()
+                                .when(provisionRoster.isNotNull().and(provision.insert_email.eq(InsertAdmin.knEmail))).then("3")
                                 .when(provisionRoster.isNotNull()).then("1")
-                                .otherwise("2"), // 다운로드 가능 "1", 다운로드 불가능 "2"
+                                .otherwise("2"), // 다운로드 가능 "1", 다운로드 불가능 "2", 다운로드 또는 제공종료 가능 "3"
                         new CaseBuilder()
                                 .when(InsertAdmin.adminId.eq(provisionSearchDto.getAdminId())).then("1")
                                 .otherwise("2") // 자신이 제공한건이면 "1", 받은건이면 "2"로 반환
@@ -113,8 +114,10 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
                 statePredicate.and(provision.proStartDate.gt(today));
             } else if(provisionSearchDto.getFilterState().equals("1")) {
                 statePredicate.and(provision.proStartDate.loe(today)).and(provision.proExpDate.goe(today));
-            } else {
+            } else if(provisionSearchDto.getFilterState().equals("2")) {
                 statePredicate.and(provision.proExpDate.lt(today));
+            } else {
+                statePredicate.and(provision.proExitState.eq(1));
             }
 
             query.where(statePredicate);

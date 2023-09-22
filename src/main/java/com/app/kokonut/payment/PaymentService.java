@@ -5,9 +5,9 @@ import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import com.app.kokonut.awskmshistory.AwsKmsHistoryService;
 import com.app.kokonut.common.AjaxResponse;
-import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.common.BootPayService;
 import com.app.kokonut.common.CommonUtil;
+import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.company.company.Company;
 import com.app.kokonut.company.company.CompanyRepository;
 import com.app.kokonut.company.companypayment.CompanyPayment;
@@ -17,6 +17,8 @@ import com.app.kokonut.company.companypayment.dtos.CompanyPaymentSearchDto;
 import com.app.kokonut.company.companypaymentinfo.CompanyPaymentInfo;
 import com.app.kokonut.company.companypaymentinfo.CompanyPaymentInfoRepository;
 import com.app.kokonut.company.companypaymentinfo.dtos.CompanyPaymentInfoDto;
+import com.app.kokonut.company.companytablecolumninfo.CompanyTableColumnInfo;
+import com.app.kokonut.company.companytablecolumninfo.CompanyTableColumnInfoRepository;
 import com.app.kokonut.configs.GoogleOTP;
 import com.app.kokonut.configs.KeyGenerateService;
 import com.app.kokonut.configs.MailSender;
@@ -66,6 +68,7 @@ public class PaymentService {
 	private final PaymentErrorRepository paymentErrorRepository;
 	private final CompanyPaymentRepository companyPaymentRepository;
 	private final CompanyPaymentInfoRepository companyPaymentInfoRepository;
+	private final CompanyTableColumnInfoRepository companyTableColumnInfoRepository;
 
 	private final PaymentPrivacyCountRepository paymentPrivacyCountRepository;
 	private final DynamicUserRepositoryCustom dynamicUserRepositoryCustom;
@@ -75,7 +78,7 @@ public class PaymentService {
 						  EmailService emailService, AwsKmsHistoryService awsKmsHistoryService, AdminRepository adminRepository,
 						  CompanyRepository companyRepository, PaymentRepository paymentRepository,
 						  PaymentErrorRepository paymentErrorRepository, CompanyPaymentRepository companyPaymentRepository, CompanyPaymentInfoRepository companyPaymentInfoRepository,
-						  PaymentPrivacyCountRepository paymentPrivacyCountRepository, DynamicUserRepositoryCustom dynamicUserRepositoryCustom) {
+						  CompanyTableColumnInfoRepository companyTableColumnInfoRepository, PaymentPrivacyCountRepository paymentPrivacyCountRepository, DynamicUserRepositoryCustom dynamicUserRepositoryCustom) {
 		this.historyService = historyService;
 		this.mailSender = mailSender;
 		this.googleOTP = googleOTP;
@@ -89,6 +92,7 @@ public class PaymentService {
 		this.paymentErrorRepository = paymentErrorRepository;
 		this.companyPaymentRepository = companyPaymentRepository;
 		this.companyPaymentInfoRepository = companyPaymentInfoRepository;
+		this.companyTableColumnInfoRepository = companyTableColumnInfoRepository;
 		this.paymentPrivacyCountRepository = paymentPrivacyCountRepository;
 		this.dynamicUserRepositoryCustom = dynamicUserRepositoryCustom;
 	}
@@ -281,6 +285,25 @@ public class PaymentService {
 					companyPaymentInfo.setInsert_email(email);
 					companyPaymentInfo.setInsert_date(LocalDateTime.now());
 					companyPaymentInfoRepository.save(companyPaymentInfo);
+
+					// 기본컬럼 아이디 저장(1_id), kokonut_IDX 저장(1_idx), 회원가입일시 저장(1_regdate), 마지막로그인일시 저장(1_lastlog)
+					String[] ctciNameList = {"kokonut_IDX","kokonut_REGISTER_DATE","kokonut_LAST_LOGIN_DATE","ID_1_id"};
+					String[] ctciCodeList = {"1_idx","1_regdate","1_lastlog","ID_1_id"};
+					String[] ctciDesignationList = {"kokonut_IDX","회원가입일시","마지막로그인일시","아이디"};
+					List<CompanyTableColumnInfo> companyTableColumnInfos = new ArrayList<>();
+					CompanyTableColumnInfo companyTableColumnInfo;
+					for(int i=0; i<ctciNameList.length; i++) {
+						companyTableColumnInfo = new CompanyTableColumnInfo();
+						companyTableColumnInfo.setCtName(cpCode+"_1");
+						companyTableColumnInfo.setCtciName(ctciNameList[i]);
+						companyTableColumnInfo.setCtciCode(ctciCodeList[i]);
+						companyTableColumnInfo.setCtciDesignation(ctciDesignationList[i]);
+						companyTableColumnInfo.setCtciSecuriy("0");
+						companyTableColumnInfo.setInsert_email(email);
+						companyTableColumnInfo.setInsert_date(LocalDateTime.now());
+						companyTableColumnInfos.add(companyTableColumnInfo);
+					}
+					companyTableColumnInfoRepository.saveAll(companyTableColumnInfos);
 
 					optionalCompany.get().setCpiId(companyPaymentSave.getCpiId());
 					optionalCompany.get().setCpSubscribe("1");

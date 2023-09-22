@@ -23,7 +23,7 @@ public class ProvisionListDto {
 
     private String proCode;
 
-    private String proState; // "0" -> 대기중, "1" -> 제공중, "2" -> 제공완료
+    private String proState; // "0" -> 대기중, "1" -> 제공중, "2" -> 제공완료, "3" -> 제공종료
 
     private String knName; // 제공자
 

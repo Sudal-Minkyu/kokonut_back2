@@ -6,6 +6,9 @@ import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.CommonUtil;
 import com.app.kokonut.common.ReqUtils;
 import com.app.kokonut.common.ResponseErrorCode;
+import com.app.kokonut.company.companytablecolumninfo.CompanyTableColumnInfo;
+import com.app.kokonut.company.companytablecolumninfo.CompanyTableColumnInfoRepository;
+import com.app.kokonut.configs.ExcelService;
 import com.app.kokonut.configs.MailSender;
 import com.app.kokonut.email.email.EmailService;
 import com.app.kokonut.navercloud.NaverCloudPlatformService;
@@ -18,7 +21,11 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -37,16 +44,21 @@ public class TestRestController {
 
     private final MailSender mailSender;
     private final EmailService emailService;
+    private final ExcelService excelService;
     private final NaverCloudPlatformService naverCloudPlatformService;
     private final AlimtalkSendService alimtalkSendService;
+    private final CompanyTableColumnInfoRepository companyTableColumnInfoRepository;
 
     @Autowired
     public TestRestController(MailSender mailSender, EmailService emailService,
-                              NaverCloudPlatformService naverCloudPlatformService, AlimtalkSendService alimtalkSendService){
+                              ExcelService excelService, NaverCloudPlatformService naverCloudPlatformService,
+                              AlimtalkSendService alimtalkSendService, CompanyTableColumnInfoRepository companyTableColumnInfoRepository){
         this.mailSender = mailSender;
         this.emailService = emailService;
+        this.excelService = excelService;
         this.naverCloudPlatformService = naverCloudPlatformService;
         this.alimtalkSendService = alimtalkSendService;
+        this.companyTableColumnInfoRepository = companyTableColumnInfoRepository;
     }
 
     @ApiOperation(value = "메일전송 테스트용")
@@ -111,8 +123,6 @@ public class TestRestController {
         log.info("CommonUtil.getServerIp() : "+ CommonUtil.getServerIp());
 
         // 테스트하는곳
-//        String referrer = request.getHeader("Referer");
-//        log.info("referrer : "+ referrer);
 
         data.put("request.getRemoteAddr()", request.getRemoteAddr());
         data.put("CommonUtil.publicIp()",CommonUtil.publicIp());
@@ -134,6 +144,35 @@ public class TestRestController {
 
         return ResponseEntity.ok(res.success(data));
     }
+
+    @ApiOperation(value = "엑셀다운로드 API 테스트용")
+    @GetMapping(value = "/excelDownload")
+    public ResponseEntity<Map<String,Object>> excelDownload() throws IOException {
+        log.info("excelDownload 호출");
+
+        List<Map<String, Object>> dataList = new ArrayList<>();
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data;
+
+        Map<String, Object> row1 = new HashMap<>();
+        row1.put("id", 1);
+        row1.put("name2", "John");
+        row1.put("age", 35);
+
+        Map<String, Object> row2 = new HashMap<>();
+        row2.put("id", 2);
+        row2.put("name", "Sally");
+        row2.put("age", 28);
+
+        dataList.add(row1);
+        dataList.add(row2);
+
+        data = excelService.createExcelFile("테스트압축파일", "테스트시트명", dataList, "1234");
+
+        return ResponseEntity.ok(res.success(data));
+    }
+
 
     @ApiOperation(value = "테스트 탬플릿 검수승인")
     @PostMapping(value = "/alimtalkTemplateInspection")
