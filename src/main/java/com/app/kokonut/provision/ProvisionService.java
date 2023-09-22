@@ -145,7 +145,7 @@ public class ProvisionService {
         Long activityHistoryId;
 
         // 개인정보제공 등록 코드
-        activityCode = ActivityCode.AC_48_1;
+        activityCode = ActivityCode.AC_48;
 
         String nowDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
@@ -474,7 +474,7 @@ public class ProvisionService {
             }
 
             // 활동이력 저장 -> 비정상 모드
-            activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
+            activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
                     cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason, ip, 0, email);
 
             // 제공할 개인정보가 존재하는지 체크
