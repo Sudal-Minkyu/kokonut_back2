@@ -402,6 +402,19 @@ public class KokonutUserService {
 		return dynamicUserRepositoryCustom.selectUserIdx(searchQuery);
 	}
 
+	// 회원 삭제처리 -> DeleteDate 날짜 업데이트
+	public void deleteUserUpdate(String ctName, String kokonut_IDX) {
+		log.info("deleteUserTable 호출");
+		try {
+			String userDeleteQuery = "UPDATE "+ctName+" SET kokonut_DELETE_DATE = NOW() WHERE kokonut_IDX = '"+kokonut_IDX+"'";
+//			log.info("userDeleteQuery : "+userDeleteQuery);
+			dynamicUserRepositoryCustom.userCommonTable(userDeleteQuery);
+
+		} catch (Exception e) {
+			log.error("유저삭제 에러 e.getMessage() : "+e.getMessage());
+		}
+	}
+
 	/**
 	 * tableName 테이블에 회원정보 삭제
 	 * @param ctName : 테이블 명

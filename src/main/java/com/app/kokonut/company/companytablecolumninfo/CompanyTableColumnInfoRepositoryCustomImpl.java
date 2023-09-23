@@ -42,6 +42,10 @@ public class CompanyTableColumnInfoRepositoryCustomImpl extends QuerydslReposito
                         companyTableColumnInfo.ctciCode
                 ));
 
+        query.where(companyTableColumnInfo.ctciCode.ne("1_regdate"));
+        query.where(companyTableColumnInfo.ctciCode.ne("1_lastlog"));
+        query.where(companyTableColumnInfo.ctciCode.ne("1_idx"));
+
         query.orderBy(companyTableColumnInfo.ctciCode.asc());
 
         return query.fetch();

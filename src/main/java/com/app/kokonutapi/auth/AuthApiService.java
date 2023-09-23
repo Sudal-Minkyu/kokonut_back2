@@ -590,7 +590,9 @@ public class AuthApiService {
             return ResponseEntity.ok(res.apifail(ResponseErrorCode.ERROR_CODE_24.getCode(),ResponseErrorCode.ERROR_CODE_24.getDesc()));
         }
 
-        kokonutUserService.deleteUserTable(basicTable, kokonutIdx);
+        kokonutUserService.deleteUserUpdate(basicTable, kokonutIdx);
+
+        log.info("회원탈퇴를 완료");
         data.put("result","회원탈퇴를 완료했습니다.");
 
         return ResponseEntity.ok(res.apisuccess(data));
