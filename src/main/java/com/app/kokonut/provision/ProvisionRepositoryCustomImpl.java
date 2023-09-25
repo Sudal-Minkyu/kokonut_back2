@@ -95,9 +95,9 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
                         provisionRosterCnt.count(),
                         downloadHistoryCountSubQuery,
                         new CaseBuilder()
-                                .when(provisionRoster.isNotNull().and(provision.insert_email.eq(InsertAdmin.knEmail))).then("3")
+                                .when(provisionRoster.isNotNull().and(admin.adminId.eq(provisionSearchDto.getAdminId()))).then("3")
                                 .when(provisionRoster.isNotNull()).then("1")
-                                .otherwise("2"), // 다운로드 가능 "1", 다운로드 불가능 "2", 다운로드 또는 제공종료 가능 "3"
+                                .otherwise("2"), // 다운로드 가능 "1", 제공종료 가능 "2", 다운로드 또는 제공종료 가능 "3"
                         new CaseBuilder()
                                 .when(InsertAdmin.adminId.eq(provisionSearchDto.getAdminId())).then("1")
                                 .otherwise("2") // 자신이 제공한건이면 "1", 받은건이면 "2"로 반환
@@ -222,7 +222,8 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
                         provision.proProvide,
                         provision.proStartDate,
                         provision.proExpDate,
-                        provision.proTargetType
+                        provision.proTargetType,
+                        provision.proExitState
                 ));
 
         return query.fetchOne();

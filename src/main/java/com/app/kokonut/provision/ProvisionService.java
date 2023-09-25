@@ -441,6 +441,11 @@ public class ProvisionService {
         ProvisionDownloadCheckDto provisionDownloadCheckDto = provisionRepository.findByProvisionDownloadCheck(cpCode, proCode, 1);
         if(provisionDownloadCheckDto != null) {
 
+            if (provisionDownloadCheckDto.getProExitState().equals(1)) {
+                log.error("제공종료된 항목입니다.");
+                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO113_3.getCode(), ResponseErrorCode.KO113_3.getDesc()));
+            }
+
             LocalDate now = LocalDate.now();
             //  제공기간내의 다운로드인지 체크
             if (provisionDownloadCheckDto.getProStartDate().isAfter(now)) {

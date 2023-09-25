@@ -13,6 +13,7 @@ import com.app.kokonut.common.CommonUtil;
 import com.app.kokonut.common.Utils;
 import com.app.kokonut.company.company.CompanyRepository;
 import com.app.kokonut.company.companydatakey.CompanyDataKeyService;
+import com.app.kokonut.company.companysetting.CompanySetting;
 import com.app.kokonut.company.companysetting.CompanySettingRepository;
 import com.app.kokonut.company.companysetting.dtos.CompanySettingEmailDto;
 import com.app.kokonut.company.companytable.CompanyTable;
@@ -32,6 +33,10 @@ import com.app.kokonut.history.extra.decrypcounthistory.DecrypCountHistoryServic
 import com.app.kokonut.history.extra.encrypcounthistory.EncrypCountHistoryService;
 import com.app.kokonut.privacyhistory.PrivacyHistoryService;
 import com.app.kokonut.privacyhistory.dtos.PrivacyHistoryCode;
+import com.app.kokonut.thirdparty.ThirdParty;
+import com.app.kokonut.thirdparty.ThirdPartyRepository;
+import com.app.kokonut.thirdparty.bizm.ThirdPartyBizm;
+import com.app.kokonut.thirdparty.bizm.ThirdPartyBizmRepository;
 import com.app.kokonutdormant.KokonutDormantService;
 import com.app.kokonutdormant.dtos.KokonutDormantListDto;
 import com.app.kokonutuser.dtos.*;
@@ -78,6 +83,8 @@ public class DynamicUserService {
 	private final PrivacyHistoryService privacyHistoryService;
 	private final CompanyDataKeyService companyDataKeyService;
 	private final CompanySettingRepository companySettingRepository;
+	private final ThirdPartyRepository thirdPartyRepository;
+	private final ThirdPartyBizmRepository thirdPartyBizmRepository;
 
 	private final KokonutDormantService kokonutDormantService;
 
@@ -94,7 +101,7 @@ public class DynamicUserService {
 							  CompanyRepository companyRepository, MailSender mailSender, GoogleOTP googleOTP, ExcelService excelService,
 							  KokonutUserService kokonutUserService, CompanyDataKeyService companyDataKeyService, KokonutDormantService kokonutDormantService,
 							  HistoryService historyService, PrivacyHistoryService privacyHistoryService,
-							  CompanySettingRepository companySettingRepository, CompanyTableRepository companyTableRepository,
+							  CompanySettingRepository companySettingRepository, ThirdPartyRepository thirdPartyRepository, ThirdPartyBizmRepository thirdPartyBizmRepository, CompanyTableRepository companyTableRepository,
 							  CompanyTableColumnInfoRepository companyTableColumnInfoRepository,
 							  EncrypCountHistoryService encrypCountHistoryService, DecrypCountHistoryService decrypCountHistoryService,
 							  DynamicUserRepositoryCustom dynamicUserRepositoryCustom) {
@@ -109,6 +116,8 @@ public class DynamicUserService {
 		this.historyService = historyService;
 		this.privacyHistoryService = privacyHistoryService;
 		this.companySettingRepository = companySettingRepository;
+		this.thirdPartyRepository = thirdPartyRepository;
+		this.thirdPartyBizmRepository = thirdPartyBizmRepository;
 		this.companyTableRepository = companyTableRepository;
 		this.companyTableColumnInfoRepository = companyTableColumnInfoRepository;
 		this.encrypCountHistoryService = encrypCountHistoryService;
@@ -1849,11 +1858,61 @@ public class DynamicUserService {
 			String ctEmailStatus = optionalCompanyTable.get().getCtEmailStatus();
 			String ctBirthStatus = optionalCompanyTable.get().getCtBirthStatus();
 
+			// 이메일지정 코드 조회
+			Optional<CompanySetting> optionalCompanySetting = companySettingRepository.findCompanySettingByCpCode(cpCode);
+			String settingEmailCode = "";
+			if(optionalCompanySetting.isPresent() && optionalCompanySetting.get().getCsEmailCodeSetting() != null) {
+				settingEmailCode = cpCode+"_"+optionalCompanySetting.get().getCsEmailCodeSetting();
+			}
+
+			Optional<ThirdParty> optionalThirdParty = thirdPartyRepository.findThirdPartyByCpCodeAndTsType(cpCode, "1");
+			Optional<ThirdPartyBizm> optionalThirdPartyBizm = Optional.of(new ThirdPartyBizm());
+			String settingBizmReceiverNum = "";
+			String settingBizmAppUserId = "";
+			if(optionalThirdParty.isPresent()) {
+				optionalThirdPartyBizm = thirdPartyBizmRepository.findThirdPartyBizmByTsId(optionalThirdParty.get().getTsId());
+				if(optionalThirdPartyBizm.isPresent()) {
+					if(!optionalThirdPartyBizm.get().getTsBizmReceiverNumCode().equals("")){
+						settingBizmReceiverNum = cpCode+"_"+optionalThirdPartyBizm.get().getTsBizmReceiverNumCode();
+					}
+
+					if(!optionalThirdPartyBizm.get().getTsBizmAppUserIdCode().equals("")){
+						settingBizmAppUserId = cpCode+"_"+optionalThirdPartyBizm.get().getTsBizmAppUserIdCode();
+					}
+				}
+			}
+
+
 			for(int i=0; i<kokonutColumnDeleteDto.getFieldNames().size(); i++) {
 				log.info("삭제할 필드명 : "+kokonutColumnDeleteDto.getFieldNames().get(i));
 				boolean result = kokonutUserService.alterDropColumnUserTableQuery(tableName, kokonutColumnDeleteDto.getFieldNames().get(i));
 
 				if(result) {
+
+					// 이메일항목 제거
+					if(!settingEmailCode.equals("")) {
+						if(kokonutColumnDeleteDto.getFieldNames().get(i).equals(settingEmailCode)) {
+							optionalCompanySetting.get().setCsEmailCodeSetting(null);
+							companySettingRepository.save(optionalCompanySetting.get());
+						}
+					}
+
+					// 서드파티 설정한 휴대전화번호 제거
+					if(!settingBizmReceiverNum.equals("")) {
+						if(kokonutColumnDeleteDto.getFieldNames().get(i).equals(settingBizmReceiverNum)) {
+							optionalThirdPartyBizm.get().setTsBizmReceiverNumCode("");
+							thirdPartyBizmRepository.save(optionalThirdPartyBizm.get());
+						}
+					}
+
+					// 서드파티 설정한 앱아이디 제거
+					if(!settingBizmAppUserId.equals("")) {
+						if(kokonutColumnDeleteDto.getFieldNames().get(i).equals(settingBizmAppUserId)) {
+							optionalThirdPartyBizm.get().setTsBizmAppUserIdCode("");
+							thirdPartyBizmRepository.save(optionalThirdPartyBizm.get());
+						}
+					}
+
 					if(!ctNameStatus.equals("")) {
 						if(kokonutColumnDeleteDto.getFieldNames().get(i).equals(ctNameStatus)) {
 							ctNameStatus = "";
