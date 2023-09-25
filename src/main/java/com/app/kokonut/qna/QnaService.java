@@ -226,8 +226,7 @@ public class QnaService {
 //            log.error("시스템관리자를 찾을 수 없습니다.");
 //        }
 
-        historyService.updateHistory(activityHistoryId,
-                companyCode+" - ", "", 1);
+        historyService.updateHistory(activityHistoryId, null, "", 1);
 
         return ResponseEntity.ok(res.success(data));
     }

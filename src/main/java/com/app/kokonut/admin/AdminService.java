@@ -129,8 +129,7 @@ public class AdminService {
             optionalAdmin.get().setModify_date(LocalDateTime.now());
             adminRepository.save(optionalAdmin.get());
 
-            historyService.updateHistory(activityHistoryId,
-                    companyCode+" - ", "", 1);
+            historyService.updateHistory(activityHistoryId, null, "", 1);
         } else{
             log.error("해당 유저가 존재하지 않습니다.");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(),"해당 유저가 "+ResponseErrorCode.KO004.getDesc()));
@@ -200,8 +199,7 @@ public class AdminService {
                 adminRepository.save(optionalAdmin.get());
             }
 
-            historyService.updateHistory(activityHistoryId,
-                    companyCode+" - ", "", 1);
+            historyService.updateHistory(activityHistoryId, null, "", 1);
         } else{
             log.error("해당 유저가 존재하지 않습니다.");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(),"해당 유저가 "+ResponseErrorCode.KO004.getDesc()));
@@ -254,8 +252,7 @@ public class AdminService {
             optionalAdmin.get().setModify_date(LocalDateTime.now());
             adminRepository.save(optionalAdmin.get());
 
-            historyService.updateHistory(activityHistoryId,
-                    companyCode+" - ", "", 1);
+            historyService.updateHistory(activityHistoryId, null, "", 1);
         } else{
             log.error("해당 유저가 존재하지 않습니다.");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(),"해당 유저가 "+ResponseErrorCode.KO004.getDesc()));
@@ -509,8 +506,7 @@ public class AdminService {
                 // 암호화 횟수 저장
                 encrypCountHistoryService.encrypCountHistorySave(companyCode, 1);
 
-                historyService.updateHistory(activityHistoryId,
-                        companyCode+" - ", "", 1);
+                historyService.updateHistory(activityHistoryId, null, "", 1);
             }else{
                 log.error("### 해당 메일 전송에 실패했습니다. 관리자에게 문의하세요. reciverEmail : "+ userEmail);
                 return ResponseEntity.ok(res.fail(ResponseErrorCode.KO041.getCode(), ResponseErrorCode.KO041.getDesc()));
@@ -600,8 +596,7 @@ public class AdminService {
                 // 암호화 횟수 저장
                 encrypCountHistoryService.encrypCountHistorySave(companyCode, 1);
 
-                historyService.updateHistory(activityHistoryId,
-                        companyCode+" - ", "", 1);
+                historyService.updateHistory(activityHistoryId, null, "", 1);
             }else{
                 log.error("### 해당 메일 전송에 실패했습니다. 관리자에게 문의하세요. reciverEmail : "+ userEmail);
                 return ResponseEntity.ok(res.fail(ResponseErrorCode.KO041.getCode(), ResponseErrorCode.KO041.getDesc()));
@@ -708,8 +703,7 @@ public class AdminService {
                 // 암호화 횟수 저장
                 encrypCountHistoryService.encrypCountHistorySave(companyCode, 1);
 
-                historyService.updateHistory(activityHistoryId,
-                        companyCode+" - ", "", 1);
+                historyService.updateHistory(activityHistoryId, null, "", 1);
             }else{
                 log.error("### 해당 메일 전송에 실패했습니다. 관리자에게 문의하세요. reciverEmail : "+ userEmail);
                 return ResponseEntity.ok(res.fail(ResponseErrorCode.KO041.getCode(), ResponseErrorCode.KO041.getDesc()));

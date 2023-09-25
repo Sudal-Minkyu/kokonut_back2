@@ -241,7 +241,7 @@ public class ProvisionService {
 
             // 성공이력 업데이트
             historyService.updateHistory(activityHistoryId,
-                    cpCode+" - ", "", 1);
+                    null, "", 1);
 
             return ResponseEntity.ok(res.success(data));
 
@@ -356,7 +356,7 @@ public class ProvisionService {
 //        }
 
         historyService.updateHistory(activityHistoryId,
-                cpCode+" - ", "", 1);
+                null, "", 1);
 
         return ResponseEntity.ok(res.ResponseEntityPage(provisionListDtos));
     }
@@ -391,7 +391,7 @@ public class ProvisionService {
         Page<ProvisionDownloadHistoryListDto> provisionDownloadList = provisionDownloadHistoryRepository.findByProvisionDownloadList(proCode, pageable);
 
         historyService.updateHistory(activityHistoryId,
-                cpCode+" - ", "", 1);
+                null, "", 1);
         return ResponseEntity.ok(res.ResponseEntityPage(provisionDownloadList));
     }
 
@@ -654,11 +654,11 @@ public class ProvisionService {
                 }
 
                 historyService.updateHistory(activityHistoryId,
-                        cpCode+" - ", downloadReason, 1);
+                        null, downloadReason, 1);
 
             }else{
                 historyService.updateHistory(activityHistoryId,
-                        cpCode+" - ", downloadReason+"- 개인정보제공시 파일암호전송 실패", 0);
+                        cpCode+" - "+"개인정보제공시 파일암호전송 실패", downloadReason+"- 개인정보제공시 파일암호전송 실패", 0);
 
                 // mailSender 실패
                 log.error("### 해당 메일 전송에 실패했습니다. 관리자에게 문의하세요. reciverEmail : "+ email);
@@ -723,7 +723,7 @@ public class ProvisionService {
                 provisionRepository.save(optionalProvision.get());
 
                 historyService.updateHistory(activityHistoryId,
-                        cpCode+" - ", "", 1);
+                        null, "", 1);
             } else {
                 return ResponseEntity.ok(res.fail(ResponseErrorCode.KO119.getCode(), ResponseErrorCode.KO119.getDesc()));
             }

@@ -313,7 +313,7 @@ public class PaymentService {
 				}
 
 				historyService.updateHistory(activityHistoryId,
-						cpCode+" - ", "", 1);
+						null, "", 1);
 			} else {
 				log.error("billingSave : 회사가 조회되지 않음");
 			}
@@ -411,7 +411,7 @@ public class PaymentService {
 				payment.setPayReceiptid(receiptId);
 
 				historyService.updateHistory(activityHistoryId,
-						cpCode+" - ", "", 1);
+						null, "", 1);
 			}
 
 			payment.setModify_date(LocalDateTime.now());
@@ -476,7 +476,7 @@ public class PaymentService {
 					companyRepository.save(optionalCompany.get());
 
 					historyService.updateHistory(activityHistoryId,
-							cpCode+" - ", reason, 1);
+							null, reason, 1);
 				} else {
 					log.error("등록된 빌링키 정보가 존재하지 않습니다.");
 				}
@@ -524,7 +524,7 @@ public class PaymentService {
 					companyRepository.save(optionalCompany.get());
 
 					historyService.updateHistory(activityHistoryId,
-							cpCode+" - ", "", 1);
+							null, "", 1);
 				} else {
 					log.error("등록된 빌링키 정보가 존재하지 않습니다.");
 				}

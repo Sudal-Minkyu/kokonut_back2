@@ -656,7 +656,7 @@ public class DynamicUserService {
 //				}
 //			}
 //
-//			historyService.updateHistory(activityHistoryId,companyCode+" - ", "", 1);
+//			historyService.updateHistory(activityHistoryId, null, "", 1);
 //
 //		} catch (Exception e) {
 //			log.error("회원등록 에러확인 필요");
@@ -817,7 +817,7 @@ public class DynamicUserService {
 //			}
 //
 //
-//			historyService.updateHistory(activityHistoryId,companyCode+" - ", "", 1);
+//			historyService.updateHistory(activityHistoryId, null, "", 1);
 //
 ////			log.info("updateString : "+ updateString);
 //
@@ -1207,8 +1207,7 @@ public class DynamicUserService {
 		// 휴면테이블에 컬럼 추가
 		kokonutDormantService.alterAddColumnTableQuery(companyCode, fieldName, type, length, isNull, defaultValue, comment);
 
-		historyService.updateHistory(activityHistoryId,
-				companyCode+" - ", "", 1);
+		historyService.updateHistory(activityHistoryId, null, "", 1);
 
 		return ResponseEntity.ok(res.success(data));
 	}
@@ -1455,8 +1454,7 @@ public class DynamicUserService {
 //				kokonutDormantService.alterChangeColumnTableQuery(companyCode, beforField, fieldName, type, length, isNull, defaultValue, comment);
 //			}
 //
-//			historyService.updateHistory(activityHistoryId,
-//					companyCode+" - ", "", 1);
+//			historyService.updateHistory(activityHistoryId, null, "", 1);
 //
 //		} else {
 //			log.error("수정할 필드가 테이블에 존재하지 않습니다.");
@@ -1532,8 +1530,7 @@ public class DynamicUserService {
 //			kokonutUserService.alterDropColumnUserTableQuery(companyCode, fieldName);
 //			kokonutDormantService.alterDropColumnDormantTableQuery(companyCode, fieldName);
 //
-//			historyService.updateHistory(activityHistoryId,
-//					companyCode+" - ", "", 1);
+//			historyService.updateHistory(activityHistoryId, null, "", 1);
 //		} else {
 //			historyService.updateHistory(activityHistoryId,
 //					companyCode+" - "+"필드 삭제 조건에 부합하지 않습니다.", "필드 삭제 조건에 부합하지 않습니다.", 1);
@@ -1899,7 +1896,7 @@ public class DynamicUserService {
 			companyTableRepository.save(optionalCompanyTable.get());
 
 			historyService.updateHistory(activityHistoryId,
-					cpCode+" - ", "", 1);
+					null, "", 1);
 		}
 
 		return ResponseEntity.ok(res.success(data));
@@ -2691,10 +2688,10 @@ public class DynamicUserService {
 			data = excelService.createExcelFile(fileName, sheetName, paramMap, String.valueOf(filePassword));
 
 			historyService.updateHistory(activityHistoryId,
-					cpCode+" - ", downloadReason, 1);
+					null, downloadReason, 1);
 		}else{
 			historyService.updateHistory(activityHistoryId,
-					cpCode+" - ", downloadReason+"- 개인정보열람 파일암호전송 실패", 0);
+					cpCode+" - "+"개인정보열람 파일암호전송 실패", downloadReason+"- 개인정보열람 파일암호전송 실패", 0);
 
 			// mailSender 실패
 			log.error("### 해당 메일 전송에 실패했습니다. 관리자에게 문의하세요. reciverEmail : "+ email);

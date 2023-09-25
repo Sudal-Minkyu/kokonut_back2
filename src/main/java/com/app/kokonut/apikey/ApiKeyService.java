@@ -210,8 +210,7 @@ public class ApiKeyService {
             apiKeyRepository.save(apiKey);
         }
 
-        historyService.updateHistory(activityHistoryId,
-                companyCode+" - ", "", 1);
+        historyService.updateHistory(activityHistoryId, null, "", 1);
 
         return ResponseEntity.ok(res.success(data));
     }
@@ -273,8 +272,7 @@ public class ApiKeyService {
             optionalApiKey.get().setModify_date(LocalDateTime.now());
             apiKeyRepository.save(optionalApiKey.get());
 
-            historyService.updateHistory(activityHistoryId,
-                    companyCode+" - ", "", 1);
+            historyService.updateHistory(activityHistoryId, null, "", 1);
 
         } else {
             log.error("등록되신 API Key가 존재하지 않습니다. API Key 먼저 발급해주시길 바랍니다.");
@@ -373,8 +371,7 @@ public class ApiKeyService {
             optionalApiKey.get().setModify_date(LocalDateTime.now());
             apiKeyRepository.save(optionalApiKey.get());
 
-            historyService.updateHistory(activityHistoryId,
-                    companyCode+" - ", "", 1);
+            historyService.updateHistory(activityHistoryId, null, "", 1);
 
         } else {
             log.error("등록되신 API Key가 존재하지 않습니다. API Key 먼저 발급해주시길 바랍니다.");

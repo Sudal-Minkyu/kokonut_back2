@@ -157,7 +157,7 @@ public class PolicyService {
         Page<PolicyListDto> policyListDtos = policyRepository.findByPolicyList(policySearchDto, pageable);
 
         historyService.updateHistory(activityHistoryId,
-                cpCode+" - ", "", 1);
+                null, "", 1);
         return ResponseEntity.ok(res.ResponseEntityPage(policyListDtos));
     }
 
@@ -314,8 +314,7 @@ public class PolicyService {
                     policyRepository.delete(optionalPolicy.get());
                 }
 
-                historyService.updateHistory(activityHistoryId,
-                        companyCode+" - ", "", 1);
+                historyService.updateHistory(activityHistoryId, null, "", 1);
             }
 
 
@@ -430,8 +429,7 @@ public class PolicyService {
             policySave = policyRepository.save(policy);
         }
 
-        historyService.updateHistory(activityHistoryId,
-                companyCode+" - "+" 첫번째 뎁스", "", 1);
+        historyService.updateHistory(activityHistoryId, companyCode+" - "+" 첫번째 뎁스", "", 1);
 
         data.put("saveId",policySave.getPiId());
 
@@ -516,8 +514,7 @@ public class PolicyService {
             policyPurposeRepository.saveAll(policyPurposeSaveList);
             policyPurposeRepository.deleteAll(policyPurposeDeleteList);
 
-            historyService.updateHistory(activityHistoryId,
-                    companyCode+" - "+" 두번째 뎁스", "", 1);
+            historyService.updateHistory(activityHistoryId, companyCode+" - "+" 두번째 뎁스", "", 1);
 
         } else {
             log.error("존재하지 않은 개인정보처리방침 입니다. 새로고침이후 진행해주세요.");
@@ -720,8 +717,7 @@ public class PolicyService {
             policyServiceAutoRepository.saveAll(policyServiceAutoSaveList);
             policyServiceAutoRepository.deleteAll(policyServiceAutoDeleteList);
 
-            historyService.updateHistory(activityHistoryId,
-                    companyCode+" - "+" 세번째 뎁스", "", 1);
+            historyService.updateHistory(activityHistoryId, companyCode+" - "+" 세번째 뎁스", "", 1);
 
         } else {
             log.error("존재하지 않은 개인정보처리방침 입니다. 새로고침이후 진행해주세요.");
@@ -878,8 +874,7 @@ public class PolicyService {
             policyOutRepository.saveAll(policyOutSaveList);
             policyOutRepository.deleteAll(policyOutDeleteList);
 
-            historyService.updateHistory(activityHistoryId,
-                    companyCode+" - "+" 네번째 뎁스", "", 1);
+            historyService.updateHistory(activityHistoryId, companyCode+" - "+" 네번째 뎁스", "", 1);
 
         } else {
             log.error("존재하지 않은 개인정보처리방침 입니다. 새로고침이후 진행해주세요.");
@@ -1047,8 +1042,7 @@ public class PolicyService {
             optionalPolicy.get().setModify_email(email);
             optionalPolicy.get().setModify_date(LocalDateTime.now());
 
-            historyService.updateHistory(activityHistoryId,
-                    companyCode+" - "+" 네번째 뎁스", "", 1);
+            historyService.updateHistory(activityHistoryId, companyCode+" - "+" 네번째 뎁스", "", 1);
 
         } else {
             log.error("존재하지 않은 개인정보처리방침 입니다. 새로고침이후 진행해주세요.");
@@ -1152,8 +1146,7 @@ public class PolicyService {
 
             policyRepository.save(optionalPolicy.get());
 
-            historyService.updateHistory(activityHistoryId,
-                    companyCode+" - "+" 여섯번째 뎁스", "", 1);
+            historyService.updateHistory(activityHistoryId, companyCode+" - "+" 여섯번째 뎁스", "", 1);
 
         } else {
             log.error("존재하지 않은 개인정보처리방침 입니다. 새로고침이후 진행해주세요.");
@@ -1203,8 +1196,7 @@ public class PolicyService {
 
             policyRepository.save(optionalPolicy.get());
 
-            historyService.updateHistory(activityHistoryId,
-                    companyCode+" - "+" 마지막 뎁스", "", 1);
+            historyService.updateHistory(activityHistoryId, companyCode+" - "+" 마지막 뎁스", "", 1);
             
         } else {
             log.error("존재하지 않은 개인정보처리방침 입니다. 새로고침이후 진행해주세요.");

@@ -152,8 +152,7 @@ public class CompanyItemService {
             companyItem.setInsert_date(LocalDateTime.now());
             companyItemRepository.save(companyItem);
 
-            historyService.updateHistory(activityHistoryId,
-                    companyCode+" - ", "", 1);
+            historyService.updateHistory(activityHistoryId, null, "", 1);
         }
 
         return ResponseEntity.ok(res.success(data));
@@ -194,8 +193,7 @@ public class CompanyItemService {
                 optionalCompanyItem.get().setModify_date(LocalDateTime.now());
                 companyItemRepository.save(optionalCompanyItem.get());
 
-                historyService.updateHistory(activityHistoryId,
-                        companyCode+" - ", "", 1);
+                historyService.updateHistory(activityHistoryId, null, "", 1);
             } else {
                 log.error("존재하지 않은 항목입니다. 새로고침이후 진행해주세요.");
                 return ResponseEntity.ok(res.fail(ResponseErrorCode.KO091.getCode(), ResponseErrorCode.KO091.getDesc()));
@@ -237,8 +235,7 @@ public class CompanyItemService {
 
             companyItemRepository.delete(optionalCompanyItem.get());
 
-            historyService.updateHistory(activityHistoryId,
-                    companyCode+" - ", "", 1);
+            historyService.updateHistory(activityHistoryId, null, "", 1);
         } else {
             log.error("존재하지 않은 항목입니다. 새로고침이후 진행해주세요.");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO091.getCode(), ResponseErrorCode.KO091.getDesc()));
@@ -325,7 +322,7 @@ public class CompanyItemService {
                 }
 
                 historyService.updateHistory(activityHistoryId,
-                        cpCode+" - ", "", 1);
+                        null, "", 1);
             }
         }
 

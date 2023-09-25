@@ -185,7 +185,7 @@ public class CompanySettingService {
             companySettingRepository.save(optionalCompanySetting.get());
 
             historyService.updateHistory(activityHistoryId,
-                    cpCode+" - ", "", 1);
+                    null, "", 1);
         }
 
         return ResponseEntity.ok(res.success(data));
@@ -215,7 +215,7 @@ public class CompanySettingService {
             companySettingRepository.save(optionalCompanySetting.get());
 
             historyService.updateHistory(activityHistoryId,
-                    cpCode+" - ", "", 1);
+                    null, "", 1);
         }
 
         return ResponseEntity.ok(res.success(data));
@@ -245,7 +245,7 @@ public class CompanySettingService {
             companySettingRepository.save(optionalCompanySetting.get());
 
             historyService.updateHistory(activityHistoryId,
-                    cpCode+" - ", "", 1);
+                    null, "", 1);
         }
 
         return ResponseEntity.ok(res.success(data));
@@ -276,7 +276,7 @@ public class CompanySettingService {
             companySettingRepository.save(optionalCompanySetting.get());
 
             historyService.updateHistory(activityHistoryId,
-                    cpCode+" - ", "", 1);
+                    null, "", 1);
         }
 
         return ResponseEntity.ok(res.success(data));
@@ -317,7 +317,7 @@ public class CompanySettingService {
             }
 
             historyService.updateHistory(activityHistoryId,
-                    cpCode+" - ", "", 1);
+                    null, "", 1);
         }
 
         return ResponseEntity.ok(res.success(data));
@@ -370,7 +370,7 @@ public class CompanySettingService {
             companySettingAccessIPRepository.findByCompanySettingAccessIPDelete(deleteIpList);
 
             historyService.updateHistory(activityHistoryId,
-                    cpCode+" - ", "", 1);
+                    null, "", 1);
         }
 
         return ResponseEntity.ok(res.success(data));
@@ -413,7 +413,7 @@ public class CompanySettingService {
             companySettingRepository.save(optionalCompanySetting.get());
 
             historyService.updateHistory(activityHistoryId,
-                    cpCode+" - ", "", 1);
+                    null, "", 1);
 
         }
 

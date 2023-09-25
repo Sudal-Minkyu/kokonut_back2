@@ -115,7 +115,7 @@ public class EmailService {
         Page<EmailListDto> emailListDtos = emailRepository.findByEmailPage(emailSearchDto, pageable);
 
         historyService.updateHistory(activityHistoryId,
-                cpCode+" - ", "", 1);
+                null, "", 1);
         return ResponseEntity.ok(res.ResponseEntityPage(emailListDtos));
     }
 
@@ -337,7 +337,7 @@ public class EmailService {
 
             } else {
                 historyService.updateHistory(activityHistoryId,
-                        cpCode+" - ", "발송할 이메일이 존재하지 않습니다.", 0);
+                        "발송할 이메일이 존재하지 않습니다.", "발송할 이메일이 존재하지 않습니다.", 0);
             }
 
             if(emailSendResult != null) {
@@ -378,7 +378,7 @@ public class EmailService {
                 emailRepository.save(saveEmail);
 
                 historyService.updateHistory(activityHistoryId,
-                        cpCode+" - ", "", 1);
+                        null, "", 1);
             }
 
             // 복호화 횟수 저장
@@ -423,17 +423,17 @@ public class EmailService {
                 emailRepository.save(optionalEmail.get());
 
                 historyService.updateHistory(activityHistoryId,
-                        cpCode+" - ", "", 1);
+                        null, "", 1);
             } else {
                 historyService.updateHistory(activityHistoryId,
-                        cpCode+" - ", "이미 발송된 이메일입니다.", 0);
+                        cpCode+" - "+"이미 발송된 이메일", "이미 발송된 이메일입니다.", 0);
                 log.error("이미 발송된 이메일이므로 취소할 수 없습니다.");
                 return ResponseEntity.ok(res.fail(ResponseErrorCode.KO108.getCode(),ResponseErrorCode.KO108.getDesc()));
             }
 
         } else {
             historyService.updateHistory(activityHistoryId,
-                    cpCode+" - ", "예약발송 취소할 정보가 존재하지 않습니다.", 0);
+                    cpCode+" - "+"예약발송 취소할 정보가 존재하지 않음", "예약발송 취소할 정보가 존재하지 않습니다.", 0);
             log.error("예약발송 취소할 정보가 존재하지 않습니다. 새로고침 이후 다시 시도해주세요.");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO107.getCode(),ResponseErrorCode.KO107.getDesc()));
         }

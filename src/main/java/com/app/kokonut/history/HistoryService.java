@@ -109,7 +109,7 @@ public class HistoryService {
 
         Page<HistoryListDto> historyListDtos = historyRepository.findByHistoryPage(historySearchDto, pageable);
 
-        updateHistory(activityHistoryId, cpCode+" - ", "", 1);
+        updateHistory(activityHistoryId, null, "", 1);
         return ResponseEntity.ok(res.ResponseEntityPage(historyListDtos));
     }
 
@@ -240,10 +240,10 @@ public class HistoryService {
             log.info("시트명 : "+sheetName);
             data = excelService.createExcelFile(fileName, sheetName, historyDownloadDataList, String.valueOf(filePassword));
 
-            updateHistory(activityHistoryId, cpCode+" - ", downloadReason, 1);
+            updateHistory(activityHistoryId, null, downloadReason, 1);
 
         }else{
-            updateHistory(activityHistoryId, cpCode+" - ", downloadReason+"- 활동이력다운로드 파일암호전송 실패", 1);
+            updateHistory(activityHistoryId, null, downloadReason+"- 활동이력다운로드 파일암호전송 실패", 1);
 
             // mailSender 실패
             log.error("### 해당 메일 전송에 실패했습니다. 관리자에게 문의하세요. reciverEmail : "+ email);
@@ -324,7 +324,9 @@ public class HistoryService {
         History history = historyRepository.findById(ahId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않은 'activityCode' 입니다."));
 
-        history.setAhActivityDetail(activityDetail);
+        if (activityDetail != null) {
+            history.setAhActivityDetail(activityDetail);
+        }
         history.setAhReason(ahReason);
         history.setAhState(ahState);
 

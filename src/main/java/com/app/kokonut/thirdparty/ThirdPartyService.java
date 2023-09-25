@@ -124,7 +124,7 @@ public class ThirdPartyService {
 				thirdPartyRepository.save(optionalThirdParty.get());
 
 				historyService.updateHistory(activityHistoryId,
-						cpCode+" - ", "", 1);
+						null, "", 1);
 			}
 
 		}
@@ -156,7 +156,7 @@ public class ThirdPartyService {
 			thirdPartyBizmRepository.save(thirdPartyBizm);
 
 			historyService.updateHistory(activityHistoryId,
-					cpCode+" - ", "", 1);
+					null, "", 1);
 		}
 
 		return ResponseEntity.ok(res.success(data));
