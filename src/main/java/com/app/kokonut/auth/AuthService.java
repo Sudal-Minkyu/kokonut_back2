@@ -633,6 +633,10 @@ public class AuthService {
 
                     if(optionalAdmin.get().getKnOtpKey() == null){ // 시스템관리자 일 경우 제외
                         log.error("등록된 OTP가 존재하지 않습니다. 구글 OTP 인증을 등록해주세요.");
+
+                        historyService.updateHistory(activityHistoryId,
+                                companyCode+" - "+activityCode.getDesc()+" 시도 이력", "로그인 실패 구글OTP 미등록", 0);
+
                         return ResponseEntity.ok(res.fail(ResponseErrorCode.KO011.getCode(),ResponseErrorCode.KO011.getDesc()));
                     }
                     else {
@@ -652,6 +656,10 @@ public class AuthService {
 
                         if (!auth) {
                             log.error("입력된 구글 OTP 값이 일치하지 않습니다. 다시 확인해주세요.");
+
+                            historyService.updateHistory(activityHistoryId,
+                                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "로그인 실패 구글OTP 불일치", 0);
+
                             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO012.getCode(), ResponseErrorCode.KO012.getDesc()));
                         } else {
                             log.info("OTP인증완료 -> JWT토큰 발급");
