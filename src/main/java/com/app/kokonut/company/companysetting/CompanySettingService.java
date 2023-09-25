@@ -108,12 +108,12 @@ public class CompanySettingService {
                 state = " 허용";
             }
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    cpCode+" - "+activityCode.getDesc()+state+" 시도 이력", "", CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
+                    cpCode+" - "+state, "", CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
 
             companySettingRepository.save(optionalCompanySetting.get());
 
             historyService.updateHistory(activityHistoryId,
-                    cpCode+" - "+activityCode.getDesc()+state+" 시도 이력", "", 1);
+                    cpCode+" - "+state, "", 1);
         }
 
         return ResponseEntity.ok(res.success(data));
@@ -150,12 +150,12 @@ public class CompanySettingService {
                 state = " 비활성화";
             }
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    cpCode+" - "+activityCode.getDesc()+state+" 시도 이력", "", CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
+                    cpCode+" - "+state, "", CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
 
             companySettingRepository.save(optionalCompanySetting.get());
 
             historyService.updateHistory(activityHistoryId,
-                    cpCode+" - "+activityCode.getDesc()+state+" 시도 이력", "", 1);
+                    cpCode+" - "+state, "", 1);
         }
 
         return ResponseEntity.ok(res.success(data));
@@ -179,13 +179,13 @@ public class CompanySettingService {
         Optional<CompanySetting> optionalCompanySetting = companySettingRepository.findCompanySettingByCpCode(cpCode);
         if(optionalCompanySetting.isPresent()) {
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
+                    cpCode+" - ", "", CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
 
             optionalCompanySetting.get().setCsPasswordChangeSetting(csPasswordChangeSetting);
             companySettingRepository.save(optionalCompanySetting.get());
 
             historyService.updateHistory(activityHistoryId,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+                    cpCode+" - ", "", 1);
         }
 
         return ResponseEntity.ok(res.success(data));
@@ -209,13 +209,13 @@ public class CompanySettingService {
         Optional<CompanySetting> optionalCompanySetting = companySettingRepository.findCompanySettingByCpCode(cpCode);
         if(optionalCompanySetting.isPresent()) {
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
+                    cpCode+" - ", "", CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
 
             optionalCompanySetting.get().setCsPasswordErrorCountSetting(csPasswordErrorCountSetting);
             companySettingRepository.save(optionalCompanySetting.get());
 
             historyService.updateHistory(activityHistoryId,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+                    cpCode+" - ", "", 1);
         }
 
         return ResponseEntity.ok(res.success(data));
@@ -239,13 +239,13 @@ public class CompanySettingService {
         Optional<CompanySetting> optionalCompanySetting = companySettingRepository.findCompanySettingByCpCode(cpCode);
         if(optionalCompanySetting.isPresent()) {
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
+                    cpCode+" - ", "", CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
 
             optionalCompanySetting.get().setCsAutoLogoutSetting(csAutoLogoutSetting);
             companySettingRepository.save(optionalCompanySetting.get());
 
             historyService.updateHistory(activityHistoryId,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+                    cpCode+" - ", "", 1);
         }
 
         return ResponseEntity.ok(res.success(data));
@@ -270,13 +270,13 @@ public class CompanySettingService {
         if(optionalCompanySetting.isPresent()) {
 
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
+                    cpCode+" - ", "", CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
 
             optionalCompanySetting.get().setCsLongDisconnectionSetting(csLongDisconnectionSetting);
             companySettingRepository.save(optionalCompanySetting.get());
 
             historyService.updateHistory(activityHistoryId,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+                    cpCode+" - ", "", 1);
         }
 
         return ResponseEntity.ok(res.success(data));
@@ -301,7 +301,7 @@ public class CompanySettingService {
         if(optionalCompanySetting.isPresent()) {
 
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
+                    cpCode+" - ", "", CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
 
             if(!companySettingAccessIPRepository.existsCompanySettingAccessIPByCsIdAndCsipIp(optionalCompanySetting.get().getCsId(), csipIp)) {
                 CompanySettingAccessIP companySettingAccessIP = new CompanySettingAccessIP();
@@ -317,7 +317,7 @@ public class CompanySettingService {
             }
 
             historyService.updateHistory(activityHistoryId,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+                    cpCode+" - ", "", 1);
         }
 
         return ResponseEntity.ok(res.success(data));
@@ -365,12 +365,12 @@ public class CompanySettingService {
         if(optionalCompanySetting.isPresent()) {
 
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
+                    cpCode+" - ", "", CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
 
             companySettingAccessIPRepository.findByCompanySettingAccessIPDelete(deleteIpList);
 
             historyService.updateHistory(activityHistoryId,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+                    cpCode+" - ", "", 1);
         }
 
         return ResponseEntity.ok(res.success(data));
@@ -403,7 +403,7 @@ public class CompanySettingService {
             }
 
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
+                    cpCode+" - ", "", CommonUtil.publicIp(), 0, jwtFilterDto.getEmail());
 
             if (csEmailCodeSetting.equals("")) {
                 csEmailCodeSetting = null;
@@ -413,7 +413,7 @@ public class CompanySettingService {
             companySettingRepository.save(optionalCompanySetting.get());
 
             historyService.updateHistory(activityHistoryId,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+                    cpCode+" - ", "", 1);
 
         }
 

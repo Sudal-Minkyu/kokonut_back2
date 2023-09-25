@@ -211,7 +211,7 @@ public class PaymentService {
 
 					// 활동이력 저장 -> 비정상 모드
 					activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-							cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+							cpCode+" - ", "", ip, 0, email);
 
 					Optional<CompanyPayment> optionalCompanyPayment = companyPaymentRepository.findCompanyPaymentByCpiIdAndCpCode(optionalCompany.get().getCpiId(), cpCode);
 					if(optionalCompanyPayment.isPresent()) {
@@ -254,7 +254,7 @@ public class PaymentService {
 
 					// 활동이력 저장 -> 비정상 모드
 					activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-							cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+							cpCode+" - ", "", ip, 0, email);
 
 					LocalDate validStart;
 					if(optionalCompany.get().getCpValidStart() != null) {
@@ -313,7 +313,7 @@ public class PaymentService {
 				}
 
 				historyService.updateHistory(activityHistoryId,
-						cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+						cpCode+" - ", "", 1);
 			} else {
 				log.error("billingSave : 회사가 조회되지 않음");
 			}
@@ -366,7 +366,7 @@ public class PaymentService {
 
 			// 활동이력 저장 -> 비정상 모드
 			activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-					cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+					cpCode+" - ", "", ip, 0, email);
 
 			LocalDate firstDayOfLastMonth = LocalDate.now().withDayOfMonth(1);
 			LocalDate lastDayOfLastMonth = LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth());
@@ -400,7 +400,7 @@ public class PaymentService {
 				payment.setPayState("0");
 				payment.setPayMethod("1");
 				historyService.updateHistory(activityHistoryId,
-						cpCode+" - "+activityCode.getDesc()+"시도 실패 이력", "부트페이 내에 요금정산을 실패했습니다.", 1);
+						cpCode+" - "+"부트페이 내 요금정산을 실패", "부트페이 내 요금정산을 실패했습니다.", 1);
 
 				return ResponseEntity.ok(res.fail(ResponseErrorCode.KO099.getCode(), ResponseErrorCode.KO099.getDesc()));
 			} else {
@@ -411,7 +411,7 @@ public class PaymentService {
 				payment.setPayReceiptid(receiptId);
 
 				historyService.updateHistory(activityHistoryId,
-						cpCode+" - "+activityCode.getDesc()+"시도 성공 이력", "", 1);
+						cpCode+" - ", "", 1);
 			}
 
 			payment.setModify_date(LocalDateTime.now());
@@ -462,7 +462,7 @@ public class PaymentService {
 
 				// 활동이력 저장 -> 비정상 모드
 				activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-						cpCode+" - "+activityCode.getDesc()+" 시도 이력", reason, ip, 0, email);
+						cpCode+" - ", reason, ip, 0, email);
 
 				Optional<CompanyPayment> optionalCompanyPayment = companyPaymentRepository.findCompanyPaymentByCpiIdAndCpCode(optionalCompany.get().getCpiId(), cpCode);
 
@@ -476,7 +476,7 @@ public class PaymentService {
 					companyRepository.save(optionalCompany.get());
 
 					historyService.updateHistory(activityHistoryId,
-							cpCode+" - "+activityCode.getDesc()+"시도 성공 이력", reason, 1);
+							cpCode+" - ", reason, 1);
 				} else {
 					log.error("등록된 빌링키 정보가 존재하지 않습니다.");
 				}
@@ -510,7 +510,7 @@ public class PaymentService {
 
 				// 활동이력 저장 -> 비정상 모드
 				activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-						cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+						cpCode+" - ", "", ip, 0, email);
 
 				Optional<CompanyPayment> optionalCompanyPayment = companyPaymentRepository.findCompanyPaymentByCpiIdAndCpCode(optionalCompany.get().getCpiId(), cpCode);
 
@@ -524,7 +524,7 @@ public class PaymentService {
 					companyRepository.save(optionalCompany.get());
 
 					historyService.updateHistory(activityHistoryId,
-							cpCode+" - "+activityCode.getDesc()+"시도 성공 이력", "", 1);
+							cpCode+" - ", "", 1);
 				} else {
 					log.error("등록된 빌링키 정보가 존재하지 않습니다.");
 				}

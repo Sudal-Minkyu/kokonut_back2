@@ -142,7 +142,7 @@ public class CompanyItemService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+                    companyCode+" - ", "", ip, 0, email);
 
             CompanyItem companyItem = new CompanyItem();
             companyItem.setCpCode(companyCode);
@@ -153,7 +153,7 @@ public class CompanyItemService {
             companyItemRepository.save(companyItem);
 
             historyService.updateHistory(activityHistoryId,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+                    companyCode+" - ", "", 1);
         }
 
         return ResponseEntity.ok(res.success(data));
@@ -187,7 +187,7 @@ public class CompanyItemService {
 
                 // 활동이력 저장 -> 비정상 모드
                 activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,0, email);
+                        companyCode+" - ", "", ip,0, email);
 
                 optionalCompanyItem.get().setCiName(ciName);
                 optionalCompanyItem.get().setModify_email(jwtFilterDto.getEmail());
@@ -195,7 +195,7 @@ public class CompanyItemService {
                 companyItemRepository.save(optionalCompanyItem.get());
 
                 historyService.updateHistory(activityHistoryId,
-                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+                        companyCode+" - ", "", 1);
             } else {
                 log.error("존재하지 않은 항목입니다. 새로고침이후 진행해주세요.");
                 return ResponseEntity.ok(res.fail(ResponseErrorCode.KO091.getCode(), ResponseErrorCode.KO091.getDesc()));
@@ -233,12 +233,12 @@ public class CompanyItemService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,0, email);
+                    companyCode+" - ", "", ip,0, email);
 
             companyItemRepository.delete(optionalCompanyItem.get());
 
             historyService.updateHistory(activityHistoryId,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+                    companyCode+" - ", "", 1);
         } else {
             log.error("존재하지 않은 항목입니다. 새로고침이후 진행해주세요.");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO091.getCode(), ResponseErrorCode.KO091.getDesc()));
@@ -280,7 +280,7 @@ public class CompanyItemService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,0, email);
+                    cpCode+" - ", "", ip,0, email);
 
             Optional<Company> optionalCompany = companyRepository.findByCpCode(cpCode);
 
@@ -325,7 +325,7 @@ public class CompanyItemService {
                 }
 
                 historyService.updateHistory(activityHistoryId,
-                        cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+                        cpCode+" - ", "", 1);
             }
         }
 

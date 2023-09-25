@@ -152,12 +152,12 @@ public class PolicyService {
 
         // 활동이력 저장 -> 비정상 모드
         activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+                cpCode+" - ", "", ip, 0, email);
 
         Page<PolicyListDto> policyListDtos = policyRepository.findByPolicyList(policySearchDto, pageable);
 
         historyService.updateHistory(activityHistoryId,
-                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+                cpCode+" - ", "", 1);
         return ResponseEntity.ok(res.ResponseEntityPage(policyListDtos));
     }
 
@@ -274,7 +274,7 @@ public class PolicyService {
 
                 // 활동이력 저장 -> 비정상 모드
                 activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+                        companyCode+" - ", "", ip, 0, email);
 
                 if(piStage < 6) {
 
@@ -315,7 +315,7 @@ public class PolicyService {
                 }
 
                 historyService.updateHistory(activityHistoryId,
-                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+                        companyCode+" - ", "", 1);
             }
 
 
@@ -397,7 +397,7 @@ public class PolicyService {
 
         // 활동이력 저장 -> 비정상 모드
         activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                companyCode+" - "+activityCode.getDesc()+" 첫번째 뎁스 시도 이력", "", ip, 0, email);
+                companyCode+" - "+" 첫번째 뎁스", "", ip, 0, email);
 
 //        String getPiDate = policySaveFirstDto.getPiDate()+" 00:00:00.000";
 //        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy. MM. dd HH:mm:ss.SSS");
@@ -431,7 +431,7 @@ public class PolicyService {
         }
 
         historyService.updateHistory(activityHistoryId,
-                companyCode+" - "+activityCode.getDesc()+" 첫번째 뎁스 시도 이력", "", 1);
+                companyCode+" - "+" 첫번째 뎁스", "", 1);
 
         data.put("saveId",policySave.getPiId());
 
@@ -469,7 +469,7 @@ public class PolicyService {
         if(optionalPolicy.isPresent()) {
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 두번째 뎁스 시도 이력", "", ip, 0, email);
+                    companyCode+" - "+" 두번째 뎁스", "", ip, 0, email);
 
             List<PolicyPurpose> policyPurposeSaveList = new ArrayList<>();
             PolicyPurpose policyPurpose;
@@ -517,7 +517,7 @@ public class PolicyService {
             policyPurposeRepository.deleteAll(policyPurposeDeleteList);
 
             historyService.updateHistory(activityHistoryId,
-                    companyCode+" - "+activityCode.getDesc()+" 두번째 뎁스 시도 이력", "", 1);
+                    companyCode+" - "+" 두번째 뎁스", "", 1);
 
         } else {
             log.error("존재하지 않은 개인정보처리방침 입니다. 새로고침이후 진행해주세요.");
@@ -558,7 +558,7 @@ public class PolicyService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 세번째 뎁스 시도 이력", "", ip, 0, email);
+                    companyCode+" - "+" 세번째 뎁스", "", ip, 0, email);
 
             List<PolicyBefore> policyBeforeSaveList = new ArrayList<>();
             List<PolicyAfter> policyAfterSaveList = new ArrayList<>();
@@ -721,7 +721,7 @@ public class PolicyService {
             policyServiceAutoRepository.deleteAll(policyServiceAutoDeleteList);
 
             historyService.updateHistory(activityHistoryId,
-                    companyCode+" - "+activityCode.getDesc()+" 세번째 뎁스 시도 이력", "", 1);
+                    companyCode+" - "+" 세번째 뎁스", "", 1);
 
         } else {
             log.error("존재하지 않은 개인정보처리방침 입니다. 새로고침이후 진행해주세요.");
@@ -762,7 +762,7 @@ public class PolicyService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 네번째 뎁스 시도 이력", "", ip, 0, email);
+                    companyCode+" - "+" 네번째 뎁스", "", ip, 0, email);
 
             List<PolicyOut> policyOutSaveList = new ArrayList<>();
             List<PolicyOutDetail> policyOutDetailSaveList = new ArrayList<>();
@@ -879,7 +879,7 @@ public class PolicyService {
             policyOutRepository.deleteAll(policyOutDeleteList);
 
             historyService.updateHistory(activityHistoryId,
-                    companyCode+" - "+activityCode.getDesc()+" 네번째 뎁스 시도 이력", "", 1);
+                    companyCode+" - "+" 네번째 뎁스", "", 1);
 
         } else {
             log.error("존재하지 않은 개인정보처리방침 입니다. 새로고침이후 진행해주세요.");
@@ -920,7 +920,7 @@ public class PolicyService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 네번째 뎁스 시도 이력", "", ip, 0, email);
+                    companyCode+" - "+" 네번째 뎁스", "", ip, 0, email);
 
             int thirdState = 0;
             int thirdOverseasState = 0;
@@ -1048,7 +1048,7 @@ public class PolicyService {
             optionalPolicy.get().setModify_date(LocalDateTime.now());
 
             historyService.updateHistory(activityHistoryId,
-                    companyCode+" - "+activityCode.getDesc()+" 네번째 뎁스 시도 이력", "", 1);
+                    companyCode+" - "+" 네번째 뎁스", "", 1);
 
         } else {
             log.error("존재하지 않은 개인정보처리방침 입니다. 새로고침이후 진행해주세요.");
@@ -1089,7 +1089,7 @@ public class PolicyService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode + " - " + activityCode.getDesc() + " 여섯번째 뎁스 시도 이력", "", ip, 0, email);
+                    companyCode + " - " + " 여섯번째 뎁스", "", ip, 0, email);
 
             List<PolicyResponsible> policyResponsibleSaveList = new ArrayList<>();
             PolicyResponsible policyResponsible;
@@ -1153,7 +1153,7 @@ public class PolicyService {
             policyRepository.save(optionalPolicy.get());
 
             historyService.updateHistory(activityHistoryId,
-                    companyCode+" - "+activityCode.getDesc()+" 여섯번째 뎁스 시도 이력", "", 1);
+                    companyCode+" - "+" 여섯번째 뎁스", "", 1);
 
         } else {
             log.error("존재하지 않은 개인정보처리방침 입니다. 새로고침이후 진행해주세요.");
@@ -1194,7 +1194,7 @@ public class PolicyService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode + " - " + activityCode.getDesc() + " 마지막 뎁스 시도 이력", "", ip, 0, email);
+                    companyCode + " - " + " 마지막 뎁스", "", ip, 0, email);
 
             optionalPolicy.get().setPiStage(7);
             optionalPolicy.get().setPiAutosave(1);
@@ -1204,7 +1204,7 @@ public class PolicyService {
             policyRepository.save(optionalPolicy.get());
 
             historyService.updateHistory(activityHistoryId,
-                    companyCode+" - "+activityCode.getDesc()+" 마지막 뎁스 시도 이력", "", 1);
+                    companyCode+" - "+" 마지막 뎁스", "", 1);
             
         } else {
             log.error("존재하지 않은 개인정보처리방침 입니다. 새로고침이후 진행해주세요.");

@@ -110,12 +110,12 @@ public class EmailService {
 
         // 활동이력 저장 -> 비정상 모드
         activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+                cpCode+" - ", "", ip, 0, email);
 
         Page<EmailListDto> emailListDtos = emailRepository.findByEmailPage(emailSearchDto, pageable);
 
         historyService.updateHistory(activityHistoryId,
-                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+                cpCode+" - ", "", 1);
         return ResponseEntity.ok(res.ResponseEntityPage(emailListDtos));
     }
 
@@ -303,7 +303,7 @@ public class EmailService {
             String ip = CommonUtil.publicIp();
 
             Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+                    cpCode+" - ", "", ip, 0, email);
 
             log.info("sendEmailList : "+sendEmailList);
 
@@ -337,7 +337,7 @@ public class EmailService {
 
             } else {
                 historyService.updateHistory(activityHistoryId,
-                        cpCode+" - "+activityCode.getDesc()+" 시도 이력", "발송할 이메일이 존재하지 않습니다.", 0);
+                        cpCode+" - ", "발송할 이메일이 존재하지 않습니다.", 0);
             }
 
             if(emailSendResult != null) {
@@ -378,7 +378,7 @@ public class EmailService {
                 emailRepository.save(saveEmail);
 
                 historyService.updateHistory(activityHistoryId,
-                        cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+                        cpCode+" - ", "", 1);
             }
 
             // 복호화 횟수 저장
@@ -411,7 +411,7 @@ public class EmailService {
         String ip = CommonUtil.publicIp();
 
         Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  0, email);
+                cpCode+" - ", "", ip,  0, email);
 
         Optional<Email> optionalEmail = emailRepository.findById(emId);
         if(optionalEmail.isPresent()) {
@@ -423,17 +423,17 @@ public class EmailService {
                 emailRepository.save(optionalEmail.get());
 
                 historyService.updateHistory(activityHistoryId,
-                        cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+                        cpCode+" - ", "", 1);
             } else {
                 historyService.updateHistory(activityHistoryId,
-                        cpCode+" - "+activityCode.getDesc()+" 시도 이력", "이미 발송된 이메일입니다.", 0);
+                        cpCode+" - ", "이미 발송된 이메일입니다.", 0);
                 log.error("이미 발송된 이메일이므로 취소할 수 없습니다.");
                 return ResponseEntity.ok(res.fail(ResponseErrorCode.KO108.getCode(),ResponseErrorCode.KO108.getDesc()));
             }
 
         } else {
             historyService.updateHistory(activityHistoryId,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "예약발송 취소할 정보가 존재하지 않습니다.", 0);
+                    cpCode+" - ", "예약발송 취소할 정보가 존재하지 않습니다.", 0);
             log.error("예약발송 취소할 정보가 존재하지 않습니다. 새로고침 이후 다시 시도해주세요.");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO107.getCode(),ResponseErrorCode.KO107.getDesc()));
         }
