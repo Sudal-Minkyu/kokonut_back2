@@ -96,6 +96,18 @@ public class AuthRequestDto {
 
     @Getter
     @Setter
+    public static class EmailPwCheck {
+
+        @NotBlank(message = "이메일은 필수 입력값입니다.")
+        private String knEmail;
+
+        @NotBlank(message = "비밀번호는 필수 입력값입니다.")
+        private String knPassword;
+
+    }
+
+    @Getter
+    @Setter
     public static class Login {
 
         private String otpValue;

@@ -1,9 +1,11 @@
 package com.app.kokonut.provision.dtos;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.Column;
 import java.time.LocalDate;
 
 /**
@@ -26,5 +28,7 @@ public class ProvisionDownloadCheckDto {
     private LocalDate proExpDate; // 제공만료 기간
 
     private Integer proTargetType; // 제공 개인정보 여부 - 0: 전체 개인정보, 1: 일부 개인정보
+
+    private Integer proExitState; // 제공종료 여부 : 0: 미종료상태, 1: 종료상태
 
 }
