@@ -158,6 +158,15 @@ public class AuthRestController {
         }
     }
 
+    // 아이디가 존재하는 아이디인지, 입력한 비밀번호가 맞는지 체크하고 비밀번호틀릴시 카운팅
+    @GetMapping("/emailPwCheck")
+    @ApiOperation(value = "로그인 - 아이디 비밀번호확인" , notes = "1. 입력한 아이디와 비밀번호를 보낸다." +
+            "2. 이메일과 비밀번호를 대조한다.")
+    public ResponseEntity<Map<String,Object>> login(@Validated AuthRequestDto.EmailPwCheck emailPwCheck,
+                                                        HttpServletRequest request, HttpServletResponse response) {
+        return authService.emailPwCheck(emailPwCheck, request, response);
+    }
+
     // 로그인 성공 이후 JWT Token 발급 및 업데이트
     // "loginVerify" + "/otpVerify" 합쳐진 메서드
     @PostMapping("/authToken")

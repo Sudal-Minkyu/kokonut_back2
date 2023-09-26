@@ -38,6 +38,10 @@ public class Policy {
     @Column(name = "pi_header")
     private String piHeader;
 
+    @ApiModelProperty("',' 구분자 -> 기본항목의 법령에 따른 개인정보의 보유기간 체크항목 순서")
+    @Column(name = "pi_statute")
+    private String piStatute;
+
     @ApiModelProperty("인터넷접속로그 여부 0: 미선택, 1: 선택")
     @Column(name = "pi_internet_chose")
     private Boolean piInternetChose;

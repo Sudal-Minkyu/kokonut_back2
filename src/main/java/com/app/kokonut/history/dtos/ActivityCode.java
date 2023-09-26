@@ -9,6 +9,8 @@ package com.app.kokonut.history.dtos;
 public enum ActivityCode {
 
     AC_01("AC_01", "로그인"), // 사용
+    AC_01_1("AC_01_1", "아이디비번체크"), // 사용
+
 //    AC_02("AC_02", "회원정보 변경"),
 //    AC_03("AC_03", "회원정보 삭제"),
     AC_04("AC_04", "관리자 등록"), // 사용
