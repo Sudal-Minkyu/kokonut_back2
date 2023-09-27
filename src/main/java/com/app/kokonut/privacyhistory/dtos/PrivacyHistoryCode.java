@@ -13,6 +13,8 @@ public enum PrivacyHistoryCode {
     PHC_03("PHC_03", "삭제"), // 개인정보 삭제
     PHC_04("PHC_04", "조회"), // 개인정보 조회
     PHC_05("PHC_05", "열람"), // 개인정보 열람
+    PHC_06("PHC_06", "열람 다운로드"), // 개인정보 열람 다운로드
+    PHC_07("PHC_07", "제공 다운로드"), // 개인정보 제공 다운로드
     ;
     
     private final String code;

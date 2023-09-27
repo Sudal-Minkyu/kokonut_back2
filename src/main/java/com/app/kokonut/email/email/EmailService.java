@@ -337,7 +337,7 @@ public class EmailService {
 
             } else {
                 historyService.updateHistory(activityHistoryId,
-                        "발송할 이메일이 존재하지 않습니다.", "발송할 이메일이 존재하지 않습니다.", 0);
+                        cpCode+" - "+"발송할 이메일이 존재하지 않습니다.", "발송할 이메일이 존재하지 않습니다.", 0);
             }
 
             if(emailSendResult != null) {

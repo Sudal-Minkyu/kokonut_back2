@@ -2714,13 +2714,8 @@ public class DynamicUserService {
 			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO116.getCode(), ResponseErrorCode.KO116.getDesc()));
 		}
 
-		ActivityCode activityCode = ActivityCode.AC_06;
 		String ip = CommonUtil.publicIp();
 		Long activityHistoryId;
-
-		// 활동이력 저장 -> 비정상 모드
-		activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-				cpCode+" - ", downloadReason, ip, 0, email);
 
 		String fileName = LocalDate.now()+"_개인정보열람파일";
 		String sheetName = paramMap.get(0).get("아이디(1_id)")+"의 개인정보";
@@ -2754,11 +2749,9 @@ public class DynamicUserService {
 			log.info("시트명 : "+sheetName);
 			data = excelService.createExcelFile(fileName, sheetName, paramMap, String.valueOf(filePassword));
 
-			historyService.updateHistory(activityHistoryId,
-					null, downloadReason, 1);
+			privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_06, 1, "개인정보 "+PrivacyHistoryCode.PHC_06.getDesc()+" - 사유 : "+downloadReason, CommonUtil.publicIp(), email);
 		}else{
-			historyService.updateHistory(activityHistoryId,
-					cpCode+" - "+"개인정보열람 파일암호전송 실패", downloadReason+"- 개인정보열람 파일암호전송 실패", 0);
+			privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_06, 1, "개인정보 "+PrivacyHistoryCode.PHC_06.getDesc()+" - 사유 : "+downloadReason, CommonUtil.publicIp(), email);
 
 			// mailSender 실패
 			log.error("### 해당 메일 전송에 실패했습니다. 관리자에게 문의하세요. reciverEmail : "+ email);

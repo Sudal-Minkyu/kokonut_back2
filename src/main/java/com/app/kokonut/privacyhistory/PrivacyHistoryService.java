@@ -194,7 +194,7 @@ public class PrivacyHistoryService {
 
         // 활동이력 저장 -> 비정상 모드
         activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-                cpCode+" - ", downloadReason, ip, 0, email);
+                cpCode+" - "+downloadReason, downloadReason, ip, 0, email);
 
         // 파일암호 전송
         // 파일암호(숫자6자리) 생성
