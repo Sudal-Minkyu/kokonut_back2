@@ -23,6 +23,8 @@ public class ProvisionDownloadHistoryListDto {
 
     private LocalDateTime insert_time; // 다운로드 시간
 
+    private Integer piphCount; // 다운로드 횟수
+
     private String knName; // 다운로드한사람
 
     public String getKnName() {

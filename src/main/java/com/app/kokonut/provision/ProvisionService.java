@@ -33,7 +33,6 @@ import com.app.kokonut.provision.provisionlist.dtos.ProvisionTargetIdxDto;
 import com.app.kokonut.provision.provisionroster.ProvisionRoster;
 import com.app.kokonut.provision.provisionroster.ProvisionRosterRepository;
 import com.app.kokonutuser.DynamicUserRepositoryCustom;
-import com.app.kokonutuser.KokonutUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -607,7 +606,7 @@ public class ProvisionService {
 
 //            log.info("privacyInfo : "+privacyInfo);
 
-            String filePassword = passwordGenerator.generate(6, 8);
+            String filePassword = PasswordGenerator.generate(6, 8);
             log.info("생성된 파일암호 : "+filePassword);
 
             // 인증번호 메일전송
@@ -639,6 +638,7 @@ public class ProvisionService {
                 if(provisionDownloadHistoryOptional.isPresent()) {
                     provisionDownloadHistory = provisionDownloadHistoryOptional.get();
                     provisionDownloadHistoryOptional.get().setPiphCount(provisionDownloadHistoryOptional.get().getPiphCount()+1);
+                    provisionDownloadHistory.setInsert_date(LocalDateTime.now());
                 } else {
                     provisionDownloadHistory = new ProvisionDownloadHistory();
                     provisionDownloadHistory.setProCode(proCode);
