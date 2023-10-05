@@ -1,8 +1,6 @@
 package com.app.kokonut.common;
 
 import com.app.kokonut.auth.dtos.AuthPhoneCheckDto;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -121,6 +119,54 @@ public class Utils {
 		return sb.toString();
 	}
 
+	/**
+	 * 특수문자 포함 난수값 생성 함수 특정 길이의 암호를 생성하여 반환
+	 * @param minMaxLength (optional) 첫번째 자리 - 생성할 암호의 최소길이, 두번째 자리 - 생성할 암호의 최대길이
+	 * @return 길이에 맞춰 생성된 문자열
+	 */
+	public static String getSpecialRandomStr(int... minMaxLength) {
+
+		// 암호에 사용될 후보 문자열군
+		String PASSWORD_CHAR_POOL = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_+=<>?";
+
+		int minLength;
+		int maxLength;
+		SecureRandom random = new SecureRandom();
+
+		switch (minMaxLength.length) {
+			case 0:
+				// 인자가 없는 경우
+				minLength = 8;
+				maxLength = 8;
+				break;
+			case 1:
+				// 최소 문자열 길이만 지정한 경우
+				minLength = minMaxLength[0];
+				maxLength = minMaxLength[0];
+				break;
+			case 2:
+				// 최소, 최대 문자열 길이를 모두 지정한 경우
+				minLength = minMaxLength[0];
+				maxLength = minMaxLength[1];
+				break;
+			default:
+				throw new IllegalArgumentException("이 메서드는 인자를 3개이상 받지 않습니다.");
+		}
+
+		if (minLength > maxLength || minLength < 1) {
+			throw new IllegalArgumentException("잘못된 암호생성 길이입니다. 최소길이는 최대길이보다 작을 수 없으며, 길이가 0이 될 수도 없습니다.");
+		}
+
+		int length = minLength + random.nextInt(maxLength - minLength + 1);
+		StringBuilder password = new StringBuilder(length);
+
+		for (int i = 0; i < length; i++) {
+			password.append(PASSWORD_CHAR_POOL.charAt(random.nextInt(PASSWORD_CHAR_POOL.length())));
+		}
+
+		return password.toString();
+	}
+
 	// LocalDateTime -> String yyyy-mm-dd 형태로 변환
 	public static String convertLocalDateTimeToString(LocalDateTime localDateTime) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -129,11 +175,7 @@ public class Utils {
 
 	// 문자열 길이만큼 -> *로 반환
 	public static String starsForString(String input) {
-		StringBuilder stars = new StringBuilder();
-		for (int i = 0; i < input.length(); i++) {
-			stars.append("*");
-		}
-		return stars.toString();
+		return "*".repeat(input.length());
 	}
 
 	// 이메일 체크 정규식 함수 - true일 경우 준수함, false일 경우 준수하지 않음

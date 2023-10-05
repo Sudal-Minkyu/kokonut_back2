@@ -199,8 +199,8 @@ public class MailSender {
 
 		String renaderdHtml = "<div style=\"display:inline-block;overflow:hidden;width:600px;height:auto;position:relative;\">\n" +
 				"\t<div style=\"width:100%;position:relative;margin-top:80px;background: #00CA94; height: 60px; padding: 0;\">\n" +
-				"\t\t<a href=\"https://beta.kokonut.me:8888\" class=\"logo\">\n" +
-				"\t\t\t<img src=\"https://beta.kokonut.me:8888/public/assets/images/logo/kokonut_white.png\" alt=\"logo\" style=\"width:30%;\"/>\n" +
+				"\t\t<a href=\"https://kokonut.me\" class=\"logo\">\n" +
+				"\t\t\t<img src=\"https://kokonut.me/public/assets/images/logo/kokonut_white.png\" alt=\"logo\" style=\"width:30%;\"/>\n" +
 				"\t\t</a>\n" +
 				"\t</div>\n" +
 				"\t<div style=\"display: block; margin-top: 40px;\">\n" +
@@ -215,7 +215,7 @@ public class MailSender {
 				"\t\t<div style=\"word-break: break-word;color: #666;font-family: Pretendard, sans-serif;font-size: 14px;font-style: normal;font-weight: 400;line-height: 24px;\">\n" +
 				"\t\t\t본 메일은 발신전용 입니다.<br>\n" +
 				"\t\t\tⓒ2023. Everyfeb. All Rights Reserved.<br>\n" +
-				"\t\t\t<img src=\"https://beta.kokonut.me:8888/public/assets/images/logo/kokonut_gray.png\" alt=\"logo\" style=\"width:30%;padding: 20px 0 0 0;\"/>\n" +
+				"\t\t\t<img src=\"https://kokonut.me/public/assets/images/logo/kokonut_gray.png\" alt=\"logo\" style=\"width:30%;padding: 20px 0 0 0;\"/>\n" +
 				"\t\t</div>\n" +
 				"\t</div>\n" +
 				"</div>";

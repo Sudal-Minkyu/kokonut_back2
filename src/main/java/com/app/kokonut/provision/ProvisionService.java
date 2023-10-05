@@ -76,7 +76,6 @@ public class ProvisionService {
     private final CompanyTableColumnInfoRepository companyTableColumnInfoRepository;
 
     private final DynamicUserRepositoryCustom dynamicUserRepositoryCustom;
-    private final PasswordGenerator passwordGenerator;
 
     @Autowired
     public ProvisionService(KeyGenerateService keyGenerateService, GoogleOTP googleOTP, HistoryService historyService,
@@ -85,7 +84,7 @@ public class ProvisionService {
                             ProvisionDownloadHistoryRepository provisionDownloadHistoryRepository, ProvisionRosterRepository provisionRosterRepository,
                             ProvisionEntryRepository provisionEntryRepository, ProvisionListRepository provisionListRepository,
                             DecrypCountHistoryService decrypCountHistoryService, CompanyTableColumnInfoRepository companyTableColumnInfoRepository,
-                            DynamicUserRepositoryCustom dynamicUserRepositoryCustom, PasswordGenerator passwordGenerator){
+                            DynamicUserRepositoryCustom dynamicUserRepositoryCustom){
         this.keyGenerateService = keyGenerateService;
         this.googleOTP = googleOTP;
         this.historyService = historyService;
@@ -101,7 +100,6 @@ public class ProvisionService {
         this.decrypCountHistoryService = decrypCountHistoryService;
         this.companyTableColumnInfoRepository = companyTableColumnInfoRepository;
         this.dynamicUserRepositoryCustom = dynamicUserRepositoryCustom;
-        this.passwordGenerator = passwordGenerator;
     }
 
     // 개인정보제공 등록
@@ -605,8 +603,7 @@ public class ProvisionService {
 //            }
 
 //            log.info("privacyInfo : "+privacyInfo);
-
-            String filePassword = PasswordGenerator.generate(6, 8);
+            String filePassword = Utils.getSpecialRandomStr(6, 8);
             log.info("생성된 파일암호 : "+filePassword);
 
             // 인증번호 메일전송

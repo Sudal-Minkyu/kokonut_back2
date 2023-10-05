@@ -89,7 +89,6 @@ public class DynamicUserService {
 	private final DecrypCountHistoryService decrypCountHistoryService;
 
 	private final DynamicUserRepositoryCustom dynamicUserRepositoryCustom;
-	private final PasswordGenerator passwordGenerator;
 
 	@Autowired
 	public DynamicUserService(AdminRepository adminRepository,
@@ -99,7 +98,7 @@ public class DynamicUserService {
 							  CompanySettingRepository companySettingRepository, ThirdPartyRepository thirdPartyRepository, ThirdPartyBizmRepository thirdPartyBizmRepository, CompanyTableRepository companyTableRepository,
 							  CompanyTableColumnInfoRepository companyTableColumnInfoRepository,
 							  EncrypCountHistoryService encrypCountHistoryService, DecrypCountHistoryService decrypCountHistoryService,
-							  DynamicUserRepositoryCustom dynamicUserRepositoryCustom, PasswordGenerator passwordGenerator) {
+							  DynamicUserRepositoryCustom dynamicUserRepositoryCustom) {
 		this.adminRepository = adminRepository;
 		this.companyRepository = companyRepository;
 		this.mailSender = mailSender;
@@ -118,7 +117,6 @@ public class DynamicUserService {
 		this.encrypCountHistoryService = encrypCountHistoryService;
 		this.decrypCountHistoryService = decrypCountHistoryService;
 		this.dynamicUserRepositoryCustom = dynamicUserRepositoryCustom;
-		this.passwordGenerator = passwordGenerator;
 	}
 
 	/**
@@ -2724,7 +2722,7 @@ public class DynamicUserService {
 		String fileName = LocalDate.now()+"_개인정보열람파일";
 		String sheetName = paramMap.get(0).get("아이디(1_id)")+"의 개인정보";
 
-		String filePassword = passwordGenerator.generate(6, 8);
+		String filePassword = Utils.getSpecialRandomStr(6, 8);
 		log.info("생성된 파일암호 : "+filePassword);
 
 		// 인증번호 메일전송

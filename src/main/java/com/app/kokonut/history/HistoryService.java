@@ -38,17 +38,15 @@ public class HistoryService {
 
     private final AdminRepository adminRepository;
     private final HistoryRepository historyRepository;
-    private final PasswordGenerator passwordGenerator;
 
     @Autowired
     public HistoryService(GoogleOTP googleOTP, ExcelService excelService, MailSender mailSender,
-                          AdminRepository adminRepository, HistoryRepository historyRepository, PasswordGenerator passwordGenerator) {
+                          AdminRepository adminRepository, HistoryRepository historyRepository) {
         this.googleOTP = googleOTP;
         this.excelService = excelService;
         this.mailSender = mailSender;
         this.adminRepository = adminRepository;
         this.historyRepository = historyRepository;
-        this.passwordGenerator = passwordGenerator;
     }
 
     // 관리자 활동이력 리스트 ahType => "2"
@@ -204,7 +202,7 @@ public class HistoryService {
         activityHistoryId = insertHistory(2, adminId, activityCode,
                 cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason, ip, 0, email);
 
-        String filePassword = passwordGenerator.generate(6, 8);
+        String filePassword = Utils.getSpecialRandomStr(6, 8);
         log.info("생성된 파일암호 : "+filePassword);
 
         // 인증번호 메일전송

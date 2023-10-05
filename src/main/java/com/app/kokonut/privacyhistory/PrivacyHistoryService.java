@@ -45,18 +45,16 @@ public class PrivacyHistoryService {
 
     private final AdminRepository adminRepository;
     private final PrivacyHistoryRepository privacyHistoryRepository;
-    private final PasswordGenerator passwordGenerator;
 
     @Autowired
     public PrivacyHistoryService(GoogleOTP googleOTP, MailSender mailSender,
-                                 ExcelService excelService, HistoryService historyService, AdminRepository adminRepository, PrivacyHistoryRepository privacyHistoryRepository, PasswordGenerator passwordGenerator) {
+                                 ExcelService excelService, HistoryService historyService, AdminRepository adminRepository, PrivacyHistoryRepository privacyHistoryRepository) {
         this.googleOTP = googleOTP;
         this.mailSender = mailSender;
         this.excelService = excelService;
         this.historyService = historyService;
         this.adminRepository = adminRepository;
         this.privacyHistoryRepository = privacyHistoryRepository;
-        this.passwordGenerator = passwordGenerator;
     }
 
     public void privacyHistoryInsert(Long adminId, PrivacyHistoryCode privacyHistoryCode,Integer kphType, String kphReason, String kphIpAddr, String email) {
@@ -193,7 +191,7 @@ public class PrivacyHistoryService {
         activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
                 cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason, ip, 0, email);
 
-        String filePassword = passwordGenerator.generate(6, 8);
+        String filePassword = Utils.getSpecialRandomStr(6, 8);
         log.info("생성된 파일암호 : "+filePassword);
 
         // 인증번호 메일전송
