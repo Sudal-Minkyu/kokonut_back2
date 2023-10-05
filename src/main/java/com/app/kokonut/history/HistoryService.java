@@ -203,6 +203,9 @@ public class HistoryService {
                 cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason, ip, 0, email);
 
         String filePassword = Utils.getSpecialRandomStr(6, 8);
+        if (filePassword == "ERROR ERROR") {
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO120.getCode(), ResponseErrorCode.KO120.getDesc()));
+        }
         log.info("생성된 파일암호 : "+filePassword);
 
         // 인증번호 메일전송

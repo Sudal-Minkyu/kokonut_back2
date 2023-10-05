@@ -150,11 +150,13 @@ public class Utils {
 				maxLength = minMaxLength[1];
 				break;
 			default:
-				throw new IllegalArgumentException("이 메서드는 인자를 3개이상 받지 않습니다.");
+				log.error("이 암호생성 메서드는 인자를 3개이상 받지 않습니다.");
+				return "ERROR ERROR";
 		}
 
 		if (minLength > maxLength || minLength < 1) {
-			throw new IllegalArgumentException("잘못된 암호생성 길이입니다. 최소길이는 최대길이보다 작을 수 없으며, 길이가 0이 될 수도 없습니다.");
+			log.error("잘못된 암호생성 길이입니다. 최소길이는 최대길이보다 작을 수 없으며, 길이가 0이 될 수도 없습니다.");
+			return "ERROR ERROR";
 		}
 
 		int length = minLength + random.nextInt(maxLength - minLength + 1);

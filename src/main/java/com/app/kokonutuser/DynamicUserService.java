@@ -2723,6 +2723,9 @@ public class DynamicUserService {
 		String sheetName = paramMap.get(0).get("아이디(1_id)")+"의 개인정보";
 
 		String filePassword = Utils.getSpecialRandomStr(6, 8);
+		if (filePassword == "ERROR ERROR") {
+			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO120.getCode(), ResponseErrorCode.KO120.getDesc()));
+		}
 		log.info("생성된 파일암호 : "+filePassword);
 
 		// 인증번호 메일전송
