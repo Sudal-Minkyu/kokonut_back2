@@ -605,7 +605,7 @@ public class ProvisionService {
 //            log.info("privacyInfo : "+privacyInfo);
             String filePassword = Utils.getSpecialRandomStr(6, 8);
             if (filePassword == "ERROR ERROR") {
-                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO120.getCode(), ResponseErrorCode.KO120.getDesc()));
+                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO036.getCode(), ResponseErrorCode.KO036.getDesc()));
             }
             log.info("생성된 파일암호 : "+filePassword);
 
