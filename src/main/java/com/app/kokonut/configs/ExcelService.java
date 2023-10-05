@@ -10,6 +10,11 @@ import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFDataFormat;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.poifs.crypt.EncryptionInfo;
+import org.apache.poi.poifs.crypt.EncryptionMode;
+import org.apache.poi.poifs.crypt.Encryptor;
+
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
@@ -17,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -292,8 +298,21 @@ public class ExcelService {
 
 			// Save Excel as a byte array
 			ByteArrayOutputStream excelBos = new ByteArrayOutputStream();
-			workbook.write(excelBos);
-			byte[] excelBytes = excelBos.toByteArray();
+			POIFSFileSystem fs = new POIFSFileSystem();
+
+			EncryptionInfo info = new EncryptionInfo(EncryptionMode.agile);
+			Encryptor enc = info.getEncryptor();
+			enc.confirmPassword(zipPassword); // 여기에 암호 설정
+
+			try (OutputStream os = enc.getDataStream(fs)) {
+				// 파일 암호화 및 저장
+				workbook.write(os);
+			}
+
+			// POIFSFileSystem 객체를 사용하여 암호화된 워크북을 바이트 배열로 저장
+			fs.writeFilesystem(excelBos);
+			byte[] encryptedBytes = excelBos.toByteArray();
+
 
 			// Create a Zip File and add the excel byte array into it with password
 			ZipParameters zipParameters = new ZipParameters();
@@ -304,7 +323,7 @@ public class ExcelService {
 
 			ZipOutputStream zos = new ZipOutputStream(bos, zipPassword.toCharArray());
 			zos.putNextEntry(zipParameters);
-			zos.write(excelBytes);
+			zos.write(encryptedBytes);
 			zos.closeEntry();
 			zos.close();
 

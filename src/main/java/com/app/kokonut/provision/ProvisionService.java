@@ -43,7 +43,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -66,7 +65,6 @@ public class ProvisionService {
     private final MailSender mailSender;
 
     private final HistoryService historyService;
-    private final KokonutUserService kokonutUserService;
     private final DecrypCountHistoryService decrypCountHistoryService;
     private final CompanyDataKeyService companyDataKeyService;
 
@@ -79,21 +77,21 @@ public class ProvisionService {
     private final CompanyTableColumnInfoRepository companyTableColumnInfoRepository;
 
     private final DynamicUserRepositoryCustom dynamicUserRepositoryCustom;
+    private final PasswordGenerator passwordGenerator;
 
     @Autowired
     public ProvisionService(KeyGenerateService keyGenerateService, GoogleOTP googleOTP, HistoryService historyService,
-                            ExcelService excelService, MailSender mailSender, KokonutUserService kokonutUserService,
+                            ExcelService excelService, MailSender mailSender,
                             CompanyDataKeyService companyDataKeyService, AdminRepository adminRepository, ProvisionRepository provisionRepository,
                             ProvisionDownloadHistoryRepository provisionDownloadHistoryRepository, ProvisionRosterRepository provisionRosterRepository,
                             ProvisionEntryRepository provisionEntryRepository, ProvisionListRepository provisionListRepository,
                             DecrypCountHistoryService decrypCountHistoryService, CompanyTableColumnInfoRepository companyTableColumnInfoRepository,
-                            DynamicUserRepositoryCustom dynamicUserRepositoryCustom){
+                            DynamicUserRepositoryCustom dynamicUserRepositoryCustom, PasswordGenerator passwordGenerator){
         this.keyGenerateService = keyGenerateService;
         this.googleOTP = googleOTP;
         this.historyService = historyService;
         this.excelService = excelService;
         this.mailSender = mailSender;
-        this.kokonutUserService = kokonutUserService;
         this.companyDataKeyService = companyDataKeyService;
         this.adminRepository = adminRepository;
         this.provisionRepository = provisionRepository;
@@ -104,6 +102,7 @@ public class ProvisionService {
         this.decrypCountHistoryService = decrypCountHistoryService;
         this.companyTableColumnInfoRepository = companyTableColumnInfoRepository;
         this.dynamicUserRepositoryCustom = dynamicUserRepositoryCustom;
+        this.passwordGenerator = passwordGenerator;
     }
 
     // 개인정보제공 등록
@@ -608,10 +607,7 @@ public class ProvisionService {
 
 //            log.info("privacyInfo : "+privacyInfo);
 
-            // 파일암호 전송
-            // 파일암호(숫자6자리) 생성
-            SecureRandom secureRandom = new SecureRandom();
-            int filePassword = secureRandom.nextInt(900000) + 100000;
+            String filePassword = passwordGenerator.generate(6, 8);
             log.info("생성된 파일암호 : "+filePassword);
 
             // 인증번호 메일전송
@@ -635,7 +631,7 @@ public class ProvisionService {
 
                 log.info("파일명 : "+fileName);
                 log.info("시트명 : "+sheetName);
-                data = excelService.createExcelFile(fileName, sheetName, privacyInfo, String.valueOf(filePassword));
+                data = excelService.createExcelFile(fileName, sheetName, privacyInfo, filePassword);
 
                 // 다운로드 성공기록
                 ProvisionDownloadHistory provisionDownloadHistory;

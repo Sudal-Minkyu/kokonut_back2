@@ -3,11 +3,7 @@ package com.app.kokonut.privacyhistory;
 import com.app.kokonut.admin.AdminRepository;
 import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
-import com.app.kokonut.common.AjaxResponse;
-import com.app.kokonut.common.ResponseErrorCode;
-import com.app.kokonut.common.ReqUtils;
-import com.app.kokonut.common.CommonUtil;
-import com.app.kokonut.common.Utils;
+import com.app.kokonut.common.*;
 import com.app.kokonut.configs.ExcelService;
 import com.app.kokonut.configs.GoogleOTP;
 import com.app.kokonut.configs.MailSender;
@@ -25,7 +21,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -50,16 +45,18 @@ public class PrivacyHistoryService {
 
     private final AdminRepository adminRepository;
     private final PrivacyHistoryRepository privacyHistoryRepository;
+    private final PasswordGenerator passwordGenerator;
 
     @Autowired
     public PrivacyHistoryService(GoogleOTP googleOTP, MailSender mailSender,
-                                 ExcelService excelService, HistoryService historyService, AdminRepository adminRepository, PrivacyHistoryRepository privacyHistoryRepository) {
+                                 ExcelService excelService, HistoryService historyService, AdminRepository adminRepository, PrivacyHistoryRepository privacyHistoryRepository, PasswordGenerator passwordGenerator) {
         this.googleOTP = googleOTP;
         this.mailSender = mailSender;
         this.excelService = excelService;
         this.historyService = historyService;
         this.adminRepository = adminRepository;
         this.privacyHistoryRepository = privacyHistoryRepository;
+        this.passwordGenerator = passwordGenerator;
     }
 
     public void privacyHistoryInsert(Long adminId, PrivacyHistoryCode privacyHistoryCode,Integer kphType, String kphReason, String kphIpAddr, String email) {
@@ -196,10 +193,7 @@ public class PrivacyHistoryService {
         activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
                 cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason, ip, 0, email);
 
-        // 파일암호 전송
-        // 파일암호(숫자6자리) 생성
-        SecureRandom secureRandom = new SecureRandom();
-        int filePassword = secureRandom.nextInt(900000) + 100000;
+        String filePassword = passwordGenerator.generate(6, 8);
         log.info("생성된 파일암호 : "+filePassword);
 
         // 인증번호 메일전송
@@ -227,7 +221,7 @@ public class PrivacyHistoryService {
 
             log.info("파일명 : "+fileName);
             log.info("시트명 : "+sheetName);
-            data = excelService.createExcelFile(fileName, sheetName, privacyHistoryExcelDownloadList, String.valueOf(filePassword));
+            data = excelService.createExcelFile(fileName, sheetName, privacyHistoryExcelDownloadList, filePassword);
 
             historyService.updateHistory(activityHistoryId, cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason, 1);
 

@@ -5,12 +5,7 @@ import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
 import com.app.kokonut.admin.dtos.AdminOtpKeyDto;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import com.app.kokonut.awskmshistory.dto.AwsKmsResultDto;
-import com.app.kokonut.common.AjaxResponse;
-import com.app.kokonut.common.ResponseErrorCode;
-import com.app.kokonut.common.ReqUtils;
-import com.app.kokonut.common.AESGCMcrypto;
-import com.app.kokonut.common.CommonUtil;
-import com.app.kokonut.common.Utils;
+import com.app.kokonut.common.*;
 import com.app.kokonut.company.company.CompanyRepository;
 import com.app.kokonut.company.companydatakey.CompanyDataKeyService;
 import com.app.kokonut.company.companysetting.CompanySetting;
@@ -52,7 +47,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -95,6 +89,7 @@ public class DynamicUserService {
 	private final DecrypCountHistoryService decrypCountHistoryService;
 
 	private final DynamicUserRepositoryCustom dynamicUserRepositoryCustom;
+	private final PasswordGenerator passwordGenerator;
 
 	@Autowired
 	public DynamicUserService(AdminRepository adminRepository,
@@ -104,7 +99,7 @@ public class DynamicUserService {
 							  CompanySettingRepository companySettingRepository, ThirdPartyRepository thirdPartyRepository, ThirdPartyBizmRepository thirdPartyBizmRepository, CompanyTableRepository companyTableRepository,
 							  CompanyTableColumnInfoRepository companyTableColumnInfoRepository,
 							  EncrypCountHistoryService encrypCountHistoryService, DecrypCountHistoryService decrypCountHistoryService,
-							  DynamicUserRepositoryCustom dynamicUserRepositoryCustom) {
+							  DynamicUserRepositoryCustom dynamicUserRepositoryCustom, PasswordGenerator passwordGenerator) {
 		this.adminRepository = adminRepository;
 		this.companyRepository = companyRepository;
 		this.mailSender = mailSender;
@@ -123,6 +118,7 @@ public class DynamicUserService {
 		this.encrypCountHistoryService = encrypCountHistoryService;
 		this.decrypCountHistoryService = decrypCountHistoryService;
 		this.dynamicUserRepositoryCustom = dynamicUserRepositoryCustom;
+		this.passwordGenerator = passwordGenerator;
 	}
 
 	/**
@@ -2728,10 +2724,7 @@ public class DynamicUserService {
 		String fileName = LocalDate.now()+"_개인정보열람파일";
 		String sheetName = paramMap.get(0).get("아이디(1_id)")+"의 개인정보";
 
-		// 파일암호 전송
-		// 파일암호(숫자6자리) 생성
-		SecureRandom secureRandom = new SecureRandom();
-		int filePassword = secureRandom.nextInt(900000) + 100000;
+		String filePassword = passwordGenerator.generate(6, 8);
 		log.info("생성된 파일암호 : "+filePassword);
 
 		// 인증번호 메일전송
@@ -2755,7 +2748,7 @@ public class DynamicUserService {
 
 			log.info("파일명 : "+fileName);
 			log.info("시트명 : "+sheetName);
-			data = excelService.createExcelFile(fileName, sheetName, paramMap, String.valueOf(filePassword));
+			data = excelService.createExcelFile(fileName, sheetName, paramMap, filePassword);
 
 			historyService.updateHistory(activityHistoryId,
 					cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason, 1);

@@ -3,11 +3,7 @@ package com.app.kokonut.history;
 import com.app.kokonut.admin.Admin;
 import com.app.kokonut.admin.AdminRepository;
 import com.app.kokonut.admin.dtos.AdminCompanyInfoDto;
-import com.app.kokonut.common.AjaxResponse;
-import com.app.kokonut.common.ResponseErrorCode;
-import com.app.kokonut.common.ReqUtils;
-import com.app.kokonut.common.CommonUtil;
-import com.app.kokonut.common.Utils;
+import com.app.kokonut.common.*;
 import com.app.kokonut.configs.ExcelService;
 import com.app.kokonut.configs.GoogleOTP;
 import com.app.kokonut.configs.MailSender;
@@ -22,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -43,15 +38,17 @@ public class HistoryService {
 
     private final AdminRepository adminRepository;
     private final HistoryRepository historyRepository;
+    private final PasswordGenerator passwordGenerator;
 
     @Autowired
     public HistoryService(GoogleOTP googleOTP, ExcelService excelService, MailSender mailSender,
-                          AdminRepository adminRepository, HistoryRepository historyRepository) {
+                          AdminRepository adminRepository, HistoryRepository historyRepository, PasswordGenerator passwordGenerator) {
         this.googleOTP = googleOTP;
         this.excelService = excelService;
         this.mailSender = mailSender;
         this.adminRepository = adminRepository;
         this.historyRepository = historyRepository;
+        this.passwordGenerator = passwordGenerator;
     }
 
     // 관리자 활동이력 리스트 ahType => "2"
@@ -207,10 +204,7 @@ public class HistoryService {
         activityHistoryId = insertHistory(2, adminId, activityCode,
                 cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason, ip, 0, email);
 
-        // 파일암호 전송
-        // 파일암호(숫자6자리) 생성
-        SecureRandom secureRandom = new SecureRandom();
-        int filePassword = secureRandom.nextInt(900000) + 100000;
+        String filePassword = passwordGenerator.generate(6, 8);
         log.info("생성된 파일암호 : "+filePassword);
 
         // 인증번호 메일전송
@@ -238,7 +232,7 @@ public class HistoryService {
 
             log.info("파일명 : "+fileName);
             log.info("시트명 : "+sheetName);
-            data = excelService.createExcelFile(fileName, sheetName, historyDownloadDataList, String.valueOf(filePassword));
+            data = excelService.createExcelFile(fileName, sheetName, historyDownloadDataList, filePassword);
 
             updateHistory(activityHistoryId, cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason, 1);
 
