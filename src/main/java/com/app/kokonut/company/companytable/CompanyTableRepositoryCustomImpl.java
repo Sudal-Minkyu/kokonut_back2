@@ -51,7 +51,7 @@ public class CompanyTableRepositoryCustomImpl extends QuerydslRepositorySupport 
         sb.append("COUNT(ct_name) AS count, \n");
         sb.append("SUBSTRING(ct_name, 1, 16) AS code \n");
         sb.append("FROM kn_company_table_column_info \n");
-        sb.append("WHERE ctci_name != 'ID_1_id' \n");
+        sb.append("WHERE ctci_name != 'ID_1_id' AND ctci_name != 'kokonut_REGISTER_DATE' AND ctci_name != 'kokonut_LAST_LOGIN_DATE' AND ctci_name != 'kokonut_IDX' \n");
         sb.append("GROUP BY code) AS infoCount \n");
         sb.append("ON sumTable.cp_code = infoCount.code; \n");
 

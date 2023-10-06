@@ -1,6 +1,5 @@
 package com.app.kokonut.category.categoryitem;
 
-import com.app.kokonut.category.categorydefault.dtos.CategoryDefaultListDto;
 import com.app.kokonut.category.categoryitem.dtos.CategoryItemListDto;
 
 import java.util.List;

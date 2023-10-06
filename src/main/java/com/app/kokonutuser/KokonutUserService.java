@@ -125,6 +125,26 @@ public class KokonutUserService {
 		return dynamicUserRepositoryCustom.selectUserList(searchQuery);
 	}
 
+	// 개인정보 테이블의 컬럼 코멘트 조회
+	public List<KokonutUserCommentInfoDto> commentInfo(String tableName, String field) {
+		log.info("commentInfo 호출");
+
+		StringBuilder searchQuery = new StringBuilder();
+		searchQuery
+				.append("SELECT SUBSTRING_INDEX(COLUMN_COMMENT, ',', 1) as columnName,")
+				.append("SUBSTRING_INDEX(SUBSTRING_INDEX(COLUMN_COMMENT, ',', 2), ',', -1) as columnSecurity,")
+				.append("SUBSTRING_INDEX(SUBSTRING_INDEX(COLUMN_COMMENT, ',', 4), ',', -1) as columnSubName " +
+						"FROM INFORMATION_SCHEMA.COLUMNS")
+				.append(" WHERE TABLE_NAME = '").append(tableName).append("' AND COLUMN_NAME = '").append(field).append("'");
+
+		log.info("searchQuery : "+searchQuery);
+
+		return dynamicUserRepositoryCustom.commentInfo(String.valueOf(searchQuery));
+	}
+
+
+
+
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 

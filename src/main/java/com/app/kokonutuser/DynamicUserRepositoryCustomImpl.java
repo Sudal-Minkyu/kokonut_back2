@@ -243,6 +243,20 @@ public class DynamicUserRepositoryCustomImpl implements DynamicUserRepositoryCus
         );
     }
 
+    // 개인정보 테이블의 컬럼 코멘트 조회
+    @Override
+    public List<KokonutUserCommentInfoDto> commentInfo(String searchQuery) {
+        return jdbcTemplate.query(
+                searchQuery,
+                (rs, rowNum) ->
+                        new KokonutUserCommentInfoDto(
+                                rs.getString("columnName"),
+                                rs.getString("columnSecurity"),
+                                rs.getString("columnSubName")
+                        )
+        );
+    }
+
     public String getColumnComment(String searchQuery, String tableName, String columnName) {
         return jdbcTemplate.queryForObject(searchQuery, (rs, rowNum) -> rs.getString("COLUMN_COMMENT"), tableName, columnName);
     }
