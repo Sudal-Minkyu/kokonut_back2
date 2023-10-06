@@ -26,8 +26,6 @@ import com.app.kokonut.company.companysetting.dtos.CompanySettingCheckDto;
 import com.app.kokonut.company.companysettingaccessip.CompanySettingAccessIPRepository;
 import com.app.kokonut.company.companytable.CompanyTable;
 import com.app.kokonut.company.companytable.CompanyTableRepository;
-import com.app.kokonut.company.companytablecolumninfo.CompanyTableColumnInfo;
-import com.app.kokonut.company.companytablecolumninfo.CompanyTableColumnInfoRepository;
 import com.app.kokonut.configs.GoogleOTP;
 import com.app.kokonut.configs.KeyGenerateService;
 import com.app.kokonut.configs.MailSender;
@@ -87,7 +85,6 @@ public class AuthService {
     private final CompanyRepository companyRepository;
     private final CompanyDataKeyRepository companyDataKeyRepository;
     private final CompanyTableRepository companyTableRepository;
-    private final CompanyTableColumnInfoRepository companyTableColumnInfoRepository;
     private final CompanySettingRepository companySettingRepository;
     private final CompanySettingAccessIPRepository companySettingAccessIPRepository;
 
@@ -108,7 +105,6 @@ public class AuthService {
                        AwsKmsUtil awsKmsUtil, WhoisUtil whoisUtil, KeyGenerateService keyGenerateService,
                        AwsKmsHistoryService awsKmsHistoryService, CompanyRepository companyRepository,
                        CompanyDataKeyRepository companyDataKeyRepository, CompanyTableRepository companyTableRepository,
-                       CompanyTableColumnInfoRepository companyTableColumnInfoRepository,
                        CompanySettingRepository companySettingRepository, CompanySettingAccessIPRepository companySettingAccessIPRepository,
                        PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider,
                        AuthenticationManagerBuilder authenticationManagerBuilder,
@@ -126,7 +122,6 @@ public class AuthService {
         this.companyRepository = companyRepository;
         this.companyDataKeyRepository = companyDataKeyRepository;
         this.companyTableRepository = companyTableRepository;
-        this.companyTableColumnInfoRepository = companyTableColumnInfoRepository;
         this.companySettingRepository = companySettingRepository;
         this.companySettingAccessIPRepository = companySettingAccessIPRepository;
         this.passwordEncoder = passwordEncoder;
