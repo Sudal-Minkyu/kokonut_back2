@@ -189,7 +189,7 @@ public class PrivacyHistoryService {
 
         // 활동이력 저장 -> 비정상 모드
         activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-                cpCode+" - "+downloadReason, downloadReason, ip, 0, email);
+                cpCode+" - 사유 : "+downloadReason, downloadReason, ip, 0, email);
 
         String filePassword = Utils.getSpecialRandomStr(6, 8);
         if (filePassword == "ERROR ERROR") {
