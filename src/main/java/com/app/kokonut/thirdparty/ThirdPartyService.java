@@ -109,7 +109,7 @@ public class ThirdPartyService {
 
 				// 활동이력 저장 -> 비정상 모드
 				activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-						cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+						cpCode+" - ", "", ip, 0, email);
 
 				optionalThirdPartyBizm.get().setTsBizmReceiverNumCode(tsBizmReceiverNumCode);
 				optionalThirdPartyBizm.get().setTsBizmAppUserIdCode(tsBizmAppUserIdCode);
@@ -124,7 +124,7 @@ public class ThirdPartyService {
 				thirdPartyRepository.save(optionalThirdParty.get());
 
 				historyService.updateHistory(activityHistoryId,
-						cpCode+" - "+activityCode.getDesc()+"시도 성공 이력", "", 1);
+						null, "", 1);
 			}
 
 		}
@@ -133,7 +133,7 @@ public class ThirdPartyService {
 
 			// 활동이력 저장 -> 비정상 모드
 			activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-					cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+					cpCode+" - ", "", ip, 0, email);
 
 			// 신규셋팅
 			thirdParty = new ThirdParty();
@@ -156,7 +156,7 @@ public class ThirdPartyService {
 			thirdPartyBizmRepository.save(thirdPartyBizm);
 
 			historyService.updateHistory(activityHistoryId,
-					cpCode+" - "+activityCode.getDesc()+"시도 성공 이력", "", 1);
+					null, "", 1);
 		}
 
 		return ResponseEntity.ok(res.success(data));

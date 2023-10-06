@@ -100,11 +100,11 @@ public class HistoryService {
 
         // 활동이력 저장 -> 비정상 모드
         activityHistoryId = insertHistory(4, adminId, activityCode,
-                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+                cpCode+" - ", "", ip, 0, email);
 
         Page<HistoryListDto> historyListDtos = historyRepository.findByHistoryPage(historySearchDto, pageable);
 
-        updateHistory(activityHistoryId, cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+        updateHistory(activityHistoryId, null, "", 1);
         return ResponseEntity.ok(res.ResponseEntityPage(historyListDtos));
     }
 
@@ -200,7 +200,7 @@ public class HistoryService {
 
         // 활동이력 저장 -> 비정상 모드
         activityHistoryId = insertHistory(2, adminId, activityCode,
-                cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason, ip, 0, email);
+                cpCode+" - "+downloadReason, downloadReason, ip, 0, email);
 
         String filePassword = Utils.getSpecialRandomStr(6, 8);
         if (filePassword == "ERROR ERROR") {
@@ -235,10 +235,10 @@ public class HistoryService {
             log.info("시트명 : "+sheetName);
             data = excelService.createExcelFile(fileName, sheetName, historyDownloadDataList, filePassword);
 
-            updateHistory(activityHistoryId, cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason, 1);
+            updateHistory(activityHistoryId, null, downloadReason, 1);
 
         }else{
-            updateHistory(activityHistoryId, cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason+"- 활동이력다운로드 파일암호전송 실패", 1);
+            updateHistory(activityHistoryId, null, downloadReason+"- 활동이력다운로드 파일암호전송 실패", 1);
 
             // mailSender 실패
             log.error("### 해당 메일 전송에 실패했습니다. 관리자에게 문의하세요. reciverEmail : "+ email);
@@ -319,7 +319,9 @@ public class HistoryService {
         History history = historyRepository.findById(ahId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않은 'activityCode' 입니다."));
 
-        history.setAhActivityDetail(activityDetail);
+        if (activityDetail != null) {
+            history.setAhActivityDetail(activityDetail);
+        }
         history.setAhReason(ahReason);
         history.setAhState(ahState);
 

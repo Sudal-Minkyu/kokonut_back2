@@ -715,7 +715,7 @@ public class AuthService {
 
                     // 활동이력 저장 -> 로그인실패 - 비정상 모드
                     Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-                            companyCode+" - "+activityCode.getDesc()+" 시도 이력", "로그인 실패 비밀번호 일치하지 않음", publicIp, 0, knEmail);
+                            companyCode+" - ", "로그인 실패 비밀번호 일치하지 않음", publicIp, 0, knEmail);
 
                     // Login ID/PW 를 기반으로 Authentication 객체 생성 -> 아아디 / 비번 검증
                     // 이때 authentication은 인증 여부를 확인하는 authenticated 값이 false
@@ -727,7 +727,7 @@ public class AuthService {
                         log.error("등록된 OTP가 존재하지 않습니다. 구글 OTP 인증을 등록해주세요.");
 
                         historyService.updateHistory(activityHistoryId,
-                                companyCode+" - "+activityCode.getDesc()+" 시도 이력", "로그인 실패 구글OTP 미등록", 0);
+                                companyCode+" - "+"구글OTP 미등록", "로그인 실패 구글OTP 미등록", 0);
 
                         return ResponseEntity.ok(res.fail(ResponseErrorCode.KO011.getCode(),ResponseErrorCode.KO011.getDesc()));
                     }
@@ -750,7 +750,7 @@ public class AuthService {
                             log.error("입력된 구글 OTP 값이 일치하지 않습니다. 다시 확인해주세요.");
 
                             historyService.updateHistory(activityHistoryId,
-                                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "로그인 실패 구글OTP 불일치", 0);
+                                    companyCode+" - "+"구글OTP 불일치", "로그인 실패 구글OTP 불일치", 0);
 
                             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO012.getCode(), ResponseErrorCode.KO012.getDesc()));
                         } else {
@@ -759,8 +759,7 @@ public class AuthService {
                             int knPwdErrorCount = optionalAdmin.get().getKnPwdErrorCount(); // 비밀번호 오류횟수
 
                             // 활동이력 저장 -> 로그인정상 - 비정상 모드
-                            historyService.updateHistory(activityHistoryId,
-                                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "로그인 성공", 0);
+                            historyService.updateHistory(activityHistoryId, null, "로그인 성공", 0);
 
                             // 비밀번호 오휴 횟수 제한 가져오기
                             // 설정해둔 횟수와 같거나 크면 로그인 제한됨 -> 비밀번호 찾기 미제공 -> 왕관 최고관리자일경우
@@ -779,7 +778,7 @@ public class AuthService {
                                         log.info("해외로그인 차단서비스 활성화");
                                         historyState = 1;
                                         historyService.updateHistory(activityHistoryId,
-                                                companyCode+" - "+activityCode.getDesc()+" 시도 이력", "해외로그인 차단서비스 활성화 -> 로그인 시도 해당 국가코드 : "+countryCode, 0);
+                                                 companyCode+" - "+"해외로그인 차단, 국가코드 : "+countryCode, "해외로그인 차단서비스 활성화 -> 로그인 시도 해당 국가코드 : "+countryCode, 0);
                                         data.put("blockAbroad", activityHistoryId);
                                         data.put("knName", optionalAdmin.get().getKnName());
                                         data.put("knPhoneNumber", optionalAdmin.get().getKnPhoneNumber());
@@ -788,7 +787,7 @@ public class AuthService {
                                 } else {
                                     log.error("whois library 호출오류");
                                     historyService.insertHistory(4, adminId, activityCode,
-                                            companyCode+" - "+activityCode.getDesc()+" 시도 이력", "whois library 호출오류", publicIp, 0, knEmail);
+                                            companyCode+" - ", "whois library 호출오류", publicIp, 0, knEmail);
                                 }
                             }
 
@@ -801,7 +800,7 @@ public class AuthService {
                                     log.error("허용되지 않은 IP 차단");
 
                                     historyService.updateHistory(activityHistoryId,
-                                            companyCode+" - "+activityCode.getDesc()+" 시도 이력", "접속 허용되지 않은 IP에서 로그인 시도하여 실패", 0);
+                                            companyCode+" - "+"접속 허용되지 않은 IP", "접속 허용되지 않은 IP에서 로그인 시도하여 실패", 0);
 
                                     return ResponseEntity.ok(res.fail(ResponseErrorCode.KO094.getCode(),ResponseErrorCode.KO094.getDesc()));
                                 }
@@ -814,7 +813,7 @@ public class AuthService {
                                 log.error("로그인 오류 횟수제한 이메일 : "+knEmail);
                                 // -> 로그인불가처리 - 관리자가 비밀번호 재설정을 눌러줄 방법밖에 없음(왕관관리자는 코코넛에게 문의)
                                 historyService.updateHistory(activityHistoryId,
-                                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "로그인 오류횟수 초과로 인한 로그인실패", 0);
+                                        companyCode+" - "+"로그인 오류횟수 초과", "로그인 오류횟수 초과로 인한 로그인실패", 0);
 
                                 if(roleCode.equals("ROLE_MASTER") || roleCode.equals("ROLE_ADMIN")) {
 //                                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO096.getCode(),"비밀번호를 "+knPwdErrorCount+"회 틀리셨습니다. contact@kokonut.me로 문의바랍니다."+"(최대횟수 : "+csPasswordErrorCountSetting+"회)"));
@@ -849,8 +848,7 @@ public class AuthService {
                             adminRepository.save(optionalAdmin.get());
 
                             if(historyState == 0) {
-                                historyService.updateHistory(activityHistoryId,
-                                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "로그인 성공", 1);
+                                historyService.updateHistory(activityHistoryId, null, "로그인 성공", 1);
                             }
 
                             return ResponseEntity.ok(res.success(data));
@@ -1282,5 +1280,6 @@ public class AuthService {
 
         return ResponseEntity.ok(res.success(data));
     }
+
 
 }

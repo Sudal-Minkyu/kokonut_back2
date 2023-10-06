@@ -167,7 +167,7 @@ public class ApiKeyService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
+                    companyCode+" - ", "", ip, 0, jwtFilterDto.getEmail());
 
             String akKey = optionalApiKey.get().getAkKey();
             log.info("현재 API Key : "+akKey);
@@ -191,7 +191,7 @@ public class ApiKeyService {
 
             // 활동이력 저장 -> 비정상 모드
             activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
+                    companyCode+" - ", "", ip, 0, jwtFilterDto.getEmail());
 
             ApiKey apiKey = new ApiKey();
 
@@ -210,8 +210,7 @@ public class ApiKeyService {
             apiKeyRepository.save(apiKey);
         }
 
-        historyService.updateHistory(activityHistoryId,
-                companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+        historyService.updateHistory(activityHistoryId, null, "", 1);
 
         return ResponseEntity.ok(res.success(data));
     }
@@ -242,7 +241,7 @@ public class ApiKeyService {
 
             // 활동이력 저장 -> 비정상 모드
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
+                    companyCode+" - ", "", ip, 0, jwtFilterDto.getEmail());
 
             if(!apiKeyRepository.doesAccessIpExist(companyId, accessIp)) {
                 if(optionalApiKey.get().getAkAgreeIp1() == null) {
@@ -273,8 +272,7 @@ public class ApiKeyService {
             optionalApiKey.get().setModify_date(LocalDateTime.now());
             apiKeyRepository.save(optionalApiKey.get());
 
-            historyService.updateHistory(activityHistoryId,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+            historyService.updateHistory(activityHistoryId, null, "", 1);
 
         } else {
             log.error("등록되신 API Key가 존재하지 않습니다. API Key 먼저 발급해주시길 바랍니다.");
@@ -333,7 +331,7 @@ public class ApiKeyService {
 
             // 활동이력 저장 -> 비정상 모드
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
+                    companyCode+" - ", "", ip, 0, jwtFilterDto.getEmail());
 
             for (String deleteIp : deleteIpList) {
                 while (true) {
@@ -373,8 +371,7 @@ public class ApiKeyService {
             optionalApiKey.get().setModify_date(LocalDateTime.now());
             apiKeyRepository.save(optionalApiKey.get());
 
-            historyService.updateHistory(activityHistoryId,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+            historyService.updateHistory(activityHistoryId, null, "", 1);
 
         } else {
             log.error("등록되신 API Key가 존재하지 않습니다. API Key 먼저 발급해주시길 바랍니다.");
