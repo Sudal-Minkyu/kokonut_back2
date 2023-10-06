@@ -534,7 +534,7 @@ public class DynamicUserService {
 //		// 활동이력 저장 -> 비정상 모드
 //		String ip = CommonUtil.publicIp();
 //		Long activityHistoryId = historyService.insertHistory(1, adminId, activityCode,
-//				companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+//				companyCode+" - ", "", ip, 0, email);
 //		String id = null;
 //		try {
 //
@@ -659,7 +659,7 @@ public class DynamicUserService {
 //				}
 //			}
 //
-//			historyService.updateHistory(activityHistoryId,companyCode+" - "+activityCode.getDesc()+" 완료 이력", "", 1);
+//			historyService.updateHistory(activityHistoryId, null, "", 1);
 //
 //		} catch (Exception e) {
 //			log.error("회원등록 에러확인 필요");
@@ -712,7 +712,7 @@ public class DynamicUserService {
 //		ActivityCode activityCode = ActivityCode.AC_02;
 //		// 활동이력 저장 -> 비정상 모드
 //		String ip = CommonUtil.publicIp();
-//		Long activityHistoryId = historyService.insertHistory(1, adminId, activityCode, companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
+//		Long activityHistoryId = historyService.insertHistory(1, adminId, activityCode, companyCode+" - ", "", ip,  CommonUtil.publicIp(), 0, email);
 //
 //		try {
 //
@@ -820,7 +820,7 @@ public class DynamicUserService {
 //			}
 //
 //
-//			historyService.updateHistory(activityHistoryId,companyCode+" - "+activityCode.getDesc()+" 완료 이력", "", 1);
+//			historyService.updateHistory(activityHistoryId, null, "", 1);
 //
 ////			log.info("updateString : "+ updateString);
 //
@@ -897,7 +897,7 @@ public class DynamicUserService {
 //		// 활동이력 저장 -> 비정상 모드
 //		String ip = CommonUtil.publicIp();
 //		Long activityHistoryId = historyService.insertHistory(1, adminId, activityCode,
-//				companyCode+" - "+activityCode.getDesc()+" 시도 이력 ID : "+kokonutRemoveInfoDtos.get(0).getID(), "", ip,  CommonUtil.publicIp(), 0, email);
+//				companyCode+" - "+"ID : "+kokonutRemoveInfoDtos.get(0).getID(), "", ip,  CommonUtil.publicIp(), 0, email);
 //
 //		try {
 //
@@ -936,7 +936,7 @@ public class DynamicUserService {
 //		}
 //
 //		historyService.updateHistory(activityHistoryId,
-//				companyCode+" - "+activityCode.getDesc()+" 완료 이력 ID : "+kokonutRemoveInfoDtos.get(0).getID(), "", 1);
+//				companyCode+" - "+"ID : "+kokonutRemoveInfoDtos.get(0).getID(), "", 1);
 //
 //		return ResponseEntity.ok(res.success(data));
 //	}
@@ -1203,15 +1203,14 @@ public class DynamicUserService {
 		// 활동이력 저장 -> 비정상 모드
 		String ip = CommonUtil.publicIp();
 		Long activityHistoryId = historyService.insertHistory(3, adminId, activityCode,
-				companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,0, email);
+				companyCode+" - ", "", ip,0, email);
 
 		// 사용테이블에 컬럼 추가
 		kokonutUserService.alterAddColumnTableQuery(companyCode, fieldName, type, length, isNull, defaultValue, comment);
 		// 휴면테이블에 컬럼 추가
 		kokonutDormantService.alterAddColumnTableQuery(companyCode, fieldName, type, length, isNull, defaultValue, comment);
 
-		historyService.updateHistory(activityHistoryId,
-				companyCode+" - "+activityCode.getDesc()+" 완료 이력", "", 1);
+		historyService.updateHistory(activityHistoryId, null, "", 1);
 
 		return ResponseEntity.ok(res.success(data));
 	}
@@ -1334,7 +1333,7 @@ public class DynamicUserService {
 //		// 활동이력 저장 -> 비정상 모드
 //		String ip = CommonUtil.publicIp();
 //		Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-//				companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
+//				companyCode+" - ", "", ip,  CommonUtil.publicIp(), 0, email);
 //
 //		// 암호화, 복호화 전환로직
 //		if(changeColumnComment != null) {
@@ -1458,13 +1457,12 @@ public class DynamicUserService {
 //				kokonutDormantService.alterChangeColumnTableQuery(companyCode, beforField, fieldName, type, length, isNull, defaultValue, comment);
 //			}
 //
-//			historyService.updateHistory(activityHistoryId,
-//					companyCode+" - "+activityCode.getDesc()+" 완료 이력", "", 1);
+//			historyService.updateHistory(activityHistoryId, null, "", 1);
 //
 //		} else {
 //			log.error("수정할 필드가 테이블에 존재하지 않습니다.");
 //			historyService.updateHistory(activityHistoryId,
-//					companyCode+" - "+activityCode.getDesc()+" 실패 이력", "수정할 필드가 존재하지 않습니다.", 1);
+//					companyCode+" - "+"수정할 필드가 존재하지 않습니다.", "수정할 필드가 존재하지 않습니다.", 1);
 //			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO067.getCode(), "수정할 필드가 "+ResponseErrorCode.KO067.getDesc()));
 //		}
 //
@@ -1527,7 +1525,7 @@ public class DynamicUserService {
 //		ActivityCode activityCode = ActivityCode.AC_21;
 //		// 활동이력 저장 -> 비정상 모드
 //		String ip = CommonUtil.publicIp();
-//		Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode, companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,  CommonUtil.publicIp(), 0, email);
+//		Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode, companyCode+" - ", "", ip,  CommonUtil.publicIp(), 0, email);
 //
 //		if(companyCode.equals(userTableCheck.get(0).getTABLE_NAME()) && fieldName.equals(userTableCheck.get(0).getCOLUMN_NAME()) &&
 //				companyCode.equals(dormantTableCheck.get(0).getTABLE_NAME()) && fieldName.equals(dormantTableCheck.get(0).getCOLUMN_NAME())){
@@ -1535,11 +1533,10 @@ public class DynamicUserService {
 //			kokonutUserService.alterDropColumnUserTableQuery(companyCode, fieldName);
 //			kokonutDormantService.alterDropColumnDormantTableQuery(companyCode, fieldName);
 //
-//			historyService.updateHistory(activityHistoryId,
-//					companyCode+" - "+activityCode.getDesc()+" 완료 이력", "", 1);
+//			historyService.updateHistory(activityHistoryId, null, "", 1);
 //		} else {
 //			historyService.updateHistory(activityHistoryId,
-//					companyCode+" - "+activityCode.getDesc()+" 실패 이력", "필드 삭제 조건에 부합하지 않습니다.", 1);
+//					companyCode+" - "+"필드 삭제 조건에 부합하지 않습니다.", "필드 삭제 조건에 부합하지 않습니다.", 1);
 //		}
 //
 //		return ResponseEntity.ok(res.success(data));
@@ -1729,7 +1726,7 @@ public class DynamicUserService {
 				companyTableColumnInfo.setInsert_date(LocalDateTime.now());
 
 				Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-						companyCode+" - "+activityCode.getDesc()+" : "+kokonutAddColumnListDto.getCiName(), "", ip,0, jwtFilterDto.getEmail());
+						companyCode+" - "+"컬럼명 : "+kokonutAddColumnListDto.getCiName(), "", ip,0, jwtFilterDto.getEmail());
 
 				String fieldCode = optionalCompanyTable.get().getCtTableCount()+"_"+tableAddColumnCount;
 				companyTableColumnInfo.setCtciCode(fieldCode);
@@ -1787,7 +1784,7 @@ public class DynamicUserService {
 				);
 
 				historyService.updateHistory(activityHistoryId,
-						companyCode+" - "+activityCode.getDesc()+" : "+kokonutAddColumnListDto.getCiName(), "", 1);
+						companyCode+" - "+"컬럼명 : "+kokonutAddColumnListDto.getCiName(), "", 1);
 
 				tableAddColumnCount++;
 				companyTableColumnInfos.add(companyTableColumnInfo);
@@ -1878,7 +1875,7 @@ public class DynamicUserService {
 			for(int i=0; i<kokonutColumnDeleteDto.getFieldNames().size(); i++) {
 				String ctciDesignation = "";
 
-				Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode, cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,0, jwtFilterDto.getEmail());
+				Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode, cpCode+" - ", "", ip,0, jwtFilterDto.getEmail());
 
 //				log.info("삭제할 필드명 : "+kokonutColumnDeleteDto.getFieldNames().get(i));
 
@@ -2711,13 +2708,8 @@ public class DynamicUserService {
 			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO116.getCode(), ResponseErrorCode.KO116.getDesc()));
 		}
 
-		ActivityCode activityCode = ActivityCode.AC_06;
 		String ip = CommonUtil.publicIp();
 		Long activityHistoryId;
-
-		// 활동이력 저장 -> 비정상 모드
-		activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-				cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason, ip, 0, email);
 
 		String fileName = LocalDate.now()+"_개인정보열람파일";
 		String sheetName = paramMap.get(0).get("아이디(1_id)")+"의 개인정보";
@@ -2751,11 +2743,9 @@ public class DynamicUserService {
 			log.info("시트명 : "+sheetName);
 			data = excelService.createExcelFile(fileName, sheetName, paramMap, filePassword);
 
-			historyService.updateHistory(activityHistoryId,
-					cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason, 1);
+			privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_06, 1, "개인정보 "+PrivacyHistoryCode.PHC_06.getDesc()+" - 사유 : "+downloadReason, CommonUtil.publicIp(), email);
 		}else{
-			historyService.updateHistory(activityHistoryId,
-					cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason+"- 개인정보열람 파일암호전송 실패", 0);
+			privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_06, 1, "개인정보 "+PrivacyHistoryCode.PHC_06.getDesc()+" - 사유 : "+downloadReason, CommonUtil.publicIp(), email);
 
 			// mailSender 실패
 			log.error("### 해당 메일 전송에 실패했습니다. 관리자에게 문의하세요. reciverEmail : "+ email);

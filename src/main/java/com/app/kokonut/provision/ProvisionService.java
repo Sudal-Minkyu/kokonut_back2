@@ -16,6 +16,8 @@ import com.app.kokonut.configs.MailSender;
 import com.app.kokonut.history.HistoryService;
 import com.app.kokonut.history.dtos.ActivityCode;
 import com.app.kokonut.history.extra.decrypcounthistory.DecrypCountHistoryService;
+import com.app.kokonut.privacyhistory.PrivacyHistoryService;
+import com.app.kokonut.privacyhistory.dtos.PrivacyHistoryCode;
 import com.app.kokonut.provision.dtos.ProvisionDownloadCheckDto;
 import com.app.kokonut.provision.dtos.ProvisionListDto;
 import com.app.kokonut.provision.dtos.ProvisionSaveDto;
@@ -76,6 +78,7 @@ public class ProvisionService {
     private final CompanyTableColumnInfoRepository companyTableColumnInfoRepository;
 
     private final DynamicUserRepositoryCustom dynamicUserRepositoryCustom;
+    private final PrivacyHistoryService privacyHistoryService;
 
     @Autowired
     public ProvisionService(KeyGenerateService keyGenerateService, GoogleOTP googleOTP, HistoryService historyService,
@@ -84,7 +87,7 @@ public class ProvisionService {
                             ProvisionDownloadHistoryRepository provisionDownloadHistoryRepository, ProvisionRosterRepository provisionRosterRepository,
                             ProvisionEntryRepository provisionEntryRepository, ProvisionListRepository provisionListRepository,
                             DecrypCountHistoryService decrypCountHistoryService, CompanyTableColumnInfoRepository companyTableColumnInfoRepository,
-                            DynamicUserRepositoryCustom dynamicUserRepositoryCustom){
+                            DynamicUserRepositoryCustom dynamicUserRepositoryCustom, PrivacyHistoryService privacyHistoryService){
         this.keyGenerateService = keyGenerateService;
         this.googleOTP = googleOTP;
         this.historyService = historyService;
@@ -100,6 +103,7 @@ public class ProvisionService {
         this.decrypCountHistoryService = decrypCountHistoryService;
         this.companyTableColumnInfoRepository = companyTableColumnInfoRepository;
         this.dynamicUserRepositoryCustom = dynamicUserRepositoryCustom;
+        this.privacyHistoryService = privacyHistoryService;
     }
 
     // 개인정보제공 등록
@@ -165,7 +169,7 @@ public class ProvisionService {
 
         // 활동이력 저장 -> 비정상 모드
         activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,0, email);
+                cpCode+" - ", "", ip,0, email);
 
         try {
             Provision saveprovision = provisionRepository.save(provision);
@@ -224,7 +228,7 @@ public class ProvisionService {
 
                 // 실패이력 업데이트
                 historyService.updateHistory(activityHistoryId,
-                        cpCode+" - "+activityCode.getDesc()+" 실패 이력", "제공할 개인정보를 선택해주세요.", 1);
+                        cpCode+" - "+"제공할 개인정보를 선택해주세요.", "제공할 개인정보를 선택해주세요.", 1);
 
                 return ResponseEntity.ok(res.fail(ResponseErrorCode.KO093.getCode(),ResponseErrorCode.KO093.getDesc()));
             }
@@ -237,7 +241,7 @@ public class ProvisionService {
 
             // 성공이력 업데이트
             historyService.updateHistory(activityHistoryId,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+                    null, "", 1);
 
             return ResponseEntity.ok(res.success(data));
 
@@ -247,7 +251,7 @@ public class ProvisionService {
 
             // 실패이력 업데이트
             historyService.updateHistory(activityHistoryId,
-                    cpCode+" - "+activityCode.getDesc()+" 실패 이력", "개인정보제공 등록에 실패했습니다.", 1);
+                    cpCode+" - "+"개인정보제공 등록에 실패했습니다.", "개인정보제공 등록에 실패했습니다.", 1);
 
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO092.getCode(),ResponseErrorCode.KO092.getDesc()));
         }
@@ -344,7 +348,7 @@ public class ProvisionService {
 
         // 활동이력 저장 -> 비정상 모드
         activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+                cpCode+" - ", "", ip, 0, email);
 
         Page<ProvisionListDto> provisionListDtos = provisionRepository.findByProvisionList(provisionSearchDto, pageable);
 //        for(int i=0 ;i<provisionListDtos.getContent().size(); i++) {
@@ -352,7 +356,7 @@ public class ProvisionService {
 //        }
 
         historyService.updateHistory(activityHistoryId,
-                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+                null, "", 1);
 
         return ResponseEntity.ok(res.ResponseEntityPage(provisionListDtos));
     }
@@ -382,12 +386,12 @@ public class ProvisionService {
 
         // 활동이력 저장 -> 비정상 모드
         activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+                cpCode+" - ", "", ip, 0, email);
 
         Page<ProvisionDownloadHistoryListDto> provisionDownloadList = provisionDownloadHistoryRepository.findByProvisionDownloadList(proCode, pageable);
 
         historyService.updateHistory(activityHistoryId,
-                cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+                null, "", 1);
         return ResponseEntity.ok(res.ResponseEntityPage(provisionDownloadList));
     }
 
@@ -430,7 +434,6 @@ public class ProvisionService {
 
         int dchCount = 0; // 복호화 카운팅
 
-        ActivityCode activityCode = ActivityCode.AC_47_2;
         String ip = CommonUtil.publicIp();
         Long activityHistoryId;
 
@@ -473,10 +476,6 @@ public class ProvisionService {
                 fileName = "개인정보_외부제공 압축파일";
                 sheetName = proCode+"_외부제공";
             }
-
-            // 활동이력 저장 -> 비정상 모드
-            activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-                    cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason, ip, 0, email);
 
             // 제공할 개인정보가 존재하는지 체크
             ProvisionTargetIdxDto provisionTargetIdxDto = provisionListRepository.findByProvisionIdxList(proCode);
@@ -654,12 +653,10 @@ public class ProvisionService {
                     decrypCountHistoryService.decrypCountHistorySave(cpCode, dchCount);
                 }
 
-                historyService.updateHistory(activityHistoryId,
-                        cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason, 1);
+                privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_07, 1, "개인정보 "+PrivacyHistoryCode.PHC_07.getDesc()+" - 사유 : "+downloadReason, CommonUtil.publicIp(), email);
 
             }else{
-                historyService.updateHistory(activityHistoryId,
-                        cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason+"- 개인정보제공시 파일암호전송 실패", 0);
+                privacyHistoryService.privacyHistoryInsert(adminId, PrivacyHistoryCode.PHC_07, 1, "개인정보 "+PrivacyHistoryCode.PHC_07.getDesc()+" 실패 - 사유 : "+downloadReason, CommonUtil.publicIp(), email);
 
                 // mailSender 실패
                 log.error("### 해당 메일 전송에 실패했습니다. 관리자에게 문의하세요. reciverEmail : "+ email);
@@ -716,7 +713,7 @@ public class ProvisionService {
 
                 // 활동이력 저장 -> 비정상 모드
                 activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                        cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+                        cpCode+" - ", "", ip, 0, email);
 
                 optionalProvision.get().setProExitState(1);
                 optionalProvision.get().setModify_email(email);
@@ -724,7 +721,7 @@ public class ProvisionService {
                 provisionRepository.save(optionalProvision.get());
 
                 historyService.updateHistory(activityHistoryId,
-                        cpCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+                        null, "", 1);
             } else {
                 return ResponseEntity.ok(res.fail(ResponseErrorCode.KO119.getCode(), ResponseErrorCode.KO119.getDesc()));
             }

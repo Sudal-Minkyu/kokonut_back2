@@ -121,7 +121,7 @@ public class AdminService {
         Optional<Admin> optionalAdmin = adminRepository.findByKnEmail(email);
         if(optionalAdmin.isPresent()) {
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
+                    companyCode+" - ", "", ip, 0, jwtFilterDto.getEmail());
 
             optionalAdmin.get().setKnName(knName);
             optionalAdmin.get().setKnPhoneNumber(knPhoneNumber);
@@ -129,8 +129,7 @@ public class AdminService {
             optionalAdmin.get().setModify_date(LocalDateTime.now());
             adminRepository.save(optionalAdmin.get());
 
-            historyService.updateHistory(activityHistoryId,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+            historyService.updateHistory(activityHistoryId, null, "", 1);
         } else{
             log.error("해당 유저가 존재하지 않습니다.");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(),"해당 유저가 "+ResponseErrorCode.KO004.getDesc()));
@@ -179,7 +178,7 @@ public class AdminService {
 
             // 활동이력 저장 -> 비정상 모드
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
+                    companyCode+" - ", "", ip, 0, jwtFilterDto.getEmail());
 
             if(state == 1) {
                 // 소속명 변경
@@ -200,8 +199,7 @@ public class AdminService {
                 adminRepository.save(optionalAdmin.get());
             }
 
-            historyService.updateHistory(activityHistoryId,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+            historyService.updateHistory(activityHistoryId, null, "", 1);
         } else{
             log.error("해당 유저가 존재하지 않습니다.");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(),"해당 유저가 "+ResponseErrorCode.KO004.getDesc()));
@@ -245,7 +243,7 @@ public class AdminService {
 
             // 활동이력 저장 -> 비정상 모드
             Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip,0, jwtFilterDto.getEmail());
+                    companyCode+" - ", "", ip,0, jwtFilterDto.getEmail());
 
             optionalAdmin.get().setKnPassword(passwordEncoder.encode(newknPassword));
             optionalAdmin.get().setKnPwdChangeDate(LocalDateTime.now());
@@ -254,8 +252,7 @@ public class AdminService {
             optionalAdmin.get().setModify_date(LocalDateTime.now());
             adminRepository.save(optionalAdmin.get());
 
-            historyService.updateHistory(activityHistoryId,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+            historyService.updateHistory(activityHistoryId, null, "", 1);
         } else{
             log.error("해당 유저가 존재하지 않습니다.");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(),"해당 유저가 "+ResponseErrorCode.KO004.getDesc()));
@@ -444,7 +441,7 @@ public class AdminService {
 
             // 관리자추가 저장 -> 비정상 모드
             Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, jwtFilterDto.getEmail());
+                    companyCode+" - ", "", ip, 0, jwtFilterDto.getEmail());
 
             AwsKmsResultDto awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(companyCode);
             byte[] ivBytes = AESGCMcrypto.generateIV();
@@ -509,8 +506,7 @@ public class AdminService {
                 // 암호화 횟수 저장
                 encrypCountHistoryService.encrypCountHistorySave(companyCode, 1);
 
-                historyService.updateHistory(activityHistoryId,
-                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+                historyService.updateHistory(activityHistoryId, null, "", 1);
             }else{
                 log.error("### 해당 메일 전송에 실패했습니다. 관리자에게 문의하세요. reciverEmail : "+ userEmail);
                 return ResponseEntity.ok(res.fail(ResponseErrorCode.KO041.getCode(), ResponseErrorCode.KO041.getDesc()));
@@ -552,7 +548,7 @@ public class AdminService {
 
             // 관리자추가 저장 -> 비정상 모드
             Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+                    companyCode+" - ", "", ip, 0, email);
 
             AwsKmsResultDto awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(companyCode);
             byte[] ivBytes = AESGCMcrypto.generateIV();
@@ -600,8 +596,7 @@ public class AdminService {
                 // 암호화 횟수 저장
                 encrypCountHistoryService.encrypCountHistorySave(companyCode, 1);
 
-                historyService.updateHistory(activityHistoryId,
-                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+                historyService.updateHistory(activityHistoryId, null, "", 1);
             }else{
                 log.error("### 해당 메일 전송에 실패했습니다. 관리자에게 문의하세요. reciverEmail : "+ userEmail);
                 return ResponseEntity.ok(res.fail(ResponseErrorCode.KO041.getCode(), ResponseErrorCode.KO041.getDesc()));
@@ -659,7 +654,7 @@ public class AdminService {
 
             // 관리자추가 저장 -> 비정상 모드
             Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+                    companyCode+" - ", "", ip, 0, email);
 
             AwsKmsResultDto awsKmsResultDto = companyDataKeyService.findByCompanyDataKey(companyCode);
             byte[] ivBytes = AESGCMcrypto.generateIV();
@@ -708,8 +703,7 @@ public class AdminService {
                 // 암호화 횟수 저장
                 encrypCountHistoryService.encrypCountHistorySave(companyCode, 1);
 
-                historyService.updateHistory(activityHistoryId,
-                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+                historyService.updateHistory(activityHistoryId, null, "", 1);
             }else{
                 log.error("### 해당 메일 전송에 실패했습니다. 관리자에게 문의하세요. reciverEmail : "+ userEmail);
                 return ResponseEntity.ok(res.fail(ResponseErrorCode.KO041.getCode(), ResponseErrorCode.KO041.getDesc()));

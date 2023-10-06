@@ -189,7 +189,7 @@ public class PrivacyHistoryService {
 
         // 활동이력 저장 -> 비정상 모드
         activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-                cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason, ip, 0, email);
+                cpCode+" - 사유 : "+downloadReason, downloadReason, ip, 0, email);
 
         String filePassword = Utils.getSpecialRandomStr(6, 8);
         if (filePassword == "ERROR ERROR") {
@@ -224,10 +224,10 @@ public class PrivacyHistoryService {
             log.info("시트명 : "+sheetName);
             data = excelService.createExcelFile(fileName, sheetName, privacyHistoryExcelDownloadList, filePassword);
 
-            historyService.updateHistory(activityHistoryId, cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason, 1);
+            historyService.updateHistory(activityHistoryId, null, downloadReason, 1);
 
         }else{
-            historyService.updateHistory(activityHistoryId, cpCode+" - "+activityCode.getDesc()+" 시도 이력", downloadReason+"- 처리이력다운로드 파일암호전송 실패", 1);
+            historyService.updateHistory(activityHistoryId, null, downloadReason+"- 처리이력다운로드 파일암호전송 실패", 1);
 
             // mailSender 실패
             log.error("### 해당 메일 전송에 실패했습니다. 관리자에게 문의하세요. reciverEmail : "+ email);

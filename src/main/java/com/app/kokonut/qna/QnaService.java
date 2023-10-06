@@ -131,7 +131,7 @@ public class QnaService {
         String ip = CommonUtil.publicIp();
 
         Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
-                companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", ip, 0, email);
+                companyCode+" - ", "", ip, 0, email);
 
         // 1:1 문의 등록
         Qna qna = new Qna();
@@ -226,8 +226,7 @@ public class QnaService {
 //            log.error("시스템관리자를 찾을 수 없습니다.");
 //        }
 
-        historyService.updateHistory(activityHistoryId,
-                companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+        historyService.updateHistory(activityHistoryId, null, "", 1);
 
         return ResponseEntity.ok(res.success(data));
     }
