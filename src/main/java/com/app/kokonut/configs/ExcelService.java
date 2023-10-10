@@ -294,6 +294,8 @@ public class ExcelService {
 			// Resize all columns to fit the content size
 			for (int i = 0; i < dataList.get(0).size(); i++) {
 				sheet.autoSizeColumn(i);
+				// 한글일 경우를 대비하여 폭을 0.15 배만큼 더 넓힘
+				sheet.setColumnWidth(i, (sheet.getColumnWidth(i)) + (int)(sheet.getColumnWidth(i) * 0.15));
 			}
 
 			// Save Excel as a byte array
@@ -314,28 +316,27 @@ public class ExcelService {
 			byte[] encryptedBytes = excelBos.toByteArray();
 
 
-			// Create a Zip File and add the excel byte array into it with password
-			ZipParameters zipParameters = new ZipParameters();
-			zipParameters.setFileNameInZip(fileName + ".xlsx");
-			zipParameters.setCompressionMethod(CompressionMethod.DEFLATE);
-			zipParameters.setEncryptionMethod(EncryptionMethod.ZIP_STANDARD);
-			zipParameters.setEncryptFiles(true);
+			// 엑셀 파일 암호화된 압축하기
+//			ZipParameters zipParameters = new ZipParameters();
+//			zipParameters.setFileNameInZip(fileName + ".xlsx");
+//			zipParameters.setCompressionMethod(CompressionMethod.DEFLATE);
+//			zipParameters.setEncryptionMethod(EncryptionMethod.ZIP_STANDARD);
+//			zipParameters.setEncryptFiles(true);
+//			ZipOutputStream zos = new ZipOutputStream(bos, zipPassword.toCharArray());
+//			zos.putNextEntry(zipParameters);
+//			zos.write(encryptedBytes);
+//			zos.closeEntry();
+//			zos.close();
+//			byte[] zipBytes = bos.toByteArray();
+//			String encoded = Base64.getEncoder().encodeToString(zipBytes);
 
-			ZipOutputStream zos = new ZipOutputStream(bos, zipPassword.toCharArray());
-			zos.putNextEntry(zipParameters);
-			zos.write(encryptedBytes);
-			zos.closeEntry();
-			zos.close();
+			// 엑셀 파일 암호화된 압축하기 사용할 경우 주석처리할 것
+			String encoded = Base64.getEncoder().encodeToString(encryptedBytes);
 
-			// Get the created Zip file
-			byte[] zipBytes = bos.toByteArray();
-
-			// Encode the file as Base64
-			String encoded = Base64.getEncoder().encodeToString(zipBytes);
 
 			HashMap<String, Object> data = new HashMap<>();
 			data.put("fileData", encoded);
-			data.put("fileName", fileName + ".zip");
+			data.put("fileName", fileName + ".xlsx");
 			return data;
 
 		} catch (Exception e) {
