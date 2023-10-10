@@ -2062,7 +2062,7 @@ public class DynamicUserService {
 			}
 
 			if(!ctGenderStatus.equals("")) {
-				companyTableColumnNameSearch = companyTableColumnInfoRepository.findByColumnName(ctPhoneStatus);
+				companyTableColumnNameSearch = companyTableColumnInfoRepository.findByColumnName(ctGenderStatus);
 				securityNames.put("basicGender", companyTableColumnNameSearch.getCtciDesignation());
 
 				headerNames.add("basicGender");
