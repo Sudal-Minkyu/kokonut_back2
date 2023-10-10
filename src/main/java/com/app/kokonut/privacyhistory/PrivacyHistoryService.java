@@ -227,7 +227,7 @@ public class PrivacyHistoryService {
             historyService.updateHistory(activityHistoryId, null, downloadReason, 1);
 
         }else{
-            historyService.updateHistory(activityHistoryId, null, downloadReason+"- 처리이력다운로드 파일암호전송 실패", 1);
+            historyService.updateHistory(activityHistoryId, null, downloadReason+"- 처리이력다운로드 파일암호전송 실패", 0);
 
             // mailSender 실패
             log.error("### 해당 메일 전송에 실패했습니다. 관리자에게 문의하세요. reciverEmail : "+ email);

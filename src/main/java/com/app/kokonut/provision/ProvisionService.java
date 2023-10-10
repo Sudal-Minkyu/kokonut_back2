@@ -228,7 +228,7 @@ public class ProvisionService {
 
                 // 실패이력 업데이트
                 historyService.updateHistory(activityHistoryId,
-                        cpCode+" - "+"제공할 개인정보를 선택해주세요.", "제공할 개인정보를 선택해주세요.", 1);
+                        cpCode+" - "+"제공할 개인정보 존재 안함", "제공할 개인정보를 선택해주세요.", 0);
 
                 return ResponseEntity.ok(res.fail(ResponseErrorCode.KO093.getCode(),ResponseErrorCode.KO093.getDesc()));
             }
@@ -251,7 +251,7 @@ public class ProvisionService {
 
             // 실패이력 업데이트
             historyService.updateHistory(activityHistoryId,
-                    cpCode+" - "+"개인정보제공 등록에 실패했습니다.", "개인정보제공 등록에 실패했습니다.", 1);
+                    cpCode+" - "+"개인정보제공 등록 실패.", "개인정보제공 등록에 실패했습니다.", 0);
 
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO092.getCode(),ResponseErrorCode.KO092.getDesc()));
         }

@@ -1462,7 +1462,7 @@ public class DynamicUserService {
 //		} else {
 //			log.error("수정할 필드가 테이블에 존재하지 않습니다.");
 //			historyService.updateHistory(activityHistoryId,
-//					companyCode+" - "+"수정할 필드가 존재하지 않습니다.", "수정할 필드가 존재하지 않습니다.", 1);
+//					companyCode+" - "+"수정할 필드가 존재하지 않습니다.", "수정할 필드가 존재하지 않습니다.", 0);
 //			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO067.getCode(), "수정할 필드가 "+ResponseErrorCode.KO067.getDesc()));
 //		}
 //
@@ -1536,7 +1536,7 @@ public class DynamicUserService {
 //			historyService.updateHistory(activityHistoryId, null, "", 1);
 //		} else {
 //			historyService.updateHistory(activityHistoryId,
-//					companyCode+" - "+"필드 삭제 조건에 부합하지 않습니다.", "필드 삭제 조건에 부합하지 않습니다.", 1);
+//					companyCode+" - "+"필드 삭제 조건에 부합하지 않습니다.", "필드 삭제 조건에 부합하지 않습니다.", 0);
 //		}
 //
 //		return ResponseEntity.ok(res.success(data));

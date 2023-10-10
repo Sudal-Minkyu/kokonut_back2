@@ -646,7 +646,7 @@ public class AuthService {
 
                 // 활동이력 저장 -> 아이디비번체크 - 정상 모드
                 historyService.updateHistory(activityHistoryId,
-                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", 1);
+                        null, "", 1);
 
                 return ResponseEntity.ok(res.success(data));
             }

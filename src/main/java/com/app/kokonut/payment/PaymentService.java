@@ -400,7 +400,7 @@ public class PaymentService {
 				payment.setPayState("0");
 				payment.setPayMethod("1");
 				historyService.updateHistory(activityHistoryId,
-						cpCode+" - "+"부트페이 내 요금정산을 실패", "부트페이 내 요금정산을 실패했습니다.", 1);
+						cpCode+" - "+"부트페이 내 요금정산을 실패", "부트페이 내 요금정산을 실패했습니다.", 0);
 
 				return ResponseEntity.ok(res.fail(ResponseErrorCode.KO099.getCode(), ResponseErrorCode.KO099.getDesc()));
 			} else {
