@@ -21,10 +21,6 @@ import java.util.List;
 @Table(name="kn_admin")
 public class Admin implements UserDetails {
 
-    /**test
-     * 키
-     */
-
     @Id
     @ApiModelProperty("주키")
     @Column(name = "admin_id", nullable = false)
@@ -75,192 +71,59 @@ public class Admin implements UserDetails {
     @Column(name = "kn_department")
     private String knDepartment;
 
-    /**
-     * 0:정지(권한해제),1:사용,2:로그인제한(비번5회오류),3:탈퇴, 4:휴면계정
-     */
-    @Column(name = "kn_state")
-    @ApiModelProperty("0:정지(권한해제),1:사용,2:로그인제한(비번5회오류),3:탈퇴, 4:휴면계정")
-    private Integer knState = 1;
-
-    /**
-     * 휴면계정 전환일
-     */
-    @ApiModelProperty("휴면계정 전환일")
-    @Column(name = "kn_dormant_date")
-    private LocalDateTime knDormantDate;
-
-    /**
-     * 계정삭제예정일
-     */
-    @ApiModelProperty("계정삭제예정일")
-    @Column(name = "kn_expected_delete_date")
-    private LocalDateTime knExpectedDeleteDate;
-
-    /**
-     * 권한해제 사유
-     */
-    @Column(name = "kn_reason")
-    @ApiModelProperty("권한해제 사유")
-    private String knReason;
-
-    /**
-     * 최근 접속 IP
-     */
-    @Column(name = "kn_ip_addr")
-    @ApiModelProperty("최근 접속 IP")
-    private String knIpAddr;
-
-    /**
-     * 승인상태(1:승인대기, 2:승인완료, 3:승인보류)
-     */
-    @Column(name = "kn_approval_state")
-    @ApiModelProperty("승인상태(1:승인대기, 2:승인완료, 3:승인보류)")
-    private Integer knApprovalState = 1;
-
-    /**
-     * 관리자승인일시,반려일시
-     */
-    @Column(name = "kn_approval_date")
-    @ApiModelProperty("관리자승인일시,반려일시")
-    private LocalDateTime knApprovalDate;
-
-    /**
-     * 관리자 반려 사유
-     */
-    @ApiModelProperty("관리자 반려 사유")
-    @Column(name = "kn_approval_return_reason")
-    private String knApprovalReturnReason;
-
-    /**
-     * 승인자(반려자)
-     */
-    @ApiModelProperty("승인자(반려자)")
-    @Column(name = "kn_approval_name")
-    private String knApprovalName;
-
-    /**
-     * 탈퇴사유선택(1:계정변경, 2:서비스이용불만,3:사용하지않음,4:기타)
-     */
-    @Column(name = "kn_withdrawal_reason_type")
-    @ApiModelProperty("탈퇴사유선택(1:계정변경, 2:서비스이용불만,3:사용하지않음,4:기타)")
-    private Integer knWithdrawalReasonType;
-
-    /**
-     * 탈퇴사유
-     */
-    @ApiModelProperty("탈퇴사유")
-    @Column(name = "kn_withdrawal_reason")
-    private String knWithdrawalReason;
-
-    /**
-     * 탈퇴일시
-     */
-    @ApiModelProperty("탈퇴일시")
-    @Column(name = "kn_withdrawal_date")
-    private LocalDateTime knWithdrawalDate;
-
-    /**
-     * 최근접속일시
-     */
     @Column(name = "kn_last_login_date")
     @ApiModelProperty("최근접속일시")
     private LocalDateTime knLastLoginDate;
 
-    /**
-     * 이메일인증여부접
-     */
+    @Column(name = "kn_ip_addr")
+    @ApiModelProperty("최근 접속 IP")
+    private String knIpAddr;
+
+    @Column(name = "kn_active_status")
+    @ApiModelProperty("관리자 활성 상태 : 활성 '1' 비활성 '0'")
+    private String knActiveStatus;
+
+    @Column(name = "kn_active_status_date")
+    @ApiModelProperty("관리자 활성상태 변경 날짜")
+    private LocalDateTime knActiveStatusDate;
+
     @ApiModelProperty("이메일인증여부")
     @Column(name = "kn_is_email_auth")
     private String knIsEmailAuth;
 
-    /**
-     * 이메일인증코드(관리자등록용)
-     */
     @ApiModelProperty("이메일인증코드(관리자등록용)")
     @Column(name = "kn_email_auth_Code")
     private String knEmailAuthCode;
 
-    /**
-     * 이메일인증번호
-     */
-    @ApiModelProperty("이메일인증코드(관리자등록용)")
-    @Column(name = "kn_email_auth_number")
-    private String knEmailAuthNumber;
-
-    /**
-     * 비밀번호 설정 시 인증번호
-     */
-    @Column(name = "kn_pwd_auth_number")
-    @ApiModelProperty("비밀번호 설정 시 인증번호")
-    private String knPwdAuthNumber;
-
-    /**
-     * 인증시작시간
-     */
-    @ApiModelProperty("인증시작시간")
-    @Column(name = "kn_auth_start_date")
-    private LocalDateTime knAuthStartDate;
-
-    /**
-     * 인증종료시간
-     */
-    @ApiModelProperty("인증종료시간")
-    @Column(name = "kn_auth_end_date")
-    private LocalDateTime knAuthEndDate;
-
-    /**
-     * 구글 OTP에 사용될 KEY
-     */
     @Column(name = "kn_otp_key")
     @ApiModelProperty("구글 OTP에 사용될 KEY")
     private String knOtpKey;
 
-    /**
-     * GOOGLE인증여부
-     */
     @Column(name = "kn_is_login_auth")
     @ApiModelProperty("GOOGLE인증여부")
     private String knIsLoginAuth = "N";
 
-    /**
-     * 권한(시스템관리자:ROLE_SYSTEM, 관리자 : ROLE_ADMIN, 마스터관리자:ROLE_MASTER)
-     */
     @Enumerated(EnumType.STRING)
     @ApiModelProperty("권한(시스템관리자:ROLE_SYSTEM, 관리자 : ROLE_ADMIN, 마스터관리자:ROLE_MASTER)")
     @Column(name="kn_role_code")
     private AuthorityRole knRoleCode;
 
-    /**
-     * 등록자 email
-     */
     @ApiModelProperty("등록자 email")
     @Column(name = "insert_email", nullable = false)
     private String insert_email;
 
-    /**
-     * 등록 날짜
-     */
     @ApiModelProperty("등록 날짜")
     @Column(name = "insert_date", nullable = false)
     private LocalDateTime insert_date;
 
-    /**
-     * 수정자
-     */
     @ApiModelProperty("수정자 id")
     @Column(name = "modify_id")
     private Long modify_id;
 
-    /**
-     * 수정자 이름
-     */
     @ApiModelProperty("수정자 email")
     @Column(name = "modify_email")
     private String modify_email;
 
-    /**
-     * 수정 날짜
-     */
     @ApiModelProperty("수정 날짜")
     @Column(name = "modify_date")
     private LocalDateTime modify_date;

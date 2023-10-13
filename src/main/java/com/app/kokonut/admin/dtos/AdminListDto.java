@@ -33,6 +33,6 @@ public class AdminListDto {
 
     private String knIsEmailAuth; // 이메일 인증여부
 
-    private Integer knState; // 상태
+    private String knActiveStatus; // 상태
 
 }

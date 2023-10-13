@@ -39,7 +39,7 @@ public class AdminListSubDto {
 
     private String knIsEmailAuth; // 이메일 인증여부
 
-    private Integer knState; // 상태
+    private String knActiveStatus; // 상태
 
     public String getKnRoleDesc() {
         return knRoleDesc.getDesc();

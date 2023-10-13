@@ -14,6 +14,7 @@ import com.app.kokonut.common.Utils;
 import com.app.kokonut.company.company.Company;
 import com.app.kokonut.company.company.CompanyRepository;
 import com.app.kokonut.company.companydatakey.CompanyDataKeyService;
+import com.app.kokonut.configs.GoogleOTP;
 import com.app.kokonut.configs.MailSender;
 import com.app.kokonut.history.HistoryService;
 import com.app.kokonut.history.dtos.ActivityCode;
@@ -57,10 +58,11 @@ public class AdminService {
     private final EncrypCountHistoryService encrypCountHistoryService;
 
     private final RedisDao redisDao;
+    private final GoogleOTP googleOTP;
 
     @Autowired
     public AdminService(AdminRepository adminRepository, CompanyRepository companyRepository, CompanyDataKeyService companyDataKeyService,
-                        HistoryService historyService, PasswordEncoder passwordEncoder, MailSender mailSender, EncrypCountHistoryService encrypCountHistoryService, RedisDao redisDao) {
+                        HistoryService historyService, PasswordEncoder passwordEncoder, MailSender mailSender, EncrypCountHistoryService encrypCountHistoryService, RedisDao redisDao, GoogleOTP googleOTP) {
         this.adminRepository = adminRepository;
         this.companyRepository = companyRepository;
         this.companyDataKeyService = companyDataKeyService;
@@ -69,6 +71,7 @@ public class AdminService {
         this.mailSender = mailSender;
         this.encrypCountHistoryService = encrypCountHistoryService;
         this.redisDao = redisDao;
+        this.googleOTP = googleOTP;
     }
 
     // 마이페이지(내정보) 데이터 호출
@@ -263,17 +266,35 @@ public class AdminService {
 
     // 관리자 정보 수정
     @Transactional
-    public ResponseEntity<Map<String, Object>> updateAdminData(String knEmail, String knIsEmailAuth, String knRoleCode, String knActiveStatus, JwtFilterDto jwtFilterDto) {
+    public ResponseEntity<Map<String, Object>> updateAdminData(String knEmail, String knRoleCode, String knActiveStatus, String otpValue,
+                                                               JwtFilterDto jwtFilterDto) {
         log.info("updateAdminData 호출");
 
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
 
-        String email = jwtFilterDto.getEmail();
+        if(otpValue == null || otpValue.equals("")) {
+            log.error("구글 OTP 값이 존재하지 않습니다.");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO010.getCode(),ResponseErrorCode.KO010.getDesc()));
+        }
 
-        AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(jwtFilterDto.getEmail());
-        Long adminId = adminCompanyInfoDto.getAdminId();
+        String email = jwtFilterDto.getEmail();
+        String role = jwtFilterDto.getRole().getCode();
+
+        AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+
+        long adminId = adminCompanyInfoDto.getAdminId();
         String companyCode = adminCompanyInfoDto.getCompanyCode();
+        String knOtpKey = adminCompanyInfoDto.getKnOtpKey();
+
+        boolean auth = googleOTP.checkCode(otpValue, knOtpKey);
+
+        if (!auth) {
+            log.error("입력된 구글 OTP 값이 일치하지 않습니다. 다시 확인해주세요.");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO012.getCode(), ResponseErrorCode.KO012.getDesc()));
+        } else {
+            log.info("OTP인증완료 -> 개인정보 제공엑셀 다운로드 시작");
+        }
 
         // 활동 코드
         ActivityCode activityCode = ActivityCode.AC_39;
@@ -282,29 +303,27 @@ public class AdminService {
         Optional<Admin> optionalAdmin = adminRepository.findByKnEmail(knEmail);
         if(optionalAdmin.isPresent()) {
 
-            // 비밀번호 검증
-//            if (!passwordEncoder.matches(oldknPassword, optionalAdmin.get().getKnPassword())){
-//                log.error("입력하신 비밀번호가 일치하지 않습니다.");
-//                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO013.getCode(), ResponseErrorCode.KO013.getDesc()));
-//            }
-
-            // 비밀번호 확인비교
-//            if (!newknPassword.equals(newknPasswordCheck)){
-//                log.error("새로운 비밀번호가 일치하지 않습니다.");
-//                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO083.getCode(), ResponseErrorCode.KO083.getDesc()));
+//            if(role.equals("ROLE_MASTER")) {
+//
+//            } else if(role.equals("ROLE_ADMIN")) {
+//
+//            } else if(role.equals("ROLE_USER")) {
+//
 //            }
 
             // 활동이력 저장 -> 비정상 모드
-//            Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-//                    companyCode+" - ", "", ip,0, jwtFilterDto.getEmail());
+            Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
+                    companyCode+" - ", "", ip,0, jwtFilterDto.getEmail());
 
-//            optionalAdmin.get().setKnPassword(passwordEncoder.encode(newknPassword));
+            optionalAdmin.get().setKnActiveStatus(knActiveStatus);
+            optionalAdmin.get().setKnActiveStatusDate(LocalDateTime.now());
             optionalAdmin.get().setKnRoleCode(AuthorityRole.valueOf(knRoleCode));
             optionalAdmin.get().setModify_email(email);
             optionalAdmin.get().setModify_date(LocalDateTime.now());
             adminRepository.save(optionalAdmin.get());
 
-//            historyService.updateHistory(activityHistoryId, null, "", 1);
+            historyService.updateHistory(activityHistoryId, null, "", 1);
+
         } else{
             log.error("해당 유저가 존재하지 않습니다.");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(),"해당 유저가 "+ResponseErrorCode.KO004.getDesc()));
@@ -406,21 +425,13 @@ public class AdminService {
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
 
-        String email = jwtFilterDto.getEmail();
         AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(jwtFilterDto.getEmail());
         Long companyId = adminCompanyInfoDto.getCompanyId();
-
-        Integer knState;
-        if(filterState.equals("")) {
-            knState = null;
-        } else {
-            knState = Integer.parseInt(filterState);
-        }
 
         List<AdminListDto> adminListDtoList = new ArrayList<>();
         AdminListDto adminListDto;
 
-        Page<AdminListSubDto> adminListDtos = adminRepository.findByAdminList(searchText, filterRole, knState, companyId, email, pageable);
+        Page<AdminListSubDto> adminListDtos = adminRepository.findByAdminList(searchText, filterRole, filterState, companyId, pageable);
         if(adminListDtos.getTotalPages() == 0) {
             log.info("조회된 데이터가 없습니다.");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO003.getCode(), ResponseErrorCode.KO003.getDesc()));
@@ -431,7 +442,7 @@ public class AdminService {
 
                 adminListDto.setKnName(adminListDtos.getContent().get(i).getKnName());
                 adminListDto.setKnEmail(adminListDtos.getContent().get(i).getKnEmail());
-                adminListDto.setKnState(adminListDtos.getContent().get(i).getKnState());
+                adminListDto.setKnActiveStatus(adminListDtos.getContent().get(i).getKnActiveStatus());
                 adminListDto.setKnRoleDesc(adminListDtos.getContent().get(i).getKnRoleDesc());
                 adminListDto.setKnRoleCode(adminListDtos.getContent().get(i).getKnRoleCode());
 
@@ -547,7 +558,7 @@ public class AdminService {
                 admin.setKnUserType(2);
                 admin.setKnIsEmailAuth("N");
                 admin.setKnEmailAuthCode(knEmailAuthCode);
-                admin.setKnState(1);
+                admin.setKnActiveStatus("1");
                 admin.setKnRoleCode(AuthorityRole.valueOf(roleCode));
                 admin.setInsert_email(email);
                 admin.setInsert_date(LocalDateTime.now());

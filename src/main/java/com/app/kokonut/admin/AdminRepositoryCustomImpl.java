@@ -90,7 +90,7 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
     public List<AdminEmailInfoDto> findSystemAdminEmailInfo() {
         QAdmin admin = QAdmin.admin;
         JPQLQuery<AdminEmailInfoDto> query = from(admin)
-                .where(admin.knState.eq(1), admin.knRoleCode.eq(AuthorityRole.ROLE_SYSTEM))
+                .where(admin.knRoleCode.eq(AuthorityRole.ROLE_SYSTEM))
                 .select(Projections.constructor(AdminEmailInfoDto.class,
                         admin.knEmail,
                         admin.knName
@@ -162,7 +162,7 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
 
     // 관리자 목록관리 페이지에 표출될 데이터
     @Override
-    public Page<AdminListSubDto> findByAdminList(String searchText, String roleCode, Integer knState, Long companyId, String email, Pageable pageable) {
+    public Page<AdminListSubDto> findByAdminList(String searchText, String roleCode, String knActiveStatus, Long companyId, Pageable pageable) {
 
         QAdmin admin = new QAdmin("admin");
         QAdmin InsertAdmin = new QAdmin("InsertAdmin");
@@ -182,8 +182,9 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
                                 .otherwise(""),
                         admin.insert_date,
                         admin.knIsEmailAuth,
-                        admin.knState
+                        admin.knActiveStatus
                 ));
+
         if(!searchText.equals("")) {
             query.where(admin.knName.like("%"+ searchText +"%").or(admin.knEmail.like("%"+ searchText +"%")));
         }
@@ -192,8 +193,8 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
             query.where(admin.knRoleCode.eq(AuthorityRole.valueOf(roleCode)));
         }
 
-        if(knState != null) {
-            query.where(admin.knState.eq(knState));
+        if(!knActiveStatus.equals("")) {
+            query.where(admin.knActiveStatus.eq(knActiveStatus));
         }
 
         query.orderBy(admin.adminId.desc());

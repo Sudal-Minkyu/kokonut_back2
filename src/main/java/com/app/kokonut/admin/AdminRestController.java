@@ -37,9 +37,7 @@ public class AdminRestController {
     @GetMapping("/myInfo")
     @ApiOperation(value = "마이페이지 데이터 가져오기" , notes = "1. 유저가 내정보페이지를 들어간다." +
             "2. 해당 유저의 정보를 프론트로 보내준다.")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
-    })
+    @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> myInfo() {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return adminService.myInfo(jwtFilterDto);
@@ -48,9 +46,7 @@ public class AdminRestController {
     @PostMapping("/phoneChange")
     @ApiOperation(value = "휴대전화번호 변경" , notes = "1. 변경할 핸드폰번호로 인증한다." +
             "2. 인증을 성공하면 인증된번호로 변경한다.")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
-    })
+    @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> phoneChange(@RequestParam(value="knName", defaultValue = "") String knName,
                                                           @RequestParam(value="knPhoneNumber", defaultValue = "") String knPhoneNumber) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
@@ -61,9 +57,7 @@ public class AdminRestController {
     @ApiOperation(value = "소속명 변경 + 부서 변경/등록" , notes = "1. 소속 및 부서를 변경하거나 등록할때 사용됨" +
             "2. 변경할 내용과 비밀번호를 받는다." +
             "3. state 값을 비교하여 구분한다. 1 -> 소속명변경, 2 -> 부서 변경및등록")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
-    })
+    @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> cpChange(@RequestParam(value="cpContent", defaultValue = "") String cpContent,
                                                           @RequestParam(value="knPassword", defaultValue = "") String knPassword,
                                                           @RequestParam(value="state", defaultValue = "") Integer state) throws IOException {
@@ -76,9 +70,7 @@ public class AdminRestController {
             "2. 현재비밀번호를 검증한다." +
             "3. 변경할 비밀번호와 비밀번호확인 값과 비교한다." +
             "4. 모든 조건이 충족되면 비밀번호를 변경한다.")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
-    })
+    @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> pwdChange(@RequestParam(value="oldknPassword", defaultValue = "") String oldknPassword,
                                                        @RequestParam(value="newknPassword", defaultValue = "") String newknPassword,
                                                        @RequestParam(value="newknPasswordCheck", defaultValue = "") String newknPasswordCheck) throws IOException {
@@ -93,19 +85,17 @@ public class AdminRestController {
             "4. 모든 조건이 충족되면 관리자 정보를 변경한다.")
     @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> updateAdminData(@RequestParam(value="knEmail") String knEmail,
-                                                            @RequestParam(value="knIsEmailAuth") String knIsEmailAuth,
-                                                            @RequestParam(value="knRoleCode") String knRoleCode,
-                                                            @RequestParam(value = "knActiveStatus") String knActiveStatus) throws IOException {
+                                                              @RequestParam(value="knIsEmailAuth") String knIsEmailAuth,
+                                                              @RequestParam(value="knRoleCode") String knRoleCode,
+                                                              @RequestParam(value="knActiveStatus") String knActiveStatus,
+                                                              @RequestParam(value="otpValue", defaultValue = "") String otpValue) {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
-        return adminService.updateAdminData(knEmail, knIsEmailAuth, knRoleCode, knActiveStatus, jwtFilterDto);
-//        return adminService.pwdChange(oldknPassword, newknPassword, newknPasswordCheck, jwtFilterDto);
+        return adminService.updateAdminData(knEmail, knRoleCode, knActiveStatus, otpValue, jwtFilterDto);
     }
 
     @GetMapping("/list")
     @ApiOperation(value = "관리자 목록 리스트 호출" , notes = "검색할 문자와 관리자등급 계정상태의 대한 필터로 목록을 조회한다.")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey"),
-    })
+    @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     public ResponseEntity<Map<String,Object>> list(@RequestParam(value="searchText", defaultValue = "") String searchText,
                                                    @RequestParam(value="filterRole", defaultValue = "") String filterRole,
                                                    @RequestParam(value="filterState", defaultValue = "") String filterState,
