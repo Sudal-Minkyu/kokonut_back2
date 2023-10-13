@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -83,6 +84,21 @@ public class AdminRestController {
                                                        @RequestParam(value="newknPasswordCheck", defaultValue = "") String newknPasswordCheck) throws IOException {
         JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
         return adminService.pwdChange(oldknPassword, newknPassword, newknPasswordCheck, jwtFilterDto);
+    }
+
+    @PostMapping("/updateAdminData")
+    @ApiOperation(value = "관리자 정보 업데이트" , notes = "1. 변경 가능한 관리자 정보를 받는다." +
+            "2. 요청자가 변경할 수 있는 관리자 대상인지 확인한다." +
+            "3. 각 정보가 변경가능한 정보인지 검증한다." +
+            "4. 모든 조건이 충족되면 관리자 정보를 변경한다.")
+    @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    public ResponseEntity<Map<String,Object>> updateAdminData(@RequestParam(value="knEmail") String knEmail,
+                                                            @RequestParam(value="knIsEmailAuth") String knIsEmailAuth,
+                                                            @RequestParam(value="knRoleCode") String knRoleCode,
+                                                            @RequestParam(value = "knActiveStatus") String knActiveStatus) throws IOException {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return adminService.updateAdminData(knEmail, knIsEmailAuth, knRoleCode, knActiveStatus, jwtFilterDto);
+//        return adminService.pwdChange(oldknPassword, newknPassword, newknPasswordCheck, jwtFilterDto);
     }
 
     @GetMapping("/list")

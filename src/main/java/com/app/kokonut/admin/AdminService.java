@@ -261,7 +261,57 @@ public class AdminService {
         return ResponseEntity.ok(res.success(data));
     }
 
+    // 관리자 정보 수정
+    @Transactional
+    public ResponseEntity<Map<String, Object>> updateAdminData(String knEmail, String knIsEmailAuth, String knRoleCode, String knActiveStatus, JwtFilterDto jwtFilterDto) {
+        log.info("updateAdminData 호출");
 
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+        String email = jwtFilterDto.getEmail();
+
+        AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(jwtFilterDto.getEmail());
+        Long adminId = adminCompanyInfoDto.getAdminId();
+        String companyCode = adminCompanyInfoDto.getCompanyCode();
+
+        // 활동 코드
+        ActivityCode activityCode = ActivityCode.AC_39;
+        String ip = CommonUtil.publicIp();
+
+        Optional<Admin> optionalAdmin = adminRepository.findByKnEmail(knEmail);
+        if(optionalAdmin.isPresent()) {
+
+            // 비밀번호 검증
+//            if (!passwordEncoder.matches(oldknPassword, optionalAdmin.get().getKnPassword())){
+//                log.error("입력하신 비밀번호가 일치하지 않습니다.");
+//                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO013.getCode(), ResponseErrorCode.KO013.getDesc()));
+//            }
+
+            // 비밀번호 확인비교
+//            if (!newknPassword.equals(newknPasswordCheck)){
+//                log.error("새로운 비밀번호가 일치하지 않습니다.");
+//                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO083.getCode(), ResponseErrorCode.KO083.getDesc()));
+//            }
+
+            // 활동이력 저장 -> 비정상 모드
+//            Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
+//                    companyCode+" - ", "", ip,0, jwtFilterDto.getEmail());
+
+//            optionalAdmin.get().setKnPassword(passwordEncoder.encode(newknPassword));
+            optionalAdmin.get().setKnRoleCode(AuthorityRole.valueOf(knRoleCode));
+            optionalAdmin.get().setModify_email(email);
+            optionalAdmin.get().setModify_date(LocalDateTime.now());
+            adminRepository.save(optionalAdmin.get());
+
+//            historyService.updateHistory(activityHistoryId, null, "", 1);
+        } else{
+            log.error("해당 유저가 존재하지 않습니다.");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(),"해당 유저가 "+ResponseErrorCode.KO004.getDesc()));
+        }
+
+        return ResponseEntity.ok(res.success(data));
+    }
 
     // 유저의 권한 및 jwt 토큰확인
     public ResponseEntity<Map<String,Object>> authorityCheck(JwtFilterDto jwtFilterDto) {
