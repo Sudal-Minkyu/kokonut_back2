@@ -1,4 +1,4 @@
-package com.app.kokonut.policy.policythirdoverseas;
+package com.app.kokonut.policy.policystatute;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -9,14 +9,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Woody
- * Date : 2023-04-26
+ * Date : 2023-10-16
  * Time :
  * Remark :
  */
 @Repository
-public interface PolicyThirdOverseasRepository extends JpaRepository<PolicyThirdOverseas, Long>, JpaSpecificationExecutor<PolicyThirdOverseas>, PolicyThirdOverseasRepositoryCustom {
+public interface PolicyStatuteRepository extends JpaRepository<PolicyStatute, Long>, JpaSpecificationExecutor<PolicyStatute>, PolicyStatuteRepositoryCustom {
+
     @Transactional
     @Modifying
-    @Query("delete from PolicyThirdOverseas a where a.piId = :piId")
+    @Query("delete from PolicyStatute a where a.piId = :piId")
     void deleteField(Long piId);
+
 }

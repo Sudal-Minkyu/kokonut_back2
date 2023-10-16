@@ -42,42 +42,6 @@ public class Policy {
     @Column(name = "pi_statute")
     private String piStatute;
 
-    @ApiModelProperty("인터넷접속로그 여부 0: 미선택, 1: 선택")
-    @Column(name = "pi_internet_chose")
-    private Boolean piInternetChose;
-
-    @ApiModelProperty("계약또는청약철회 여부 0: 미선택, 1: 선택")
-    @Column(name = "pi_contract_chose")
-    private Boolean piContractChose;
-
-    @ApiModelProperty("대금결제 및 재화 여부 0: 미선택, 1: 선택")
-    @Column(name = "pi_pay_chose")
-    private Boolean piPayChose;
-
-    @ApiModelProperty("소피자의 불만 또는 분쟁처리 여부: 0: 미선택, 1: 선택")
-    @Column(name = "pi_consumer_chose")
-    private Boolean piConsumerChose;
-
-    @ApiModelProperty("표시광고 0: 미선택, 1: 선택")
-    @Column(name = "pi_advertisement_chose")
-    private Boolean piAdvertisementChose;
-
-    @ApiModelProperty("개인정보 처리업무의 국외 위탁에 관한 사항: 0: 미선택, 1: 선택")
-    @Column(name = "pi_out_chose")
-    private Boolean piOutChose;
-
-    @ApiModelProperty("제3자 제공에 관한 사항: 0: 미선택, 1: 선택")
-    @Column(name = "pi_third_chose")
-    private Boolean piThirdChose;
-
-    @ApiModelProperty("국외 제3자 제공에 관한 사항: 0: 미선택, 1: 선택")
-    @Column(name = "pi_third_overseas_chose")
-    private Boolean piThirdOverseasChose;
-
-    @ApiModelProperty("개인정보 처리방침의 변경에 관한 사항: 0: 미선택, 1: 선택")
-    @Column(name = "pi_change_chose")
-    private Boolean piChangeChose;
-
     @ApiModelProperty("이전 시행일자 년")
     @Column(name = "pi_year")
     private String piYear;

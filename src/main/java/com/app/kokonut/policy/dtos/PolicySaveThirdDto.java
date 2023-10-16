@@ -18,15 +18,11 @@ public class PolicySaveThirdDto {
 
     private Long piId; // 개인정보처리방침 ID
 
-    private Boolean piInternetChose; // 인터넷접속로그 여부 0: 미선택, 1: 선택
+    private String piChoseListString; // 기본베이스 법령에 따른 개인정보의 보유기간 선택리스트
 
-    private Boolean piContractChose; // 계약또는청약철회 여부 0: 미선택, 1: 선택
+    private List<piChoseCustomDto> piChoseCustomList; // 개인정보처리방침 ID
 
-    private Boolean piPayChose; // 대금결제 및 재화 여부 0: 미선택, 1: 선택
-
-    private Boolean piConsumerChose; // 소피자의 불만 또는 분쟁처리 여부: 0: 미선택, 1: 선택
-
-    private Boolean piAdvertisementChose; // 표시광고 0: 미선택, 1: 선택
+    private List<Long> piChoseCustomDeleteIdList; // 개인정보보유기간 삭제 ID 리스트
 
     private List<PolicyBeforeSaveDto> policyBeforeSaveDtoList; // 서비스가입 시 수집하는 개인정보 저장 리스트값
 
