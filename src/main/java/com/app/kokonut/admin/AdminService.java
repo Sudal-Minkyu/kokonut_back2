@@ -318,8 +318,8 @@ public class AdminService {
             }
 
             // 활동이력 저장 -> 비정상 모드
-            Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - ", "", ip,0, jwtFilterDto.getEmail());
+            Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
+                    companyCode+" - 대상 : "+optionalAdmin.get().getUsername()+"("+optionalAdmin.get().getKnEmail()+")", "", ip,0, jwtFilterDto.getEmail());
 
             optionalAdmin.get().setKnActiveStatus(knActiveStatus);
             optionalAdmin.get().setKnActiveStatusDate(LocalDateTime.now());
