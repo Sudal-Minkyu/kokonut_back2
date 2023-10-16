@@ -158,6 +158,7 @@ public enum ResponseErrorCode {
 
     KO118("KO118", "존재하지 않은 제공건이거나, 이미 종료된 제공건 입니다."),
     KO119("KO119", "해당 개인정보제공을 종료할 권한이 없습니다."),
+    KO120("KO120", "제공하지 않는 요청을 시도 하였습니다."),
 
 
     ERROR_CODE_API("ERROR_CODE_API", "API 내용"),
