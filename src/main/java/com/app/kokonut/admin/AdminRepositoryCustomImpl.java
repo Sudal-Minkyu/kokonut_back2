@@ -66,7 +66,8 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
                         admin.adminId,
                         company.companyId,
                         company.cpCode,
-                        admin.knOtpKey
+                        admin.knOtpKey,
+                        admin.knRoleCode
                 ));
 
         return query.fetchOne();
