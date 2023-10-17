@@ -458,6 +458,7 @@ public class AdminService {
         List<AdminListDto> adminListDtoList = new ArrayList<>();
         AdminListDto adminListDto;
 
+        LocalDateTime now = LocalDateTime.now();
         Page<AdminListSubDto> adminListDtos = adminRepository.findByAdminList(searchText, filterRole, filterState, companyId, pageable);
         if(adminListDtos.getTotalPages() == 0) {
             log.info("조회된 데이터가 없습니다.");
@@ -473,7 +474,7 @@ public class AdminService {
                 adminListDto.setKnRoleDesc(adminListDtos.getContent().get(i).getKnRoleDesc());
                 adminListDto.setKnRoleCode(adminListDtos.getContent().get(i).getKnRoleCode());
 
-                adminListDto.setKnLastLoginDate(adminListDtos.getContent().get(i).getKnLastLoginDate());
+                adminListDto.setKnLastLoginDate(Utils.calculateTimeAgo(adminListDtos.getContent().get(i).getKnLastLoginDateTime(), now));
                 adminListDto.setKnIpAddr(adminListDtos.getContent().get(i).getKnIpAddr());
 
                 adminListDto.setKnIsEmailAuth(adminListDtos.getContent().get(i).getKnIsEmailAuth());
