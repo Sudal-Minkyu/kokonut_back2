@@ -575,7 +575,7 @@ public class AuthService {
 
     // 로그인 - 아이디 비밀번호확인
     @Transactional
-    public ResponseEntity<Map<String, Object>> emailPwCheck(AuthRequestDto.EmailPwCheck emailPwCheck, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<Map<String, Object>> emailPwCheck(AuthRequestDto.EmailPwCheck emailPwCheck, HttpServletRequest request) {
         log.info("emailPwCheck 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -1028,6 +1028,17 @@ public class AuthService {
             }
             else {
                 data.put("authOtpKey", encValue);
+
+                Duration duration = Duration.between(optionalAdmin.get().getInsert_date(), LocalDateTime.now());
+                long differenceInMinutes = duration.toMinutes();
+
+                if((optionalAdmin.get().getMasterId() == 0 && differenceInMinutes <= 10)
+                        || (optionalAdmin.get().getMasterId().equals(optionalAdmin.get().getCompanyId()) && differenceInMinutes <= 10)) {
+                    data.put("phoneCheckPass", true);
+                } else {
+                    data.put("phoneCheckPass", false);
+                }
+
                 return ResponseEntity.ok(res.success(data));
             }
         }
@@ -1055,10 +1066,18 @@ public class AuthService {
             String knName = optionalAdmin.get().getKnName();
             String knPhoneNumber = optionalAdmin.get().getKnPhoneNumber();
 
+            Duration duration = Duration.between(optionalAdmin.get().getInsert_date(), LocalDateTime.now());
+            long differenceInMinutes = duration.toMinutes();
+
             // 본인인증 체크
             if (!knPhoneNumber.equals(authPhoneCheckDto.getJoinPhone()) || !knName.equals(authPhoneCheckDto.getJoinName())) {
-                log.error("본인인증된 명의 및 휴대전화번호가 아닙니다. 본인인증을 다시해주세요.");
-                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO033.getCode(), ResponseErrorCode.KO033.getDesc()));
+                if((optionalAdmin.get().getMasterId() == 0 && differenceInMinutes <= 10)
+                        || (optionalAdmin.get().getMasterId().equals(optionalAdmin.get().getCompanyId()) && differenceInMinutes <= 10)) {
+                    log.info("10분내 가입한사람");
+                } else {
+                    log.error("본인인증된 명의 및 휴대전화번호가 아닙니다. 본인인증을 다시해주세요.");
+                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO033.getCode(), ResponseErrorCode.KO033.getDesc()));
+                }
             }else {
                 // 인증 쿠키제거
                 Utils.cookieDelete("joinName", response);
