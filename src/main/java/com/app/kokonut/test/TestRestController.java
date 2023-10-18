@@ -2,31 +2,47 @@ package com.app.kokonut.test;
 
 import com.app.kokonut.alimtalk.AlimtalkSendService;
 import com.app.kokonut.alimtalk.dtos.AlimtalkTemplateInfoDto;
-import com.app.kokonut.common.AjaxResponse;
-import com.app.kokonut.common.CommonUtil;
-import com.app.kokonut.common.ReqUtils;
-import com.app.kokonut.common.ResponseErrorCode;
+import com.app.kokonut.auth.jwt.SecurityUtil;
+import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
+import com.app.kokonut.common.*;
 import com.app.kokonut.company.companytablecolumninfo.CompanyTableColumnInfo;
 import com.app.kokonut.company.companytablecolumninfo.CompanyTableColumnInfoRepository;
 import com.app.kokonut.configs.ExcelService;
 import com.app.kokonut.configs.MailSender;
 import com.app.kokonut.email.email.EmailService;
+import com.app.kokonut.email.email.dtos.EmailCheckDto;
 import com.app.kokonut.navercloud.NaverCloudPlatformService;
+import com.app.kokonut.qna.dtos.QnaQuestionSaveDto;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Woody
@@ -256,6 +272,140 @@ public class TestRestController {
         log.info("response : "+response);
 
         return ResponseEntity.ok(res.success(data));
+    }
+
+
+    @ApiOperation(value="사진등록 테스트")
+    @PostMapping(value = "/phototest")
+//    @PostMapping(value = "/phototest", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<Map<String,Object>> phototest(@ModelAttribute PhototestDto phototestDto) {
+        log.info("phototest 호출");
+
+        log.info("codeList : "+phototestDto.getCodeList());
+        log.info("dataList : "+phototestDto.getDataList());
+        log.info("multipartFile : "+phototestDto.getMultipartFile());
+
+        return apifilesendtest(phototestDto);
+    }
+
+    public ResponseEntity<Map<String,Object>> apifilesendtest(PhototestDto phototestDto) {
+        log.info("apifilesendtest 호출");
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+
+//        // HttpPost 객체 생성
+//        HttpPost httpPost = new HttpPost("http://127.0.0.1:8050/v3/api/Auth/register");
+//
+        try {
+            String url = "http://127.0.0.1:8050/v3/api/Auth/register";
+            log.info("url : " + url);
+
+            try {
+                URL apiurl = new URL(url);
+
+                HttpURLConnection conn = (HttpURLConnection) apiurl.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("content-type", "application/json");
+                conn.setRequestProperty("x-api-key", "ebb36afbd976c0aa4ff157616e30e674");
+                conn.setUseCaches(false);
+                conn.setDoOutput(true);
+                conn.setDoInput(true);
+
+                MultipartFile multipartFile = phototestDto.getMultipartFile().get(0);
+                log.info("multipartFile.getOriginalFilename() : "+multipartFile.getOriginalFilename());
+                log.info("multipartFile.getSize() : "+multipartFile.getSize());
+                log.info("multipartFile.getOriginalFilename() : "+multipartFile.getOriginalFilename());
+
+                byte[] binary = multipartFile.getBytes();
+
+                // Request Body 설정
+                String jsonInputString = "{"
+                        + "\"1_id\": \"test111\","
+                        + "\"1_pw\": \"test222\","
+                        + "\"1_50\": \"woody@kokonut.me\","
+                        + "\"1_51\": \"김우디\","
+                        + "\"1_7\": \""+ Arrays.toString(binary) +"\"}";
+
+                try(OutputStream os = conn.getOutputStream()) {
+                    byte[] input = jsonInputString.getBytes(StandardCharsets.UTF_8);
+                    os.write(input, 0, input.length);
+                }
+
+                // 응답 데이터 얻기
+                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
+                StringBuilder sb = new StringBuilder();
+
+                String line;
+                while ((line = br.readLine()) != null) {
+                    sb.append(line);
+                }
+
+                String code = String.valueOf(conn.getResponseCode());
+                String data2 = sb.toString();
+
+                br.close();
+                conn.disconnect();
+
+                log.info("code: {}, data: {}", code, data2);
+
+//                if (code.equals("200")) {
+//
+//                }
+
+
+            } catch (Exception e) {
+                log.error("예외처리 : " + e);
+                log.error("예외처리 메세지 : " + e.getMessage());
+            }
+        }
+//            // MultipartFile을 java.io.File로 변환
+////            File file = Utils.convertMultipartFileToFile(multipartFile);
+//
+////            log.info("signature : "+signature);
+//
+//            // 파일을 이용해 FileBody 객체 생성
+////            FileBody fileBody = new FileBody(file, ContentType.DEFAULT_BINARY);
+//
+//            // MultipartEntityBuilder를 이용해 HttpEntity 객체 생성
+////            HttpEntity entity = MultipartEntityBuilder.create() // 자동으로 "Content-Type","multipart/form-data"이 주입됨
+////                    .addPart("fileList", fileBody)
+////                    .build();
+//
+//            // HttpPost 객체에 HttpEntity 설정
+//            httpPost.set(entity);
+//
+//            // 필요한 헤더 추가
+//            httpPost.setHeader("accept", "application/json");
+////            httpPost.setHeader("Content-Type", "multipart/form-data");
+//            httpPost.setHeader("x-api-key", "ebb36afbd976c0aa4ff157616e30e674");
+////            log.info("httpPost : " + httpPost);
+//
+//            // POST 요청 실행
+//            try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
+//                log.info("response : " + response);
+//
+////                // 응답 처리
+////                String responseString = EntityUtils.toString(response.getEntity());
+////                JSONObject jsonObject = new JSONObject(responseString);
+////                JSONArray filesArray = jsonObject.getJSONArray("files");
+////                log.info("File ID : " + result);
+//            }
+//            catch (Exception e) {
+//                log.error("예외처리 2 : "+e);
+//                log.error("예외처리 메세지 2 : "+e.getMessage());
+//            }
+//
+//        }
+
+        catch (Exception e) {
+            log.error("예외처리 1 : "+e);
+            log.error("예외처리 메세지 1 : "+e.getMessage());
+        }
+
+        return ResponseEntity.ok(res.apisuccess(data));
     }
 
 

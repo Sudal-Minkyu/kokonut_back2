@@ -260,7 +260,7 @@ public class KokonutUserService {
 					.append(" AND MONTH(kokonut_REGISTER_DATE) = ").append(now.getMonthValue());
 		}
 
-		log.info("searchQuery : "+sb);
+//		log.info("searchQuery : "+sb);
 
 		return dynamicUserRepositoryCustom.getCountFromTable(sb.toString());
 	}
