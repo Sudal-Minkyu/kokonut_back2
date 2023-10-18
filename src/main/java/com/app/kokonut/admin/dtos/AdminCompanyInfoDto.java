@@ -1,5 +1,6 @@
 package com.app.kokonut.admin.dtos;
 
+import com.app.kokonut.admin.enums.AuthorityRole;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,5 +23,11 @@ public class AdminCompanyInfoDto {
     private String companyCode; // cpCode
 
     private String knOtpKey; // 구글 OTP에 사용될 KEY
+
+    private AuthorityRole authorityRole;
+
+    public String getAuthorityRole() {
+        return authorityRole.getCode();
+    }
 
 }

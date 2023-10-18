@@ -50,11 +50,7 @@ public class PolicyRepositoryCustomImpl extends QuerydslRepositorySupport implem
         JPQLQuery<PolicySecondInfoDto> query = from(policy)
                 .where(policy.piId.eq(piId))
                 .select(Projections.constructor(PolicySecondInfoDto.class,
-                        policy.piInternetChose,
-                        policy.piContractChose,
-                        policy.piPayChose,
-                        policy.piConsumerChose,
-                        policy.piAdvertisementChose
+                        policy.piStatute
                 ));
         return query.fetchOne();
     }
@@ -154,17 +150,8 @@ public class PolicyRepositoryCustomImpl extends QuerydslRepositorySupport implem
                         policy.piHeader,
                         admin.knName,
 
-                        policy.piInternetChose,
-                        policy.piContractChose,
-                        policy.piPayChose,
-                        policy.piConsumerChose,
-                        policy.piAdvertisementChose,
+                        policy.piStatute,
 
-                        policy.piOutChose,
-                        policy.piThirdChose,
-                        policy.piThirdOverseasChose,
-
-                        policy.piChangeChose,
                         policy.piYear,
                         policy.piMonth,
                         policy.piDay

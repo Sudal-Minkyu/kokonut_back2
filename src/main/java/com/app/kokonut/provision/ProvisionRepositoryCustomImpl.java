@@ -54,8 +54,6 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
 
         QProvisionDownloadHistory provisionDownloadHistory = QProvisionDownloadHistory.provisionDownloadHistory;
 
-//        QAdmin admin = QAdmin.admin;
-
         QAdmin admin = new QAdmin("admin");
         QAdmin InsertAdmin = new QAdmin("InsertAdmin");
 
@@ -79,12 +77,8 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
                 .innerJoin(InsertAdmin).on(InsertAdmin.adminId.eq(admin.adminId))
 
                 .leftJoin(provisionRoster).on(provisionRoster.proCode.eq(provision.proCode).and(provisionRoster.adminId.eq(provisionSearchDto.getAdminId())))
-
-//                .innerJoin(provisionRoster).on(provisionRoster.proCode.eq(provision.proCode))
-//                .innerJoin(provisionRoster).on(provisionRoster.proCode.eq(provision.proCode).and(provisionRoster.adminId.eq(provisionSearchDto.getAdminId())))
                 .innerJoin(provisionRosterCnt).on(provisionRosterCnt.proCode.eq(provision.proCode)).groupBy(provisionRosterCnt.proCode)
                 .select(Projections.constructor(ProvisionListDto.class,
-//                        provision.proId,
                         provision.proCode,
                         proState,
                         admin.knName,
@@ -99,8 +93,9 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
                                 .when(provisionRoster.isNotNull()).then("1")
                                 .otherwise("2"), // 다운로드 가능 "1", 제공종료 가능 "2", 다운로드 또는 제공종료 가능 "3"
                         new CaseBuilder()
-                                .when(InsertAdmin.adminId.eq(provisionSearchDto.getAdminId())).then("1")
-                                .otherwise("2") // 자신이 제공한건이면 "1", 받은건이면 "2"로 반환
+                                .when(admin.adminId.eq(provisionSearchDto.getAdminId()).and(provisionRoster.adminId.eq(provisionSearchDto.getAdminId()))).then("3")
+                                .when(InsertAdmin.adminId.eq(provisionSearchDto.getAdminId()).and(provisionRoster.isNull())).then("1")
+                                .otherwise("2") // 자신이 제공한건이면 "1", 받은건이면 "2"로 반환, 제공하거나 받은건이면 "3"로 반환
                 ));
 
         if(!provisionSearchDto.getSearchText().equals("")) {
@@ -125,9 +120,14 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
 
         if(!provisionSearchDto.getFilterOfferType().equals("")) {
             if(provisionSearchDto.getFilterOfferType().equals("1")) {
-                query.where(InsertAdmin.adminId.ne(provisionSearchDto.getAdminId()));
-            } else {
-                query.where(InsertAdmin.adminId.eq(provisionSearchDto.getAdminId()));
+                // 제공함
+                query.where(InsertAdmin.adminId.eq(provisionSearchDto.getAdminId()).and(provisionRoster.isNull()));
+            } else if(provisionSearchDto.getFilterOfferType().equals("3")) {
+                // 제공/제공받음
+                query.where(admin.adminId.eq(provisionSearchDto.getAdminId()).and(provisionRoster.adminId.eq(provisionSearchDto.getAdminId())));
+            } else if(provisionSearchDto.getFilterOfferType().equals("2")) {
+                // 제공받음
+                query.where(InsertAdmin.adminId.ne(provisionSearchDto.getAdminId()).and(provisionRoster.adminId.eq(provisionSearchDto.getAdminId())));
             }
         }
 

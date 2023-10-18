@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -367,4 +368,31 @@ public class Utils {
 		}
 	}
 
+	// 시각을 입력받아 x일전, x시간전, x분전 등의 결과문자를 반환
+	public static String calculateTimeAgo(LocalDateTime refTime, LocalDateTime nowTime) {
+		if (refTime != null) {
+			long diffInSeconds = ChronoUnit.SECONDS.between(refTime, nowTime);
+			long diffInMinutes = diffInSeconds / 60;
+			long diffInHours = diffInMinutes / 60;
+			long diffInDays = diffInHours / 24;
+			long diffInMonths = diffInDays / 30;
+			long diffInYears = diffInDays / 365;
+
+			if (diffInYears > 0) {
+				return diffInYears + "년 전";
+			} else if (diffInMonths > 0) {
+				return diffInMonths + "달 전";
+			} else if (diffInDays > 0) {
+				return diffInDays + "일 전";
+			} else if (diffInHours > 0) {
+				return diffInHours + "시간 전";
+			} else if (diffInMinutes > 6) {
+				// 6분이상일 경우 미접속으로 판단
+				return diffInMinutes + "분 전";
+			} else {
+				return "방금전";
+			}
+		}
+		return "";
+	}
 }
