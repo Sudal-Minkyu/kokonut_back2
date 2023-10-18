@@ -108,6 +108,8 @@ public enum ActivityCode {
     AC_62_1("AC_62_1", "비즈엠 서트파티 설정 업데이트"), // 사용
     AC_62_2("AC_62_2", "비즈엠 서트파티 설정 등록"), // 사용
 
+    AC_63("AC_63", "본인 계정 비활성화"), // 사용
+
     ;
     
     private final String code;

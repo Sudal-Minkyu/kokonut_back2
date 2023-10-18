@@ -627,6 +627,13 @@ public class AuthService {
                 authenticationManagerBuilder.getObject().authenticate(new UsernamePasswordAuthenticationToken
                         (emailPwCheck.getKnEmail(), Utils.decryptData(emailPwCheck.getKnPassword(), request.getHeader("keyBufferSto"), request.getHeader("ivSto"))));
 
+                if (optionalAdmin.get().getKnActiveStatus().equals("0")) {
+                    log.error("비활성화된 사용자 입니다.");
+                    historyService.updateHistory(activityHistoryId,
+                            companyCode+" - "+activityCode.getDesc()+" 시도 이력", "비활성화상태의 계정", 0);
+                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO121.getCode(),ResponseErrorCode.KO121.getDesc()));
+                }
+
                 if(companySettingCheckDto.getCsAccessSetting().equals("1")) {
                     log.info("접속 허용IP 체크");
                     boolean accessIpCheckResult = companySettingAccessIPRepository.existsCompanySettingAccessIPByCsIdAndCsipIp(companySettingCheckDto.getCsId(), publicIp);

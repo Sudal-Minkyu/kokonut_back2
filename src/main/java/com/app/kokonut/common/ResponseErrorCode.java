@@ -160,6 +160,8 @@ public enum ResponseErrorCode {
     KO119("KO119", "해당 개인정보제공을 종료할 권한이 없습니다."),
     KO120("KO120", "제공하지 않는 요청을 시도 하였습니다."),
 
+    KO121("KO121", "비활성화된 사용자 입니다."),
+
 
     ERROR_CODE_API("ERROR_CODE_API", "API 내용"),
     ERROR_CODE_00("ERROR_CODE_00", "파라미터 데이터가 없습니다."),

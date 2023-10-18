@@ -76,6 +76,16 @@ public class AdminRestController {
         return adminService.pwdChange(oldknPassword, newknPassword, newknPasswordCheck, jwtFilterDto);
     }
 
+    @PostMapping("/deactivateAdmin")
+    @ApiOperation(value = "본인 관리자 계정 비활성화" , notes = "1. otp입력 값을 받는다." +
+            "2. otp 값을 검증한다." +
+            "3. 관리자 본인의 계정을 비활성화 한다.")
+    @ApiImplicitParam(name ="Authorization", value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    public ResponseEntity<Map<String,Object>> deactivateAdmin(@RequestParam(value="otpValue", defaultValue = "") String otpValue) throws IOException {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return adminService.deactivateAdmin(otpValue, jwtFilterDto);
+    }
+
     @PostMapping("/updateAdminData")
     @ApiOperation(value = "관리자 정보 업데이트" , notes = "1. 변경 가능한 관리자 정보를 받는다." +
             "2. 요청자가 변경할 수 있는 관리자 대상인지 확인한다." +

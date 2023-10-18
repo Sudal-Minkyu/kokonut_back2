@@ -264,6 +264,59 @@ public class AdminService {
         return ResponseEntity.ok(res.success(data));
     }
 
+    // 본인 관리자 계정 비활성화
+    @Transactional
+    public ResponseEntity<Map<String, Object>> deactivateAdmin(String otpValue,JwtFilterDto jwtFilterDto) {
+        log.info("deactivateAdmin 호출");
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+        if(otpValue == null || otpValue.equals("")) {
+            log.error("구글 OTP 값이 존재하지 않습니다.");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO010.getCode(),ResponseErrorCode.KO010.getDesc()));
+        }
+
+        String email = jwtFilterDto.getEmail();
+
+        AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(jwtFilterDto.getEmail());
+
+        long adminId = adminCompanyInfoDto.getAdminId();
+        String companyCode = adminCompanyInfoDto.getCompanyCode();
+        String knOtpKey = adminCompanyInfoDto.getKnOtpKey();
+
+        boolean auth = googleOTP.checkCode(otpValue, knOtpKey);
+
+        if (!auth) {
+            log.error("입력된 구글 OTP 값이 일치하지 않습니다. 다시 확인해주세요.");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO012.getCode(), ResponseErrorCode.KO012.getDesc()));
+        }
+
+        // 활동 코드
+        ActivityCode activityCode = ActivityCode.AC_63;
+        String ip = CommonUtil.publicIp();
+
+        Optional<Admin> optionalAdmin = adminRepository.findByKnEmail(email);
+        if(optionalAdmin.isPresent()) {
+            // 활동이력 저장 -> 비정상 모드
+            Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
+                    companyCode+" - ", "", ip,0, jwtFilterDto.getEmail());
+
+            optionalAdmin.get().setKnActiveStatus("0");
+            optionalAdmin.get().setKnPwdErrorCount(0);
+            optionalAdmin.get().setModify_email(email);
+            optionalAdmin.get().setModify_date(LocalDateTime.now());
+            adminRepository.save(optionalAdmin.get());
+
+            historyService.updateHistory(activityHistoryId, null, "", 1);
+        } else{
+            log.error("해당 유저가 존재하지 않습니다.");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO004.getCode(),"해당 유저가 "+ResponseErrorCode.KO004.getDesc()));
+        }
+
+        return ResponseEntity.ok(res.success(data));
+    }
+
     // 관리자 정보 수정
     @Transactional
     public ResponseEntity<Map<String, Object>> updateAdminData(String knEmail, String knRoleCode, String knActiveStatus, String otpValue,
@@ -292,8 +345,6 @@ public class AdminService {
         if (!auth) {
             log.error("입력된 구글 OTP 값이 일치하지 않습니다. 다시 확인해주세요.");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO012.getCode(), ResponseErrorCode.KO012.getDesc()));
-        } else {
-            log.info("OTP인증완료 -> 개인정보 제공엑셀 다운로드 시작");
         }
 
         // 활동 코드
