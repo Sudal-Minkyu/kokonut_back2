@@ -194,7 +194,7 @@ public class PolicyService {
             List<PolicyServiceAutoSaveInfoListDto> policyServiceAutoSaveInfoListDtoList = policyServiceAutoRepository.findByPolicyServiceAutoList(piId);
             data.put("serviceAutoDataList", policyServiceAutoSaveInfoListDtoList);
             List<PolicyStatuteSaveInfoListDto> policyStatuteSaveInfoListDtoList = policyStatuteRepository.findByPolicyStatuteList(piId);
-            data.put("piChoseCustomList ", policyStatuteSaveInfoListDtoList);
+            data.put("piChoseCustomList", policyStatuteSaveInfoListDtoList);
 
             // Step4
             List<PolicyOutSaveInfoListDto> policyOutSaveInfoListDtos = policyOutRepository.findByPolicyOutList(piId);
