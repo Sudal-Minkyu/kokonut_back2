@@ -163,8 +163,8 @@ public class AuthRestController {
     @ApiOperation(value = "로그인 - 아이디 비밀번호확인" , notes = "1. 입력한 아이디와 비밀번호를 보낸다." +
             "2. 이메일과 비밀번호를 대조한다.")
     public ResponseEntity<Map<String,Object>> login(@Validated AuthRequestDto.EmailPwCheck emailPwCheck,
-                                                        HttpServletRequest request, HttpServletResponse response) {
-        return authService.emailPwCheck(emailPwCheck, request, response);
+                                                    HttpServletRequest request) {
+        return authService.emailPwCheck(emailPwCheck, request);
     }
 
     // 로그인 성공 이후 JWT Token 발급 및 업데이트

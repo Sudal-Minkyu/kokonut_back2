@@ -158,6 +158,7 @@ public enum ResponseErrorCode {
 
     KO118("KO118", "존재하지 않은 제공건이거나, 이미 종료된 제공건 입니다."),
     KO119("KO119", "해당 개인정보제공을 종료할 권한이 없습니다."),
+    KO120("KO120", "제공하지 않는 요청을 시도 하였습니다."),
 
 
     ERROR_CODE_API("ERROR_CODE_API", "API 내용"),
@@ -194,6 +195,8 @@ public enum ResponseErrorCode {
 
     ERROR_KOKONUT_01("ERROR_KOKONUT_01", "알 수 없는 에러가 발생했습니다. 코코넛에게 해당 상황을 피드백 해주세요!"),
     ERROR_KOKONUT_02("ERROR_KOKONUT_02", "JSON 데이터가 잘못 기입됐습니다. 확인해주시고 다시 호출해주세요."),
+    ERROR_KOKONUT_03("ERROR_KOKONUT_03", "첨부파일이 용량이 20MB를 넘었습니다."),
+
     ERROR_CODE_96("ERROR_CODE_96", "헤더에 APIKey가 존재하지 않습니다. APIKey를 담아 보내주세요."), // 400
     ERROR_CODE_97("ERROR_CODE_97", "호출하신 APIKey는 존재하지 않은 APIKey 입니다. APIKey관리 페이지에서 APIKey를 확인해주세요."), // 404
     ERROR_CODE_98("ERROR_CODE_98", "관리자에 의해 사용에 제한된 APIKey 입니다. 관리자에게 문의해주세요."), // 402

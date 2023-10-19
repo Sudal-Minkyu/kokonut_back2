@@ -3,7 +3,6 @@ package com.app.kokonut.admin;
 import com.app.kokonut.auth.jwt.SecurityUtil;
 import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
 import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 /**

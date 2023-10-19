@@ -573,7 +573,9 @@ public class AuthService {
         return ResponseEntity.ok(res.success(data));
     }
 
-    public ResponseEntity<Map<String, Object>> emailPwCheck(AuthRequestDto.EmailPwCheck emailPwCheck, HttpServletRequest request, HttpServletResponse response) {
+    // 로그인 - 아이디 비밀번호확인
+    @Transactional
+    public ResponseEntity<Map<String, Object>> emailPwCheck(AuthRequestDto.EmailPwCheck emailPwCheck, HttpServletRequest request) {
         log.info("emailPwCheck 호출");
 
         AjaxResponse res = new AjaxResponse();
@@ -597,20 +599,33 @@ public class AuthService {
             String companyCode = adminCompanyInfoDto.getCompanyCode();
             String roleCode = optionalAdmin.get().getKnRoleCode().getCode();
 
+            Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
+                    companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", publicIp, 0, knEmail);
+
+            // 비밀번호 오휴 횟수 제한 가져오기
+            // 설정해둔 횟수와 같거나 크면 로그인 제한됨 -> 비밀번호 찾기 미제공 -> 왕관 최고관리자일경우
+            CompanySettingCheckDto companySettingCheckDto = companySettingRepository.findByCompanySettingCheck(companyCode);
+
+            int knPwdErrorCount = optionalAdmin.get().getKnPwdErrorCount(); // 비밀번호 오류횟수
+
+            int csPasswordErrorCountSetting = Integer.parseInt(companySettingCheckDto.getCsPasswordErrorCountSetting());
+            if(csPasswordErrorCountSetting <= knPwdErrorCount && !roleCode.equals("ROLE_SYSTEM")) {
+                log.error("로그인 오류 횟수제한 이메일 : "+knEmail);
+                historyService.updateHistory(activityHistoryId,
+                                companyCode+" - "+activityCode.getDesc()+" 시도 이력", "로그인 오류횟수 초과로 인한 로그인실패", 0);
+
+                if(roleCode.equals("ROLE_MASTER") || roleCode.equals("ROLE_ADMIN")) {
+                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO096.getCode(),"비밀번호를 "+knPwdErrorCount+"회 틀리셨습니다. 비밀번호 찾기를 진행해주시길 바랍니다."));
+                } else {
+                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO095.getCode(),"비밀번호를 "+knPwdErrorCount+"회 틀리셨습니다. 최고관리자에게 비밀번호변경을 요청 바랍니다."));
+                }
+            }
+
             try {
 
                 // 아이디 / 비번 검증
                 authenticationManagerBuilder.getObject().authenticate(new UsernamePasswordAuthenticationToken
                         (emailPwCheck.getKnEmail(), Utils.decryptData(emailPwCheck.getKnPassword(), request.getHeader("keyBufferSto"), request.getHeader("ivSto"))));
-
-                Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                        companyCode+" - "+activityCode.getDesc()+" 시도 이력", "", publicIp, 0, knEmail);
-
-                int knPwdErrorCount = optionalAdmin.get().getKnPwdErrorCount(); // 비밀번호 오류횟수
-
-                // 비밀번호 오휴 횟수 제한 가져오기
-                // 설정해둔 횟수와 같거나 크면 로그인 제한됨 -> 비밀번호 찾기 미제공 -> 왕관 최고관리자일경우
-                CompanySettingCheckDto companySettingCheckDto = companySettingRepository.findByCompanySettingCheck(companyCode);
 
                 if(companySettingCheckDto.getCsAccessSetting().equals("1")) {
                     log.info("접속 허용IP 체크");
@@ -623,19 +638,6 @@ public class AuthService {
                                 companyCode+" - "+activityCode.getDesc()+" 시도 이력", "접속 허용되지 않은 IP에서 로그인 시도하여 실패", 0);
 
                         return ResponseEntity.ok(res.fail(ResponseErrorCode.KO094.getCode(),ResponseErrorCode.KO094.getDesc()));
-                    }
-                }
-
-                int csPasswordErrorCountSetting = Integer.parseInt(companySettingCheckDto.getCsPasswordErrorCountSetting());
-                if(csPasswordErrorCountSetting <= knPwdErrorCount && !roleCode.equals("ROLE_SYSTEM")) {
-                    log.error("로그인 오류 횟수제한 이메일 : "+knEmail);
-                    historyService.updateHistory(activityHistoryId,
-                            companyCode+" - "+activityCode.getDesc()+" 시도 이력", "로그인 오류횟수 초과로 인한 로그인실패", 0);
-
-                    if(roleCode.equals("ROLE_MASTER") || roleCode.equals("ROLE_ADMIN")) {
-                        return ResponseEntity.ok(res.fail(ResponseErrorCode.KO096.getCode(),"비밀번호를 "+knPwdErrorCount+"회 틀리셨습니다. 비밀번호 찾기를 진행해주시길 바랍니다."));
-                    } else {
-                        return ResponseEntity.ok(res.fail(ResponseErrorCode.KO095.getCode(),"비밀번호를 "+knPwdErrorCount+"회 틀리셨습니다. 최고관리자에게 비밀번호변경을 요청 바랍니다."));
                     }
                 }
 
@@ -654,7 +656,7 @@ public class AuthService {
                 log.error("아이디 또는 비밀번호가 일치하지 않습니다.");
 
                 // 활동이력 저장 -> 로그인실패 - 비정상 모드
-                historyService.insertHistory(2, adminId, ActivityCode.AC_01, companyCode+" - "+activityCode.getDesc()+" 시도 이력", "로그인 실패 비밀번호 일치하지 않음", publicIp, 0, knEmail);
+                historyService.updateHistory(activityHistoryId,companyCode+" - "+activityCode.getDesc()+" 시도 이력", "로그인 실패 비밀번호 일치하지 않음", 0);
 
                 // 비밀번호가 틀렸기때문에 비밀번호 오류횟수 카운팅
                 optionalAdmin.get().setKnPwdErrorCount(optionalAdmin.get().getKnPwdErrorCount()+1);
@@ -1026,6 +1028,17 @@ public class AuthService {
             }
             else {
                 data.put("authOtpKey", encValue);
+
+                Duration duration = Duration.between(optionalAdmin.get().getInsert_date(), LocalDateTime.now());
+                long differenceInMinutes = duration.toMinutes();
+
+                if((optionalAdmin.get().getMasterId() == 0 && differenceInMinutes <= 10)
+                        || (optionalAdmin.get().getMasterId().equals(optionalAdmin.get().getCompanyId()) && differenceInMinutes <= 10)) {
+                    data.put("phoneCheckPass", true);
+                } else {
+                    data.put("phoneCheckPass", false);
+                }
+
                 return ResponseEntity.ok(res.success(data));
             }
         }
@@ -1053,10 +1066,18 @@ public class AuthService {
             String knName = optionalAdmin.get().getKnName();
             String knPhoneNumber = optionalAdmin.get().getKnPhoneNumber();
 
+            Duration duration = Duration.between(optionalAdmin.get().getInsert_date(), LocalDateTime.now());
+            long differenceInMinutes = duration.toMinutes();
+
             // 본인인증 체크
             if (!knPhoneNumber.equals(authPhoneCheckDto.getJoinPhone()) || !knName.equals(authPhoneCheckDto.getJoinName())) {
-                log.error("본인인증된 명의 및 휴대전화번호가 아닙니다. 본인인증을 다시해주세요.");
-                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO033.getCode(), ResponseErrorCode.KO033.getDesc()));
+                if((optionalAdmin.get().getMasterId() == 0 && differenceInMinutes <= 10)
+                        || (optionalAdmin.get().getMasterId().equals(optionalAdmin.get().getCompanyId()) && differenceInMinutes <= 10)) {
+                    log.info("10분내 가입한사람");
+                } else {
+                    log.error("본인인증된 명의 및 휴대전화번호가 아닙니다. 본인인증을 다시해주세요.");
+                    return ResponseEntity.ok(res.fail(ResponseErrorCode.KO033.getCode(), ResponseErrorCode.KO033.getDesc()));
+                }
             }else {
                 // 인증 쿠키제거
                 Utils.cookieDelete("joinName", response);

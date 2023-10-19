@@ -23,4 +23,5 @@ public interface PolicyRepositoryCustom {
     Page<PolicyListDto> findByPolicyList(PolicySearchDto policySearchDto, Pageable pageable);
 
     PolicyDetailDto findByPolicyDetail(Long piId, String cpCode);
+
 }

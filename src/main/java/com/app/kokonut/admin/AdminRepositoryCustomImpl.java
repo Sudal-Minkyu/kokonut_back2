@@ -66,7 +66,8 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
                         admin.adminId,
                         company.companyId,
                         company.cpCode,
-                        admin.knOtpKey
+                        admin.knOtpKey,
+                        admin.knRoleCode
                 ));
 
         return query.fetchOne();
@@ -115,6 +116,7 @@ public class AdminRepositoryCustomImpl extends QuerydslRepositorySupport impleme
                         company.cpName,
                         admin.knPhoneNumber,
                         admin.knRoleCode,
+                        admin.knActiveStatus,
 
                         new CaseBuilder()
                                 .when(company.cpElectronic.isNull()).then(0)

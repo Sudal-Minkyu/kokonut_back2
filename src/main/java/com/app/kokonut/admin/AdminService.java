@@ -301,19 +301,25 @@ public class AdminService {
         String ip = CommonUtil.publicIp();
 
         Optional<Admin> optionalAdmin = adminRepository.findByKnEmail(knEmail);
+        String targetRole = optionalAdmin.get().getKnRoleCode().getCode();
         if(optionalAdmin.isPresent()) {
-
-//            if(role.equals("ROLE_MASTER")) {
-//
-//            } else if(role.equals("ROLE_ADMIN")) {
-//
-//            } else if(role.equals("ROLE_USER")) {
-//
-//            }
+            if(targetRole.equals("ROLE_MASTER")) { // 왕관관리자는 누구도 변경 불가
+                log.error("왕관관리자의 정보는 타인이 수정할 수 없습니다.");
+                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO120.getCode(), ResponseErrorCode.KO120.getDesc()));
+            } else if(role.equals("ROLE_USER") && !targetRole.equals("ROLE_GUEST")) { // 유저는 게스트 이외에 변경 불가
+                log.error("관리자는 게스트가 아닌 관리자의 정보를 수정할 수 없습니다.");
+                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO001.getCode(), ResponseErrorCode.KO001.getDesc()));
+            } else if(email.equals(optionalAdmin.get().getKnEmail())) { // 자기자신의 정보는 변경 불가
+                log.error("해당 메뉴에서는 자기자신의 정보를 변경할 수 없습니다.");
+                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO001.getCode(), ResponseErrorCode.KO001.getDesc()));
+            } else if(targetRole.equals("ROLE_GUEST") && !knRoleCode.equals(targetRole)) { // 게스트의 권한등급은 변경 불가
+                log.error("게스트의 권한 등급은 수정할 수 없습니다.");
+                return ResponseEntity.ok(res.fail(ResponseErrorCode.KO120.getCode(), ResponseErrorCode.KO120.getDesc()));
+            }
 
             // 활동이력 저장 -> 비정상 모드
-            Long activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
-                    companyCode+" - ", "", ip,0, jwtFilterDto.getEmail());
+            Long activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
+                    companyCode+" - 대상 : "+optionalAdmin.get().getKnName()+"("+optionalAdmin.get().getKnEmail()+")", "", ip,0, jwtFilterDto.getEmail());
 
             optionalAdmin.get().setKnActiveStatus(knActiveStatus);
             optionalAdmin.get().setKnActiveStatusDate(LocalDateTime.now());
@@ -323,6 +329,26 @@ public class AdminService {
             adminRepository.save(optionalAdmin.get());
 
             historyService.updateHistory(activityHistoryId, null, "", 1);
+
+            // 메일 보내주기 추가할 것
+            String mailTitle = "계정 정보 변경 알림";
+            String mailContents = "당신의 계정의 정보가 변경 되었습니다.<br>" +
+                    "관리자 등급 : <b>" + AuthorityRole.valueOf(knRoleCode).getDesc() + "</b><br>" +
+                    "계정 활성 상태 : <b>" + (knActiveStatus.equals("1") ? "활성" : "비활성") + "</b><br>" +
+                    "정보 수정자 : " + email;
+            mailContents = ReqUtils.unFilter(mailContents);
+
+            // 템플릿 호출을 위한 데이터 세팅
+            HashMap<String, String> callTemplate = new HashMap<>();
+            callTemplate.put("template", "MailTemplate");
+            callTemplate.put("title", mailTitle);
+            callTemplate.put("content", mailContents);
+
+            // 템플릿 TODO 템플릿 디자인 추가되면 수정
+            mailContents = mailSender.getHTML6(callTemplate);
+
+            String reciverName = "kokonut";
+            mailSender.sendKokonutMail(knEmail, reciverName, mailTitle, mailContents);
 
         } else{
             log.error("해당 유저가 존재하지 않습니다.");
@@ -357,6 +383,7 @@ public class AdminService {
             data.put("role",adminInfoDto.getKnRoleCode());
 
             data.put("knPhoneNumber",adminInfoDto.getKnPhoneNumber());
+            data.put("knActiveStatus", adminInfoDto.getKnActiveStatus());
 
             LocalDate nowDate = LocalDate.now();
             // log.info("nowDate : "+nowDate);
@@ -431,6 +458,7 @@ public class AdminService {
         List<AdminListDto> adminListDtoList = new ArrayList<>();
         AdminListDto adminListDto;
 
+        LocalDateTime now = LocalDateTime.now();
         Page<AdminListSubDto> adminListDtos = adminRepository.findByAdminList(searchText, filterRole, filterState, companyId, pageable);
         if(adminListDtos.getTotalPages() == 0) {
             log.info("조회된 데이터가 없습니다.");
@@ -446,7 +474,7 @@ public class AdminService {
                 adminListDto.setKnRoleDesc(adminListDtos.getContent().get(i).getKnRoleDesc());
                 adminListDto.setKnRoleCode(adminListDtos.getContent().get(i).getKnRoleCode());
 
-                adminListDto.setKnLastLoginDate(adminListDtos.getContent().get(i).getKnLastLoginDate());
+                adminListDto.setKnLastLoginDate(Utils.calculateTimeAgo(adminListDtos.getContent().get(i).getKnLastLoginDateTime(), now));
                 adminListDto.setKnIpAddr(adminListDtos.getContent().get(i).getKnIpAddr());
 
                 adminListDto.setKnIsEmailAuth(adminListDtos.getContent().get(i).getKnIsEmailAuth());

@@ -57,6 +57,10 @@ public class AdminListSubDto {
         }
     }
 
+    public LocalDateTime getKnLastLoginDateTime() {
+        return knLastLoginDate;
+    }
+
     public String getInsert_date() {
         return DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(insert_date);
     }

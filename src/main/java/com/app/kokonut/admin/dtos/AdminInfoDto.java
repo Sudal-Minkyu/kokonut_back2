@@ -27,6 +27,8 @@ public class AdminInfoDto {
 
     private AuthorityRole knRoleCode;
 
+    private String knActiveStatus;
+
     private Integer cpElectronic;
 
     private LocalDate cpElectronicDate;
@@ -41,6 +43,7 @@ public class AdminInfoDto {
     private String emailSendSettingState; // 이메일발송 셋팅 여부
 
     private LocalDateTime cpSubscribeDate;
+
 
     public String getKnRoleCode() {
         return knRoleCode.getCode();
