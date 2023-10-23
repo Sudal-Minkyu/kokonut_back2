@@ -132,7 +132,7 @@ public class MailSender {
 		NCloudPlatformMailRequest req = new NCloudPlatformMailRequest();
 		req.setSenderAddress(fromEmail);
 		req.setSenderName(fromName);
-		req.setTitle(title);
+		req.setTitle("[코코넛] "+title);
 		req.setBody(contents);
 		req.setRecipients(recipients);
 		req.setUnsubscribeMessage("광고 수신 문구");

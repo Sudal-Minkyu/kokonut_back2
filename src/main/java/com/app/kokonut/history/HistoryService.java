@@ -209,13 +209,13 @@ public class HistoryService {
         log.info("생성된 파일암호 : "+filePassword);
 
         // 인증번호 메일전송
-        String title = ReqUtils.filter("활동이력 파일의 암호가 도착했습니다.");
+        String title = ReqUtils.filter("관리자 활동이력 파일의 암호가 도착했습니다.");
         String contents = ReqUtils.unFilter("파일암호 : "+filePassword);
 
         // 템플릿 호출을 위한 데이터 세팅
         HashMap<String, String> callTemplate = new HashMap<>();
 //        callTemplate.put("template", "KokonutMailTemplate");
-        callTemplate.put("title", "활동이력 파일암호 알림");
+        callTemplate.put("title", "파일 암호 안내");
         callTemplate.put("content", contents);
 
         // 템플릿 TODO 템플릿 디자인 추가되면 수정

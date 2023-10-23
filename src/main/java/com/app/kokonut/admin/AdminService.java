@@ -383,10 +383,11 @@ public class AdminService {
 
             // 메일 보내주기 추가할 것
             String mailTitle = "계정 정보 변경 알림";
-            String mailContents = "당신의 계정의 정보가 변경 되었습니다.<br>" +
+            String mailContents = "정보 수정자 : " + email + "<br><br>" +
+                    "당신의 계정 정보가 변경 되었습니다.<br>" +
                     "관리자 등급 : <b>" + AuthorityRole.valueOf(knRoleCode).getDesc() + "</b><br>" +
-                    "계정 활성 상태 : <b>" + (knActiveStatus.equals("1") ? "활성" : "비활성") + "</b><br>" +
-                    "정보 수정자 : " + email;
+                    "계정 활성 상태 : <b>" + (knActiveStatus.equals("1") ? "활성" : "비활성") + "</b>";
+
             mailContents = ReqUtils.unFilter(mailContents);
 
             // 템플릿 호출을 위한 데이터 세팅
@@ -701,7 +702,7 @@ public class AdminService {
             // 관리자 등록메일 보내기
             String title = "관리자등록 재인증 알림";
             // TODO : 답변 내용을 HTML 태그를 붙여서 메일로 전송해준다. 화면단과 개발할 때 추가 개발해야함.
-            String contents = "관리자등록 재요청 되었습니다. <br>해당 링크를 통해 가입을 이어서 해주시길 바랍니다.<br>링크 : "+
+            String contents = "해당 링크를 통해 가입을 새로 진행해 주세요.<br>링크 : "+
                     "<a href=\""+frontServerDomainIp+"/#/create?" +
                     "send=1&" +
                     "evKo="+ companyId +"&" +
@@ -806,8 +807,8 @@ public class AdminService {
 
             // 관리자 등록메일 보내기
             // TODO : 답변 내용을 HTML 태그를 붙여서 메일로 전송해준다. 화면단과 개발할 때 추가 개발해야함.
-            String title = "비밀번호 변경 알림";
-            String contents = "비밀번호 변경 요청 되었습니다. <br>해당 링크를 통해 변경을 이어서 해주시길 바랍니다.<br>링크 : "+
+            String title = "비밀번호 변경 안내";
+            String contents = "비밀번호 변경 안내<br>해당 링크를 통해 변경을 이어서 해주시길 바랍니다.<br>링크 : "+
                     "<a href=\""+frontServerDomainIp+"/#/create?" +
                     "send=2&" +
                     "evKo="+ companyId +"&" +

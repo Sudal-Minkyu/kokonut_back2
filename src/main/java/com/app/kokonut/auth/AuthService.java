@@ -332,7 +332,7 @@ public class AuthService {
 //        // 템플릿 호출을 위한 데이터 세팅
         HashMap<String, String> callTemplate = new HashMap<>();
 //        callTemplate.put("template", "KokonutMailTemplate");
-        callTemplate.put("title", "인증번호 알림");
+        callTemplate.put("title", "임시비밀번호 알림");
         callTemplate.put("content", contents);
 
         // 템플릿 TODO 템플릿 디자인 추가되면 수정
@@ -381,7 +381,7 @@ public class AuthService {
 
             // 본인인증 체크
             if (!knPhoneNumber.equals(authPhoneCheckDto.getJoinPhone()) || !knName.equals(authPhoneCheckDto.getJoinName())) {
-                log.error("본인인증된 명의 및 휴대전화번호가 아닙니다. 본인인증을 다시해주세요.");
+                log.error("본인 명의의 휴대전화 번호가 아닙니다. 다시 인증 해주세요. ");
                 return ResponseEntity.ok(res.fail(ResponseErrorCode.KO033.getCode(), ResponseErrorCode.KO033.getDesc()));
             }else {
                 // 인증 쿠키제거
@@ -441,7 +441,7 @@ public class AuthService {
 
         // 본인인증 체크
         if (!kokonutSignUp.getKnPhoneNumber().equals(authPhoneCheckDto.getJoinPhone()) || !kokonutSignUp.getKnName().equals(authPhoneCheckDto.getJoinName())) {
-            log.error("본인인증된 명의 및 휴대전화번호가 아닙니다. 본인인증을 다시해주세요.");
+            log.error("본인 명의의 휴대전화 번호가 아닙니다. 다시 인증 해주세요. ");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO033.getCode(), ResponseErrorCode.KO033.getDesc()));
         }else {
             // 인증 쿠키제거
@@ -1082,7 +1082,7 @@ public class AuthService {
                         || (optionalAdmin.get().getMasterId().equals(optionalAdmin.get().getCompanyId()) && differenceInMinutes <= 10)) {
                     log.info("10분내 가입한사람");
                 } else {
-                    log.error("본인인증된 명의 및 휴대전화번호가 아닙니다. 본인인증을 다시해주세요.");
+                    log.error("본인 명의의 휴대전화 번호가 아닙니다. 다시 인증 해주세요. ");
                     return ResponseEntity.ok(res.fail(ResponseErrorCode.KO033.getCode(), ResponseErrorCode.KO033.getDesc()));
                 }
             }else {
@@ -1202,7 +1202,7 @@ public class AuthService {
         AuthPhoneCheckDto authPhoneCheckDto = Utils.authPhoneCheck(request);
         // 본인인증 체크
         if (!kokonutCreateUser.getKnPhoneNumber().equals(authPhoneCheckDto.getJoinPhone()) || !kokonutCreateUser.getKnName().equals(authPhoneCheckDto.getJoinName())) {
-            log.error("본인인증된 명의 및 휴대전화번호가 아닙니다. 본인인증을 다시해주세요.");
+            log.error("본인 명의의 휴대전화 번호가 아닙니다. 다시 인증 해주세요. ");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO033.getCode(), ResponseErrorCode.KO033.getDesc()));
         }else {
             // 인증 쿠키제거
@@ -1280,7 +1280,7 @@ public class AuthService {
 
             // 본인인증 체크
             if (!knPhoneNumber.equals(authPhoneCheckDto.getJoinPhone()) || !knName.equals(authPhoneCheckDto.getJoinName())) {
-                log.error("본인인증된 명의 및 휴대전화번호가 아닙니다. 본인인증을 다시해주세요.");
+                log.error("본인 명의의 휴대전화 번호가 아닙니다. 다시 인증 해주세요. ");
                 return ResponseEntity.ok(res.fail(ResponseErrorCode.KO033.getCode(), ResponseErrorCode.KO033.getDesc()));
             }else {
                 // 인증 쿠키제거
