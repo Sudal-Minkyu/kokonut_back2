@@ -631,7 +631,7 @@ public class PolicyService {
             }
 
             List<PolicyServiceAuto> policyServiceAutoDeleteList = new ArrayList<>();
-            List<Long> serviceAutoDeleteIdList = policySaveThirdDto.getPolicyBeforeDeleteIdList();
+            List<Long> serviceAutoDeleteIdList = policySaveThirdDto.getPolicyServiceAutoDeleteIdList();
             for(PolicyServiceAutoSaveDto policyServiceAutoSaveDto : policySaveThirdDto.getPolicyServiceAutoSaveDtoList()) {
                 if(policyServiceAutoSaveDto.getPisaId() != 0) {
                     Optional<PolicyServiceAuto> optionalPolicyServiceAuto = policyServiceAutoRepository.findById(policyServiceAutoSaveDto.getPisaId());
