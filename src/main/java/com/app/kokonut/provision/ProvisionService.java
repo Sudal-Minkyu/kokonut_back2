@@ -18,10 +18,7 @@ import com.app.kokonut.history.dtos.ActivityCode;
 import com.app.kokonut.history.extra.decrypcounthistory.DecrypCountHistoryService;
 import com.app.kokonut.privacyhistory.PrivacyHistoryService;
 import com.app.kokonut.privacyhistory.dtos.PrivacyHistoryCode;
-import com.app.kokonut.provision.dtos.ProvisionDownloadCheckDto;
-import com.app.kokonut.provision.dtos.ProvisionListDto;
-import com.app.kokonut.provision.dtos.ProvisionSaveDto;
-import com.app.kokonut.provision.dtos.ProvisionSearchDto;
+import com.app.kokonut.provision.dtos.*;
 import com.app.kokonut.provision.provisiondownloadhistory.ProvisionDownloadHistory;
 import com.app.kokonut.provision.provisiondownloadhistory.ProvisionDownloadHistoryRepository;
 import com.app.kokonut.provision.provisiondownloadhistory.dtos.ProvisionDownloadHistoryListDto;
@@ -350,7 +347,7 @@ public class ProvisionService {
         activityHistoryId = historyService.insertHistory(4, adminId, activityCode,
                 cpCode+" - ", "", ip, 0, email);
 
-        Page<ProvisionListDto> provisionListDtos = provisionRepository.findByProvisionList(provisionSearchDto, pageable);
+        Page<ProvisionPageDto> provisionPageDtos = provisionRepository.findByProvisionPage(provisionSearchDto, pageable);
 //        for(int i=0 ;i<provisionListDtos.getContent().size(); i++) {
 //            log.info("provisionSearchDto.getDownloadAccept : "+provisionListDtos.getContent().get(i).getDownloadAccept());
 //        }
@@ -358,7 +355,7 @@ public class ProvisionService {
         historyService.updateHistory(activityHistoryId,
                 null, "", 1);
 
-        return ResponseEntity.ok(res.ResponseEntityPage(provisionListDtos));
+        return ResponseEntity.ok(res.ResponseEntityPage(provisionPageDtos));
     }
 
     // 개인정보제공 다운로드 리스트 조회
@@ -539,10 +536,10 @@ public class ProvisionService {
 
             for(int i=0; i<targetList.size(); i++) {
                 if(!targetList.get(i).equals("pass") && !securityList.get(i).equals("pass") && !headerName.get(i).equals("pass")) {
-                    if(i==targetList.size()-1) {
-                        selectQuery.append("COALESCE(").append(targetList.get(i)).append(", '없음') as ").append(headerName.get(i)).append(" ");
+                    if(i == 0) {
+                        selectQuery.append("COALESCE(").append(targetList.get(i)).append(", '없음') as ").append(headerName.get(i));
                     } else {
-                        selectQuery.append("COALESCE(").append(targetList.get(i)).append(", '없음') as ").append(headerName.get(i)).append(", ");
+                        selectQuery.append(", COALESCE(").append(targetList.get(i)).append(", '없음') as ").append(headerName.get(i)).append(" ");
                     }
                 }
             }
@@ -727,6 +724,140 @@ public class ProvisionService {
             }
         } else {
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO118.getCode(), ResponseErrorCode.KO118.getDesc()));
+        }
+
+        return ResponseEntity.ok(res.success(data));
+    }
+
+    // 개인정보제공 리스트 엑셀 다운로드 API
+    public ResponseEntity<Map<String, Object>> provisionListDownloadExcel(String searchText, String stime, String filterOfferType, String filterState, String otpValue, String downloadReason, String email) throws IOException {
+        log.info("provisionListDownloadExcel 호출");
+
+//        log.info("email : "+email);
+//        log.info("searchText : "+searchText);
+//        log.info("stime : "+stime);
+//        log.info("filterOfferType : "+filterOfferType);
+//        log.info("filterState : "+filterState);
+//        log.info("otpValue : "+otpValue);
+//        log.info("downloadReason : "+downloadReason);
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data;
+
+        if(otpValue == null || otpValue.equals("")) {
+            log.error("구글 OTP 값이 존재하지 않습니다.");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO010.getCode(),ResponseErrorCode.KO010.getDesc()));
+        }
+
+        // 접속한 사용자 인덱스
+        AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
+        long adminId = adminCompanyInfoDto.getAdminId();
+        String cpCode = adminCompanyInfoDto.getCompanyCode();
+        String knOtpKey = adminCompanyInfoDto.getKnOtpKey();
+
+        boolean auth = googleOTP.checkCode(otpValue, knOtpKey);
+        log.info("auth : " + auth);
+
+        if (!auth) {
+            log.error("입력된 구글 OTP 값이 일치하지 않습니다. 다시 확인해주세요.");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO012.getCode(), ResponseErrorCode.KO012.getDesc()));
+        } else {
+            log.info("OTP인증완료 -> 개인정보 제공엑셀 다운로드 시작");
+        }
+
+        ProvisionSearchDto provisionSearchDto = new ProvisionSearchDto();
+        provisionSearchDto.setAdminId(adminId);
+        provisionSearchDto.setCpCode(cpCode);
+        provisionSearchDto.setSearchText(searchText);
+        provisionSearchDto.setFilterOfferType(filterOfferType);
+        provisionSearchDto.setFilterState(filterState);
+
+        if(!stime.equals("")) {
+            List<LocalDateTime> stimeList = Utils.getStimeList(stime);
+            provisionSearchDto.setStimeStart(stimeList.get(0));
+            provisionSearchDto.setStimeEnd(stimeList.get(1).plusHours(23).plusMinutes(59));
+        }
+        else {
+            log.info("만든날짜 범위를 지정해주세요.");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO121.getCode(), ResponseErrorCode.KO121.getDesc()));
+        }
+
+        List<ProvisionListDto> provisionListDtos = provisionRepository.findByProvisionList(provisionSearchDto);
+//        log.info("provisionListDtos : "+provisionListDtos);
+
+        if(provisionListDtos.isEmpty()) {
+            log.info("제공이력 데이터가 존재하지 않습니다.");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO122.getCode(), ResponseErrorCode.KO122.getDesc()));
+        }
+
+
+        List<Map<String, Object>> provisionDownloadDataList = new ArrayList<>();
+        Map<String, Object> provisionDownloadData;
+        for (ProvisionListDto provisionListDto : provisionListDtos) {
+            provisionDownloadData = new HashMap<>();
+
+            provisionDownloadData.put("상태", provisionListDto.getProState());
+            provisionDownloadData.put("제공자", provisionListDto.getKnName());
+            provisionDownloadData.put("만든 날짜", provisionListDto.getInsert_date());
+            provisionDownloadData.put("제공 기간", provisionListDto.getProStartDate()+" ~ "+provisionListDto.getProExpDate());
+            provisionDownloadData.put("제공 타입", provisionListDto.getOfferType());
+            provisionDownloadData.put("제공인원 수", provisionListDto.getOfferCount());
+            provisionDownloadData.put("다운로드인원 수", provisionListDto.getDownloadCount());
+
+            provisionDownloadDataList.add(provisionDownloadData);
+        }
+//        log.info("provisionDownloadDataList : "+provisionDownloadDataList);
+
+        //  다운로드 코드
+        ActivityCode activityCode = ActivityCode.AC_47_3;
+        String ip = CommonUtil.publicIp();
+        Long activityHistoryId;
+
+        // 활동이력 저장 -> 비정상 모드
+        activityHistoryId = historyService.insertHistory(2, adminId, activityCode,
+                cpCode+" - 사유 : "+downloadReason, downloadReason, ip, 0, email);
+
+        String filePassword = Utils.getSpecialRandomStr(6, 8);
+        if (filePassword.equals("ERROR ERROR")) {
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO036.getCode(), ResponseErrorCode.KO036.getDesc()));
+        }
+        log.info("생성된 파일암호 : "+filePassword);
+
+        // 인증번호 메일전송
+        String title = ReqUtils.filter("개인정보제공 이력 파일의 암호가 도착했습니다.");
+        String contents = ReqUtils.unFilter("파일암호 : "+filePassword);
+
+        // 템플릿 호출을 위한 데이터 세팅
+        HashMap<String, String> callTemplate = new HashMap<>();
+//        callTemplate.put("template", "KokonutMailTemplate");
+        callTemplate.put("title", "개인정보제공 이력 파일암호 알림");
+        callTemplate.put("content", contents);
+
+        // 템플릿 TODO 템플릿 디자인 추가되면 수정
+        contents = mailSender.getHTML6(callTemplate);
+        String reciverName = "kokonut";
+
+        String mailSenderResult = mailSender.sendKokonutMail(email, reciverName, title, contents);
+        if(mailSenderResult != null) {
+            // mailSender 성공
+            log.info("### 메일전송 성공했습니다. reciver Email : "+ email);
+
+            LocalDate now = LocalDate.now();
+            String fileName = now+"_개인정보제공 이력";
+            String sheetName = "개인정보제공 이력";
+
+            log.info("파일명 : "+fileName);
+            log.info("시트명 : "+sheetName);
+            data = excelService.createExcelFile(fileName, sheetName, provisionDownloadDataList, filePassword);
+
+            historyService.updateHistory(activityHistoryId, null, downloadReason, 1);
+
+        }else{
+            historyService.updateHistory(activityHistoryId, null, downloadReason+"- 개인정보제공이력 다운로드 파일암호전송 실패", 0);
+
+            // mailSender 실패
+            log.error("### 해당 메일 전송에 실패했습니다. 관리자에게 문의하세요. reciverEmail : "+ email);
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO041.getCode(), ResponseErrorCode.KO041.getDesc()));
         }
 
         return ResponseEntity.ok(res.success(data));
