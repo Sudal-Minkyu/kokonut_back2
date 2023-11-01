@@ -4,6 +4,7 @@ import com.app.kokonut.common.AjaxResponse;
 import com.app.kokonut.common.ResponseErrorCode;
 import com.app.kokonut.configs.exception.KokonutAPIException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.impl.SizeLimitExceededException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
@@ -65,6 +66,14 @@ public class GlobalExceptionHandler {
         log.error("에러내용 : 403 에러발생!");
         log.error("ex : "+ex);
         log.error("ex.getMessage() : "+ex.getMessage());
+    }
+
+    // 이미지 초과
+    @ExceptionHandler(SizeLimitExceededException.class)
+    public ResponseEntity<Map<String, Object>> handleKokonutAPISizeLimitExceededException(HttpMessageNotReadableException e) {
+        AjaxResponse res = new AjaxResponse();
+        log.error("에러내용 : 첨부파일이 20MB 용량을 넘었습니다.");
+        return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_KOKONUT_03.getCode(),ResponseErrorCode.ERROR_KOKONUT_03.getDesc()));
     }
 
 }

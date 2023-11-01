@@ -2,11 +2,13 @@ package com.app.kokonut.provision;
 
 import com.app.kokonut.provision.dtos.ProvisionDownloadCheckDto;
 import com.app.kokonut.provision.dtos.ProvisionListDto;
+import com.app.kokonut.provision.dtos.ProvisionPageDto;
 import com.app.kokonut.provision.dtos.ProvisionSearchDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * @author Woody
@@ -16,7 +18,9 @@ import java.time.LocalDate;
  */
 public interface ProvisionRepositoryCustom {
 
-    Page<ProvisionListDto> findByProvisionList(ProvisionSearchDto provisionSearchDto, Pageable pageable);
+    Page<ProvisionPageDto> findByProvisionPage(ProvisionSearchDto provisionSearchDto, Pageable pageable);
+
+    List<ProvisionListDto> findByProvisionList(ProvisionSearchDto provisionSearchDto);
 
     Long findByProvisionIndexTodayCount(String cpCode, Integer type, LocalDate now);
 

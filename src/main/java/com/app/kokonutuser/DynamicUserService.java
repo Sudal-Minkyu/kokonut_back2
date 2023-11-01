@@ -2723,7 +2723,6 @@ public class DynamicUserService {
 		AdminCompanyInfoDto adminCompanyInfoDto = adminRepository.findByCompanyInfo(email);
 
 		long adminId = adminCompanyInfoDto.getAdminId();
-		String cpCode = adminCompanyInfoDto.getCompanyCode();
 		String knOtpKey = adminCompanyInfoDto.getKnOtpKey();
 
 		boolean auth = googleOTP.checkCode(otpValue, knOtpKey);
@@ -2737,18 +2736,18 @@ public class DynamicUserService {
 		}
 
 		if(paramMap.isEmpty()) {
-			log.error("입력된 구글 OTP 값이 일치하지 않습니다. 다시 확인해주세요.");
+			log.error("개인정보 데이터가 존재하지 않습니다.");
 			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO116.getCode(), ResponseErrorCode.KO116.getDesc()));
 		}
 
-		String ip = CommonUtil.publicIp();
-		Long activityHistoryId;
+//		String ip = CommonUtil.publicIp();
+//		Long activityHistoryId;
 
 		String fileName = LocalDate.now()+"_개인정보열람파일";
 		String sheetName = paramMap.get(0).get("아이디(1_id)")+"의 개인정보";
 
 		String filePassword = Utils.getSpecialRandomStr(6, 8);
-		if (filePassword == "ERROR ERROR") {
+		if (filePassword.equals("ERROR ERROR")) {
 			return ResponseEntity.ok(res.fail(ResponseErrorCode.KO036.getCode(), ResponseErrorCode.KO036.getDesc()));
 		}
 		log.info("생성된 파일암호 : "+filePassword);
