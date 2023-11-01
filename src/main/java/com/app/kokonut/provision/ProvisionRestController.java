@@ -84,6 +84,19 @@ public class ProvisionRestController {
         return provisionService.provisionDetail(proCode, jwtFilterDto);
     }
 
+    @PostMapping("/provisionListDownloadExcel")
+    @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
+    @ApiOperation(value = "개인정보제공 리스트 엑셀 다운로드 API", notes = "")
+    public ResponseEntity<Map<String, Object>> provisionListDownloadExcel(@RequestParam(value="searchText", defaultValue = "") String searchText,
+                                                                          @RequestParam(value="stime", defaultValue = "") String stime,
+                                                                          @RequestParam(value="filterOfferType", defaultValue = "") String filterOfferType,
+                                                                          @RequestParam(value="filterState", defaultValue = "") String filterState,
+                                                                          @RequestParam(value="otpValue", defaultValue = "") String otpValue,
+                                                                          @RequestParam(value="downloadReason", defaultValue = "") String downloadReason) throws IOException {
+        JwtFilterDto jwtFilterDto = SecurityUtil.getCurrentJwt();
+        return provisionService.provisionListDownloadExcel(searchText, stime, filterOfferType, filterState, otpValue, downloadReason, jwtFilterDto.getEmail());
+    }
+
     @PostMapping("/provisionDownloadExcel")
     @ApiImplicitParam(name ="Authorization",  value="JWT Token",required = true, dataTypeClass = String.class, paramType = "header", example = "jwtKey")
     @ApiOperation(value = "개인정보제공 다운로드 API", notes = "")

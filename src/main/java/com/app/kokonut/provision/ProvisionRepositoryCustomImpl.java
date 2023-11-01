@@ -3,6 +3,7 @@ package com.app.kokonut.provision;
 import com.app.kokonut.admin.QAdmin;
 import com.app.kokonut.provision.dtos.ProvisionDownloadCheckDto;
 import com.app.kokonut.provision.dtos.ProvisionListDto;
+import com.app.kokonut.provision.dtos.ProvisionPageDto;
 import com.app.kokonut.provision.dtos.ProvisionSearchDto;
 import com.app.kokonut.provision.provisiondownloadhistory.QProvisionDownloadHistory;
 import com.app.kokonut.provision.provisionroster.QProvisionRoster;
@@ -46,7 +47,7 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
     // 내가 제공해준거까지 리스트로 나오게되면 문제점 : 내가 제공을해줬지만 내가포함이 아닐수도있다.
     // 만약 위처럼 하게된다면 상세보기를 볼 수 없게하는 작업을 따로 해야된다.
     @Override
-    public Page<ProvisionListDto> findByProvisionList(ProvisionSearchDto provisionSearchDto, Pageable pageable) {
+    public Page<ProvisionPageDto> findByProvisionPage(ProvisionSearchDto provisionSearchDto, Pageable pageable) {
 
         QProvision provision = QProvision.provision;
         QProvisionRoster provisionRoster = new QProvisionRoster("provisionRoster");
@@ -70,7 +71,7 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
                 .from(provisionDownloadHistory)
                 .where(provisionDownloadHistory.proCode.eq(provision.proCode));
 
-        JPQLQuery<ProvisionListDto> query = from(provision)
+        JPQLQuery<ProvisionPageDto> query = from(provision)
                 .where(provision.cpCode.eq(provisionSearchDto.getCpCode())).orderBy(provision.proId.desc())
                 .where(provision.insert_date.goe(provisionSearchDto.getStimeStart()).and(provision.insert_date.loe(provisionSearchDto.getStimeEnd())))
                 .innerJoin(admin).on(admin.knEmail.eq(provision.insert_email))
@@ -78,7 +79,7 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
 
                 .leftJoin(provisionRoster).on(provisionRoster.proCode.eq(provision.proCode).and(provisionRoster.adminId.eq(provisionSearchDto.getAdminId())))
                 .innerJoin(provisionRosterCnt).on(provisionRosterCnt.proCode.eq(provision.proCode)).groupBy(provisionRosterCnt.proCode)
-                .select(Projections.constructor(ProvisionListDto.class,
+                .select(Projections.constructor(ProvisionPageDto.class,
                         provision.proCode,
                         proState,
                         admin.knName,
@@ -131,9 +132,93 @@ public class ProvisionRepositoryCustomImpl extends QuerydslRepositorySupport imp
             }
         }
 
-        final List<ProvisionListDto>  provisionListDtos = Objects.requireNonNull(getQuerydsl()).applyPagination(pageable, query).fetch();
-        return new PageImpl<>(provisionListDtos, pageable, query.fetchCount());
+        final List<ProvisionPageDto> provisionPageDtos = Objects.requireNonNull(getQuerydsl()).applyPagination(pageable, query).fetch();
+        return new PageImpl<>(provisionPageDtos, pageable, query.fetchCount());
     }
+
+    @Override
+    public List<ProvisionListDto> findByProvisionList(ProvisionSearchDto provisionSearchDto) {
+
+        QProvision provision = QProvision.provision;
+        QProvisionRoster provisionRoster = new QProvisionRoster("provisionRoster");
+        QProvisionRoster provisionRosterCnt = new QProvisionRoster("provisionRosterCnt");
+
+        QProvisionDownloadHistory provisionDownloadHistory = QProvisionDownloadHistory.provisionDownloadHistory;
+
+        QAdmin admin = new QAdmin("admin");
+        QAdmin InsertAdmin = new QAdmin("InsertAdmin");
+
+        LocalDate today = LocalDate.now();
+
+        Expression<String> proState = Expressions.cases()
+                .when(provision.proExitState.eq(1)).then("3")
+                .when(provision.proStartDate.gt(today)).then("0")
+                .when(provision.proStartDate.loe(today).and(provision.proExpDate.goe(today))).then("1")
+                .otherwise("2");
+
+        JPQLQuery<Long> downloadHistoryCountSubQuery = JPAExpressions
+                .select(provisionDownloadHistory.count())
+                .from(provisionDownloadHistory)
+                .where(provisionDownloadHistory.proCode.eq(provision.proCode));
+
+        JPQLQuery<ProvisionListDto> query = from(provision)
+                .where(provision.cpCode.eq(provisionSearchDto.getCpCode())).orderBy(provision.proId.desc())
+                .where(provision.insert_date.goe(provisionSearchDto.getStimeStart()).and(provision.insert_date.loe(provisionSearchDto.getStimeEnd())))
+                .innerJoin(admin).on(admin.knEmail.eq(provision.insert_email))
+                .innerJoin(InsertAdmin).on(InsertAdmin.adminId.eq(admin.adminId))
+
+                .leftJoin(provisionRoster).on(provisionRoster.proCode.eq(provision.proCode).and(provisionRoster.adminId.eq(provisionSearchDto.getAdminId())))
+                .innerJoin(provisionRosterCnt).on(provisionRosterCnt.proCode.eq(provision.proCode)).groupBy(provisionRosterCnt.proCode)
+                .select(Projections.constructor(ProvisionListDto.class,
+                        proState,
+                        admin.knName,
+                        provision.insert_date,
+                        provision.proStartDate,
+                        provision.proExpDate,
+                        provisionRosterCnt.count(),
+                        downloadHistoryCountSubQuery,
+                        new CaseBuilder()
+                                .when(admin.adminId.eq(provisionSearchDto.getAdminId()).and(provisionRoster.adminId.eq(provisionSearchDto.getAdminId()))).then("3")
+                                .when(InsertAdmin.adminId.eq(provisionSearchDto.getAdminId()).and(provisionRoster.isNull())).then("1")
+                                .otherwise("2") // 자신이 제공한건이면 "1", 받은건이면 "2"로 반환, 제공하거나 받은건이면 "3"로 반환
+                ));
+
+        if(!provisionSearchDto.getSearchText().equals("")) {
+            query.where(admin.knName.like("%"+ provisionSearchDto.getSearchText() +"%"));
+        }
+
+        if(!provisionSearchDto.getFilterState().equals("")) {
+            BooleanBuilder statePredicate = new BooleanBuilder();
+
+            if(provisionSearchDto.getFilterState().equals("0")) {
+                statePredicate.and(provision.proStartDate.gt(today));
+            } else if(provisionSearchDto.getFilterState().equals("1")) {
+                statePredicate.and(provision.proStartDate.loe(today)).and(provision.proExpDate.goe(today));
+            } else if(provisionSearchDto.getFilterState().equals("2")) {
+                statePredicate.and(provision.proExpDate.lt(today));
+            } else {
+                statePredicate.and(provision.proExitState.eq(1));
+            }
+
+            query.where(statePredicate);
+        }
+
+        if(!provisionSearchDto.getFilterOfferType().equals("")) {
+            if(provisionSearchDto.getFilterOfferType().equals("1")) {
+                // 제공함
+                query.where(InsertAdmin.adminId.eq(provisionSearchDto.getAdminId()).and(provisionRoster.isNull()));
+            } else if(provisionSearchDto.getFilterOfferType().equals("3")) {
+                // 제공/제공받음
+                query.where(admin.adminId.eq(provisionSearchDto.getAdminId()).and(provisionRoster.adminId.eq(provisionSearchDto.getAdminId())));
+            } else if(provisionSearchDto.getFilterOfferType().equals("2")) {
+                // 제공받음
+                query.where(InsertAdmin.adminId.ne(provisionSearchDto.getAdminId()).and(provisionRoster.adminId.eq(provisionSearchDto.getAdminId())));
+            }
+        }
+
+        return query.fetch();
+    }
+
 
     public Long findByProvisionIndexTodayCount(String cpCode, Integer type, LocalDate now) {
 

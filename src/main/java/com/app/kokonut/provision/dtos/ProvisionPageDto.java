@@ -17,7 +17,11 @@ import java.time.format.DateTimeFormatter;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProvisionListDto {
+public class ProvisionPageDto {
+
+//    private Long proId;
+
+    private String proCode;
 
     private String proState; // "0" -> 대기중, "1" -> 제공중, "2" -> 제공완료, "3" -> 제공종료
 
@@ -29,11 +33,32 @@ public class ProvisionListDto {
 
     private LocalDate proExpDate; // 제공 만료 기간
 
+    private Integer proDownloadYn;
+
     private Long offerCount;
 
     private Long downloadCount;
 
+    private String downloadAccept; // 다운로드 가능 "1", 제공종료 가능 "2", 다운로드 가능 + 제공종료 가능 "2"
+
     private String offerType; // "1" : 제공함, "2" : 제공받음, "3" : 제공/제공받음
+
+    public String getProDownloadYn() {
+        if(proDownloadYn == 0) {
+            return "N";
+        } else {
+            return "Y";
+        }
+    }
+
+    public String getKnName() {
+        StringBuilder stars = new StringBuilder();
+        int namelength = knName.length()-2;
+        for(int i=0; i<namelength; i++) {
+            stars.append("*");
+        }
+        return knName.substring(0,1)+stars+knName.substring(knName.length()-1);
+    }
 
     public String getInsert_date() {
         return DateTimeFormatter.ofPattern("yyyy. MM. dd").format(insert_date);
@@ -45,28 +70,6 @@ public class ProvisionListDto {
 
     public String getProExpDate() {
         return DateTimeFormatter.ofPattern("yyyy.MM.dd").format(proExpDate);
-    }
-
-    public String getProState() {
-        if(proState.equals("0")) {
-            return "대기중";
-        } else if(proState.equals("1")) {
-            return "제공중";
-        } else if(proState.equals("2")) {
-            return "제공완료";
-        } else {
-            return "제공종료";
-        }
-    }
-
-    public String getOfferType() {
-        if(proState.equals("1")) {
-            return "제공함";
-        } else if(proState.equals("2")) {
-            return "제공받음";
-        } else {
-            return "제공/제공받음";
-        }
     }
 
 }
