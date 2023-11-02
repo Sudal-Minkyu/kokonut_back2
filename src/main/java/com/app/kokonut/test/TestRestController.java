@@ -277,7 +277,6 @@ public class TestRestController {
 
     @ApiOperation(value="사진등록 테스트")
     @PostMapping(value = "/phototest")
-//    @PostMapping(value = "/phototest", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<Map<String,Object>> phototest(@ModelAttribute PhototestDto phototestDto) {
         log.info("phototest 호출");
 
@@ -294,14 +293,9 @@ public class TestRestController {
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
 
-        CloseableHttpClient httpClient = HttpClients.createDefault();
-
-//        // HttpPost 객체 생성
-//        HttpPost httpPost = new HttpPost("http://127.0.0.1:8050/v3/api/Auth/register");
-//
         try {
             String url = "http://127.0.0.1:8050/v3/api/Auth/register";
-            log.info("url : " + url);
+//            log.info("url : " + url);
 
             try {
                 URL apiurl = new URL(url);
@@ -351,56 +345,11 @@ public class TestRestController {
 
                 log.info("code: {}, data: {}", code, data2);
 
-//                if (code.equals("200")) {
-//
-//                }
-
-
             } catch (Exception e) {
                 log.error("예외처리 : " + e);
                 log.error("예외처리 메세지 : " + e.getMessage());
             }
-        }
-//            // MultipartFile을 java.io.File로 변환
-////            File file = Utils.convertMultipartFileToFile(multipartFile);
-//
-////            log.info("signature : "+signature);
-//
-//            // 파일을 이용해 FileBody 객체 생성
-////            FileBody fileBody = new FileBody(file, ContentType.DEFAULT_BINARY);
-//
-//            // MultipartEntityBuilder를 이용해 HttpEntity 객체 생성
-////            HttpEntity entity = MultipartEntityBuilder.create() // 자동으로 "Content-Type","multipart/form-data"이 주입됨
-////                    .addPart("fileList", fileBody)
-////                    .build();
-//
-//            // HttpPost 객체에 HttpEntity 설정
-//            httpPost.set(entity);
-//
-//            // 필요한 헤더 추가
-//            httpPost.setHeader("accept", "application/json");
-////            httpPost.setHeader("Content-Type", "multipart/form-data");
-//            httpPost.setHeader("x-api-key", "ebb36afbd976c0aa4ff157616e30e674");
-////            log.info("httpPost : " + httpPost);
-//
-//            // POST 요청 실행
-//            try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
-//                log.info("response : " + response);
-//
-////                // 응답 처리
-////                String responseString = EntityUtils.toString(response.getEntity());
-////                JSONObject jsonObject = new JSONObject(responseString);
-////                JSONArray filesArray = jsonObject.getJSONArray("files");
-////                log.info("File ID : " + result);
-//            }
-//            catch (Exception e) {
-//                log.error("예외처리 2 : "+e);
-//                log.error("예외처리 메세지 2 : "+e.getMessage());
-//            }
-//
-//        }
-
-        catch (Exception e) {
+        } catch (Exception e) {
             log.error("예외처리 1 : "+e);
             log.error("예외처리 메세지 1 : "+e.getMessage());
         }

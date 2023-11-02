@@ -58,7 +58,8 @@ kokonut:
       # S3 버킷 폴더
       businessS3Folder: ${KOKONUT_AWS_S3_BUSINESSS3FOLDER}
       qnaS3Folder: ${KOKONUT_AWS_S3_QNAS3FOLDER}
-      
+      userprivacyS3Folder: ${KOKONUT_AWS_S3_USERPRIVACY}
+
     # AWS KMS
     kms:
       secret: ${KOKONUT_AWS_KMS_SECRET}
