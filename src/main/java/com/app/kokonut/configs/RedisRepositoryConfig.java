@@ -5,8 +5,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
@@ -20,15 +22,22 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @EnableRedisRepositories
 public class RedisRepositoryConfig {
 
-    @Value("${spring.redis.host}")
+    @Value("${kokonut.redis.host}")
     private String redisHost;
 
-    @Value("${spring.redis.port}")
+    @Value("${kokonut.redis.port}")
     private int redisPort;
+
+    @Value("${kokonut.redis.password}")
+    private String redisPassword;
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-        return new LettuceConnectionFactory(redisHost, redisPort);
+        RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
+        configuration.setHostName(redisHost);
+        configuration.setPassword(redisPassword);
+        configuration.setPort(redisPort);
+        return new LettuceConnectionFactory(configuration);
     }
 
     @Bean
@@ -38,6 +47,16 @@ public class RedisRepositoryConfig {
         redisTemplate.setValueSerializer(new StringRedisSerializer());
         redisTemplate.setConnectionFactory(redisConnectionFactory());
         return redisTemplate;
+    }
+
+    // stringRedisTemplate bean은 일반적인 String 값을 key, value로 사용하는 경우 사용합니다.
+    @Bean
+    public StringRedisTemplate stringRedisTemplate() {
+        StringRedisTemplate stringRedisTemplate = new StringRedisTemplate();
+        stringRedisTemplate.setKeySerializer(new StringRedisSerializer());
+        stringRedisTemplate.setValueSerializer(new StringRedisSerializer());
+        stringRedisTemplate.setConnectionFactory(redisConnectionFactory());
+        return stringRedisTemplate;
     }
 
 }
