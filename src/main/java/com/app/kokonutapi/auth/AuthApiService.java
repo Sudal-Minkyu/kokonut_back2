@@ -386,7 +386,7 @@ public class AuthApiService {
                                 log.error("이미 사용중인 아이디입니다.");
                                 return ResponseEntity.ok(res.apifail(ResponseErrorCode.ERROR_CODE_10.getCode(),ResponseErrorCode.ERROR_CODE_10.getDesc()));
                             } else {
-                                kphReason = value.charAt(0) + Utils.starsForString(value) + value.substring(value.length() - 1)+" 님의 개인정보 생성";
+                                kphReason = value.charAt(0)+" 님의 개인정보 생성";
                             }
                         }
                         if (encrypts.get(i).equals("암호화")) {

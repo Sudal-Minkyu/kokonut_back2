@@ -2347,12 +2347,14 @@ public class DynamicUserService {
 						log.error("존재하지 않은 고유코드 입니다. 고유코드를 확인 해주세요. 고유코드 : " + code);
 						return ResponseEntity.ok(res.fail(ResponseErrorCode.ERROR_CODE_04.getCode(), ResponseErrorCode.ERROR_CODE_04.getDesc() + " 고유코드 : " + code));
 					} else {
-
-						if(i == searchCodes.size()-1) {
-							kphReason.append(companyTableColumnInfoCheck.getCtciDesignation()).append(" 조회 : ");
-						} else {
-							kphReason.append(companyTableColumnInfoCheck.getCtciDesignation()).append(", ");
+						kphReason.append(companyTableColumnInfoCheck.getCtciDesignation());
+						if (value != null && !value.isEmpty()) {
+							kphReason.append(":"+value);
 						}
+						if(i != searchCodes.size()-1) {
+							kphReason.append(", ");
+						}
+						kphReason.append(" ");
 
 						if(companyTableColumnInfoCheck.getCtciSecuriy().equals("1")) {
 
@@ -2498,7 +2500,7 @@ public class DynamicUserService {
 			List<Map<String, Object>> privacyList = dynamicUserRepositoryCustom.privacyListPagedData(String.valueOf(resultQuery));
 			log.info("privacyList : "+privacyList);
 
-			kphReason.append("총 ").append(totalCount).append("건");
+			kphReason.append("- "+(kokonutSearchDto.getPageNum())+ "페이지");
 
 //			log.info("headerNames : "+headerNames); // 상단헤더 내용들
 
@@ -2665,7 +2667,7 @@ public class DynamicUserService {
 					if(securityHeaderNames.get(i).equals("아이디(1_id)")) {
 						String value = (String) map.get(securityHeaderNames.get(i));
 						if(value != null) {
-							kphReason = value.charAt(0) + Utils.starsForString(value) + value.substring(value.length() - 1)+" 님의 개인정보 열람";
+							kphReason = value+" 님의 개인정보 열람";
 						}
 					} else {
 						Object key = map.get(securityHeaderNames.get(i));

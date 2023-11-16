@@ -67,14 +67,15 @@ public class PrivacyHistoryListDto {
 
     }
 
-    public String getKnName() {
-        StringBuilder stars = new StringBuilder();
-        int namelength = knName.length()-2;
-        for(int i=0; i<namelength; i++) {
-            stars.append("*");
-        }
-        return knName.substring(0,1)+stars+knName.substring(knName.length()-1);
-    }
+    // 관리자 이름 중앙 마스킹처리
+//    public String getKnName() {
+//        StringBuilder stars = new StringBuilder();
+//        int namelength = knName.length()-2;
+//        for(int i=0; i<namelength; i++) {
+//            stars.append("*");
+//        }
+//        return knName.substring(0,1)+stars+knName.substring(knName.length()-1);
+//    }
 
     public String getPrivacyHistoryCode() {
         return privacyHistoryCode.getDesc();
