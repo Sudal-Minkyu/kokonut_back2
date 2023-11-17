@@ -2,35 +2,17 @@ package com.app.kokonut.test;
 
 import com.app.kokonut.alimtalk.AlimtalkSendService;
 import com.app.kokonut.alimtalk.dtos.AlimtalkTemplateInfoDto;
-import com.app.kokonut.auth.jwt.SecurityUtil;
-import com.app.kokonut.auth.jwt.dto.JwtFilterDto;
+import com.app.kokonut.auth.jwt.dto.RedisDao;
 import com.app.kokonut.common.*;
-import com.app.kokonut.company.companytablecolumninfo.CompanyTableColumnInfo;
 import com.app.kokonut.company.companytablecolumninfo.CompanyTableColumnInfoRepository;
 import com.app.kokonut.configs.ExcelService;
 import com.app.kokonut.configs.MailSender;
 import com.app.kokonut.email.email.EmailService;
-import com.app.kokonut.email.email.dtos.EmailCheckDto;
 import com.app.kokonut.navercloud.NaverCloudPlatformService;
-import com.app.kokonut.qna.dtos.QnaQuestionSaveDto;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,7 +23,6 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -58,6 +39,7 @@ public class TestRestController {
     @Value("${kokonut.happytalk.profilekey}")
     public String profilekey;
 
+    private final RedisDao redisDao;
     private final MailSender mailSender;
     private final EmailService emailService;
     private final ExcelService excelService;
@@ -66,9 +48,10 @@ public class TestRestController {
     private final CompanyTableColumnInfoRepository companyTableColumnInfoRepository;
 
     @Autowired
-    public TestRestController(MailSender mailSender, EmailService emailService,
+    public TestRestController(RedisDao redisDao, MailSender mailSender, EmailService emailService,
                               ExcelService excelService, NaverCloudPlatformService naverCloudPlatformService,
                               AlimtalkSendService alimtalkSendService, CompanyTableColumnInfoRepository companyTableColumnInfoRepository){
+        this.redisDao = redisDao;
         this.mailSender = mailSender;
         this.emailService = emailService;
         this.excelService = excelService;
@@ -274,6 +257,26 @@ public class TestRestController {
         return ResponseEntity.ok(res.success(data));
     }
 
+    @ApiOperation(value = "JWT토큰 삭제 테스트")
+    @GetMapping(value = "/jwtDeleteTest")
+    public ResponseEntity<Map<String,Object>> jwtDeleteTest(@RequestParam(value="knEmail", defaultValue = "") String knEmail) {
+
+        AjaxResponse res = new AjaxResponse();
+        HashMap<String, Object> data = new HashMap<>();
+
+        String publicIpReplace = CommonUtil.publicIp().replaceAll("\\.",""); // 111.222.333 = 111222333
+        String refreshToken = redisDao.getValues("RT: "+knEmail+"-"+publicIpReplace);
+        log.info("refreshToken : "+refreshToken);
+
+        if(refreshToken != null) {
+            redisDao.deleteValues("RT: "+knEmail+"-"+publicIpReplace);
+        }
+
+        refreshToken = redisDao.getValues("RT: "+knEmail+"-"+publicIpReplace);
+        log.info("refreshToken : "+refreshToken);
+
+        return ResponseEntity.ok(res.success(data));
+    }
 
     @ApiOperation(value="사진등록 테스트")
     @PostMapping(value = "/phototest")

@@ -85,10 +85,6 @@ public class JwtTokenProvider {
                 .setExpiration(new Date(date.getTime() + REFRESH_TOKEN_EXPIRE_TIME))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
-//        Claims claims = tokenProvider.parseClaims(request.getHeader("Authorization"));
-        // 레디스 저장
-        redisDao.setValues("RT: "+authentication.getName(), refreshToken);
-        log.info("redis RT : {}", redisDao.getValues("RT: "+authentication.getName()));
 
         return AuthResponseDto.TokenInfo.builder()
                 .accessToken(accessToken)

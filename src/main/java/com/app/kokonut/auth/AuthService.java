@@ -832,13 +832,26 @@ public class AuthService {
 
                             data.put("jwtToken", jwtToken.getAccessToken());
 
+                            String publicIpReplace = publicIp.replaceAll("\\.","");
+                            String knIpAddr = optionalAdmin.get().getKnIpAddr().replaceAll("\\.","");
+                            String refreshToken = jwtToken.getRefreshToken();
+
+                            if(!Objects.equals(knIpAddr, publicIpReplace)) {
+                                if(redisDao.getValues("RT: "+authentication.getName()+"-"+knIpAddr) != null) {
+                                    redisDao.deleteValues("RT: "+authentication.getName()+"-"+knIpAddr);
+                                }
+                                redisDao.setValues("RT: "+authentication.getName()+"-"+publicIpReplace, refreshToken, Duration.ofMillis(jwtToken.getRefreshTokenExpirationTime()));
+                            } else {
+                                redisDao.setValues("RT: "+authentication.getName()+"-"+publicIpReplace, refreshToken, Duration.ofMillis(jwtToken.getRefreshTokenExpirationTime()));
+                            }
+
                             // 쿠키저장함수 호출
                             if(response != null) {
-                                Utils.cookieSave("refreshToken", jwtToken.getRefreshToken(), 604800, response);
+                                Utils.cookieSave("refreshToken", refreshToken, 604800, response);
                             }
 
                             // RefreshToken Redis 저장 (expirationTime 설정을 통해 자동 삭제 처리)
-                            redisDao.setValues("RT: " + authentication.getName(), jwtToken.getRefreshToken(), Duration.ofMillis(jwtToken.getRefreshTokenExpirationTime()));
+//                            redisDao.setValues("RT: " + authentication.getName(), jwtToken.getRefreshToken(), Duration.ofMillis(jwtToken.getRefreshTokenExpirationTime()));
 
                             // 비밀번호 틀린횟수 초기화
                             if(knPwdErrorCount != 0) {
@@ -847,6 +860,7 @@ public class AuthService {
 
                             // 마지막 로그인 시간기록
                             optionalAdmin.get().setKnLastLoginDate(LocalDateTime.now());
+
                             // 최근 접속 IP
                             optionalAdmin.get().setKnIpAddr(publicIp);
                             adminRepository.save(optionalAdmin.get());
@@ -882,8 +896,10 @@ public class AuthService {
         // Access Token 에서 User knEmail 을 가져옵니다.
         Authentication authentication = jwtTokenProvider.getAuthentication(reissue.getAccessToken());
 
+        String ip = CommonUtil.publicIp();
+
         // Redis 에서 User knEmail 을 기반으로 저장된 Refresh Token 값을 가져옵니다.
-        String refreshToken = redisDao.getValues("RT: "+authentication.getName());
+        String refreshToken = redisDao.getValues("RT: "+authentication.getName()+"-"+ip);
 
         // Refresh Token 검증
         if (jwtTokenProvider.validateToken(refreshToken) == 400) {

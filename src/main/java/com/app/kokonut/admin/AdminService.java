@@ -419,7 +419,15 @@ public class AdminService {
         AjaxResponse res = new AjaxResponse();
         HashMap<String, Object> data = new HashMap<>();
 
+        String publicIpReplace = CommonUtil.publicIp().replaceAll("\\.","");;
         String email = jwtFilterDto.getEmail();
+
+        String refreshToken = redisDao.getValues("RT: "+email+"-"+publicIpReplace);
+        if(refreshToken==null) {
+            log.error("누군가 로그인하였습니다. 다시 로그인해주시길 바랍니다.");
+            return ResponseEntity.ok(res.fail(ResponseErrorCode.KO123.getCode(),ResponseErrorCode.KO123.getDesc()));
+        }
+
         if(email.equals("anonymousUser")){
             log.error("사용하실 수 없는 토큰정보 입니다. 다시 로그인 해주세요.");
             return ResponseEntity.ok(res.fail(ResponseErrorCode.KO009.getCode(),ResponseErrorCode.KO009.getDesc()));

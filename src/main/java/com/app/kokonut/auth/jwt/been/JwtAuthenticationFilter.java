@@ -1,6 +1,7 @@
 package com.app.kokonut.auth.jwt.been;
 
 import com.app.kokonut.auth.jwt.dto.RedisDao;
+import com.app.kokonut.common.CommonUtil;
 import io.jsonwebtoken.UnsupportedJwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -75,6 +76,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     } else {
                         // 토큰 검증
                         Authentication authentication = jwtTokenProvider.getAuthentication(refreshToken);
+
+                        String publicIpReplace = CommonUtil.publicIp().replaceAll("\\.","");
+                        refreshToken = redisDao.getValues("RT: "+authentication.getName()+"-"+publicIpReplace);
+                        if(refreshToken == null) {
+                            log.warn("누군가 로그인했습니다. 새로 로그인해주시길 바랍니다.");
+                            throw new RuntimeException("누군가 로그인했습니다.");
+                        }
 
                         // 토큰 발급
                         String newAccessToken = jwtTokenProvider.reissueAccessToken(authentication);

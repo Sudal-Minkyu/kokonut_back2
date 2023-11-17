@@ -163,6 +163,8 @@ public enum ResponseErrorCode {
     KO121("KO121", "만든날짜 범위를 지정해주세요."),
     KO122("KO122", "제공이력 데이터가 존재하지 않습니다."),
 
+    KO123("KO123", "다른 브라우저에서 로그인하여 이용이 종료됩니다."),
+
     ERROR_CODE_API("ERROR_CODE_API", "API 내용"),
     ERROR_CODE_00("ERROR_CODE_00", "파라미터 데이터가 없습니다."),
     ERROR_CODE_01("ERROR_CODE_01", "지정되지 않은 값입니다. 고유코드를 확인해주시고 메뉴얼대로 호출해주시길 바랍니다."),
