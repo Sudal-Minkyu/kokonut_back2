@@ -39,8 +39,8 @@ spring:
 
   servlet:
     multipart:
-      max-file-size: 21MB
-      max-request-size: 21MB
+      max-file-size: 22MB
+      max-request-size: 22MB
 
 #Custom
 kokonut:
